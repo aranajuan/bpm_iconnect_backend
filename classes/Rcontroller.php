@@ -151,11 +151,8 @@ class Rcontroller extends XMLhandler {
     private function ejectute_request() {
         include 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
         $ret = GO($this);
-        $resNodes = $this->get_responseDOM()->getElementsByTagName("response");
-        $resNode = $resNodes->item(0);
-
         if ($ret) {
-            $resNode->appendChild($ret);
+            $this->append_response($ret);
         }
     }
 

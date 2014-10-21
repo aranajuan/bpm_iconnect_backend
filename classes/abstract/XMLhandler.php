@@ -41,11 +41,14 @@ abstract class XMLhandler {
      */
     private function prepare_response() {
         $xmlRoot = $this->response->createElement("itracker");
-        $xmlRoot = $this->response->appendChild($xmlRoot);
+        $XMLIT = $this->response->appendChild($xmlRoot);
         $header = $this->response->createElement("header");
-        $xmlRoot->appendChild($header);
+        $XMLIT->appendChild($header);
+        
         $response_d = $this->response->createElement("response");
-        $xmlRoot->appendChild($response_d);
+        $XMLIT->appendChild($response_d); 
+        
+        
     }
 
     /**
@@ -167,12 +170,30 @@ abstract class XMLhandler {
      */
     private function add_error_response() {
         if ($this->error) {
-            $resNodes = $this->response->getElementsByTagName("response");
-            $resNode = $resNodes->item(0);
-            $resNode->appendChild($this->get_responseDOM()->createElement("error", $this->error_origin."::".$this->error));
+            $EL = $this->get_responseDOM()->createElement("error", $this->error_origin."::".$this->error);
+            $this->append_response($EL);
         }
     }
 
+    /**
+     * Agrega Elemento al response
+     * @param DOMElement $EL
+     */
+    public function append_response($EL){
+        $resNode = $this->get_responseTag();
+        $resNode->appendChild($EL);
+    }
+    
+    /**
+     * Devuelve el tag response para escribir respuesta
+     * @return DOMElement Response tag
+     */
+    private function get_responseTag(){
+        $resNodes = $this->response->getElementsByTagName("response");
+        $resNode = $resNodes->item(0);
+        return $resNode;
+    }
+    
     /**
      * Devuelve el dom para crear elementos
      * @return DOMdocumment
@@ -187,7 +208,7 @@ abstract class XMLhandler {
      */
     public function get_response() {
         $this->add_error_response();
-        return $this->response->saveXML();
+        return $this->response->saveXML(null,LIBXML_NOEMPTYTAG);
     }
 
     /**

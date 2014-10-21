@@ -1,0 +1,344 @@
+<?php
+
+/**
+ * Clase de administracion de acciones
+ * Ejecucion, vita html, validaciones
+ */
+class ACTION extends itobject {
+
+    private $id;    /* id del elemento */
+    private $nombre;    /* nombre de la accion */
+    private $tipo;  /* tipo de accion, agrupador // ver perfiles */
+    private $formulario;    /* requiere formulario o es de ejecucion directa */
+
+    /*
+      Habilitadores: 0: DC 1: Si 2: NO
+     */
+    private $habilita_t_propio; /* tomado por el usuario */
+    private $habilita_tomado;   /* tomado por cuaklquier usuario -> menos el logueado (marcar tambien la anterior) */
+    private $habilita_perfiles; /* perfiles habilitados (separados por coma) */
+    private $habilita_a_propio; /* abierto por el usuario */
+    private $habilita_abierto;  /* abierto */
+    private $habilita_equipo;   /* equipo del usuario */
+    private $habilita_master;   /* es master */
+
+    /* notificaciones */
+    private $notificacion_param;    /* Usuarios a notificar ver notify */
+    private $notificacion_texto;    /* Texto para el TO, CC usa texto standar */
+    private $descripcion;   /* descripcion de la accion */
+    private $estado;    /* activo o no activo */
+    private $form; /* formulario para cargar accion */
+
+    /**
+     * Filtra acciones segun filtros en array - devuelve array de objetos
+     * @param type $habilita_array  array con validaciones
+     * @return array acciones validas
+     */
+    static function load_filtered($TKT) {
+        $l = $GLOBALS[UL];
+
+        //datos a validar -> cargar del master si corresponde
+
+        if ($TKT->get_prop("idmaster")) {
+            $master_tkt = $TKT->get_prop("master");
+            $utom = $master_tkt->get_prop("u_tom");
+            $master = "habilita_master in (0,2)"; //desactivar todas las opciones para childs
+        } else {
+            $utom = $TKT->get_prop("u_tom");
+            $master = "habilita_master in (0,1)"; // activa opciones para masters
+        }
+
+        if ($utom) {
+            $tomado = "habilita_tomado in (0,1)"; //acciones para tickets tomados
+            if ($l->get_prop("id") == $utom)
+                $t_propio = "habilita_t_propio in (0,1)"; //opciones para tomado por el logueado
+            else
+                $t_propio = "habilita_t_propio in (0,2)"; // opciones para tomados por otro
+        }else {
+            $tomado = "habilita_tomado in (0,2)";   //acciones para tickets no tomados
+            $t_propio = "habilita_t_propio in (0,1,2)"; // todas, bloquea las acciones el "tomado"
+        }
+
+        if ($l->get_prop("id") == $TKT->get_prop("usr"))
+            $a_propio = "habilita_a_propio in (0,1)";  //generado por el usuario logueado
+        else
+            $a_propio = "habilita_a_propio in (0,2)"; //generado por otro usuario
+
+        $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles ='*')";
+
+        if ($l->in_team($TKT->get_prop("idequipo")))
+            $equipo = "habilita_equipo in (0,1)"; // ticket en el equipo del usuario logueado
+        else
+            $equipo = "habilita_equipo in (0,2)"; // ticket fuera del equipo del usuario logueado
+
+        if ($TKT->get_prop("UB") || $TKT->get_prop("id") == NULL)
+            $abierto = "habilita_abierto in (0,2)";
+        else
+            $abierto = "habilita_abierto in (0,1)";
+
+        $ssql = "select id from TBL_ACCIONES where $t_propio and $a_propio and $tomado and $perfil and $equipo and $abierto and $master and estado=" . I_ACTIVE;
+        $DB = new DATOS();
+        $DB->loadRS($ssql);
+        $i = 0;
+        $ret = array();
+
+        while ($actV = $DB->get_vector()) {
+            $ret[$i] = new ACTION();
+            $ret[$i]->loadDB_id($actV["id"]);
+            $i++;
+        }
+        return $ret;
+    }
+
+    public function load_DB($id) {
+        if(is_int($id)){
+            return $this->loadDB_id ($id);
+        }else{
+            return $this->loadDB_name($id);
+        }
+    }
+    
+    /*
+     * Cargar desde la base el id especificado
+     * @param int $id     /
+     */
+    private function loadDB_id($id) {
+        $this->error = FALSE;
+        $this->loadRS("select * from TBL_ACCIONES where id=$id");
+        if ($this->noEmpty && $this->cReg == 1) {
+            $tmpU = $this->get_vector();
+            $this->load_DV($tmpU);
+            if ($this->estado == I_DELETED)
+                return "eliminado";
+            return "ok";
+        }
+        else
+            $this->error = TRUE;
+        return "error";
+    }
+
+    /**
+     * Cargar accion con el nombre especificado
+     * @param String $name
+     */
+    private function loadDB_name($name) {
+        $this->error = FALSE;
+        $this->loadRS("select * from TBL_ACCIONES where nombre='" . strtoupper($name) . "'");
+        if ($this->noEmpty && $this->cReg == 1) {
+            $tmpU = $this->get_vector();
+            $this->load_DV($tmpU);
+            if ($this->estado == I_DELETED)
+                return "eliminado";
+            return "ok";
+        }
+        else
+            $this->error = TRUE;
+        return "error";
+    }
+
+    /**
+     * Carga de vector a propiedades
+     * @param type $tmpU { nombre,linkwi }
+     */
+    function load_VEC($tmpU) {
+        $this->tipo = trim($tmpU["tipo"]);
+        $this->formulario = trim($tmpU["formulario"]);
+        $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
+        $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
+        $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
+        $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
+        $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
+        $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
+        $this->habilita_master = trim($tmpU["habilita_master"]);
+        $this->notificacion_param = trim($tmpU["notificacion_param"]);
+        $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
+        $this->descripcion = trim($tmpU["descripcion"]);
+        $this->form = null;
+    }
+
+    /**
+     * Carga de base de datos a propiedades
+     * @param type $tmpU
+     */
+    private function load_DV($tmpU) {
+        $this->id = $tmpU["id"];
+        $this->estado = $tmpU["estado"];
+        $this->nombre = $tmpU["nombre"];
+        $this->load_VEC($tmpU);
+    }
+
+    /**
+     * Valida accion
+     * @param TKT $TKT
+     * @return string
+     */
+    public function check_valid($TKT) {
+        $l = $GLOBALS[UL];
+
+        if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
+            return "Esta accion no esta disponible para tu perfil";
+
+        if ($l->in_team($TKT->get_prop("idequipo"))) { //en un equipo del usuario
+            if ($this->habilita_equipo == 2)
+                return "Esta accion no se puede aplicar a un ticket de tu equipo";
+        }else { // en otro equipo
+            if ($this->habilita_equipo == 1)
+                return "Esta accion no se puede aplicar a un ticket de otro equipo";
+        }
+
+        if ($TKT->get_prop("idmaster")) { //no es master
+            $utom = $TKT->get_prop("master")->get_prop("u_tom");
+            if ($this->habilita_master == 1)
+                return "Esta accion solo se puede utilizar en un ticket master";
+        }else { // es master
+            if ($this->habilita_master == 2)
+                return "Esta accion solo se puede utilizar en un ticket adjunto a otro";
+            $utom = $TKT->get_prop("u_tom");
+        }
+
+        if ($utom) { //esta tomado
+            if ($this->habilita_tomado == 2)
+                return "Esta accion no se puede aplicar a un ticket tomado";
+            if ($l->get_prop("id") == $utom) { // tomado por el usuario
+                if ($this->habilita_t_propio == 2)
+                    return "Esta accion no se puede aplicar a un tomado por vos";
+            }else { // tomado por otro
+                if ($this->habilita_t_propio == 1)
+                    return "Esta accion no se puede aplicar a un tomado por otro";
+            }
+        } else {
+            if ($this->habilita_tomado == 1)
+                return "Esta accion no se puede aplicar a un ticket sin tomar";
+        }
+
+        if ($l->get_prop("id") == $TKT->get_prop("usr")) { //abierto por el usuario
+            if ($this->habilita_a_propio == 2)
+                return "Esta accion no se puede aplicar a un ticket generado por vos";
+        }else { // abierto por otro
+            if ($this->habilita_a_propio == 1)
+                return "Esta accion no se puede aplicar a un ticket generado por otro";
+        }
+
+        if ($TKT->get_prop("UB") || $TKT->get_prop("id") == NULL) { // cerrado - no abierto
+            if ($this->habilita_abierto == 1)
+                return "Esta accion solo se puede aplicar a un ticket abierto";
+        }else { // abierto
+            if ($this->habilita_abierto == 2)
+                return "Esta accion solo se puede aplicar a un ticket no abierto";
+        }
+
+        return "ok";
+    }
+
+    
+     /**
+     * Carga formulario de la accion solicitada
+     * @return boolean
+     */
+    private function load_form() {
+        $filename = INCLUDE_DIR . "/actions/get_" . strtolower($this->get_prop("nombre")) . ".php";
+        if (file_exists($filename)) {
+            ob_start();
+            include($filename);
+            $this->form = ob_get_contents();
+            ob_clean();
+            return true;
+        } else {
+            $this->form = "Error: acci&oacute;n inv&aacute;lida, no se encuentra formulario." . $filename;
+            return false;
+        }
+    }
+
+    /**
+     * Devuelve vista en base a los datos del historico
+     * @param TKT_H $TH
+     * @param boolean $users mostrar usuario
+     * @return String html evento
+     */
+    public function get_view($TH, $users){
+        $l = $GLOBALS[UL];
+        $Usuario = $TH->get_prop("UA_o");
+        if ($Usuario)
+            $NombreUsuario = $Usuario->get_prop("nombre_popup");
+        else
+            $NombreUsuario = "Error al cargar usuario";
+        $TKT = $TH->get_prop("TKT");
+        ob_start();
+        include(INCLUDE_DIR ."/actions/show_" . strtolower($this->get_prop("nombre") . ".php"));
+        $rta = ob_get_contents();
+        ob_clean();
+        return $rta;
+    }
+    
+    /**
+     * Ejecuta accion
+     * @param TKT $TKT
+     * @param array $data {values=>array[key value], comentario=>(html validado)}
+     * @return string resultado
+     */
+    public function ejecute($TKT,$data){
+        $rta=$this->check_valid($TKT);
+        if($rta!="ok")
+            return $rta;
+        include(INCLUDE_DIR . "/actions/go_" . strtolower($this->get_prop("nombre")) . ".php");
+        return GO($TKT,$data);
+    }
+    
+    public function get_prop($property) {
+        switch ($property) {
+            case 'id':
+                return ucwords($this->id);
+            case 'nombre':
+                return $this->nombre;
+            case 'tipo':
+                return $this->tipo;
+            case 'form':
+                if ($this->form == null)
+                    $this->load_form();
+                return $this->form;
+            case 'formulario':
+                return $this->formulario;
+            case 'habilita_t_propio':
+                return $this->habilita_t_propio;
+            case 'habilita_tomado':
+                return $this->habilita_tomado;
+            case 'habilita_perfiles':
+                return $this->habilita_perfiles;
+            case 'habilita_a_propio':
+                return $this->habilita_a_propio;
+            case 'habilita_abierto':
+                return $this->habilita_abierto;
+            case 'habilita_equipo':
+                return $this->habilita_equipo;
+            case 'habilita_master':
+                return $this->habilita_master;
+            case 'notificacion_param':
+                return $this->notificacion_param;
+            case 'notificacion_texto':
+                return $this->notificacion_texto;
+            case 'descripcion':
+                return $this->descripcion;
+            default:
+                return "Propiedad invalida.";
+        }
+    }
+
+    public function check_data() {
+        return "Funcion en desarrollo.";
+    }
+
+    public function delete_DB() {
+        return "Funcion en desarrollo.";
+    }
+
+    public function insert_DB() {
+        return "Funcion en desarrollo.";
+    }
+
+    public function update_DB() {
+        return "Funcion en desarrollo.";
+    }
+
+}
+
+?>

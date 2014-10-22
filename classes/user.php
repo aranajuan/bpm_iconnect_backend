@@ -615,6 +615,9 @@ class USER extends itobject {
             case 'perfilT':
                 $this->load_profile();
                 return $this->perfilAccess["nombre"];
+            case 'accessList':
+                $this->load_profile();
+                return $this->perfilAccess["accesos"];
             case 'instancias':
                 return $this->instancias;
             case 'ubicacion':

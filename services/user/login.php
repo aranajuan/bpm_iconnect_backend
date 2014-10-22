@@ -12,6 +12,7 @@ function GO($RC) {
         $userL=$RC->createElement("data");
         $userL->appendChild($RC->createElement("hash",$user->get_prop("hash")));
         $userL->appendChild($RC->createElement("perfil", $user->get_prop("perfil")));
+        $userL->appendChild($RC->createElement("access", $user->get_prop("accessList")));
     }
     else
         $userL = $RC->createElement("error",$rta);

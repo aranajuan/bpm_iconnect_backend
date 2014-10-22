@@ -187,7 +187,7 @@ class USER extends itobject {
 
         $ssql = "select * from TBL_UCONTAC where usr='" . strToSQL($this->usr) . "'";
         $this->dbroot->loadRS($ssql);
-        if ($this->noEmpty) {
+        if ($this->dbroot->noEmpty) {
             $data = $this->dbroot->get_vector();
             $this->mail = trim($data["mail"]);
             $this->tel = trim($data["tel"]);
@@ -623,7 +623,9 @@ class USER extends itobject {
             case 'ubicacion':
                 $this->load_contact();
                 return $this->ubicacion;
-
+            case 'puesto':
+                $this->load_contact();
+                return $this->puesto;
             default:
                 return "Propiedad invalida.";
         }

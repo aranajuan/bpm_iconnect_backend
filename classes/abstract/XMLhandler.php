@@ -40,15 +40,13 @@ abstract class XMLhandler {
      * Prepara respuesta XML
      */
     private function prepare_response() {
-        $xmlRoot = $this->response->createElement("itracker");
+        $xmlRoot = $this->createElement("itracker");
         $XMLIT = $this->response->appendChild($xmlRoot);
-        $header = $this->response->createElement("header");
+        $header = $this->createElement("header");
         $XMLIT->appendChild($header);
-        
-        $response_d = $this->response->createElement("response");
-        $XMLIT->appendChild($response_d); 
-        
-        
+
+        $response_d = $this->createElement("response");
+        $XMLIT->appendChild($response_d);
     }
 
     /**
@@ -64,7 +62,7 @@ abstract class XMLhandler {
             return false;
         }
         if ($this->date == null || $this->date == "") {
-            $this->set_error("xml_validation","Error en el origen de la solicitud - #2");
+            $this->set_error("xml_validation", "Error en el origen de la solicitud - #2");
             return false;
         }
         if (!isset($this->parse->header)) {
@@ -72,12 +70,12 @@ abstract class XMLhandler {
             return false;
         }
 
-        if (!isset($this->parse->header->usr) || $this->parse->header->usr=="") {
+        if (!isset($this->parse->header->usr) || $this->parse->header->usr == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #3.1");
             return false;
         }
-        
-        if (!isset($this->parse->header->instance) || $this->parse->header->instance=="") {
+
+        if (!isset($this->parse->header->instance) || $this->parse->header->instance == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #6.3");
             return false;
         }
@@ -95,28 +93,28 @@ abstract class XMLhandler {
         /* Validaciones request */
 
         if (!$this->parse->request) {
-            $this->set_error("xml_validation","Error en el origen de la solicitud - #7");
+            $this->set_error("xml_validation", "Error en el origen de la solicitud - #7");
             return false;
         }
 
         if ($this->parse->request->class == null || $this->parse->request->class == "") {
-            $this->set_error("xml_validation","Error en el origen de la solicitud - #8");
+            $this->set_error("xml_validation", "Error en el origen de la solicitud - #8");
             return false;
         }
 
         if ($this->parse->request->method == null || $this->parse->request->method == "") {
-            $this->set_error("xml_validation","Error en el origen de la solicitud - #9");
+            $this->set_error("xml_validation", "Error en el origen de la solicitud - #9");
             return false;
         }
 
         return true;
     }
 
-    protected function set_error($origin,$msj){
-        $this->error=$msj;
-        $this->error_origin=$origin;
+    protected function set_error($origin, $msj) {
+        $this->error = $msj;
+        $this->error_origin = $origin;
     }
-    
+
     /**
      * devuelve Ip del front
      * @return string Ip
@@ -124,7 +122,7 @@ abstract class XMLhandler {
     protected function getIpFront() {
         return $this->filter_param($this->ip);
     }
-    
+
     /**
      * devuelve Ip del cliente
      * @return string Ip
@@ -140,7 +138,7 @@ abstract class XMLhandler {
     protected function getInstance() {
         return $this->filter_param($this->parse->header->instance);
     }
-    
+
     /**
      * devuelve hash del usuario
      * @return string hash
@@ -148,6 +146,7 @@ abstract class XMLhandler {
     protected function getHash() {
         return $this->filter_param($this->parse->header->hash);
     }
+
     /**
      * Devuelve front
      * @return FRONT
@@ -164,13 +163,12 @@ abstract class XMLhandler {
         return $this->filter_param($this->parse->header->usr);
     }
 
-   
     /**
      * agrega error al dom
      */
     private function add_error_response() {
         if ($this->error) {
-            $EL = $this->get_responseDOM()->createElement("error", $this->error_origin."::".$this->error);
+            $EL = $this->createElement("error", $this->error_origin . "::" . $this->error);
             $this->append_response($EL);
         }
     }
@@ -179,27 +177,35 @@ abstract class XMLhandler {
      * Agrega Elemento al response
      * @param DOMElement $EL
      */
-    public function append_response($EL){
+    public function append_response($EL) {
         $resNode = $this->get_responseTag();
         $resNode->appendChild($EL);
     }
-    
+
     /**
      * Devuelve el tag response para escribir respuesta
      * @return DOMElement Response tag
      */
-    private function get_responseTag(){
+    private function get_responseTag() {
         $resNodes = $this->response->getElementsByTagName("response");
         $resNode = $resNodes->item(0);
         return $resNode;
     }
-    
+
     /**
      * Devuelve el dom para crear elementos
      * @return DOMdocumment
      */
-    public function get_responseDOM() {
+    private function get_responseDOM() {
         return $this->response;
+    }
+
+    public function createElement($k, $v = null,$CDATA=false) {
+        if ($v) {
+            return $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v,$CDATA));
+        } else {
+            return $this->get_responseDOM()->createElement($this->make_param($k));
+        }
     }
 
     /**
@@ -208,7 +214,7 @@ abstract class XMLhandler {
      */
     public function get_response() {
         $this->add_error_response();
-        return $this->response->saveXML(null,LIBXML_NOEMPTYTAG);
+        return $this->response->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 
     /**
@@ -233,21 +239,31 @@ abstract class XMLhandler {
         }
     }
 
-    protected function get_class(){
+    protected function get_class() {
         return $this->filter_param($this->parse->request->class);
     }
-    
-    protected function get_method(){
+
+    protected function get_method() {
         return $this->filter_param($this->parse->request->method);
     }
-    
+
     /**
      * Devuelve parametro limpio de etiquetas XSS
      * @param string $param
      * @return string $param
      */
     private function filter_param($value) {
-        return trim(strip_tags($value));
+        return trim(strip_tags(xmlText($value)));
+    }
+
+    /**
+     * Escapa caracteres del texto a enviar por xml
+     * @param string $text
+     * @param boolean $CDATA
+     * @return string
+     */
+    private function make_param($text, $CDATA) {
+        return trim(xmlEscape(strip_tags($text), $CDATA));
     }
 
 }

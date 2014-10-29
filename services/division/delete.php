@@ -1,6 +1,12 @@
 <?php
-require_once   "general_includes.php";
 require_once   'classes/division.php';
-$o= new DIVISION();
-echo obj_delete($o); 
-?>
+/**
+ * Elimina division
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $D= new DIVISION($RC->get_Connection());
+    $D->load_DB($RC->get_params("id"));
+    return $RC->createElement("result",$D->delete_DB());
+}

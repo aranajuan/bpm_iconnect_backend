@@ -14,7 +14,7 @@ $access = array(
 
     array(7,"PAGE", "division", "Administracion de Direcciones"),
     array(8,"DIVISION","insert", "Alta Direcciones"),
-    array(9,"DIVISION","listABM", "Lista de Direcciones"),
+    array(9,"DIVISION","list", "Lista de Direcciones"),
     array(10,"DIVISION","delete", "Direcciones delete"),
     array(11,"DIVISION","update", "Direcciones update"),
     array(12,"DIVISION","divisionsSelect", "Direcciones select"),
@@ -35,7 +35,7 @@ $access = array(
 
     array(25,"PAGE","systems", "Administracion de Sistemas"),
     array(26,"SYSTEM","insert", "Sistema insert"),
-    array(27,"SYSTEM","listABM", "Lista de sistemas"),
+    array(27,"SYSTEM","list", "Lista de sistemas"),
     array(28,"SYSTEM","delete", "Sistema delete"),
     array(29,"SYSTEM","update", "Sistema update"),
     

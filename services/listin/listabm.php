@@ -10,7 +10,7 @@ function GO($RC) {
     $listL=$RC->createElement("list");
     if ($LISTALL_v) {
         foreach ($LISTALL_v as $u)
-            $listL->appendChild($u->getXML($RC,array('id','too','cc')));
+            $listL->appendChild($u->getXML($RC,array('id','nombre','too','cc')));
         return $listL;
     }
     return null;

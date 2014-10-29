@@ -96,8 +96,8 @@ class LISTIN extends itobject {
     function update_DB() {
         if (!($rta = $this->check_data())) {
             $ssql = "update TBL_LISTIN set nombre='" . strToSQL($this->nombre) . "', too='" . strToSQL($this->too) . "', cc='" . strToSQL($this->cc) . "' where id=$this->id";
-            if ($this->query($ssql))
-                return "<b>Error:</b>" . $this->details;
+            if ($this->dbinstance->query($ssql))
+                return "<b>Error:</b>" . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -110,8 +110,8 @@ class LISTIN extends itobject {
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
             $ssql = "insert into TBL_LISTIN (nombre,too,cc,estado) values ('" . strToSQL($this->nombre) . "','" . strToSQL($this->too) . "','" . strToSQL($this->cc) . "',0);";
-            if ($this->query($ssql))
-                return "<b>Error:</b>" . $this->details;
+            if ($this->dbinstance->query($ssql))
+                return "<b>Error:</b>" . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -124,8 +124,8 @@ class LISTIN extends itobject {
         if ($this->estado == I_DELETED)
             return "El listin ya se encuentra eliminado";
         $ssql = "update TBL_LISTIN set estado=1 where id=$this->id";
-        if ($this->query($ssql))
-            return "<b>Error:</b>" . $this->details;
+        if ($this->dbinstance->query($ssql))
+            return "<b>Error:</b>" . $this->dbinstance->details.$ssql;
         else
             return "ok";
     }

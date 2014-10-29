@@ -200,9 +200,9 @@ abstract class XMLhandler {
         return $this->response;
     }
 
-    public function createElement($k, $v = null,$CDATA=false) {
+    public function createElement($k, $v = null, $CDATA = false) {
         if ($v) {
-            return $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v,$CDATA));
+            return $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v, $CDATA));
         } else {
             return $this->get_responseDOM()->createElement($this->make_param($k));
         }
@@ -221,8 +221,13 @@ abstract class XMLhandler {
      * devuelve array con parametros de XML filtrados
      */
     public function get_params($paramName, $parent = 'def') {
+
         if ($parent == 'def') {
-            $obj = $this->parse->request->params->{$paramName};
+            if ($paramName === null) {
+                $obj = $this->parse->request->params;
+            } else {
+                $obj = $this->parse->request->params->{$paramName};
+            }
         } else {
             $obj = $parent->{$paramName};
         }

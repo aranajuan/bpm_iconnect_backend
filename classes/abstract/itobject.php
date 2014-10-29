@@ -6,6 +6,23 @@ require_once 'classes/interfaces/dbobject.php';
 abstract class itobject  implements XmlPropInterface, dbobject {
 
     /**
+     *
+     * @var ConnectionManager 
+     */
+    protected  $conn;
+    
+    /**
+     *
+     * @var DB 
+     */
+    protected  $dbinstance;
+            
+    function __construct($conn){
+        $this->conn=$conn;
+        $this->dbinstance = new DB($conn, false);
+    }
+    
+    /**
      * 
      * @param XMLhandler $doc
      * @param array<strin> $props

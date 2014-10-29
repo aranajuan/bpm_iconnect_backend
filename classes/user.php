@@ -65,13 +65,10 @@ class USER extends itobject {
     private $perfil_vista;
     private $hash = null;
     private $dbroot;
-    private $dbinstance;
-    private $conn;
 
-    function USER($conn) {
-        $this->conn = $conn;
+    public function __construct($conn) {
+        parent::__construct($conn);
         $this->dbroot = new DB($conn, true);
-        $this->dbinstance = new DB($conn, false);
     }
 
     /**
@@ -588,17 +585,7 @@ class USER extends itobject {
             case 'nombre':
                 $this->load_contact();
                 return ucwords($this->nombre);
-            case 'nombre_popup':
-                $this->load_contact();
-                $datosC = "
-                <b>Nombre:</b>" . strToJava($this->nombre) . "<br/>
-                <b>Puesto:</b>" . ucwords(strtolower($this->ubicacion . " / " . $this->puesto)) . "<br/>
-                <b>Legajo:</b> $this->id <br/>
-                <b>Telefono:</b> $this->tel <br/>
-                <b>Mail:</b>&nbsp;<a class=\'lnk_blue\' href=\'mailto:$this->mail\'>$this->mail</a><br/>
-                ";
-                return "<a class=\"lnk_blue OC_status\" mail='$this->mail' href=\"javascript:alert_p('$datosC','Datos del usuario')\">" . ucwords($this->nombre) . "</a>";
-            case 'usr':
+             case 'usr':
                 return $this->usr;
             case 'hash':
                 return $this->hash;

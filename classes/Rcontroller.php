@@ -38,6 +38,13 @@ class Rcontroller extends XMLhandler {
     
     private $error;
 
+    /**
+     * Prepara conexiones a db, carga input, valida datos
+     * @param type $text 
+     * @param type $ipOr ip del front
+     * @param type $date
+     * @return boolean
+     */
     public function request($text, $ipOr, $date) {
         if (!$this->load_input($text, $ipOr, $date)) {
             return false;
@@ -75,6 +82,10 @@ class Rcontroller extends XMLhandler {
         }
     }
 
+    /**
+     * Valida objetos y acceso de usuario
+     * @return boolean
+     */
     private function validate_request() {
         if ($this->front->get_prop("ip") != $this->getIpFront()) {    // no coincide ip del front con el nombrado
             $this->error = "Error en el origen de la solicitud - #6.2" . $this->getIpFront();
@@ -104,11 +115,15 @@ class Rcontroller extends XMLhandler {
         return true;
     }
 
+    /**
+     * Carga objeto usuario
+     * @return boolean
+     */
     private function load_user() {
         $U = new USER($this->conections);
         $rta = $U->load_DB($this->getUser());
         if ($rta != "ok") {
-            $this->error = $rta;
+            $this->error = "Usuario o contrase&ntilde;a ivalidos";
             return false;
         }
 
@@ -126,6 +141,10 @@ class Rcontroller extends XMLhandler {
         return true;
     }
 
+    /**
+     * Carga objeto instancia
+     * @return boolean
+     */
     private function load_instance() {
         $I = new INSTANCE($this->conections);
         if ($I->load_DB($this->getInstance()) != "ok") {
@@ -137,6 +156,10 @@ class Rcontroller extends XMLhandler {
         return true;
     }
 
+    /**
+     * Carga objeto front
+     * @return boolean
+     */
     private function load_front() {
         //validar usuario - front - acceso del usr a funcion
         $front = new FRONT($this->conections);
@@ -148,6 +171,9 @@ class Rcontroller extends XMLhandler {
         return true;
     }
 
+    /**
+     * Ejecuta GO agrega a response
+     */
     private function ejectute_request() {
         include 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
         $ret = GO($this);
@@ -156,7 +182,6 @@ class Rcontroller extends XMLhandler {
         }
     }
 
-    
     
     /**
      * Devuelve usuario que ejecuta

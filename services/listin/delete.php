@@ -1,6 +1,12 @@
 <?php
-require_once   "general_includes.php";
 require_once   'classes/listin.php';
-$o= new LISTIN();
-echo obj_delete($o); 
-?>
+/**
+ * Elimina listines
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $L= new LISTIN($RC->get_Connection());
+    $L->load_DB($RC->get_params("id"));
+    return $RC->createElement("result",$L->delete_DB());
+}

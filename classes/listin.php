@@ -11,20 +11,20 @@ class LISTIN extends itobject {
     private $cc; /* cadena para CC del mail */
     private $estado; /* activo o inactivo */
     private $error = FALSE; /* error al cargar de la base */
-
+    
     /**
      * Lista de listines activos
      * @return null|\LISTIN
      */
     function list_all() {
         $ssql = "select id from TBL_LISTIN where estado =" . I_ACTIVE;
-        $this->loadRS($ssql);
-        if (!$this->noEmpty)
+        $this->dbinstance->loadRS($ssql);
+        if (!$this->dbinstance->noEmpty)
             return null;
         $i = 0;
         $list = array();
-        while ($idV = $this->get_vector()) {
-            $list[$i] = new LISTIN();
+        while ($idV = $this->dbinstance->get_vector()) {
+            $list[$i] = new LISTIN($this->conn);
             $list[$i]->load_DB($idV[0]);
             $i++;
         }
@@ -33,9 +33,9 @@ class LISTIN extends itobject {
 
     function load_DB($id) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_LISTIN where id=$id");
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+        $this->dbinstance->loadRS("select * from TBL_LISTIN where id=$id");
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";

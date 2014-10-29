@@ -65,13 +65,10 @@ class USER extends itobject {
     private $perfil_vista;
     private $hash = null;
     private $dbroot;
-    private $dbinstance;
-    private $conn;
 
-    function USER($conn) {
-        $this->conn = $conn;
+    public function __construct($conn) {
+        parent::__construct($conn);
         $this->dbroot = new DB($conn, true);
-        $this->dbinstance = new DB($conn, false);
     }
 
     /**

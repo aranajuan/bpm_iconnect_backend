@@ -183,7 +183,6 @@ class Rcontroller extends XMLhandler {
     }
 
     
-    
     /**
      * Devuelve usuario que ejecuta
      * @return USER

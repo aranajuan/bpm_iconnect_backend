@@ -33,7 +33,7 @@ class LISTIN extends itobject {
 
     function load_DB($id) {
         $this->error = FALSE;
-        $this->dbinstance->loadRS("select * from TBL_LISTIN where id=$id");
+        $this->dbinstance->loadRS("select * from TBL_LISTIN where id=".  intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
@@ -46,7 +46,10 @@ class LISTIN extends itobject {
         return "error";
     }
     
- 
+    /**
+     * Vector de propiedades editables
+     * @param type $tmpU
+     */
     function load_VEC($tmpU) {
         $this->nombre = trim($tmpU["nombre"]);
         $this->too = trim($tmpU["too"]);
@@ -77,13 +80,15 @@ class LISTIN extends itobject {
         return true;
     }
 
+    /**
+     * Verificar datos ingresados para db
+     * @return string|null
+     */
     function check_data() {
         if (!is_numeric($this->id))
             return "El id debe ser un numero entero";
         if ($this->nombre == "")
             return "El campo Nombre es obligatorio";
-        if ($this->too == "" && $this->cc == "")
-            return "Debe ingresar algun mail en TO o CC";
         if ($this->too != "" && !$this->mail_validate($this->too))
             return "El campo TO no es una cadena de mail valida";
         if ($this->cc != "" && !$this->mail_validate($this->cc))
@@ -95,9 +100,9 @@ class LISTIN extends itobject {
 
     function update_DB() {
         if (!($rta = $this->check_data())) {
-            $ssql = "update TBL_LISTIN set nombre='" . strToSQL($this->nombre) . "', too='" . strToSQL($this->too) . "', cc='" . strToSQL($this->cc) . "' where id=$this->id";
+            $ssql = "update TBL_LISTIN set nombre='" . strToSQL($this->nombre) . "', too='" . strToSQL($this->too) . "', cc='" . strToSQL($this->cc) . "' where id=".intval($this->id);
             if ($this->dbinstance->query($ssql))
-                return "<b>Error:</b>" . $this->dbinstance->details;
+                return "Listin_update: " . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -111,7 +116,7 @@ class LISTIN extends itobject {
         if (!($rta = $this->check_data())) {
             $ssql = "insert into TBL_LISTIN (nombre,too,cc,estado) values ('" . strToSQL($this->nombre) . "','" . strToSQL($this->too) . "','" . strToSQL($this->cc) . "',0);";
             if ($this->dbinstance->query($ssql))
-                return "<b>Error:</b>" . $this->dbinstance->details;
+                return "Listin_insert: " . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -123,9 +128,9 @@ class LISTIN extends itobject {
     function delete_DB() {
         if ($this->estado == I_DELETED)
             return "El listin ya se encuentra eliminado";
-        $ssql = "update TBL_LISTIN set estado=1 where id=$this->id";
+        $ssql = "update TBL_LISTIN set estado=1 where id=".intval($this->id);
         if ($this->dbinstance->query($ssql))
-            return "<b>Error:</b>" . $this->dbinstance->details.$ssql;
+            return "Listin_delete: >" . $this->dbinstance->details;
         else
             return "ok";
     }

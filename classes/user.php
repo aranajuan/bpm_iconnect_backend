@@ -2,7 +2,7 @@
 
 require_once 'classes/abstract/itobject.php';
 require_once 'classes/team.php';
-
+require_once 'classes/externalws/ldapws.php';
 
 /*
  * Variables de la vista
@@ -517,7 +517,8 @@ class USER extends itobject {
                 //validar pass
                 break;
             case "TELECOM":
-                //validar pass
+                $ldap= new LDAPWS();
+                return print_r($ldap->check_user($this->get_prop("usr"), $passL),true);
                 break;
             default:
                 return "Usuario o contrase&ntilde;a invalidos.";

@@ -18,24 +18,29 @@ class SYSTEM extends itobject {
      */
     function list_all() {
         $ssql = "select id from TBL_SISTEMAS where estado =" . I_ACTIVE;
-        $this->loadRS($ssql);
+        $this->dbinstance->loadRS($ssql);
         if (!$this->noEmpty)
             return null;
         $i = 0;
         $list = array();
         while ($idV = $this->get_vector()) {
-            $list[$i] = new SYSTEM();
+            $list[$i] = new SYSTEM($this->conn);
             $list[$i]->load_DB($idV[0]);
             $i++;
         }
         return $list;
     }
 
+    /**
+     * Carga de base de datos
+     * @param int $id
+     * @return string
+     */
     function load_DB($id) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_SISTEMAS where id=$id");
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+        $this->loadRS("select * from TBL_SISTEMAS where id=".  intval($id));
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";
@@ -47,6 +52,10 @@ class SYSTEM extends itobject {
     }
 
 
+    /**
+     * Carga array de propiedades editables
+     * @param string $tmpU
+     */
     function load_VEC($tmpU) {
         $this->nombre = trim($tmpU["nombre"]);
     }
@@ -62,6 +71,10 @@ class SYSTEM extends itobject {
     }
 
 
+    /**
+     * Verifica datos para update / insert
+     * @return string|null
+     */
     function check_data() {
         if (!is_numeric($this->id))
             return "El id debe ser un numero entero";
@@ -73,12 +86,15 @@ class SYSTEM extends itobject {
         return NULL;
     }
 
-
+    /**
+     * Actualiza en base de datos
+     * @return string
+     */
     function update_DB() {
         if (!($rta = $this->check_data())) {
-            $ssql = "update TBL_SISTEMAS set nombre='" . strToSQL($this->nombre) . "' where id=$this->id";
+            $ssql = "update TBL_SISTEMAS set nombre='" . strToSQL($this->nombre) . "' where id=".intval($this->id);
             if ($this->query($ssql))
-                return "<b>Error:</b>" . $this->details;
+                return "System_update: " . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -86,14 +102,17 @@ class SYSTEM extends itobject {
             return $rta;
     }
 
-
+    /**
+     * Inserta sistemas
+     * @return string
+     */
     function insert_DB() {
         $this->estado = I_ACTIVE;
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
             $ssql = "insert into TBL_SISTEMAS(nombre,estado) values ('" . strToSQL($this->nombre) . "',0);";
             if ($this->query($ssql))
-                return "<b>Error:</b>" . $this->details;
+                return "System_insert: " . $this->dbinstance->details;
             else
                 return "ok";
         }
@@ -101,18 +120,25 @@ class SYSTEM extends itobject {
             return $rta;
     }
 
-
+    /**
+     * Elimina de la base de datos
+     * @return string
+     */
     function delete_DB() {
         if ($this->estado == I_DELETED)
             return "La direccion ya se encuentra eliminada";
-        $ssql = "update TBL_SISTEMAS set estado=1 where id=$this->id";
+        $ssql = "update TBL_SISTEMAS set estado=1 where id=".intval($this->id);
         if ($this->query($ssql))
-            return "<b>Error:</b>" . $this->details;
+            return "<b>Error:</b>" . $this->dbinstance->details;
         else
             return "ok";
     }
 
-
+    /**
+     * Devuelve propiedad solicitada
+     * @param string $property
+     * @return string
+     */
     function get_prop($property) {
         switch ($property) {
             case 'id':

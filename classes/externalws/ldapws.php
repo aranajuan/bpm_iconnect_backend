@@ -70,9 +70,13 @@ class LDAPWS {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestTS);
         curl_setopt($ch, CURLOPT_POSTREDIR, 3);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, LDAP_TIMEOUT);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
+        if(curl_errno($ch)!=0){
+            $this->error="Error en comunicacion con WS ".curl_errno($ch);
+            return false;
+        }
         curl_close($ch);
         return $this->parse_response($data);
     }

@@ -15,6 +15,9 @@ class LDAPWS {
      * @var SimpleXMLElement 
      */
     private $domResponse;
+    
+    private $responseTXT;
+    
     private $error;
 
     /**
@@ -28,7 +31,7 @@ class LDAPWS {
         $attribute->value = LDAP_IT_USER;
         $main->appendChild($attribute);
         $attribute = $this->domRequest->createAttribute("authPass");
-        $attribute->value = LDAP_IT_PASS;
+        $attribute->value = Encrypter::decrypt(LDAP_IT_PASS);
         $main->appendChild($attribute);
         return $main;
     }
@@ -55,7 +58,7 @@ class LDAPWS {
         if (!$this->send_request()) {
             return array("status" => "error", "description" => $this->error);
         }
-        return array("status" => "ok", "response", $this->domResponse->asXML());
+        return array("status" => "ok", "response"=> trim(strip_tags($this->domResponse->asXML())));
     }
 
     /**
@@ -88,6 +91,7 @@ class LDAPWS {
      */
     private function parse_response($data) {
         try {
+            $this->responseTXT=$data;
             $this->domResponse = new SimpleXMLElement($data);
             $this->error = null;
             return $this->check_error();
@@ -103,7 +107,7 @@ class LDAPWS {
      * @return boolean  false ->error
      */
     private function check_error() {
-        if ($this->domResponse->message != null) {
+        if ($this->domResponse->message->asXML() != null) {
             $this->error = "Error WS: " . $this->domResponse->message->asXML();
             return false;
         } 

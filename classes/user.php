@@ -514,11 +514,24 @@ class USER extends itobject {
                 }
                 break;
             case "CCPI":
-                //validar pass
+                $ldap= new LDAPWS();
+                $rta=$ldap->check_user($this->get_prop("usr"), $passL);
+                if($rta["status"]==="ok"){
+                    if($rta["response"]!="true")
+                        return "Usuario o contrase&ntilde;a invalidos.";
+                }else{
+                    return "Error en servicio de logeo";
+                }
                 break;
             case "TELECOM":
                 $ldap= new LDAPWS();
-                return print_r($ldap->check_user($this->get_prop("usr"), $passL),true);
+                $rta=$ldap->check_user($this->get_prop("usr"), $passL);
+                if($rta["status"]==="ok"){
+                    if($rta["response"]!="true")
+                        return "Usuario o contrase&ntilde;a invalidos.";
+                }else{
+                    return "Error en servicio de logeo";
+                }
                 break;
             default:
                 return "Usuario o contrase&ntilde;a invalidos.";

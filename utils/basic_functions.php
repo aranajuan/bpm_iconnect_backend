@@ -1,6 +1,17 @@
 <?php
 
-
+/**
+ * Devuelve el array si no es null
+ * @param string $str
+ * @param string $spliter
+ * @return null/array
+ */
+function arrayornull($spliter,$str){
+    if($str!="" && $str){
+        return explode($spliter,$str);
+    }
+    return null;
+}
 
 /**
  * Busca recursivamente en un array
@@ -107,6 +118,7 @@ function dataDefatult($data, $defaultD) {
 
 function strToSQL($txt) {
     $tmp = str_replace("'", "''", $txt);
+    $tmp = str_replace("\\", "\\\\", $tmp);
     return $tmp;
 }
 

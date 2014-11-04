@@ -158,7 +158,7 @@ class DIVISION extends itobject {
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
             $ssql = "insert into TBL_DIRECCION(nombre,linkwi,estado) values ('" . strToSQL($this->nombre) . "','" . strToSQL($this->linkwi) . "',0);";
-            if ($$this->dbinstance->query($ssql))
+            if ($this->dbinstance->query($ssql))
                 return "Division_insert: " . $this->dbinstance->details;
             else
                 return "ok";

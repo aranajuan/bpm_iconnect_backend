@@ -1,6 +1,6 @@
 <?php
 
-require_once 'classes/itobject.php';
+require_once 'classes/abstract/itobject.php';
 
 /**
  * Clase para cargar y manejar sistemas
@@ -19,11 +19,11 @@ class SYSTEM extends itobject {
     function list_all() {
         $ssql = "select id from TBL_SISTEMAS where estado =" . I_ACTIVE;
         $this->dbinstance->loadRS($ssql);
-        if (!$this->noEmpty)
+        if (!$this->dbinstance->noEmpty)
             return null;
         $i = 0;
         $list = array();
-        while ($idV = $this->get_vector()) {
+        while ($idV = $this->dbinstance->get_vector()) {
             $list[$i] = new SYSTEM($this->conn);
             $list[$i]->load_DB($idV[0]);
             $i++;
@@ -38,7 +38,7 @@ class SYSTEM extends itobject {
      */
     function load_DB($id) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_SISTEMAS where id=".  intval($id));
+        $this->dbinstance->loadRS("select * from TBL_SISTEMAS where id=".  intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
@@ -77,7 +77,7 @@ class SYSTEM extends itobject {
      */
     function check_data() {
         if (!is_numeric($this->id))
-            return "El id debe ser un numero entero";
+            return "El id debe ser un numero entero ->".$this->id;
         if ($this->nombre == "")
             return "El campo Nombre es obligatorio";
 
@@ -93,7 +93,7 @@ class SYSTEM extends itobject {
     function update_DB() {
         if (!($rta = $this->check_data())) {
             $ssql = "update TBL_SISTEMAS set nombre='" . strToSQL($this->nombre) . "' where id=".intval($this->id);
-            if ($this->query($ssql))
+            if ($this->dbinstance->query($ssql))
                 return "System_update: " . $this->dbinstance->details;
             else
                 return "ok";
@@ -111,7 +111,7 @@ class SYSTEM extends itobject {
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
             $ssql = "insert into TBL_SISTEMAS(nombre,estado) values ('" . strToSQL($this->nombre) . "',0);";
-            if ($this->query($ssql))
+            if ($this->dbinstance->query($ssql))
                 return "System_insert: " . $this->dbinstance->details;
             else
                 return "ok";
@@ -126,9 +126,9 @@ class SYSTEM extends itobject {
      */
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            return "La direccion ya se encuentra eliminada";
+            return "Els sistema ya se encuentra eliminado";
         $ssql = "update TBL_SISTEMAS set estado=1 where id=".intval($this->id);
-        if ($this->query($ssql))
+        if ($this->dbinstance->query($ssql))
             return "<b>Error:</b>" . $this->dbinstance->details;
         else
             return "ok";

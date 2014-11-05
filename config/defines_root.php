@@ -16,7 +16,7 @@ define("INSTANCES","TELECOMCCT,AGENTESTP");
 
 // Configuraciones Base
 
-define('BASE_DIR',str_replace('\\', '/',realpath(dirname(realpath(dirname(__FILE__)).'\\..\\..\\..\\'))));
+define('BASE_DIR',realpath(dirname(realpath(dirname(__FILE__)).'/../../../')));
 
 define('ROOT_DIR',BASE_DIR.'/itracker_app');
 //echo ROOT_DIR;
@@ -53,6 +53,6 @@ define('I_NEWID',-1);
 define("FILEUP_ATTACH_FOLDER","adjuntos");
 define("FILEUP_ATTACH_FOLDER_THUMN",FILEUP_ATTACH_FOLDER."/thumbnail");
 
-ini_set('include_path',ini_get('include_path').'./;'.INCLUDE_DIR);
+ini_set('include_path',ini_get('include_path').'./'.PATH_SEPARATOR.INCLUDE_DIR);
 
 ?>

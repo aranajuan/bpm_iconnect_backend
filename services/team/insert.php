@@ -1,6 +1,12 @@
 <?php
-require_once   "general_includes.php";
 require_once   'classes/team.php';
-$o= new TEAM();
-echo obj_insert($o);  
-?>
+/**
+ * Inserta
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $O= new TEAM($RC->get_Connection());
+    $O->load_VEC($RC->get_params(null));
+    return $RC->createElement("result",$O->insert_DB());
+}

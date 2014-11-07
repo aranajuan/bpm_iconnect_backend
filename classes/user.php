@@ -51,13 +51,17 @@ class USER extends itobject {
     private $mail;
     private $tel;
     private $nombre;
-    private $contactLoaded;
 
     /* instance profile */
+    private $dbteams;
     private $idsequipos;
     private $idsequiposV;
+    private $idsequiposadm;
+    private $idsequiposadmV;
+    private $equiposadm;
     private $equipos;
     private $equiposLoaded;
+    private $equiposAdmLoaded;
     private $perfil;
     private $perfilAccess;
     private $perfilLoaded;
@@ -65,6 +69,7 @@ class USER extends itobject {
     private $perfil_vista;
     private $hash = null;
     private $dbroot;
+    private $estado;
 
     public function __construct($conn) {
         parent::__construct($conn);
@@ -76,20 +81,45 @@ class USER extends itobject {
      * @return null|\USER
      */
     function list_all() {
-        $ssql = "select usr from TBL_USUARIOS";
-        $this->dbinstance->loadRS($ssql);
-        if (!$this->dbinstance->noEmpty)
-            return null;
-        $i = 0;
-        $list = array();
-        while ($idV = $this->dbinstance->get_vector()) {
-            $tmpU = new USER($this->conn);
-            if ($tmpU->load_DB($idV[0]) == "ok") {
-                $list[$i] = $tmpU;
-                $i++;
+        $usr = $GLOBALS["RH"]->get_user();
+        $teams = $usr->get_prop("equiposadmobj");
+        $ulist = array();
+        foreach ($teams as $t) {
+            $users = $t->get_users();
+            if (count($ulist)) {
+                foreach ($users as $ut) {
+                    if (!objinarray($ut, $ulist, "usr")) {
+                        array_push($ulist, $ut);
+                    }
+                }
+            } else {
+                $ulist = $users;
             }
         }
-        return $list;
+
+        return $ulist;
+    }
+
+    /**
+     * Lista de perfiles
+     * @return array
+     */
+    function list_allprofiles() {
+        $ssql = "select id,nombre from TBL_PERFILES";
+        $this->dbinstance->loadRS($ssql);
+        $arr = array();
+        while ($p = $this->dbinstance->get_vector()) {
+            array_push($arr, $p);
+        }
+        return $arr;
+    }
+
+    /**
+     * Lista dominios
+     * @return array
+     */
+    function list_alldomains() {
+        return explode(",", DOMAINS);
     }
 
     /**
@@ -112,38 +142,73 @@ class USER extends itobject {
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $userData = $this->dbinstance->get_vector();
         } else {
-            return "Usuario invalido #usr-1 ";
+            return "Error usuario invalido #usr-1"; // error evaluado no cambiar
         }
+        $this->usr = $usr;
 
-        $this->dbroot->loadRS("select * from TBL_USUARIOS where usr='$usr'");
-        if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
-            $userData = array_merge($userData, $this->dbroot->get_vector());
+        $arrRoot = $this->load_root($this->usr);
+        if ($arrRoot) {
+            $userData = array_merge($userData, $arrRoot);
         } else {
-            return "Usuario invalido #usr-2";
+            $this->estado = I_DELETED;
+            return "Error usuario invalido #usr-2"; // error evaluado no cambiar    
         }
 
         return $this->load_DV($userData);
     }
 
+    /**
+     * Devuelve vector desde UCONTAC
+     * @return array   datos de contacto
+     */
+    private function load_contact($usr) {
+        $ssql = "select * from TBL_UCONTAC where usr='" . strToSQL($usr) . "'";
+        $this->dbroot->loadRS($ssql);
+        if ($this->dbroot->noEmpty) {
+            $data = $this->dbroot->get_vector();
+            return $data;
+        }
+        return null;
+    }
+
+    /**
+     * Carga datos del root
+     * @param type $usr
+     * @return array/null
+     */
+    private function load_root($usr) {
+        $this->dbroot->loadRS("select * from TBL_USUARIOS where usr='$usr'");
+        if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
+            return $this->dbroot->get_vector();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Carga vector
+     * @param type $tmpU
+     */
     public function load_VEC($tmpU) {
         $this->usr = strtoupper($tmpU["usr"]);
         $this->dominio = strtoupper($tmpU["dominio"]);
         $this->pass = $tmpU["pass"];
         $this->fronts = $tmpU["fronts"];
         $this->frontsV = explode(",", $this->fronts);
-        $this->instancias = $tmpU["instancias"];
-        $this->instanciasV = explode(",", $this->instancias);
 
         $this->perfil = trim($tmpU["perfil"]);
-        $this->idsequipos = trim($tmpU["idsequipos"]);
 
-        $this->mail = null;
-        $this->tel = null;
-        $this->nombre = null;
-        $this->puesto = null;
-        $this->ubicacion = null;
-        $this->contactLoaded = false;
-        $this->equiposLoaded = false;
+        $this->mail = trim($tmpU["mail"]);
+        ;
+        $this->tel = trim($tmpU["tel"]);
+        ;
+        $this->nombre = trim($tmpU["nombre"]);
+        ;
+        $this->puesto = trim($tmpU["puesto"]);
+        ;
+        $this->ubicacion = trim($tmpU["ubicacion"]);
+        ;
+
         $this->perfilLoaded = false;
     }
 
@@ -153,63 +218,147 @@ class USER extends itobject {
      * @return type
      */
     private function load_DV($tmpU) {
+        $contactD = $this->load_contact($tmpU["usr"]);
+        if ($contactD) {
+            $tmpU = array_merge($tmpU, $contactD);
+        }
+
         $this->load_VEC($tmpU);
 
+        $this->instancias = $tmpU["instancias"];
+        $this->instanciasV = explode(",", $this->instancias);
+        $this->estado = trim($tmpU["estado"]);
+        $this->dbteams = trim($tmpU["idsequipos"]);
+        $this->idsequipos = $this->dbteams;
+        $this->idsequiposadm = trim($tmpU["idsequiposadm"]);
+        $this->equiposLoaded = false;
         if (in_array($this->usr, explode(";", DEBUG_USER))) {
             $this->debug = 1;
         } else {
             $this->debug = 0;
         }
-        return "ok";
+        if ($this->estado == I_ACTIVE)
+            return "ok";
+        return "eliminado";
     }
 
     /**
-     * Cambia datos de contacto
+     * Actualiza los equipos en dbteams
+     * @param array $teamList   ids de equipos a guardar (se cruza con los que 
+     * tiene y los que administra el usuario)
+     * @return int  cantidad de equipos
+     */
+    public function change_teams($teamList) {
+        $usr = $GLOBALS["RH"]->get_user();
+        $result = array();
+        $dbteamsV = explode(",", $this->dbteams);
+        $equiposAdm = explode(",", $usr->get_prop("idsequiposadm"));
+
+        $finalAdmTeams = array_intersect($teamList, $equiposAdm);
+        $dbteamsV=array_merge($dbteamsV,$finalAdmTeams);
+        
+        foreach ($dbteamsV as $team) {
+            if (in_array($team, $equiposAdm)) { // lo administra
+                if (in_array($team, $finalAdmTeams)) {
+                    if($team!="")
+                        array_push($result, $team);
+                }
+            } else { //no lo administra
+                 if($team!="")
+                    array_push($result, $team);
+            }
+        }
+        $this->dbteams = implode(",", $result);
+
+        return count($result);
+    }
+
+    /**
+     * Elimina fisicamente de instancia
+     * @return string
+     */
+    public function hardDelete() {
+        if ($this->estado == I_DELETED) {
+            $ssql = "delete from TBL_USUARIOS where usr ='" . strToSQL($this->usr) . "'";
+            if ($this->dbinstance->query($ssql))
+                return $this->dbinstance->details;
+            return "ok";
+        }
+        return "No se puede restaurar usuario";
+    }
+
+    /**
+     * Actualiza en root
+     * @return string
+     */
+    private function update_root() {
+        // actualiza todos los datos del root menos contacto
+        $instancia = $GLOBALS["RH"]->get_Instance()->get_prop("nombre");
+        $rootD = $this->load_root($this->usr);
+        if ($rootD) {
+            $instancias = explode(",", $rootD["instancias"]);
+            $ok = false;
+            foreach ($instancias as $ins) {
+                if ($ins == $instancia) {
+                    $ok = true;
+                    break;
+                }
+            }
+            if(!$ok){
+                array_push($instancias, $instancia);
+            }
+            $rootD["instancias"]=implode(",",$instancias);
+            $rootD["fronts"]=$this->fronts;
+            $rootD["dominio"]=$this->dominio;
+            $ssql="update TBL_USUARIOS set dominio='".strToSQL($rootD["dominio"])."', fronts='".strToSQL($rootD["fronts"])."', instancias='".strToSQL($rootD["instancias"])."' where usr='".strToSQL($this->usr)."';";
+        } else {
+            $rootD=array();
+            $rootD["instancias"]=$instancia;
+            $rootD["usr"]=$this->usr;
+            $rootD["fronts"]=$this->fronts;
+            $rootD["dominio"]=$this->dominio;
+            $ssql="insert into TBL_USUARIOS (usr,dominio,pass,fronts,instancias) values ('".strToSQL($this->usr)."','".strToSQL($rootD["dominio"])."',NULL,'".strToSQL($rootD["fronts"])."','".strToSQL($rootD["instancias"])."');";
+        }
+        
+        if($this->dbroot->query($ssql)){
+            return $this->dbroot->details;
+        }
+            return "ok";
+        
+    }
+
+    /**
+     * Cambia datos de contacto //utilizada por usuario no ADM
      * @param type $mail
      * @param type $tel
      */
     public function change_contact($mail, $tel) {
         $this->mail = $mail;
         $this->tel = $tel;
-        $this->contactLoaded = false;
-    }
-
-    /**
-     * Carga datos desde UCONTAC
-     */
-    private function load_contact() {
-        if ($this->contactLoaded)
-            return;
-        $this->contactLoaded = true;
-
-        $ssql = "select * from TBL_UCONTAC where usr='" . strToSQL($this->usr) . "'";
-        $this->dbroot->loadRS($ssql);
-        if ($this->dbroot->noEmpty) {
-            $data = $this->dbroot->get_vector();
-            $this->mail = trim($data["mail"]);
-            $this->tel = trim($data["tel"]);
-            $this->nombre = trim($data["nombre"]);
-            $this->puesto = trim($data["puesto"]);
-            $this->ubicacion = trim($data["ubicacion"]);
-        }
     }
 
     /**
      * Carga objetos equipos
-     * @return string
+     * @return int q de equipos
      */
     private function load_teams() {
+        $tmpT = explode(",", $this->idsequipos);
+        if ($this->hash == null) { // no es el logueado
+            $usr = $GLOBALS["RH"]->get_user();
+            $teamsL = array_merge($usr->get_prop("equiposview"), explode(",", $usr->get_prop("idsequiposadm")), explode(",", $usr->get_prop("idsequipos")));
+            $tmpT = array_intersect($tmpT, $teamsL);
+        }
+
         if ($this->equiposLoaded)
-            return "ok";
+            return count($this->idsequiposV);
         $this->equiposLoaded = true;
         $this->idsequiposV = NULL;
         $this->equipos = NULL;
         if ($this->idsequipos == "" || $this->idsequipos == NULL) {
             $this->idsequipos = NULL;
-            return "ok"; // no se intento cargar ningun equipo
+            return 0; // no se intento cargar ningun equipo
         }
 
-        $tmpT = explode(",", $this->idsequipos);
         $i = 0;
         foreach ($tmpT as $TID) {
             $t = new TEAM($this->conn);
@@ -224,7 +373,40 @@ class USER extends itobject {
             $this->idsequipos = implode(",", $this->idsequiposV);
         else
             $this->idsequipos = NULL;
-        return "ok";
+        return $i;
+    }
+
+    /**
+     * Carga objetos equipos que administra
+     * @return int q de equipos
+     */
+    private function load_teamsAdm() {
+        if ($this->equiposAdmLoaded)
+            return count($this->idsequiposadmV);
+        $this->equiposAdmLoaded = true;
+        $this->idsequiposadmV = NULL;
+        $this->equiposadm = NULL;
+        if ($this->idsequiposadm == "" || $this->idsequiposadm == NULL) {
+            $this->idsequiposadm = NULL;
+            return 0; // no se intento cargar ningun equipo
+        }
+
+        $tmpT = explode(",", $this->idsequiposadm);
+        $i = 0;
+        foreach ($tmpT as $TID) {
+            $t = new TEAM($this->conn);
+            $rta = $t->load_DB($TID);
+            if ($rta == "ok") {
+                $this->equiposadm[$i] = $t;
+                $this->idsequiposadmV[$i] = $TID;
+                $i++;
+            }
+        }
+        if ($i)
+            $this->idsequiposadm = implode(",", $this->idsequiposadmV);
+        else
+            $this->idsequiposadm = NULL;
+        return $i;
     }
 
     /**
@@ -251,18 +433,13 @@ class USER extends itobject {
      * Carga datos modificados por el usr
      * @return string
      */
-    public function insert_ucontact() {
-
-        if ($this->id <= 0)
-            return "Usuario invalido";
-        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL))
-            return "Mail invalido";
+    private function insert_ucontact() {
 
         $ssql = "delete from TBL_UCONTAC where usr='" . strToSQL($this->usr) . "'";
         $this->dbroot->query($ssql);
 
         $ssql = "insert into TBL_UCONTAC (usr,mail,tel,nombre,puesto,ubicacion) 
-        values ($this->id, '" . strToSQL($this->mail) . "', '" . strToSQL($this->tel) . "','" . strToSQL($this->nombre) . "','" . strToSQL($this->puesto) . "','" . strToSQL($this->ubicacion) . "' )";
+        values ('".$this->usr."', '" . strToSQL($this->mail) . "', '" . strToSQL($this->tel) . "','" . strToSQL($this->nombre) . "','" . strToSQL($this->puesto) . "','" . strToSQL($this->ubicacion) . "' )";
 
         if ($this->dbroot->query($ssql))
             return "Error al guardar datos.";
@@ -270,11 +447,23 @@ class USER extends itobject {
             return "ok";
     }
 
+    /**
+     * Verifica datos para update e insert
+     * @return string|null
+     */
     public function check_data() {
+        if($this->usr=="" || $this->usr==null)
+            return "El usuario es obligatorio";
+        
         if (!in_array($this->dominio, explode(",", DOMAINS)))
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
             return "El campo perfil es obligatorio";
+        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL))
+            return "Mail invalido";
+        if ($this->dbteams == "" || $this->dbteams == null) {
+            return "Seleccione al menos un equipo";
+        }
         return NULL;
     }
 
@@ -294,22 +483,27 @@ class USER extends itobject {
             return $rta;
     }
 
+    /**
+     * Inserta en instancia, acutaliza contact y root
+     * @return string
+     */
     public function insert_DB() {
-        if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_USUARIOS(usr,dominio,pass,fronts,idsequipos,perfil) 
-                values ('" . strToSQL($this->usr) . "','" . strToSQL($this->dominio) . "','" . strToSQL($this->pass) . "','" . strToSQL($this->fronts) . "','" . strToSQL($idteam) . "'," . $this->perfil . ");";
-            if ($this->query($ssql))
-                return "<b>Error:</b>" . $this->details;
-            else
-                return "ok";
-        }
-        else
+        if (($rta = $this->check_data()))
             return $rta;
+        $ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado) 
+                values ('" . strToSQL($this->usr) . "','" . strToSQL($this->dbteams) . "',null," . intval($this->perfil) . ",0);";
+
+        if ($this->dbinstance->query($ssql)) {
+            return "User_insert: " . $this->dbinstance->details;
+        }
+
+        $this->insert_ucontact();
+        return $this->update_root();
     }
 
     public function delete_DB() {
-        $ssql = "delete from TBL_USUARIOS where usr='" . strToSQL($this->usr) . "'";
-        if ($this->query($ssql))
+        $ssql = "update TBL_USUARIOS set estado=" . I_DELETED . " where usr='" . strToSQL($this->usr) . "'";
+        if ($this->dbinstance->query($ssql))
             return "<b>Error:</b>" . $this->details;
         else {
             $ssql = "delete from TBL_UCONTAC where usr='" . strToSQL($this->usr) . "'";
@@ -384,6 +578,18 @@ class USER extends itobject {
     }
 
     /**
+     * Array de equipos que ve el usuario
+     * @return array
+     */
+    private function get_viewTeams() {
+        $arr = array();
+        foreach ($this->get_prop("equiposobj") as $t) {
+            $arr = array_merge($arr, explode(",", $t->get_prop("idsequiposvisible")));
+        }
+        return $arr;
+    }
+
+    /**
      * Verifica si se cumple relacion
      * @param type $rel
      * @param TKT $TKT
@@ -425,14 +631,13 @@ class USER extends itobject {
                 }
                 break;
             case "equipo_visible":
-                $arrayId = array();
+
                 $uT = $TKT->get_prop("usr_o");
                 if ($uT == null)
                     return false;
 
-                foreach ($this->get_prop("equiposobj") as $t) {
-                    $arrayId = array_merge($arrayId, explode(",", $t->get_prop("idsequiposvisible")));
-                }
+                $arrayId = $this->get_viewTeams();
+
                 foreach ($uT->get_prop("equiposobj") as $t) {
                     if (in_array($t->get_prop("id"), $arrayId))
                         return true;
@@ -500,6 +705,9 @@ class USER extends itobject {
      * @param string $ipuser
      */
     public function login($passL, $front, $ipuser) {
+        if ($this->estado != I_ACTIVE)
+            return "Usuario invalido";
+
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
 
@@ -533,6 +741,7 @@ class USER extends itobject {
      * @return string ok
      */
     private function newSession($front, $ipuser) {
+
         $hash = hash("md2", (string) microtime());
 
         $this->closeSession();
@@ -552,10 +761,15 @@ class USER extends itobject {
      * @return boolean
      */
     public function logged($hash, $front, $ipuser) {
+        if ($this->estado != I_ACTIVE)
+            return false;
         $ssql = "select usr from TBL_SESIONES where usr='" . strToSQL($this->usr) . "' and front=" . $front->get_prop("id") . " and hash='" . strToSQL($hash) . "' and ip='" . strToSQL($ipuser) . "' ";
         $this->dbroot->loadRS($ssql);
-        if ($this->dbroot->cReg == 1)
+        if ($this->dbroot->cReg == 1) {
+            $this->hash = $hash;
             return true;
+        }
+        $this->hash = null;
         return false;
     }
 
@@ -575,17 +789,14 @@ class USER extends itobject {
     public function get_prop($property) {
         switch ($property) {
             case 'mail':
-                $this->load_contact();
                 return $this->mail;
             case 'debug':
                 return $this->debug;
             case 'telefono':
-                $this->load_contact();
                 return $this->tel;
             case 'nombre':
-                $this->load_contact();
                 return ucwords($this->nombre);
-             case 'usr':
+            case 'usr':
                 return $this->usr;
             case 'hash':
                 return $this->hash;
@@ -597,8 +808,26 @@ class USER extends itobject {
             case 'equiposobj':
                 $this->load_teams();
                 return $this->equipos;
+            case 'equiposname':
+                if ($this->load_teams() == 0)
+                    return "";
+                $ret = "";
+                foreach ($this->equipos as $t) {
+                    $ret.=$t->get_prop("nombre") . "; ";
+                }
+                return $ret;
+            case 'idsequiposadm':
+                $this->load_teamsAdm();
+                return $this->idsequiposadm;
+            case 'equiposadmobj':
+                $this->load_teamsAdm();
+                return $this->equiposadm;
+            case 'equiposview':
+                return $this->get_viewTeams();
             case 'perfil':
                 return $this->perfil;
+            case 'fronts':
+                return $this->fronts;
             case 'perfilT':
                 $this->load_profile();
                 return $this->perfilAccess["nombre"];
@@ -608,10 +837,8 @@ class USER extends itobject {
             case 'instancias':
                 return $this->instancias;
             case 'ubicacion':
-                $this->load_contact();
                 return $this->ubicacion;
             case 'puesto':
-                $this->load_contact();
                 return $this->puesto;
             default:
                 return "Propiedad invalida.";

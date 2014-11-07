@@ -218,19 +218,19 @@ class TEAM extends itobject {
             $idprof = get_profileId($profile);
             if ($idprof == "-1")
                 return array();
-            $ssql = "select id,idsequipos from TBL_USUARIOS where perfil=".intval($idprof)." and idsequipos like '%" . intval($this->id) . "%'";
+            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=".I_ACTIVE." and perfil=".intval($idprof)." and idsequipos like '%" . intval($this->id) . "%'";
         }
         else {
-            $ssql = "select id,idsequipos from TBL_USUARIOS where idsequipos like '%" . intval($this->id) . "%'";
+            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=".I_ACTIVE." and idsequipos like '%" . intval($this->id) . "%'";
         }
         $users = array();
         $i = 0;
         $this->dbinstance->loadRS($ssql);
-        if ($this->noEmpty) {
+        if ($this->dbinstance->noEmpty) {
             while ($rs = $this->dbinstance->get_vector()) {
                 if (in_array($this->id, explode(",", $rs["idsequipos"]))) {
                     $u = new USER($this->conn);
-                    if ($u->load_DB($rs["id"]) == "ok") {
+                    if ($u->load_DB($rs["usr"]) == "ok") {
                         $users[$i] = $u;
                         $i++;
                     }

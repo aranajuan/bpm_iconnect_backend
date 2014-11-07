@@ -28,7 +28,7 @@ $access = array(
 
     array(19,"PAGE", "users", "Administracion de Usuarios"),
     array(20,"USER","insert", "Usuario insert"),
-    array(21,"USER","listABM", "Lista de usuarios"),
+    array(21,"USER","list", "Lista de usuarios"),
     array(22,"USER","delete", "Usuario delete"),
     array(23,"USER","update", "Usuario update"),
     array(24,"USER","ucontact_Update", "Actualizar datos de contacto"),
@@ -40,10 +40,15 @@ $access = array(
     array(29,"SYSTEM","update", "Sistema update"),
     
     array(30,"PAGE","newtkt", "Nuevo TKT"),
+    
     array(31,"TREE","get_open", "TREE get"),
+    
     array(32,"ACTION","ejecute_action", "Ejecutar accion TKT"),
+    
     array(33,"PAGE","staffhome", "Home Staff"),
+    
     array(34,"USER","user_teamsSelect", "Equipos de usuario"),
+    
     array(35,"TKT","listToTeam", "Lista de tkts filtrada"),
     array(36,"TKT","getH", "Detalle del ticket"),
     array(37,"TREE","getSimilars", "TKT similares"),
@@ -61,6 +66,12 @@ $access = array(
     
     array(47,"PAGE","reports", "Reportes"),
     array(48,"TREE","get_filter", "Arbol para filtros"),
+    
+    array(49,"USER","idsel_domains","Lista de dominios validos"),
+    array(50,"USER","idsel_myadmteams","Lista de equipos que administra"),
+    array(51,"USER","idsel_profiles","Lista de perfiles validos"),
+    
+    array(52,"INSTANCE","idsel_listfronts","Lista de fronts validos")
      
     
 );

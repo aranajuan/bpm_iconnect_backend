@@ -1,6 +1,22 @@
 <?php
 
 /**
+ * Busca objeto en array
+ * @param itobject $obj
+ * @param array<itobject> $array
+ * @param string $field campo a comparar
+ */
+function objinarray($obj,$array,$field="id"){
+    foreach($array as $o){
+        if($o->get_prop($field)===$obj->get_prop($field) && get_class($o)===get_class($obj)){
+            return true;
+        } 
+    }
+    return false;
+    
+}
+
+/**
  * Devuelve el array si no es null
  * @param string $str
  * @param string $spliter
@@ -16,13 +32,13 @@ function arrayornull($spliter,$str){
 /**
  * Busca recursivamente en un array
  */
-function array_get_key_val($key, $heystack) {
+function array_get_key_val($value, $heystack) {
     if (is_array($heystack)) {
         foreach ($heystack as $k => $v) {
-            if ($v == $key) {
+            if ($v == $value) {
                 return $k;
             } elseif (is_array($v)) {
-                return array_get_key_val($key, $v);
+                return array_get_key_val($value, $v);
             }
         }
         return -1;

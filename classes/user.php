@@ -747,7 +747,7 @@ class USER extends itobject {
         $this->closeSession();
         $ssql = "insert into TBL_SESIONES (usr,front,ip,hash,fecha) values ('" . strToSQL($this->usr) . "'," . $front->get_prop("id") . ",'" . strToSQL($ipuser) . "','" . $hash . "',now())";
         if ($this->dbroot->query($ssql)) {
-            return "Error: imposible loguear usuario";
+            return "Error: imposible loguear usuario".  mysql_error();
         }
         $this->hash = $hash;
         return "ok";

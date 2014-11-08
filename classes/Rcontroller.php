@@ -88,7 +88,7 @@ class Rcontroller extends XMLhandler {
      */
     private function validate_request() {
         if ($this->front->get_prop("ip") != $this->getIpFront()) {    // no coincide ip del front con el nombrado
-            $this->error = "Error en el origen de la solicitud - #6.2" . $this->getIpFront();
+            $this->error = "Error en el origen de la solicitud - #6.2";
             return false;
         }
         if (!$this->front->is_validInstance($this->instance->get_prop("nombre"))) {

@@ -255,22 +255,18 @@ class USER extends itobject {
         $equiposAdm = explode(",", $usr->get_prop("idsequiposadm"));
 
         $finalAdmTeams = array_intersect($teamList, $equiposAdm);
-        $dbteamsV=array_merge($dbteamsV,$finalAdmTeams);
-        
-        foreach ($dbteamsV as $team) {
-            if (in_array($team, $equiposAdm)) { // lo administra
-                if (in_array($team, $finalAdmTeams)) {
-                    if($team!="")
-                        array_push($result, $team);
-                }
-            } else { //no lo administra
-                 if($team!="")
-                    array_push($result, $team);
+
+        foreach($dbteamsV as $tV){
+            if( !in_array($tV,$equiposAdm) ){
+                array_push($result, $tV);
             }
         }
-        $this->dbteams = implode(",", $result);
+        
+        $resultF = array_merge($result,$finalAdmTeams);
 
-        return count($result);
+        $this->dbteams = implode(",", $resultF);
+
+        return count($resultF);
     }
 
     /**
@@ -304,27 +300,26 @@ class USER extends itobject {
                     break;
                 }
             }
-            if(!$ok){
+            if (!$ok) {
                 array_push($instancias, $instancia);
             }
-            $rootD["instancias"]=implode(",",$instancias);
-            $rootD["fronts"]=$this->fronts;
-            $rootD["dominio"]=$this->dominio;
-            $ssql="update TBL_USUARIOS set dominio='".strToSQL($rootD["dominio"])."', fronts='".strToSQL($rootD["fronts"])."', instancias='".strToSQL($rootD["instancias"])."' where usr='".strToSQL($this->usr)."';";
+            $rootD["instancias"] = implode(",", $instancias);
+            $rootD["fronts"] = $this->fronts;
+            $rootD["dominio"] = $this->dominio;
+            $ssql = "update TBL_USUARIOS set dominio='" . strToSQL($rootD["dominio"]) . "', fronts='" . strToSQL($rootD["fronts"]) . "', instancias='" . strToSQL($rootD["instancias"]) . "' where usr='" . strToSQL($this->usr) . "';";
         } else {
-            $rootD=array();
-            $rootD["instancias"]=$instancia;
-            $rootD["usr"]=$this->usr;
-            $rootD["fronts"]=$this->fronts;
-            $rootD["dominio"]=$this->dominio;
-            $ssql="insert into TBL_USUARIOS (usr,dominio,pass,fronts,instancias) values ('".strToSQL($this->usr)."','".strToSQL($rootD["dominio"])."',NULL,'".strToSQL($rootD["fronts"])."','".strToSQL($rootD["instancias"])."');";
+            $rootD = array();
+            $rootD["instancias"] = $instancia;
+            $rootD["usr"] = $this->usr;
+            $rootD["fronts"] = $this->fronts;
+            $rootD["dominio"] = $this->dominio;
+            $ssql = "insert into TBL_USUARIOS (usr,dominio,pass,fronts,instancias) values ('" . strToSQL($this->usr) . "','" . strToSQL($rootD["dominio"]) . "',NULL,'" . strToSQL($rootD["fronts"]) . "','" . strToSQL($rootD["instancias"]) . "');";
         }
-        
-        if($this->dbroot->query($ssql)){
+
+        if ($this->dbroot->query($ssql)) {
             return $this->dbroot->details;
         }
-            return "ok";
-        
+        return "ok";
     }
 
     /**
@@ -408,7 +403,57 @@ class USER extends itobject {
             $this->idsequiposadm = NULL;
         return $i;
     }
-
+    
+    /**
+     * Verifica si administra equipo
+     * @param int $idteam
+     * @return boolean
+     */
+    public function isadm($idteam){
+        return in_array($idteam,explode(",",$this->get_prop("idsequiposadm")) );
+    }
+    
+    /**
+     * Agrega como administrador a equipo
+     * @param type $idteam
+     */
+    public function add_adm($idteam){
+        if(!$this->isadm($idteam)){
+            if(!is_array($this->idsequiposadmV)){ $this->idsequiposadmV=array();}
+            array_push($this->idsequiposadmV, $idteam);
+        }
+        $this->update_adms();
+    }
+    
+    /**
+     * Elimina administracion de equipo
+     * @param type $idteam
+     */
+    public function remove_adm($idteam){
+        $arr=array();
+        if($this->isadm($idteam)){
+            foreach($this->idsequiposadmV as $t){
+                if($t!=$idteam){
+                    array_push($arr, $t);
+                }
+            }
+        }else{
+            return;
+        }
+        $this->idsequiposadmV=$arr;
+        $this->update_adms();
+        
+    }
+    
+    /**
+     * impacta cambios de adm en base de datos
+     */
+    private function update_adms(){
+        $ssql = "update TBL_USUARIOS set idsequiposadm = '".strToSQL(implode(",",$this->idsequiposadmV)).
+                "' where usr = '".strToSQL($this->get_prop("usr"))."'";
+        $this->dbinstance->query($ssql);
+    }
+    
     /**
      * Verifica si el usuario se encuentra en el equipo del id solicitado
      * @param type $id
@@ -439,7 +484,7 @@ class USER extends itobject {
         $this->dbroot->query($ssql);
 
         $ssql = "insert into TBL_UCONTAC (usr,mail,tel,nombre,puesto,ubicacion) 
-        values ('".$this->usr."', '" . strToSQL($this->mail) . "', '" . strToSQL($this->tel) . "','" . strToSQL($this->nombre) . "','" . strToSQL($this->puesto) . "','" . strToSQL($this->ubicacion) . "' )";
+        values ('" . $this->usr . "', '" . strToSQL($this->mail) . "', '" . strToSQL($this->tel) . "','" . strToSQL($this->nombre) . "','" . strToSQL($this->puesto) . "','" . strToSQL($this->ubicacion) . "' )";
 
         if ($this->dbroot->query($ssql))
             return "Error al guardar datos.";
@@ -452,9 +497,9 @@ class USER extends itobject {
      * @return string|null
      */
     public function check_data() {
-        if($this->usr=="" || $this->usr==null)
+        if ($this->usr == "" || $this->usr == null)
             return "El usuario es obligatorio";
-        
+
         if (!in_array($this->dominio, explode(",", DOMAINS)))
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
@@ -467,20 +512,24 @@ class USER extends itobject {
         return NULL;
     }
 
+   /**
+     * Actualiza en db
+     * @return string
+     */
     public function update_DB() {
-        if (!($rta = $this->check_data())) {
-            $ssql = "update TBL_USUARIOS set perfil=" . $this->get_prop("perfil") . ", idsequipos='" . strToSQL($this->get_prop("idsequipos")) . "' where usr='" . strToSQL($this->usr) . "'";
-            if ($this->dbinstance->query($ssql)) {
-                return "Error al guardar datos en instancia.";
-            } else {
-                $ssql = "update TBL_USUARIOS set dominio='" . strToSQL($this->get_prop("dominio")) . "', pass='" . strToSQL($this->get_prop("pass")) . "', fronts='" . strToSQL($this->get_prop("fronts")) . "', instancias='" . strToSQL($this->get_prop("instancias")) . "' where usr='" . strToSQL($this->usr) . "'";
-                if ($this->dbroot->query($ssql)) {
-                    return "Error al guardar datos en root.";
-                }
-            }
-        }
-        else
+        if (($rta = $this->check_data())){
             return $rta;
+        }
+        $ssql = "update TBL_USUARIOS set perfil=" . intval($this->get_prop("perfil")) . 
+                ", idsequipos='" . strToSQL($this->dbteams) . 
+                "' where usr='" . strToSQL($this->usr) . "'";
+        
+        if ($this->dbinstance->query($ssql)) {
+            return "User_update: " .$this->dbinstance->details;
+        } 
+        
+        $this->insert_ucontact();
+        return $this->update_root();
     }
 
     /**
@@ -488,8 +537,9 @@ class USER extends itobject {
      * @return string
      */
     public function insert_DB() {
-        if (($rta = $this->check_data()))
+        if (($rta = $this->check_data())){
             return $rta;
+        }
         $ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado) 
                 values ('" . strToSQL($this->usr) . "','" . strToSQL($this->dbteams) . "',null," . intval($this->perfil) . ",0);";
 
@@ -501,15 +551,16 @@ class USER extends itobject {
         return $this->update_root();
     }
 
+   /**
+     * Desactiva acceso a la instancia
+     * @return string
+     */
     public function delete_DB() {
         $ssql = "update TBL_USUARIOS set estado=" . I_DELETED . " where usr='" . strToSQL($this->usr) . "'";
-        if ($this->dbinstance->query($ssql))
-            return "<b>Error:</b>" . $this->details;
-        else {
-            $ssql = "delete from TBL_UCONTAC where usr='" . strToSQL($this->usr) . "'";
-            $this->query($ssql);
-            return "ok";
+        if ($this->dbinstance->query($ssql)){
+            return "User_delete:" . $this->dbinstance->details;
         }
+        return "ok";
     }
 
     public function load_profile() {
@@ -747,7 +798,7 @@ class USER extends itobject {
         $this->closeSession();
         $ssql = "insert into TBL_SESIONES (usr,front,ip,hash,fecha) values ('" . strToSQL($this->usr) . "'," . $front->get_prop("id") . ",'" . strToSQL($ipuser) . "','" . $hash . "',now())";
         if ($this->dbroot->query($ssql)) {
-            return "Error: imposible loguear usuario".  mysql_error();
+            return "Error: imposible loguear usuario" . mysql_error();
         }
         $this->hash = $hash;
         return "ok";

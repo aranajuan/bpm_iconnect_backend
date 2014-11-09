@@ -19,8 +19,12 @@ class TEAM extends itobject {
     private $equiposderiva; /* equipos a los que puede derivar por fuera del arbol */
     private $idsequiposvisible; /* equipos de los cuales puede ver los tickets sin relacion */
     private $equiposvisible; /* equipos de los cuales puede ver los tickets sin relacion */
+    private $mytkts_vista;  /* vista para tabla de mytkts */
+    private $staffhome_vista; /* vista para tabla staff home */
     private $estado;   /* activo / inactivo */
     private $error = FALSE;  /* error al cargar de la base */
+    private $adms = null; /* array de usuarios adms */
+    private $idsadmsV = null;
 
     /**
      * Listar equipos
@@ -60,8 +64,7 @@ class TEAM extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return "ok";
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -84,12 +87,47 @@ class TEAM extends itobject {
         $this->tipo = trim($tmpU["tipo"]);
         $this->idsequiposderiva = trim($tmpU["idsequipos_deriva"]);
         $this->idsequiposvisible = trim($tmpU["idsequipos_visible"]);
+        $this->mytkts_vista = trim($tmpU["mytkts_vista"]);
+        $this->staffhome_vista = trim($tmpU["staffhome_vista"]);
         $this->direccion = null;
         $this->listin = null;
         $this->equiposderiva = null;
         $this->equiposvisible = null;
     }
 
+    /**
+     * Carga usuarios administradores
+     * @return int cantidad de adms
+     */
+    private function load_adms() {
+        if ($this->adms != null) {
+            return count($this->adms);
+        }
+        $ssql = "select usr from TBL_USUARIOS where idsequiposadm like '%" . intval($this->id) . "%'";
+        $this->dbinstance->loadRS($ssql);
+        if (!$this->dbinstance->noEmpty) {
+            $this->adms = null;
+            $this->idsadmsV = null;
+            return 0;
+        }
+        $this->adms = array();
+        $this->idsadmsV = array();
+        while ($usr = $this->dbinstance->get_vector()) {
+            $U = new USER($this->conn);
+            if ($U->load_DB($usr["usr"]) === "ok") {
+                if ($U->isadm($this->id)) {
+                    array_push($this->adms, $U);
+                    array_push($this->idsadmsV, $U->get_prop("usr"));
+                }
+            }
+        }
+        return count($this->adms);
+    }
+
+    /**
+     * Verifica dato para insert / update
+     * @return string
+     */
     function check_data() {
         if (!is_numeric($this->id))
             return "El id debe ser un numero entero";
@@ -123,7 +161,7 @@ class TEAM extends itobject {
         if ($this->listin->load_DB($this->idlistin) == "ok")
             return TRUE;
         $this->listin = NULL;
-        $this->idlistin= NULL;
+        $this->idlistin = NULL;
         return FALSE;
     }
 
@@ -150,9 +188,9 @@ class TEAM extends itobject {
         foreach ($arrTeam as $tid) {
             if (is_numeric($tid)) {
                 $t = new TEAM($this->conn);
-                
+
                 if ($t->load_DB($tid) == "ok") {
-                    
+
                     $this->equiposderiva[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
                     $i++;
@@ -190,22 +228,23 @@ class TEAM extends itobject {
      * @param int $id Id a chequear|null(a cualquiera)
      * @return boolean
      */
-    public function canDerive($id=null){
-        if($id){
-            if(!is_numeric($id)) return false;
-            return in_array($id,explode(",",$this->idsequiposderiva));
-        }else{
-            return $this->idsequiposderiva!==null;
+    public function canDerive($id = null) {
+        if ($id) {
+            if (!is_numeric($id))
+                return false;
+            return in_array($id, explode(",", $this->idsequiposderiva));
+        }else {
+            return $this->idsequiposderiva !== null;
         }
     }
-    
+
     /**
      * Verifica que las areas esten visibles
      * @param type $id
      * @return boolean
      */
     function canView($id) {
-        return in_array($id,explode(",",$this->idsequiposvisible));
+        return in_array($id, explode(",", $this->idsequiposvisible));
     }
 
     /**
@@ -218,10 +257,10 @@ class TEAM extends itobject {
             $idprof = get_profileId($profile);
             if ($idprof == "-1")
                 return array();
-            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=".I_ACTIVE." and perfil=".intval($idprof)." and idsequipos like '%" . intval($this->id) . "%'";
+            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and perfil=" . intval($idprof) . " and idsequipos like '%" . intval($this->id) . "%'";
         }
         else {
-            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=".I_ACTIVE." and idsequipos like '%" . intval($this->id) . "%'";
+            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and idsequipos like '%" . intval($this->id) . "%'";
         }
         $users = array();
         $i = 0;
@@ -242,7 +281,15 @@ class TEAM extends itobject {
 
     function update_DB() {
         if (!($rta = $this->check_data())) {
-            $ssql = "update TBL_EQUIPOS set nombre='" . strToSQL($this->nombre) . "',t_conformidad='" . strToSQL($this->t_conformidad) . "',iddireccion=" . intval($this->iddireccion) . ",idsequipos_deriva='" . strToSQL($this->idsequiposderiva) . "',idsequipos_visible='" . strToSQL($this->idsequiposvisible) . "',idlistin=" . intval($this->idlistin) . " where id=".intval($this->id);
+            $ssql = "update TBL_EQUIPOS set nombre='" . strToSQL($this->nombre) .
+                    "',t_conformidad='" . strToSQL($this->t_conformidad) .
+                    "',iddireccion=" . intval($this->iddireccion) .
+                    ",idsequipos_deriva='" . strToSQL($this->idsequiposderiva) .
+                    "',idsequipos_visible='" . strToSQL($this->idsequiposvisible) .
+                    "', mytkts_vista = '" . strToSQL($this->mytkts_vista) .
+                    "', staffhome_vista = '" . strToSQL($this->staffhome_vista) .
+                    "',idlistin=" . intval($this->idlistin) .
+                    " where id=" . intval($this->id);
             if ($this->dbinstance->query($ssql))
                 return "Team_update: " . $this->dbinstance->details;
             else
@@ -255,20 +302,22 @@ class TEAM extends itobject {
         $this->estado = I_ACTIVE;
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idlistin,estado) values ('" . strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "'," . intval($this->idlistin) . ",0);";
+            $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idlistin,mytkts_vista,staffhome_vista,estado) values ('" .
+                    strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "'," . intval($this->idlistin) . ",'" . strToSQL($this->mytkts_vista) . "','" . strToSQL($this->staffhome_vista) . "',0);";
             if ($this->dbinstance->query($ssql))
                 return "Team_insert: " . $this->dbinstance->details;
-            else
+            else {
+                $this->id = $this->dbinstance->get_lastID();
                 return "ok";
-        }
-        else
+            }
+        } else
             return $rta;
     }
 
     function delete_DB() {
         if ($this->estado == I_DELETED)
             return "El equipo ya se encuentra eliminado";
-        $ssql = "update TBL_EQUIPOS set estado=1 where id=".intval($this->id);
+        $ssql = "update TBL_EQUIPOS set estado=1 where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql))
             return "Team_delete: " . $this->dbinstance->details;
         else
@@ -295,6 +344,17 @@ class TEAM extends itobject {
                 if ($this->direccion == null)
                     $this->load_division();
                 return $this->iddireccion;
+            case 'idsadms':
+                $this->load_adms();
+                return implode(",", $this->idsadmsV);
+            case 'adms':
+                $this->load_adms();
+                return $this->adms;
+            case 'mytkts_vista':
+                return $this->mytkts_vista;
+            case 'staffhome_vista':
+                return $this->staffhome_vista;
+
             case 'direccionobj':
                 if ($this->direccion == null)
                     $this->load_division();
@@ -302,7 +362,7 @@ class TEAM extends itobject {
             case 'direccionname':
                 if ($this->direccion == null)
                     $this->load_division();
-                if($this->direccion){
+                if ($this->direccion) {
                     return $this->direccion->get_prop("nombre");
                 }
                 return "Invalida/Error";

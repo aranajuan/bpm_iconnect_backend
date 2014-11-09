@@ -116,7 +116,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-08  9:40:50
+-- Dump completed on 2014-11-08 21:00:56
 CREATE DATABASE  IF NOT EXISTS `itracker_telecomcct_uta` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `itracker_telecomcct_uta`;
 -- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
@@ -216,10 +216,12 @@ CREATE TABLE `equipos` (
   `iddireccion` int(11) NOT NULL,
   `idsequipos_deriva` varchar(50) DEFAULT NULL,
   `idsequipos_visible` varchar(50) NOT NULL,
+  `mytkts_vista` text,
+  `staffhome_vista` text,
   `estado` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -228,7 +230,7 @@ CREATE TABLE `equipos` (
 
 LOCK TABLES `equipos` WRITE;
 /*!40000 ALTER TABLE `equipos` DISABLE KEYS */;
-INSERT INTO `equipos` VALUES (1,'Sistemas De Ventas','41:00',10,5,'2,5','5',0),(2,'Gestion De La Demanda Procesos','02:00',3,1,'','1',0),(5,'CCT AGUERO','02:00',1,1,'1','2,6',0),(6,'Admgirafe','50:00',1,1,'','1,2',0),(7,'aaaaaa','11:00',2,1,NULL,'',1),(8,'CCT CORDOBA','02:00',2,1,'','5',0),(9,'Prueba Alta','12:00',6,5,'8','6',1);
+INSERT INTO `equipos` VALUES (1,'Sistemas De Ventas','41:00',10,5,'2,5','5','sistema=tipo,pregunta_2=indicador','*',0),(2,'Gestion De La Demanda Procesos','02:00',1,1,'1','1','%aa%','all',0),(5,'CCT AGUERO','02:00',1,1,'1','2,6','','',0),(6,'Admgirafe','50:00',1,1,'','1,2',NULL,NULL,0),(7,'aaaaaa','11:00',2,1,NULL,'',NULL,NULL,1),(8,'CCT CORDOBA','02:00',2,1,'','5',NULL,NULL,0),(9,'Prueba Alta','12:00',6,5,'8','6',NULL,NULL,1),(10,'nuevo equipo','03:25',6,5,'2,5','1,2,5,6,8','mytkts','inbox',0),(11,'equipo test 2','02:00',1,1,'','','','',1),(12,'Prueba','41:00',1,5,'1','','asdd','asdas',0),(13,'Nuevo -','41:00',1,1,'','','dgdf','asdas',0),(14,'nuevo +','41:00',1,1,'','','asdasd','asdas',0);
 /*!40000 ALTER TABLE `equipos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -244,7 +246,7 @@ CREATE TABLE `listines` (
   `nombre` varchar(100) NOT NULL,
   `too` text,
   `cc` text,
-  `estado` int(11) NOT NULL,
+  `estado` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
 ) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
@@ -256,7 +258,7 @@ CREATE TABLE `listines` (
 
 LOCK TABLES `listines` WRITE;
 /*!40000 ALTER TABLE `listines` DISABLE KEYS */;
-INSERT INTO `listines` VALUES (1,'EQUIPO_SISTEMAS\' DE VENTA','sistemas_de_ventas@ta.telecom.com.sar','ss@ss.comd',0),(2,'fdsf \'\'\\','aa@bb.com','',1),(3,'Listin Test 2','a2a@bb.com','ddd.7@ss.dom',1),(4,'prueba chrome','asasd@bb.com','',1),(5,'Asdas\\\'','aa@cc.com','',1),(6,'Alert(hola)','asda@gg.com','asdas@dd.ar',0),(7,'Alert(hola)\'>','ss@cc.com','',1),(8,'Alert(hola)\'2 & juan','ss@cc.comss','ss@ss.com;pepe@jj.com',1),(9,'prueba full\'; se','tt@cc.com','',1),(10,'Vacio','','',0),(11,'asdas','','',1),(12,'alta listin','','',1);
+INSERT INTO `listines` VALUES (1,'EQUIPO_SISTEMAS\' DE VENTA','sistemas_de_ventas@ta.telecom.com.sar','ss@ss.comd','0'),(2,'fdsf \'\'\\','aa@bb.com','','1'),(3,'Listin Test 2','a2a@bb.com','ddd.7@ss.dom','1'),(4,'prueba chrome','asasd@bb.com','','1'),(5,'Asdas\\\'','aa@cc.com','','1'),(6,'Alert(hola)','asda@gg.com','asdas@dd.ar','0'),(7,'Alert(hola)\'>','ss@cc.com','','1'),(8,'Alert(hola)\'2 & juan','ss@cc.comss','ss@ss.com;pepe@jj.com','1'),(9,'prueba full\'; se','tt@cc.com','','1'),(10,'Vacio','','','0'),(11,'asdas','','','1'),(12,'alta listin','','','1');
 /*!40000 ALTER TABLE `listines` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -457,7 +459,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES ('U548391','1,2,3,5,8','',1,0),('U188353','5','',4,0),('U196798','2','',2,0),('U199629','2','',2,0),('U186462','5','',4,0),('IT1','1','2',2,0),('AG0689','8','',4,0),('ITK184050',NULL,'',2,0),('FG44','2',NULL,3,0),('PRUEBA','2,1',NULL,2,0),('ASDASñ','1',NULL,3,0),('ASDASD','2',NULL,1,0),('ASDAS','2',NULL,1,0);
+INSERT INTO `usuarios` VALUES ('U548391','3,5,8','12,2',3,0),('U188353','5','14',4,0),('U196798','2','',2,1),('U199629','1,2',NULL,2,0),('U186462','5','13,5,12',4,0),('IT1','1','1',2,0),('AG0689','8','',4,0),('ITK184050',NULL,'',2,0),('FG44','1',NULL,3,1),('PRUEBA','1,2',NULL,2,0),('ASDASñ','2',NULL,3,0),('ASDASD','2,2,2',NULL,1,0),('ASDAS','2,1',NULL,1,0);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -470,7 +472,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-08  9:40:50
+-- Dump completed on 2014-11-08 21:00:56
 CREATE DATABASE  IF NOT EXISTS `itracker_root` /*!40100 DEFAULT CHARACTER SET latin1 */;
 USE `itracker_root`;
 -- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
@@ -570,7 +572,7 @@ CREATE TABLE `sesiones` (
 
 LOCK TABLES `sesiones` WRITE;
 /*!40000 ALTER TABLE `sesiones` DISABLE KEYS */;
-INSERT INTO `sesiones` VALUES (0,'127.0.0.1',1,'756f8b10f71a712541670c7e99f25df7','2014-11-08 09:34:48');
+INSERT INTO `sesiones` VALUES (0,'127.0.0.1',1,'604a2c89ffb9ac739b4e5a196774796f','2014-11-08 09:58:42');
 /*!40000 ALTER TABLE `sesiones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -598,7 +600,7 @@ CREATE TABLE `ucontac` (
 
 LOCK TABLES `ucontac` WRITE;
 /*!40000 ALTER TABLE `ucontac` DISABLE KEYS */;
-INSERT INTO `ucontac` VALUES ('U188353','gros@ta.telecom.com.ar','1149682223',NULL,NULL,NULL),('U196798','ngranado@ta.telecom.com.ar','1149683123',NULL,NULL,NULL),('U196799','sp@ta.telecom.com.ar','1149681111',NULL,NULL,NULL),('U548391','aa@bb.com.ar','1149683877','Juan Pablo Arana','',''),('U199629','note@bb.com','123','Note Juan','',''),('IT1','it1@teco','111111','IT1','prueba itracker IT1','en IT1'),('ITK184050','aa@bb.com','1111','ITldap1',NULL,NULL),('PRUEBA','aa@cc.com','dasd45654','nombre prueba','puesto1','ubicacion1'),('ASDASñ','asda@ssd.com','asdas','asáas','asd','asdas'),('ASDASD','ss@ss.com','123123','asdas','123213','123123'),('ASDAS','aa@cc.com','','asdas','',''),('FG44','11@as.com','asd','asd','','');
+INSERT INTO `ucontac` VALUES ('U188353','gros@ta.telecom.com.ar','1149682223',NULL,NULL,NULL),('U196798','ngranado@ta.telecom.com.ar','1149683123',NULL,NULL,NULL),('U196799','sp@ta.telecom.com.ar','1149681111',NULL,NULL,NULL),('U548391','arana.juan@aa.com','133423','Juan','33','juan'),('IT1','it1@teco','111111','IT1','prueba itracker IT1','en IT1'),('ITK184050','aa@bb.com','1111','ITldap1',NULL,NULL),('PRUEBA','aa@cc.com','dasd45654','Nombre Prueba','puesto1','ubicacion1'),('ASDASñ','asda@ssd.com','asdas','Asáas','asd','asdas'),('ASDASD','ss@ss.com','123123','Asdas','123213','123123'),('ASDAS','aa@cc.com','','Asdas','',''),('FG44','11@as.com','asd','Asd','',''),('U199629','aa@ww.cc','asd','Eaf','asd','asd');
 /*!40000 ALTER TABLE `ucontac` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -625,7 +627,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES ('U548391','TELECOM',NULL,'1','TELECOMCCT,AGENTESTP'),('U188353','TELECOM',NULL,'1','TELECOMCCT'),('U196798','TELECOM',NULL,'1,2','TELECOMCCT'),('U199629','TELECOM',NULL,'1,2,3','TELECOMCCT,AGENTESTP'),('U186462','CCPI',NULL,'2','AGENTESTP'),('IT1','ITRACKER','1234!','3,1','TELECOMCCT,AGENTESTP'),('AG0689','CCPI',NULL,'1','AGENTESTP'),('aG1','CCPI',NULL,'2','AGENTESTP'),('AG2','CCPI',NULL,'2','AGENTESTP'),('ITK184050','TELECOM',NULL,'1','TELECOMCCT'),('ASDASD','TELECOM',NULL,'1','TELECOMCCT'),('PRUEBA','TELECOM',NULL,'1','TELECOMCCT'),('ASDASñ','CCPI',NULL,'1','TELECOMCCT'),('ASDAS','TELECOM','Propiedad inval','','TELECOMCCT'),('FG44','TELECOM',NULL,'1','TELECOMCCT');
+INSERT INTO `usuarios` VALUES ('U548391','TELECOM',NULL,'1','TELECOMCCT,AGENTESTP'),('U188353','TELECOM',NULL,'1','TELECOMCCT'),('U196798','TELECOM',NULL,'1,2','TELECOMCCT'),('U199629','TELECOM',NULL,'','AGENTESTP,TELECOMCCT'),('U186462','CCPI',NULL,'2','AGENTESTP'),('IT1','ITRACKER','1234!','3,1','TELECOMCCT,AGENTESTP'),('AG0689','CCPI',NULL,'1','AGENTESTP'),('aG1','CCPI',NULL,'2','AGENTESTP'),('AG2','CCPI',NULL,'2','AGENTESTP'),('ITK184050','TELECOM',NULL,'1','TELECOMCCT'),('ASDASD','TELECOM',NULL,'1','TELECOMCCT'),('PRUEBA','TELECOM',NULL,'1','TELECOMCCT'),('ASDASñ','CCPI',NULL,'1','TELECOMCCT'),('ASDAS','TELECOM','Propiedad inval','','TELECOMCCT'),('FG44','TELECOM',NULL,'1','TELECOMCCT');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -638,4 +640,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-08  9:40:50
+-- Dump completed on 2014-11-08 21:00:56

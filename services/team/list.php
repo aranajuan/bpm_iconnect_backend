@@ -11,7 +11,7 @@ function GO($RC) {
     $listL=$RC->createElement("list");
     if ($ALL_v) {
         foreach ($ALL_v as $l)
-            $listL->appendChild($l->getXML($RC,array("id","nombre","t_conformidad","iddireccion","idsequiposderiva","idsequiposvisible","idlistin","direccionname")));
+            $listL->appendChild($l->getXML($RC,array("id","nombre","t_conformidad","iddireccion","idsequiposderiva","idsequiposvisible","idsadms","staffhome_vista","mytkts_vista","idlistin","direccionname")));
         return $listL;
     }
     return null;

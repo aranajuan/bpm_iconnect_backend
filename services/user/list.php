@@ -10,7 +10,7 @@ function GO($RC) {
     $userL=$RC->createElement("list");
     if ($USERALL_v) {
         foreach ($USERALL_v as $u)
-            $userL->appendChild($u->getXML($RC,array('usr','dominio','mail','debug','telefono','nombre','perfil','perfilT','instancias','ubicacion','puesto')));
+            $userL->appendChild($u->getXML($RC,array('usr','dominio','equiposname','mail','telefono','nombre','perfil','perfilT','ubicacion','puesto','fronts','idsequipos')));
         return $userL;
     }
     return null;

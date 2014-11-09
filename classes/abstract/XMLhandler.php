@@ -200,6 +200,13 @@ abstract class XMLhandler {
         return $this->response;
     }
 
+    /**
+     * Crea elemento en dom
+     * @param string $k
+     * @param string $v
+     * @param boolean $CDATA
+     * @return DOMElement
+     */
     public function createElement($k, $v = null, $CDATA = false) {
         if ($v) {
             return $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v, $CDATA));

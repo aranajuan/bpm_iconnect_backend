@@ -1,6 +1,38 @@
 <?php
-require_once   "general_includes.php";
-require_once   'classes/user.php';
-$o= new USER();
-echo obj_delete($o); 
-?>
+
+/**
+ * Inserta
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $Ul = new USER($RC->get_Connection());
+    $loadR = $Ul->load_DB($RC->get_params("usr"));
+    $userD = $RC->createElement("result");
+    if ($loadR !== "ok") {
+        $result = "Usuario invalido";
+        $userD->appendChild($RC->createElement("ejecute", "error"));
+        $userD->appendChild($RC->createElement("msj", $result));
+    } else {
+        $rest = $Ul->change_teams(array());
+        if ($rest) {
+            $result = $Ul->update_DB();
+            if ($result === "ok") {
+                $userD->appendChild($RC->createElement("ejecute", "ok"));
+                $userD->appendChild($RC->createElement("msj", "El usuario aun posee equipos que no administras. Consulte al administrador general para bloquear el acceso."));
+            } else {
+                $userD->appendChild($RC->createElement("ejecute", "error"));
+                $userD->appendChild($RC->createElement("msj", $result));
+            }
+        } else {
+            $result = $Ul->delete_DB();
+            if ($result === "ok") {
+                $userD->appendChild($RC->createElement("ejecute", "ok"));
+            } else {
+                $userD->appendChild($RC->createElement("ejecute", "error"));
+                $userD->appendChild($RC->createElement("msj", $result));
+            }
+        }
+    }
+    return $userD;
+}

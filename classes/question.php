@@ -18,11 +18,16 @@ class QUESTION extends itobject{
      
      private $error=FALSE; /* erro al cargar de la base */
      
+     /**
+      * Carga de base de datos
+      * @param int $id
+      * @return string
+      */
      function load_DB($id){
          $this->error=FALSE;
-         $this->loadRS("select * from TBL_PREGUNTAS where id=$id");
-         if($this->noEmpty && $this->cReg==1){
-                     $tmpU=$this->get_vector();
+         $this->dbinstance->loadRS("select * from TBL_PREGUNTAS where id=".intval($id));
+         if($this->dbinstance->noEmpty && $this->dbinstance->cReg==1){
+                     $tmpU=$this->dbinstance->get_vector();
                      $this->load_DV($tmpU);
                      if($this->UB!=NULL)
                          return "eliminado";
@@ -33,7 +38,10 @@ class QUESTION extends itobject{
          return "error";
      }
 
-
+     /**
+      * Carga datos editables
+      * @param array $tmpU
+      */
      function load_VEC($tmpU){
              $this->texto=trim($tmpU["texto"]);
              $this->detalle=trim($tmpU["detalle"]);
@@ -44,7 +52,6 @@ class QUESTION extends itobject{
       * @param type $tmpU
       */
      private function load_DV($tmpU){
-        $this->id=$tmpU["id"];
         $this->id=$tmpU["id"];
         $this->UA=$tmpU["UA"]; 
         $this->FA=$tmpU["FA"];
@@ -60,10 +67,10 @@ class QUESTION extends itobject{
      private function load_options(){
          $i=0;
          $this->opciones= NULL;
-         $ssql="select id from TBL_OPCIONES where idpregunta=".$this->id." and UB is null";
-         $this->loadRS($ssql);
-         while( $o=$this->get_vector() ){
-             $oo= new OPTION(); 
+         $ssql="select id from TBL_OPCIONES where idpregunta=".inval($this->id)." and UB is null";
+         $this->dbinstance->loadRS($ssql);
+         while( $o=$this->dbinstance->get_vector() ){
+             $oo= new OPTION($this->conn); 
              $oo->load_DB($o["id"]);
              $this->opciones[$i]=$oo;
              $i++;
@@ -71,7 +78,11 @@ class QUESTION extends itobject{
          return $i;
      }
      
-
+     /**
+      * Devuelve propiedad solicitada
+      * @param string $property
+      * @return string
+      */
      function get_prop($property){
          switch($property){
              case 'id':

@@ -1,6 +1,12 @@
 <?php
-require_once   "general_includes.php";
 require_once   'classes/team.php';
-$o= new TEAM();
-echo obj_delete($o); 
-?>
+/**
+ * Elimina
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $O= new TEAM($RC->get_Connection());
+    $O->load_DB($RC->get_params("id"));
+    return $RC->createElement("result",$O->delete_DB());
+}

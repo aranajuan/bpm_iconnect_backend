@@ -1,6 +1,24 @@
 <?php
-require_once "general_includes.php";
-require_once 'classes/user.php';
-$o= new USER();
-echo obj_update($o);  
-?>
+
+/**
+ * Inserta
+ * @param Rcontroller $RC
+ * @return null
+ */
+function GO($RC) {
+    $Ul = new USER($RC->get_Connection());
+    $loadR = $Ul->load_DB($RC->get_params("usr"));
+    if ($loadR !== "ok") {
+        $result = "Usuario invalido";
+    } else {
+        $Ul->load_VEC($RC->get_params(null));
+        $tAdds = explode(",", $RC->get_params("idsequipos"));
+        if ($RC->get_params("idsequipos") != "" && count($tAdds)) {
+            $Ul->change_teams($tAdds);
+            $result = $Ul->update_DB();
+        } else {
+            $result = "Seleccione al menos un equipo";
+        }
+    }
+    return $RC->createElement("result", $result);
+}

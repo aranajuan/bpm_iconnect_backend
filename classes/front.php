@@ -18,10 +18,29 @@ class FRONT extends itobject {
      */
     private $DBobj;
     
-    function FRONT($conn){
+    function  __construct($conn){
+        parent::__construct($conn);
         $this->DBobj = new DB($conn, true);
     }
     
+    /**
+     * Lista todos los fronts
+     * @return array<FRONT>
+     */
+    function list_all(){
+        $ssql = "select nombre from TBL_FRONTS";
+        $this->DBobj->loadRS($ssql);
+        if (!$this->DBobj->noEmpty)
+            return null;
+        $i = 0;
+        $list = array();
+        while ($idV = $this->DBobj->get_vector()) {
+            $list[$i] = new FRONT($this->conn);
+            $list[$i]->load_DB($idV[0]);
+            $i++;
+        }
+        return $list;
+    }
     
     /**
      * Carga desde base el nombre

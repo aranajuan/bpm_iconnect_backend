@@ -24,11 +24,12 @@ class OPTION extends itobject {
     private $FB; /* fecha en que elimino la opcion */
     private $error = FALSE; /* error al cargar de la base */
 
+
     function load_DB($id) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_OPCIONES where id=$id");
+        $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=".intval($id));
         if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+            $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->UB != NULL)
                 return "eliminado";

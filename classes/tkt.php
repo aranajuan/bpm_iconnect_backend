@@ -1,12 +1,12 @@
 <?php
 
-require_once 'classes/itobject.php';
+
 require_once 'classes/action.php';
-require_once 'classes/tree.php';
+require_once 'classes/abstract/tree.php';
 require_once 'classes/form_checker.php';
 require_once 'classes/tkt_h.php';
 
-class TKT extends itobject {
+class TKT extends TREE {
 
     private $id;    /* id del ticket */
     private $usr;   /* id usuario que reclama */
@@ -16,7 +16,6 @@ class TKT extends itobject {
     private $idmaster;  /* id del ticket master */
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
-    private $origenT;   /* arbol origen */
     private $u_tom; /* id usuario tomado */
     private $u_tom_o;   /* usuario tomado */
     private $u_asig;    /* id usuario asigno */
@@ -39,23 +38,28 @@ class TKT extends itobject {
         array(3, 6, 9)
     );
 
+    /**
+     * Carga de base de datos
+     * @param type $id
+     * @return string
+     */
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_TICKETS where id=$id");
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+        $this->dbinstance->loadRS("select * from TBL_TICKETS where id=" . intval($id));
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
             return $this->load_DV($tmpU);
         }
-        else
-            $this->error = TRUE;
+
+        $this->error = TRUE;
         return "error";
     }
 
     /**
-     * Carga datos de la base a propiedades
+     * Carga datos de la base a propiedades y la vista del usuario
      * @param type $tmpU
-     * @return type
+     * @return string
      */
     private function load_DV($tmpU) {
         $this->id = $tmpU["id"];
@@ -68,25 +72,31 @@ class TKT extends itobject {
         $this->prioridad = $tmpU["prioridad"];
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
-        $rta = $this->load_VEC($tmpU);
-        $l = $GLOBALS[UL];
-        $this->view = $l->get_view($this);
+        $rta = $this->load_VEC($tmpU,true);
+        $usr = $GLOBALS["RH"]->get_user();
+        $this->view = $usr->get_view($this);
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
     }
 
-    function load_VEC($tmpU) {
+    /**
+     * Carga ruta
+     * @param type $tmpU
+     * @fromdb  boolean cargado desde base de datos  
+     * @return string
+     */
+    function load_VEC($tmpU,$fromdb=false) {
         $this->usr = $tmpU["usr"];
         $this->origen = $tmpU["origen"];
-        $this->origenT = new TREE();
-        return $this->origenT->load_path($this->origen);
+        return $this->load_path($this->origen,!$fromdb);
     }
 
     /**
      * Es master?
-     * @return boolea
+     * @return boolean
      */
     public function is_master() {
+        $this->load_master();
         return $this->idmaster == NULL;
     }
 
@@ -113,9 +123,10 @@ class TKT extends itobject {
      * @return string
      */
     public function ejecute_action($actionName, $data) {
-        $a = new ACTION();
-        if ($a->load_DB($actionName) != "ok")
+        $a = new ACTION($this->conn);
+        if ($a->load_DB($actionName) != "ok") {
             return "No se puede cargar accion";
+        }
 
         return array($a->ejecute($this, $data), $a);
     }
@@ -129,37 +140,46 @@ class TKT extends itobject {
 
     /**
      * Carga los childs en la propiedad
+     * @return  int cantidad cargada
      */
     function load_childs() {
-        if (!$this->childs && $this->idmaster == NULL) {
-            $ssql = "select id from TBL_TICKETS where idmaster=" . $this->id . " and idequipo=" . $this->get_prop("idequipo") . " order by FA";
-            $db = new DATOS();
-            $db->loadRS($ssql);
-            if ($db->noEmpty) {
-                $i = 0;
-                while ($tc = $db->get_vector()) {
-                    $TKT = new TKT();
-                    if ($TKT->load_DB($tc["id"]) == "ok") {
-                        $this->childs[$i] = $TKT;
-                        $i++;
-                    }
+        if ($this->childs) {
+            return count($this->childs);
+        }
+
+        $this->clear_childs();
+        if ($this->idmaster) {
+            return 0;
+        }
+        $ssql = "select id from TBL_TICKETS where idmaster=" . intval($this->id) . " and idequipo=" . intval($this->get_prop("idequipo")) . " order by FA";
+        $this->dbinstance->loadRS($ssql);
+        $i = 0;
+
+        if ($this->dbinstance->noEmpty) {
+            while ($tc = $this->dbinstance->get_vector()) {
+                $TKT = new TKT($this->conn);
+                if ($TKT->load_DB($tc["id"]) === "ok") {
+                    $this->childs[$i] = $TKT;
+                    $i++;
                 }
             }
+            return $i;
         }
+        return 0;
     }
 
     /**
      * Cantidad de childs
+     * Metodo rapido, no carga objetos de base
      * @return int
      */
     function get_count_childs() {
         if ($this->childs) {
             return count($this->childs);
         } else {
-            $ssql = "select id from TBL_TICKETS where idmaster=" . $this->id . " and idequipo=" . $this->get_prop("idequipo");
-            $db = new DATOS();
-            $db->loadRS($ssql);
-            return $db->cReg;
+            $ssql = "select id from TBL_TICKETS where idmaster=" . intval($this->id) . " and idequipo=" . intval($this->get_prop("idequipo"));
+            $this->dbinstance->loadRS($ssql);
+            return $this->dbinstance->cReg;
         }
     }
 
@@ -440,7 +460,7 @@ class TKT extends itobject {
         return array(self::$priorities[0][$idV], self::$priorities[1][$idV]);
     }
 
-    private function check_data() {
+    public function check_data() {
         if (!$this->can_edit)
             return $this->detail_can_edit;
         if (!is_numeric($this->id))
@@ -473,9 +493,8 @@ class TKT extends itobject {
         $l = $GLOBALS[UL];
         $this->usr = $l->get_prop("usr");
         $this->idequipo = $this->origenT->get_last()->equipo_destino($l);
-        
+
         return $this->insert_DB();
-        
     }
 
     /**
@@ -552,7 +571,7 @@ class TKT extends itobject {
         $this->load_childs();
 
         /* Cerrar en tabla tkts */
-        $ssql = "update TBL_TICKETS set UB=".strToSQL($UB).", FB=now() where id=" . $this->id;
+        $ssql = "update TBL_TICKETS set UB=" . strToSQL($UB) . ", FB=now() where id=" . $this->id;
         if ($this->query($ssql))
             return "<b>Error (TKT - close):</b>" . $this->details;
         $this->UB = $UB;
@@ -782,60 +801,65 @@ class TKT extends itobject {
         return $this->add_tktH("SEPARAR");
     }
 
+    public function delete_DB() {
+        return "Funcion en desarrollo.";
+    }
+
+    public function insert_DB() {
+        if (!($rta = $this->check_data())) {
+            $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)
+             values ('" . strToSQL($this->get_prop("usr")) . "'," . $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_prop("origen")) . "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
+            if ($this->query($ssql))
+                return "<b>Error (TKT - Open):</b>" . $this->details;
+            else {
+                $this->UA = $this->usr;
+                $this->id = $this->get_lastID();
+                return $this->add_tktH("ABRIR", $this->get_prop("idequipo"));
+            }
+        } else
+            return $rta;
+    }
+
+    public function update_DB() {
+        return "Funcion en desarrollo.";
+    }
+
     function get_prop($property) {
         switch ($property) {
             case 'id':
                 return $this->id;
             case 'usr':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->usr;
             case 'view':
                 return $this->view;
             case 'usr_o':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->usr_o;
             case 'idequipo':
-                if ($this->equipo == null) {
-                    $this->load_team();
-                }
+                $this->load_team();
                 return $this->idequipo;
             case 'equipo':
-                if ($this->equipo == null) {
-                    $this->load_team();
-                }
+                $this->load_team();
                 return $this->equipo;
             case 'idmaster':
                 return $this->idmaster;
             case 'master':
-                if ($this->master == null) {
-                    $this->load_master();
-                }
+                $this->load_master();
                 return $this->master;
             case 'origen':
                 return trim($this->origen);
             case 'u_tom':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->u_tom;
             case 'u_tom_o':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->u_tom_o;
             case 'u_asig':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->u_asig;
             case 'u_asig_o':
-                if ($this->usr_o == null) {
-                    $this->load_users();
-                }
+                $this->load_users();
                 return $this->u_asig_o;
             case 'prioridad':
                 return $this->prioridad;
@@ -856,30 +880,6 @@ class TKT extends itobject {
             default:
                 return "Propiedad invalida.";
         }
-    }
-
-    public function delete_DB() {
-        return "Funcion en desarrollo.";
-    }
-
-    public function insert_DB() {
-        if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)
-             values ('" . strToSQL($this->get_prop("usr")) . "'," . $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_prop("origen")) . "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
-            if ($this->query($ssql))
-                return "<b>Error (TKT - Open):</b>" . $this->details;
-            else {
-                $this->UA = $this->usr;
-                $this->id = $this->get_lastID();
-                return $this->add_tktH("ABRIR", $this->get_prop("idequipo"));
-            }
-        }
-        else
-            return $rta;
-    }
-
-    public function update_DB() {
-        return "Funcion en desarrollo.";
     }
 
 }

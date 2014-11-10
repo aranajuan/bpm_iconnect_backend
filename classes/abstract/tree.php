@@ -1,12 +1,8 @@
 <?php
 
-require_once 'classes/db.php';
-require_once 'classes/question.php';
-require_once 'classes/option.php';
-require_once 'classes/user.php';
-require_once 'classes/tkt.php';
+require_once 'itobject.php';
 
-class TREE extends DATOS {
+abstract class TREE extends itobject {
 
     private $path;
     private $path_pos;
@@ -17,12 +13,13 @@ class TREE extends DATOS {
     private $critico_v;
 
     /*
-     * formato:  'rut:iddireccion-idsistema-idopcion1-idopcion2-....
-     * verifica formato
-     * carga objetos
+     *  Carga arbol y Verifica formato
+     * @param    $path    formato:  'rut:iddireccion-idsistema-idopcion1-idopcion2-....
+     * @param    $crypt  esta encriptado    
+     * @return   string
      */
 
-    function load_path($path, $crypt = 0) {
+    protected function load_path($path, $crypt = 0) {
         $this->path_pos = 0;
         $this->path_obj = NULL;
         $this->deleted = 0;
@@ -36,10 +33,18 @@ class TREE extends DATOS {
         return $this->check_valid();
     }
 
-    function is_active() {
+    /**
+     * Es activo el arbol (se puede dar de alta)
+     * @return boolean
+     */
+    public function is_active() {
         return !$this->deleted;
     }
 
+    /**
+     * Verifica que se cumpla en formato - carga objetos
+     * @return string
+     */
     private function check_valid() {
         $this->path_max = count($this->path) - 2;
         for ($i = 0; $i < $this->path_max; $i++) {
@@ -54,19 +59,23 @@ class TREE extends DATOS {
         return $this->load_objects();
     }
 
+    /**
+     * Carga los objetos de opciones seleccionadas
+     * @return string
+     */
     private function load_objects() {
         start_measure("OBJ:TREE:load_objects");
         $this->path_obj = NULL;
         for ($i = 0; $i <= $this->path_max; $i++) {
             switch (substr($this->path[$i], 0, 1)) {
                 case "D":
-                    $o = new DIVISION();
+                    $o = new DIVISION($this->conn);
                     break;
                 case "S":
-                    $o = new SYSTEM();
+                    $o = new SYSTEM($this->conn);
                     break;
                 case "O":
-                    $o = new OPTION();
+                    $o = new OPTION($this->conn);
                     break;
                 default:
                     return "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)";
@@ -86,6 +95,9 @@ class TREE extends DATOS {
         return "ok";
     }
 
+    /**
+     * Carga opciones criticas seleccionadas
+     */
     private function load_critic() {
 
         $i = 0;
@@ -101,15 +113,15 @@ class TREE extends DATOS {
         }
         if ($this->critico == "") {
             $this->critico = NULL;
-        }
-        else
+        } else
             $this->critico = substr($this->critico, 1);
     }
 
     /**
-     * vector de TKTS similares
+     * Vector de TKTS similares
+     * @return array<TKT>|null 
      */
-    function get_similar() {
+    protected function get_similar() {
         if (!$this->critico_v) {
             $this->load_critic();
         }
@@ -118,20 +130,18 @@ class TREE extends DATOS {
         }
         $criticVC = explode("-", $this->critico);
         $ssql = "
-            select id from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . $this->get_system()->get_prop("id") . "-%'"; // todos los tkts del sistema abiertos
-        $db = new DATOS();
-        $db->loadRS($ssql);
-        if (!$db->noEmpty) {
+            select id from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
+        $this->dbinstance->loadRS($ssql);
+        if (!$this->dbinstance->noEmpty) {
             return NULL;
         }
         $i = 0;
         $tktV = array();
-        while ($tm = $db->get_vector()) {
-            $tkt = new TKT();
+        while ($tm = $this->dbinstance->get_vector()) {
+            $tkt = new TKT($this->conn);
             if ($tkt->load_DB($tm["id"]) == "ok") {
                 //verificar textos criticos y comparar con actual
-                $tkt->load_critic();
-                $countC = count(array_intersect($criticVC, explode("-", $tkt->get_critic())));
+                $countC = count(array_intersect($criticVC, explode("-", $tkt->get_prop("critic"))));
                 if ($countC) {
                     $tktV[$i] = $tkt;
                     $i++;
@@ -148,12 +158,19 @@ class TREE extends DATOS {
 
     /**
      * Devuelve textos criticos
-     * 
+     * @return  string
      */
-    function get_critic() {
+    protected function get_critic() {
+        if ($this->critico === null) {
+            $this->load_critic();
+        }
         return $this->critico;
     }
 
+    /**
+     * Sistema tipificado
+     * @return SYSTEM|null
+     */
     function get_system() {
 
         if ($this->path_max < 1) {
@@ -163,6 +180,10 @@ class TREE extends DATOS {
         return $this->path_obj[1];
     }
 
+    /**
+     * Direccion tipificada
+     * @return DIVISION|null
+     */
     function get_division() {
         if (count($this->path_obj) == 0) {
             return NULL;
@@ -174,31 +195,32 @@ class TREE extends DATOS {
     /**
      *  Devuelve array con respuestas previas<br/>
      *  null - sin respuestas previas<br/>
-     * array => title => string <br/>
-     *       => option => string <br/>
+     * array => question => string <br/>
+     *       => ans => string <br/>
      *       => path => string <br/> 
+     * @return  array
      */
-    function get_tree_history() {
+    public function get_tree_history() {
         $rta = array();
         if (is_array($this->path) && count($this->path) >= 1) {
             for ($i = 0; $i <= $this->path_max; $i++) {
                 switch ($i) {
                     case 0:
-                        $rta[$i]["title"] = "Area";
-                        $rta[$i]["option"] = $this->get_division()->get_prop("nombre");
+                        $rta[$i]["question"] = "Area";
+                        $rta[$i]["ans"] = $this->get_division()->get_prop("nombre");
                         $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id") . "-";
                         break;
                     case 1:
-                        $rta[$i]["title"] = "Inconveniente";
-                        $rta[$i]["option"] = $this->get_system()->get_prop("nombre");
+                        $rta[$i]["question"] = "Inconveniente";
+                        $rta[$i]["ans"] = $this->get_system()->get_prop("nombre");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . "-";
                         break;
                     default:
-                        $q = new QUESTION();
+                        $q = new QUESTION($this->conn);
                         $o = $this->path_obj[$i];
                         $q->load_DB($o->get_prop("idpregunta"));
-                        $rta[$i]["title"] = $q->get_prop("texto");
-                        $rta[$i]["option"] = $o->get_prop("texto");
+                        $rta[$i]["question"] = $q->get_prop("texto");
+                        $rta[$i]["ans"] = $o->get_prop("texto");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . "-";
                         break;
                 }
@@ -211,6 +233,7 @@ class TREE extends DATOS {
     /**
      * Devuelve array con pregunta y opciones en el origen establecido<br/> 
      * Title => string<br/>
+     * details =>string <br/>
      * back => string (cifrado)/ null / 'none'<br/>
      * actual => string (cifrado)<br/>
      * options => array => Title<br/>
@@ -218,31 +241,27 @@ class TREE extends DATOS {
      *                  => End (fin de arbol)<br/>
      * error => string<br/>
      * object => cuando es ultima opcion [OPTION] <br/>
+     * @return  array
      */
-    function get_tree_options() {
+    public function get_tree_options() {
         $rta = array();
-        if (!is_array($this->path)) { // primer opcion, se muestran las direcciones
+        if (!is_array($this->path)) {
+            // primer opcion, se muestran las direcciones
             //limpiar temporales del usuario
+            
             //verificar si el usuario pertenece solo a una direccion se ingresa directamente
-            $tms = $GLOBALS[UL]->get_prop("equiposobj");
-            if ($tms != null && count($tms)) {
-                $dir = 0;
-                foreach ($tms as $t) {
-                    if ($dir == 0) {
-                        $dir = $t->get_prop("iddireccion");
-                    } else {
-                        if ($t->get_prop("iddireccion") != $dir) {
-                            $dir = -1;
-                            break;
-                        }
-                    }
-                }
+            $usr = $GLOBALS["RH"]->get_User();
+            $usrDirs= $usr->get_divisions();
+            if(count($usrDirs)==1){
+                $dir=$usrDirs[0]->get_prop("id");
+            }else{
+                $dir=-1;
             }
-
+            //$dir=-1;
             if ($dir > 0) {
-                $this->load_path("D" . $dir . "-", 0);
+                $this->load_path("D" . $dir . "-", false);
             } else {
-                $divs = new DIVISION();
+                $divs = new DIVISION($this->conn);
                 $divsV = $divs->list_all();
                 $rta["title"] = "Seleccione un area";
                 $rta["back"] = "none";
@@ -256,6 +275,7 @@ class TREE extends DATOS {
                 return $rta;
             }
         }
+        
         $actualPATH = implode("-", $this->path); //ruta actual, para generar destiny
         $rta["actual"] = Encrypter::encrypt($actualPATH);
         $actualO = $this->get_last();
@@ -272,7 +292,6 @@ class TREE extends DATOS {
             case 0:
                 // cargar sistemas
                 $rta["title"] = "Seleccione una opcion";
-                $actualO->load_systems();
                 $ss = $actualO->get_prop('sistemasobj');
                 $i = 0;
                 foreach ($ss as $s) {
@@ -285,7 +304,6 @@ class TREE extends DATOS {
             case 1:
                 // cargar p_pregunta - origen sistemas
                 $oD = $this->get_division();
-                $oD->load_systems();
                 $q = $oD->get_fst_Q($actualO->get_prop("id"));
                 $rta["title"] = $q->get_prop("texto");
                 $rta["detail"] = $q->get_prop("detalle");
@@ -310,7 +328,7 @@ class TREE extends DATOS {
                 // otros casos
                 if ($actualO->get_prop("idpregunta_destino")) {
                     // cargar opciones
-                    $q = new QUESTION();
+                    $q = new QUESTION($this->conn);
                     $q->load_DB($actualO->get_prop("idpregunta_destino"));
                     $rta["title"] = $q->get_prop("texto");
                     $rta["detail"] = $q->get_prop("detalle");

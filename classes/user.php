@@ -199,15 +199,15 @@ class USER extends itobject {
         $this->perfil = trim($tmpU["perfil"]);
 
         $this->mail = trim($tmpU["mail"]);
-        ;
+
         $this->tel = trim($tmpU["tel"]);
-        ;
+
         $this->nombre = trim($tmpU["nombre"]);
-        ;
+
         $this->puesto = trim($tmpU["puesto"]);
-        ;
+
         $this->ubicacion = trim($tmpU["ubicacion"]);
-        ;
+
 
         $this->perfilLoaded = false;
     }
@@ -256,13 +256,13 @@ class USER extends itobject {
 
         $finalAdmTeams = array_intersect($teamList, $equiposAdm);
 
-        foreach($dbteamsV as $tV){
-            if( !in_array($tV,$equiposAdm) ){
+        foreach ($dbteamsV as $tV) {
+            if (!in_array($tV, $equiposAdm)) {
                 array_push($result, $tV);
             }
         }
-        
-        $resultF = array_merge($result,$finalAdmTeams);
+
+        $resultF = array_merge($result, $finalAdmTeams);
 
         $this->dbteams = implode(",", $resultF);
 
@@ -403,57 +403,74 @@ class USER extends itobject {
             $this->idsequiposadm = NULL;
         return $i;
     }
-    
+
+    /**
+     * Devuelve todas las direcciones a las que pertenece
+     * @return array<DIVISION>
+     */
+    public function get_divisions() {
+        $arr = array();
+        $teams = $this->get_prop("equiposobj");
+        foreach ($teams as $t) {
+            $div = $t->get_prop("direccionobj");
+            if (!objinarray($div, $arr)) {
+                array_push($arr, $div);
+            }
+        }
+        return $arr;
+    }
+
     /**
      * Verifica si administra equipo
      * @param int $idteam
      * @return boolean
      */
-    public function isadm($idteam){
-        return in_array($idteam,explode(",",$this->get_prop("idsequiposadm")) );
+    public function isadm($idteam) {
+        return in_array($idteam, explode(",", $this->get_prop("idsequiposadm")));
     }
-    
+
     /**
      * Agrega como administrador a equipo
      * @param type $idteam
      */
-    public function add_adm($idteam){
-        if(!$this->isadm($idteam)){
-            if(!is_array($this->idsequiposadmV)){ $this->idsequiposadmV=array();}
+    public function add_adm($idteam) {
+        if (!$this->isadm($idteam)) {
+            if (!is_array($this->idsequiposadmV)) {
+                $this->idsequiposadmV = array();
+            }
             array_push($this->idsequiposadmV, $idteam);
         }
         $this->update_adms();
     }
-    
+
     /**
      * Elimina administracion de equipo
      * @param type $idteam
      */
-    public function remove_adm($idteam){
-        $arr=array();
-        if($this->isadm($idteam)){
-            foreach($this->idsequiposadmV as $t){
-                if($t!=$idteam){
+    public function remove_adm($idteam) {
+        $arr = array();
+        if ($this->isadm($idteam)) {
+            foreach ($this->idsequiposadmV as $t) {
+                if ($t != $idteam) {
                     array_push($arr, $t);
                 }
             }
-        }else{
+        } else {
             return;
         }
-        $this->idsequiposadmV=$arr;
+        $this->idsequiposadmV = $arr;
         $this->update_adms();
-        
     }
-    
+
     /**
      * impacta cambios de adm en base de datos
      */
-    private function update_adms(){
-        $ssql = "update TBL_USUARIOS set idsequiposadm = '".strToSQL(implode(",",$this->idsequiposadmV)).
-                "' where usr = '".strToSQL($this->get_prop("usr"))."'";
+    private function update_adms() {
+        $ssql = "update TBL_USUARIOS set idsequiposadm = '" . strToSQL(implode(",", $this->idsequiposadmV)) .
+                "' where usr = '" . strToSQL($this->get_prop("usr")) . "'";
         $this->dbinstance->query($ssql);
     }
-    
+
     /**
      * Verifica si el usuario se encuentra en el equipo del id solicitado
      * @param type $id
@@ -512,22 +529,22 @@ class USER extends itobject {
         return NULL;
     }
 
-   /**
+    /**
      * Actualiza en db
      * @return string
      */
     public function update_DB() {
-        if (($rta = $this->check_data())){
+        if (($rta = $this->check_data())) {
             return $rta;
         }
-        $ssql = "update TBL_USUARIOS set perfil=" . intval($this->get_prop("perfil")) . 
-                ", idsequipos='" . strToSQL($this->dbteams) . 
+        $ssql = "update TBL_USUARIOS set perfil=" . intval($this->get_prop("perfil")) .
+                ", idsequipos='" . strToSQL($this->dbteams) .
                 "' where usr='" . strToSQL($this->usr) . "'";
-        
+
         if ($this->dbinstance->query($ssql)) {
-            return "User_update: " .$this->dbinstance->details;
-        } 
-        
+            return "User_update: " . $this->dbinstance->details;
+        }
+
         $this->insert_ucontact();
         return $this->update_root();
     }
@@ -537,7 +554,7 @@ class USER extends itobject {
      * @return string
      */
     public function insert_DB() {
-        if (($rta = $this->check_data())){
+        if (($rta = $this->check_data())) {
             return $rta;
         }
         $ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado) 
@@ -551,13 +568,13 @@ class USER extends itobject {
         return $this->update_root();
     }
 
-   /**
+    /**
      * Desactiva acceso a la instancia
      * @return string
      */
     public function delete_DB() {
         $ssql = "update TBL_USUARIOS set estado=" . I_DELETED . " where usr='" . strToSQL($this->usr) . "'";
-        if ($this->dbinstance->query($ssql)){
+        if ($this->dbinstance->query($ssql)) {
             return "User_delete:" . $this->dbinstance->details;
         }
         return "ok";
@@ -773,22 +790,22 @@ class USER extends itobject {
                 }
                 break;
             case "CCPI":
-                $ldap= new LDAPWS();
-                $rta=$ldap->check_user($this->get_prop("usr"), $passL);
-                if($rta["status"]==="ok"){
-                    if($rta["response"]!="true")
+                $ldap = new LDAPWS();
+                $rta = $ldap->check_user($this->get_prop("usr"), $passL);
+                if ($rta["status"] === "ok") {
+                    if ($rta["response"] != "true")
                         return "Usuario o contrase&ntilde;a invalidos.";
-                }else{
+                }else {
                     return "Error en servicio de logeo";
                 }
                 break;
             case "TELECOM":
-                $ldap= new LDAPWS();
-                $rta=$ldap->check_user($this->get_prop("usr"), $passL);
-                if($rta["status"]==="ok"){
-                    if($rta["response"]!="true")
+                $ldap = new LDAPWS();
+                $rta = $ldap->check_user($this->get_prop("usr"), $passL);
+                if ($rta["status"] === "ok") {
+                    if ($rta["response"] != "true")
                         return "Usuario o contrase&ntilde;a invalidos.";
-                }else{
+                }else {
                     return "Error en servicio de logeo";
                 }
                 break;

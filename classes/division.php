@@ -1,7 +1,7 @@
 <?php
 
 require_once 'classes/question.php';
-
+require_once 'classes/system.php';
 /**
  * Administra direcciones
  */
@@ -60,14 +60,16 @@ class DIVISION extends itobject {
      * @return int q de sistemas
      */
     function load_systems() {
-
+        if($this->sistemas){
+            return count($this->sistemas);
+        }
         $ssql = "select * from TBL_SISDIR where iddireccion=" . intval($this->id) . " and estado=" . I_ACTIVE;
         $this->dbinstance->loadRS($ssql);
         $this->idsistemas = NULL;
         $this->idPpreguntas = NULL;
         $this->sistemas = NULL;
         $this->Ppreguntas = NULL;
-
+        
         $i = 0;
         $nameTemp = array();
         while ($sis = $this->dbinstance->get_vector()) {
@@ -84,7 +86,6 @@ class DIVISION extends itobject {
                     $i++;
                 }
             }
-
         }
         array_multisort($nameTemp,SORT_STRING ,$this->sistemas,$this->idsistemas);
         return $i;
@@ -96,6 +97,7 @@ class DIVISION extends itobject {
      * @return QUESTION
      */
     function get_fst_Q($idSistema) {
+        $this->load_systems();
         return $this->Ppreguntas[$idSistema];
     }
 
@@ -106,6 +108,7 @@ class DIVISION extends itobject {
     function load_VEC($tmpU) {
         $this->nombre = trim($tmpU["nombre"]);
         $this->linkwi = trim($tmpU["linkwi"]);
+        $this->sistemas=null;
     }
 
     /**
@@ -195,6 +198,7 @@ class DIVISION extends itobject {
             case 'linkwi':
                 return $this->linkwi;
             case 'sistemasobj':
+                $this->load_systems();
                 return $this->sistemas;
             default:
                 return "Propiedad invalida.";

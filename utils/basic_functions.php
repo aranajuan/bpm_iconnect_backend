@@ -135,6 +135,7 @@ function dataDefatult($data, $defaultD) {
 function strToSQL($txt) {
     $tmp = str_replace("'", "''", $txt);
     $tmp = str_replace("\\", "\\\\", $tmp);
+    $tmp = str_replace("TBL_", "TBL _", $tmp);
     return $tmp;
 }
 

@@ -1,9 +1,9 @@
 <?php
 
 require_once 'classes/action.php';
-require_once 'classes/tree.php';
+
 require_once 'classes/form_checker.php';
-require_once 'classes/itobject.php';
+require_once 'classes/abstract/itobject.php';
 
 /**
  * Eventos de tickets

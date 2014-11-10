@@ -25,7 +25,7 @@ abstract class itobject  implements XmlPropInterface, dbobject {
     /**
      * 
      * @param XMLhandler $doc
-     * @param array<strin> $props
+     * @param array<string> $props
      * @return DOMElement
      */
     public function getXML($doc, $props) {

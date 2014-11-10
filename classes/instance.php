@@ -66,7 +66,7 @@ class INSTANCE extends itobject {
         return array(
             array("TBL_LISTIN", "itracker_".$this->get_prop("nombre")."_uta.listines"),
             array("TBL_USUARIOS", "itracker_".$this->get_prop("nombre")."_uta.usuarios"),
-            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."r_uta.sisdir"),
+            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."_uta.sisdir"),
             array("TBL_SISTEMAS", "itracker_".$this->get_prop("nombre")."_uta.sistemas"),
             array("TBL_ACCIONES", "itracker_".$this->get_prop("nombre")."_uta.acciones"),
             array("TBL_PREGUNTAS", "itracker_".$this->get_prop("nombre")."_uta.preguntas"),

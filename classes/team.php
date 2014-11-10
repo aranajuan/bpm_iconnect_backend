@@ -170,6 +170,8 @@ class TEAM extends itobject {
      * @return boolean
      */
     private function load_division() {
+        if($this->iddireccion===null)
+            return true;
         $this->direccion = new DIVISION($this->conn);
         if ($this->direccion->load_DB($this->iddireccion) == "ok")
             return TRUE;
@@ -356,8 +358,7 @@ class TEAM extends itobject {
                 return $this->staffhome_vista;
 
             case 'direccionobj':
-                if ($this->direccion == null)
-                    $this->load_division();
+                $this->load_division();
                 return $this->direccion;
             case 'direccionname':
                 if ($this->direccion == null)

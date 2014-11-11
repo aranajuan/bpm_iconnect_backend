@@ -250,7 +250,7 @@ abstract class TREE extends itobject {
             //limpiar temporales del usuario
             
             //verificar si el usuario pertenece solo a una direccion se ingresa directamente
-            $usr = $GLOBALS["RH"]->get_User();
+            $usr = $this->getLogged();
             $usrDirs= $usr->get_divisions();
             if(count($usrDirs)==1){
                 $dir=$usrDirs[0]->get_prop("id");

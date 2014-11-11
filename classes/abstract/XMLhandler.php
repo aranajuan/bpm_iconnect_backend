@@ -216,6 +216,18 @@ abstract class XMLhandler {
     }
 
     /**
+     * Importa documento
+     * @param DOMdocumment $dom
+     * @return DOMNode
+     */
+    public function append_xml($dom){
+        if($dom==null){
+            return false;
+        }
+        return $this->get_responseDOM()->importNode($dom,true);
+    }
+    
+    /**
      * Respuesta del servicio
      * @return string
      */

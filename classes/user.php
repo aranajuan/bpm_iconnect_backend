@@ -81,7 +81,7 @@ class USER extends itobject {
      * @return null|\USER
      */
     function list_all() {
-        $usr = $GLOBALS["RH"]->get_user();
+        $usr = $this->getLogged();
         $teams = $usr->get_prop("equiposadmobj");
         $ulist = array();
         foreach ($teams as $t) {
@@ -249,7 +249,7 @@ class USER extends itobject {
      * @return int  cantidad de equipos
      */
     public function change_teams($teamList) {
-        $usr = $GLOBALS["RH"]->get_user();
+        $usr = $this->getLogged();
         $result = array();
         $dbteamsV = explode(",", $this->dbteams);
         $equiposAdm = explode(",", $usr->get_prop("idsequiposadm"));
@@ -339,7 +339,7 @@ class USER extends itobject {
     private function load_teams() {
         $tmpT = explode(",", $this->idsequipos);
         if ($this->hash == null) { // no es el logueado
-            $usr = $GLOBALS["RH"]->get_user();
+            $usr = $this->getLogged();
             $teamsL = array_merge($usr->get_prop("equiposview"), explode(",", $usr->get_prop("idsequiposadm")), explode(",", $usr->get_prop("idsequipos")));
             $tmpT = array_intersect($tmpT, $teamsL);
         }

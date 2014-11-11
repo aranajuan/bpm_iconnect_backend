@@ -3,7 +3,7 @@
 
 require_once 'classes/action.php';
 require_once 'classes/abstract/tree.php';
-require_once 'classes/form_checker.php';
+
 require_once 'classes/tkt_h.php';
 
 class TKT extends TREE {
@@ -73,7 +73,7 @@ class TKT extends TREE {
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
         $rta = $this->load_VEC($tmpU,true);
-        $usr = $GLOBALS["RH"]->get_user();
+        $usr = $this->getLogged();
         $this->view = $usr->get_view($this);
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
@@ -374,7 +374,7 @@ class TKT extends TREE {
      */
     private function load_team() {
         // si el equipo no existe o no es valido no se puede editar
-        $t = new TEAM();
+        $t = new TEAM($this->conn);
         $rta = $t->load_DB($this->idequipo);
         switch ($rta) {
             case "eliminado":

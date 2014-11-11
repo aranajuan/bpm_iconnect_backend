@@ -1,5 +1,9 @@
 <?php
 
+require_once 'classes/tkt.php';
+
+require_once 'classes/itform.php';
+
 /**
  * Clase de administracion de acciones
  * Ejecucion, vita html, validaciones
@@ -30,27 +34,38 @@ class ACTION extends itobject {
     private $form; /* formulario para cargar accion */
 
     /**
+     *
+     * @var itform
+     */
+    private $itf;
+    
+    /**
+     *  ticket evaluado
+     * @var TKT 
+     */
+    private $TKT;
+    
+    /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
-     * @param type $habilita_array  array con validaciones
      * @return array acciones validas
      */
-    static function load_filtered($TKT) {
-        $l = $GLOBALS[UL];
+    public function load_filtered() {
+        $l = $this->getLogged();
 
         //datos a validar -> cargar del master si corresponde
 
-        if ($TKT->get_prop("idmaster")) {
-            $master_tkt = $TKT->get_prop("master");
+        if ($this->TKT->get_prop("idmaster")) {
+            $master_tkt = $this->TKT->get_prop("master");
             $utom = $master_tkt->get_prop("u_tom");
             $master = "habilita_master in (0,2)"; //desactivar todas las opciones para childs
         } else {
-            $utom = $TKT->get_prop("u_tom");
+            $utom = $this->TKT->get_prop("u_tom");
             $master = "habilita_master in (0,1)"; // activa opciones para masters
         }
 
         if ($utom) {
             $tomado = "habilita_tomado in (0,1)"; //acciones para tickets tomados
-            if ($l->get_prop("id") == $utom)
+            if ($l->get_prop("usr") == $utom)
                 $t_propio = "habilita_t_propio in (0,1)"; //opciones para tomado por el logueado
             else
                 $t_propio = "habilita_t_propio in (0,2)"; // opciones para tomados por otro
@@ -59,37 +74,41 @@ class ACTION extends itobject {
             $t_propio = "habilita_t_propio in (0,1,2)"; // todas, bloquea las acciones el "tomado"
         }
 
-        if ($l->get_prop("id") == $TKT->get_prop("usr"))
+        if ($l->get_prop("usr") == $this->TKT->get_prop("usr"))
             $a_propio = "habilita_a_propio in (0,1)";  //generado por el usuario logueado
         else
             $a_propio = "habilita_a_propio in (0,2)"; //generado por otro usuario
 
         $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles ='*')";
 
-        if ($l->in_team($TKT->get_prop("idequipo")))
+        if ($l->in_team($this->TKT->get_prop("idequipo")))
             $equipo = "habilita_equipo in (0,1)"; // ticket en el equipo del usuario logueado
         else
             $equipo = "habilita_equipo in (0,2)"; // ticket fuera del equipo del usuario logueado
 
-        if ($TKT->get_prop("UB") || $TKT->get_prop("id") == NULL)
+        if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL)
             $abierto = "habilita_abierto in (0,2)";
         else
             $abierto = "habilita_abierto in (0,1)";
 
         $ssql = "select id from TBL_ACCIONES where $t_propio and $a_propio and $tomado and $perfil and $equipo and $abierto and $master and estado=" . I_ACTIVE;
-        $DB = new DATOS();
-        $DB->loadRS($ssql);
+        $this->dbinstance->loadRS($ssql);
         $i = 0;
         $ret = array();
 
-        while ($actV = $DB->get_vector()) {
-            $ret[$i] = new ACTION();
+        while ($actV = $this->dbinstance->get_vector()) {
+            $ret[$i] = new ACTION($this->conn);
             $ret[$i]->loadDB_id($actV["id"]);
             $i++;
         }
         return $ret;
     }
 
+    /**
+     * Carga por nombre o id
+     * @param int|string $id
+     * @return type
+     */
     public function load_DB($id) {
         if(is_int($id)){
             return $this->loadDB_id ($id);
@@ -98,15 +117,64 @@ class ACTION extends itobject {
         }
     }
     
+    /**
+     * Carga ticket para ejecutar accion o consultar
+     * @param TKT $TKT
+     * @return  boolean se pudo cargar
+     */
+    public function loadTKT($TKT){
+        $this->TKT=$TKT;
+        if($this->nombre=="ABRIR"){
+            $to = $TKT->get_tree_options();
+            if($to["object"]){
+                //cambia el form por el de la opcion
+                $this->form = $to["object"]->get_prop("pretext");
+                $this->form="<itform>"
+                    . "<element><type>input</type><label>legajo</label><id>Hola</id><validations><numeric>true</numeric><required>true</required></validations></element>"
+                    . "<element><type>text</type><id>juan</id><text>holatext este si es largo para verificar el contenido alargado a su maxima longitud</text></element>"
+                    . "<element><type>input</type><id>21</id><comment></comment><validations><regex>/U[0-9]{6}/</regex></validations></element>"
+                     . "<element><type>inputlong</type><label>comentario</label><id>2</id></element>"
+                    . "<element><type>datetime</type><id>date</id><label>Fecha</label></element>"
+                    . "<element><type>date</type><id>32</id><label>Fecha</label></element>"
+                    . "<element><type>select</type><id>321</id><label>seleccion</label><option><value>1</value><text>opcion1</text></option><option><value>2</value><text>opcion2</text></option></element>"
+                    . "<element><type>link</type><id>322</id><label>Anexo</label><path>siebel/aa/dd.ppt</path><text>Link</text><comment>Descargue el archivo para luego anexarlo</comment></element>"
+                    . "</itform>";
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Carga valores de formulario y valida con itform
+     * @param array $values
+     */
+    public function loadFormValues($values,$formname){
+        
+        if($this->TKT==null){
+            return "Error ticket sin cargar";
+        }
+        if(!$this->formulario){  //no requiere formulario esta accion
+            $this->itf=null;
+            return "ok";
+        }
+        
+        $this->itf->load_xml($this->form);
+        
+        return $this->itf->load_values($values,$formname);
+        
+    }
+    
     /*
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
     private function loadDB_id($id) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_ACCIONES where id=$id");
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+        $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=".intval($id));
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";
@@ -123,9 +191,9 @@ class ACTION extends itobject {
      */
     private function loadDB_name($name) {
         $this->error = FALSE;
-        $this->loadRS("select * from TBL_ACCIONES where nombre='" . strtoupper($name) . "'");
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
+        $this->dbinstance->loadRS("select * from TBL_ACCIONES where nombre='" . strToSQL(strtoupper($name)) . "'");
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";
@@ -153,7 +221,8 @@ class ACTION extends itobject {
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
-        $this->form = null;
+        $this->form = trim($tmpU["form"]);
+        $this->itf = new itform();
     }
 
     /**
@@ -172,13 +241,13 @@ class ACTION extends itobject {
      * @param TKT $TKT
      * @return string
      */
-    public function check_valid($TKT) {
-        $l = $GLOBALS[UL];
+    public function check_valid() {
+        $l = $this->getLogged();
 
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
             return "Esta accion no esta disponible para tu perfil";
 
-        if ($l->in_team($TKT->get_prop("idequipo"))) { //en un equipo del usuario
+        if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
         }else { // en otro equipo
@@ -186,20 +255,20 @@ class ACTION extends itobject {
                 return "Esta accion no se puede aplicar a un ticket de otro equipo";
         }
 
-        if ($TKT->get_prop("idmaster")) { //no es master
-            $utom = $TKT->get_prop("master")->get_prop("u_tom");
+        if ($this->TKT->get_prop("idmaster")) { //no es master
+            $utom = $this->TKT->get_prop("master")->get_prop("u_tom");
             if ($this->habilita_master == 1)
                 return "Esta accion solo se puede utilizar en un ticket master";
         }else { // es master
             if ($this->habilita_master == 2)
                 return "Esta accion solo se puede utilizar en un ticket adjunto a otro";
-            $utom = $TKT->get_prop("u_tom");
+            $utom = $this->TKT->get_prop("u_tom");
         }
 
         if ($utom) { //esta tomado
             if ($this->habilita_tomado == 2)
                 return "Esta accion no se puede aplicar a un ticket tomado";
-            if ($l->get_prop("id") == $utom) { // tomado por el usuario
+            if ($l->get_prop("usr") == $utom) { // tomado por el usuario
                 if ($this->habilita_t_propio == 2)
                     return "Esta accion no se puede aplicar a un tomado por vos";
             }else { // tomado por otro
@@ -211,7 +280,7 @@ class ACTION extends itobject {
                 return "Esta accion no se puede aplicar a un ticket sin tomar";
         }
 
-        if ($l->get_prop("id") == $TKT->get_prop("usr")) { //abierto por el usuario
+        if ($l->get_prop("usr") == $this->TKT->get_prop("usr")) { //abierto por el usuario
             if ($this->habilita_a_propio == 2)
                 return "Esta accion no se puede aplicar a un ticket generado por vos";
         }else { // abierto por otro
@@ -219,7 +288,7 @@ class ACTION extends itobject {
                 return "Esta accion no se puede aplicar a un ticket generado por otro";
         }
 
-        if ($TKT->get_prop("UB") || $TKT->get_prop("id") == NULL) { // cerrado - no abierto
+        if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL) { // cerrado - no abierto
             if ($this->habilita_abierto == 1)
                 return "Esta accion solo se puede aplicar a un ticket abierto";
         }else { // abierto
@@ -231,24 +300,6 @@ class ACTION extends itobject {
     }
 
     
-     /**
-     * Carga formulario de la accion solicitada
-     * @return boolean
-     */
-    private function load_form() {
-        $filename = INCLUDE_DIR . "/actions/get_" . strtolower($this->get_prop("nombre")) . ".php";
-        if (file_exists($filename)) {
-            ob_start();
-            include($filename);
-            $this->form = ob_get_contents();
-            ob_clean();
-            return true;
-        } else {
-            $this->form = "Error: acci&oacute;n inv&aacute;lida, no se encuentra formulario." . $filename;
-            return false;
-        }
-    }
-
     /**
      * Devuelve vista en base a los datos del historico
      * @param TKT_H $TH
@@ -256,7 +307,7 @@ class ACTION extends itobject {
      * @return String html evento
      */
     public function get_view($TH, $users){
-        $l = $GLOBALS[UL];
+        $l = $this->getLogged();
         $Usuario = $TH->get_prop("UA_o");
         if ($Usuario)
             $NombreUsuario = $Usuario->get_prop("nombre_popup");
@@ -276,12 +327,14 @@ class ACTION extends itobject {
      * @param array $data {values=>array[key value], comentario=>(html validado)}
      * @return string resultado
      */
-    public function ejecute($TKT,$data){
-        $rta=$this->check_valid($TKT);
+    public function ejecute($data){
+        $I = $GLOBALS["RH"]->get_Instance();
+        $I->get_prop("nombre"); //ruta para ingluir GO
+        $rta=$this->check_valid();
         if($rta!="ok")
             return $rta;
         include(INCLUDE_DIR . "/actions/go_" . strtolower($this->get_prop("nombre")) . ".php");
-        return GO($TKT,$data);
+        return GO($this->TKT,$data);
     }
     
     public function get_prop($property) {
@@ -293,8 +346,6 @@ class ACTION extends itobject {
             case 'tipo':
                 return $this->tipo;
             case 'form':
-                if ($this->form == null)
-                    $this->load_form();
                 return $this->form;
             case 'formulario':
                 return $this->formulario;

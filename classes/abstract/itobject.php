@@ -35,6 +35,14 @@ abstract class itobject  implements XmlPropInterface, dbobject {
         }
         return $el;
     }
+    
+    /**
+     * Usuario logueado
+     * @return USER
+     */
+    protected function getLogged(){
+        return $GLOBALS["RH"]->get_User();
+    }
 
 }
 

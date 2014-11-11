@@ -2,7 +2,7 @@
 
 require_once 'classes/action.php';
 
-require_once 'classes/form_checker.php';
+
 require_once 'classes/abstract/itobject.php';
 
 /**

@@ -1,6 +1,5 @@
 <?php
 
-
 require_once 'classes/action.php';
 require_once 'classes/abstract/tree.php';
 
@@ -72,7 +71,7 @@ class TKT extends TREE {
         $this->prioridad = $tmpU["prioridad"];
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
-        $rta = $this->load_VEC($tmpU,true);
+        $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->view = $usr->get_view($this);
         show_measure("OBJ:TKT:DB:" . $this->id);
@@ -85,10 +84,10 @@ class TKT extends TREE {
      * @fromdb  boolean cargado desde base de datos  
      * @return string
      */
-    function load_VEC($tmpU,$fromdb=false) {
+    function load_VEC($tmpU, $fromdb = false) {
         $this->usr = $tmpU["usr"];
         $this->origen = $tmpU["origen"];
-        return $this->load_path($this->origen,!$fromdb);
+        return $this->load_path($this->origen, !$fromdb);
     }
 
     /**
@@ -116,20 +115,6 @@ class TKT extends TREE {
         return ACTION::load_filtered($this);
     }
 
-    /**
-     * Ejecuta accion
-     * @param type $actionName
-     * @param type $data
-     * @return string
-     */
-    public function ejecute_action($actionName, $data) {
-        $a = new ACTION($this->conn);
-        if ($a->load_DB($actionName) != "ok") {
-            return "No se puede cargar accion";
-        }
-
-        return array($a->ejecute($this, $data), $a);
-    }
 
     /**
      * Elimina los childs cargados de la propiedad
@@ -326,55 +311,19 @@ class TKT extends TREE {
      * return array ( string insertresult, TH)
      */
 
-    private function add_tktH($accion, $valoraccion = 0, $needOBJ = 0) {
-        // comentario_valid a insert de tktH
-        $TH = new TKT_H();
-        $TH->load_VEC(
-                array("idtkt" => $this->id,
-                    "nombreaccion" => $accion,
-                    "valoraccion" => $valoraccion,
-                    "detalle" => $this->comentario_valid
-                )
-        );
-        $this->comentario_u = "";
-        $this->comentario_valid = "";
-        $rta = $TH->insert_DB();
-        if ($needOBJ)
-            return array($rta, $TH);
-        else
-            return $rta;
-    }
-
-    function load_detail($txt, $check = TRUE) {
-        $this->comentario_u = $txt;
-        if (!$check) {
-            $this->comentario_valid = $txt;
-            return "ok";
-        }
-        $error = $this->check_detail($this->comentario_u);
-        return $error;
-    }
-
-    private function check_detail($txt) {
-        $o = $this->get_last();
-        $original = $o->get_prop("pretext");
-        if ($original == "Propiedad invalida.")
-            return "Ruta de arbol invalida." . $this->origen;
-        $d = new form_checker();
-        $error = $d->load_text($txt, $original);
-        if ($error == "ok")
-            $this->comentario_valid = $d->get_remake();
-        else
-            $this->comentario_valid = "";
-        return $error;
-    }
-
     /**
      * Carga equipo owner
      */
     private function load_team() {
         // si el equipo no existe o no es valido no se puede editar
-        $t = new TEAM($this->conn);
+        if (!is_numeric($this->idequipo)) {
+            $this->can_edit = 0;
+            $this->detail_can_edit = "Equipo sin asignar";
+            $this->idequipo = NULL;
+            $this->equipo = NULL;
+            return;
+        }
+        $t = new TEAM();
         $rta = $t->load_DB($this->idequipo);
         switch ($rta) {
             case "eliminado":
@@ -465,7 +414,7 @@ class TKT extends TREE {
             return $this->detail_can_edit;
         if (!is_numeric($this->id))
             return "El id debe ser un numero entero";
-        if (!is_numeric($this->usr))
+        if (trim($this->usr) == "")
             return "El usuario es obligatorio";
         if (!is_numeric($this->idequipo))
             return "El equipo debe ser un numero entero";
@@ -490,10 +439,10 @@ class TKT extends TREE {
         $this->id = I_NEWID;
         $this->u_tom = NULL;
         $this->u_asig = NULL;
-        $l = $GLOBALS[UL];
-        $this->usr = $l->get_prop("usr");
-        $this->idequipo = $this->origenT->get_last()->equipo_destino($l);
-
+        $this->usr = $this->getLogged()->get_prop("usr");
+        $l = $this->getLogged();
+        $this->idequipo = $this->get_last()->equipo_destino($l);
+        $this->load_team();
         return $this->insert_DB();
     }
 
@@ -806,18 +755,22 @@ class TKT extends TREE {
     }
 
     public function insert_DB() {
-        if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)
-             values ('" . strToSQL($this->get_prop("usr")) . "'," . $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_prop("origen")) . "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
-            if ($this->query($ssql))
-                return "<b>Error (TKT - Open):</b>" . $this->details;
-            else {
-                $this->UA = $this->usr;
-                $this->id = $this->get_lastID();
-                return $this->add_tktH("ABRIR", $this->get_prop("idequipo"));
-            }
-        } else
+        if (($rta = $this->check_data())) {
             return $rta;
+        }
+        $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)".
+             "values ('" . strToSQL($this->get_prop("usr")) . "'," . $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_path()) . "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
+
+        
+        if ($this->dbinstance->query($ssql)){
+            return "TKT_Open: " . $this->dbinstance->details;
+        }
+        else {
+            $this->UA = $this->usr;
+            $this->id = $this->dbinstance->get_lastID();
+            return $this->add_tktH("ABRIR", $this->get_prop("idequipo"));
+        }
+        
     }
 
     public function update_DB() {

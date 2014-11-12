@@ -71,9 +71,9 @@ class USER extends itobject {
     private $dbroot;
     private $estado;
 
-    public function __construct($conn) {
+    function __construct($conn=null) {
         parent::__construct($conn);
-        $this->dbroot = new DB($conn, true);
+        $this->dbroot = new DB($this->conn, true);
     }
 
     /**
@@ -289,7 +289,7 @@ class USER extends itobject {
      */
     private function update_root() {
         // actualiza todos los datos del root menos contacto
-        $instancia = $GLOBALS["RH"]->get_Instance()->get_prop("nombre");
+        $instancia = $this->getInstance()->get_prop("nombre");
         $rootD = $this->load_root($this->usr);
         if ($rootD) {
             $instancias = explode(",", $rootD["instancias"]);

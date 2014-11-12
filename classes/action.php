@@ -125,20 +125,10 @@ class ACTION extends itobject {
     public function loadTKT($TKT){
         $this->TKT=$TKT;
         if($this->nombre=="ABRIR"){
-            $to = $TKT->get_tree_options();
-            if($to["object"]){
+            $to = $TKT->get_last();
+            if($to){
                 //cambia el form por el de la opcion
-                $this->form = $to["object"]->get_prop("pretext");
-                $this->form="<itform>"
-                    . "<element><type>input</type><label>legajo</label><id>Hola</id><validations><numeric>true</numeric><required>true</required></validations></element>"
-                    . "<element><type>text</type><id>juan</id><text>holatext este si es largo para verificar el contenido alargado a su maxima longitud</text></element>"
-                    . "<element><type>input</type><id>21</id><comment></comment><validations><regex>/U[0-9]{6}/</regex></validations></element>"
-                     . "<element><type>inputlong</type><label>comentario</label><id>2</id></element>"
-                    . "<element><type>datetime</type><id>date</id><label>Fecha</label></element>"
-                    . "<element><type>date</type><id>32</id><label>Fecha</label></element>"
-                    . "<element><type>select</type><id>321</id><label>seleccion</label><option><value>1</value><text>opcion1</text></option><option><value>2</value><text>opcion2</text></option></element>"
-                    . "<element><type>link</type><id>322</id><label>Anexo</label><path>siebel/aa/dd.ppt</path><text>Link</text><comment>Descargue el archivo para luego anexarlo</comment></element>"
-                    . "</itform>";
+                $this->form = $to->get_prop("pretext");
                 return true;
             }
             return false;
@@ -160,7 +150,9 @@ class ACTION extends itobject {
             return "ok";
         }
         
-        $this->itf->load_xml($this->form);
+        if(!$this->itf->load_xml($this->form)){
+            return "Error al cargar formulario de la tipificacion.";
+        }
         
         return $this->itf->load_values($values,$formname);
         
@@ -323,18 +315,13 @@ class ACTION extends itobject {
     
     /**
      * Ejecuta accion
-     * @param TKT $TKT
-     * @param array $data {values=>array[key value], comentario=>(html validado)}
-     * @return string resultado
+     * @return array resultado
      */
-    public function ejecute($data){
-        $I = $GLOBALS["RH"]->get_Instance();
-        $I->get_prop("nombre"); //ruta para ingluir GO
-        $rta=$this->check_valid();
-        if($rta!="ok")
-            return $rta;
-        include(INCLUDE_DIR . "/actions/go_" . strtolower($this->get_prop("nombre")) . ".php");
-        return GO($this->TKT,$data);
+    public function ejecute(){
+        $I = $this->getInstance();
+        $file = $I->get_instancepath()."/actions/go/go_".strtolower($this->get_prop("nombre")).".php";
+        include($file);
+        return GO_action($this->TKT,$this->itf);
     }
     
     public function get_prop($property) {

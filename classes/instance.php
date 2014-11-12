@@ -103,6 +103,14 @@ class INSTANCE extends itobject {
         }
     }
 
+    /**
+     * Devuelve ruta a la instancia
+     * @return string Path a instancia
+     */
+    public function get_instancepath(){
+        return "instances/".$this->get_prop("nombre");
+    }
+    
     public function check_data() {
         return "Funcion en desarrollo.";
     }

@@ -18,7 +18,6 @@ abstract class TREE extends itobject {
      * @param    $crypt  esta encriptado    
      * @return   string
      */
-
     protected function load_path($path, $crypt = 0) {
         $this->path_pos = 0;
         $this->path_obj = NULL;
@@ -33,6 +32,14 @@ abstract class TREE extends itobject {
         return $this->check_valid();
     }
 
+    /**
+     *  Devuelve path desencriptado
+     * @return string path
+     */
+    protected function get_path(){
+        return implode("-",$this->path);
+    }
+    
     /**
      * Es activo el arbol (se puede dar de alta)
      * @return boolean

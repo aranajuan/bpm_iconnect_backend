@@ -45,16 +45,7 @@ function GO($RC) {
 
         if ($topts["object"]) {
 
-            $X = "<itform>"
-                    . "<element><type>input</type><label>legajo</label><id>Hola</id></element>"
-                    . "<element><type>text</type><id>juan</id><text>holatext este si es largo para verificar el contenido alargado a su maxima longitud</text></element>"
-                    . "<element><type>input</type><id>21</id><comment></comment></element>"
-                     . "<element><type>inputlong</type><label>comentario</label><id>2</id></element>"
-                    . "<element><type>datetime</type><id>date</id><label>Fecha</label></element>"
-                    . "<element><type>date</type><id>32</id><label>Fecha</label></element>"
-                    . "<element><type>select</type><id>321</id><label>seleccion</label><option><value>1</value><text>opcion1</text></option><option><value>2</value><text>opcion2</text></option></element>"
-                    . "<element><type>link</type><id>322</id><label>Anexo</label><path>siebel/aa/dd.ppt</path><text>Link</text><comment>Descargue el archivo para luego anexarlo</comment></element>"
-                    . "</itform>";
+            $X = $topts["object"]->get_prop("pretext");
             $dom = new DOMDocument();
             $dom->loadXML($X);
             $joined = $RC->append_xml($dom->documentElement);

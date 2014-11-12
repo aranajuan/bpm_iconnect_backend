@@ -1,8 +1,6 @@
 <?php
 
 require_once 'classes/action.php';
-
-
 require_once 'classes/abstract/itobject.php';
 
 /**
@@ -31,6 +29,8 @@ class TKT_H extends itobject {
     /* accion */
     private $accion; /* objeto accion */
 
+    
+    
     function load_DB($id, $TKT = null) {
 
         $this->error = FALSE;

@@ -11,7 +11,7 @@ function GO($RC) {
 
     $idtkt = $RC->get_params("idtkt");
 
-    $TKT = new TKT($RC->get_Connection());
+    $TKT = new TKT();
 
     if ($idtkt) {
         $TKT->load_DB($idtkt);
@@ -19,7 +19,7 @@ function GO($RC) {
         $TKT->load_VEC(array("origen" => $RC->get_params("path")));
     }
 
-    $A = new ACTION($RC->get_Connection());
+    $A = new ACTION();
     $A->load_DB($RC->get_params("action"));
     $validation = $A->loadTKT($TKT);
 
@@ -37,11 +37,11 @@ function GO($RC) {
     $validation = $A->loadFormValues($form,"openform");
 
     
-    //if ($validation != "ok") {
+    if ($validation != "ok") {
         return $RC->createElement("error", "Error en formulario. " . $validation);
-    //}
+    }
     
-    //$actionResult = $A->ejecute();
+    $actionResult = $A->ejecute();
     
-    return $RC->createElement("error", "Ejecutando");
+    return $RC->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
 }

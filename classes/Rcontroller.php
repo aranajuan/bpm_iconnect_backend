@@ -115,6 +115,7 @@ class Rcontroller extends XMLhandler {
         return true;
     }
 
+   
     /**
      * Carga objeto usuario
      * @return boolean

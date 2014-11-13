@@ -32,7 +32,11 @@ class ACTION extends itobject {
     private $descripcion;   /* descripcion de la accion */
     private $estado;    /* activo o no activo */
     private $form; /* formulario para cargar accion */
-
+    private $files; /* archivos */
+    
+    
+    private $value; //valor de accion ejecutada
+    
     /**
      *
      * @var itform
@@ -137,6 +141,31 @@ class ACTION extends itobject {
     }
     
     /**
+     * Carga Archivos
+     * @param array $files 
+     */
+    public function loadFiles($files){
+        $this->files=$files;
+    }
+    
+      /**
+     * Devuelve Archivos
+     * @return array $files 
+     */
+    public function getFiles(){
+        return $this->files;
+    }
+    
+    
+    /**
+     * Devuelve ticket cargado
+     * @return TKT
+     */
+    public function getTKT(){
+        return $this->TKT;
+    }
+    
+    /**
      * Carga valores de formulario y valida con itform
      * @param array $values
      */
@@ -145,8 +174,8 @@ class ACTION extends itobject {
         if($this->TKT==null){
             return "Error ticket sin cargar";
         }
-        if(!$this->formulario){  //no requiere formulario esta accion
-            $this->itf=null;
+        if(!$this->formulario || $this->form==""){  //no requiere formulario esta accion
+            $this->itf= new itform();
             return "ok";
         }
         
@@ -228,6 +257,14 @@ class ACTION extends itobject {
         $this->load_VEC($tmpU);
     }
 
+    /**
+     * Carga valor para tktH
+     * @param int $value
+     */
+    public function loadValue($value){
+        $this->value=$value;
+    }
+    
     /**
      * Valida accion
      * @param TKT $TKT
@@ -321,7 +358,29 @@ class ACTION extends itobject {
         $I = $this->getInstance();
         $file = $I->get_instancepath()."/actions/go/go_".strtolower($this->get_prop("nombre")).".php";
         include($file);
-        return GO_action($this->TKT,$this->itf);
+        $response = GO_action($this);
+        $response["tkth"]=$this->addTKT_H();
+        $response["sendfiles"]=$response["tkth"];
+        return $response;
+    }
+    
+    /**
+     * Guarda evento
+     * @return string
+     */
+    private function addTKT_H(){
+        $tktH = new TKT_H();
+        $tktH->load_VEC($this);
+        $rta = $tktH->insert_DB();
+        return $rta;
+    }
+    
+    /**
+     * Devuelve formulario
+     * @return itform
+     */
+    public function getitform(){
+        return $this->itf;
     }
     
     public function get_prop($property) {
@@ -336,6 +395,8 @@ class ACTION extends itobject {
                 return $this->form;
             case 'formulario':
                 return $this->formulario;
+            case 'value':
+                return $this->value;
             case 'habilita_t_propio':
                 return $this->habilita_t_propio;
             case 'habilita_tomado':

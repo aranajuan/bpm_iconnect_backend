@@ -10,7 +10,7 @@ require_once 'classes/action.php';
 function GO($RC) {
 
     $idtkt = $RC->get_params("idtkt");
-
+   
     $TKT = new TKT();
 
     if ($idtkt) {
@@ -41,7 +41,17 @@ function GO($RC) {
         return $RC->createElement("error", "Error en formulario. " . $validation);
     }
     
+    if($RC->get_params("sendfiles")=="true"){
+        $files = $RC->get_files();
+        $A->loadFiles($files);
+    }
+    
     $actionResult = $A->ejecute();
     
-    return $RC->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
+    $result= $RC->createElement("data");
+    foreach($actionResult as $k=>$v){
+        $result->appendChild($RC->createElement($k, $v));
+    }
+    return $result;
+    //return $RC->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
 }

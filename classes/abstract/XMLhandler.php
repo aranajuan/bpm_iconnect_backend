@@ -37,6 +37,14 @@ abstract class XMLhandler {
     }
 
     /**
+     * Devuelve palin request
+     * @return string
+     */
+    public function get_plainrequest() {
+        return $this->input;
+    }
+
+    /**
      * Prepara respuesta XML
      */
     private function prepare_response() {
@@ -220,13 +228,13 @@ abstract class XMLhandler {
      * @param DOMdocumment $dom
      * @return DOMNode
      */
-    public function append_xml($dom){
-        if($dom==null){
+    public function append_xml($dom) {
+        if ($dom == null) {
             return false;
         }
-        return $this->get_responseDOM()->importNode($dom,true);
+        return $this->get_responseDOM()->importNode($dom, true);
     }
-    
+
     /**
      * Respuesta del servicio
      * @return string
@@ -290,6 +298,21 @@ abstract class XMLhandler {
         return trim(xmlEscape(strip_tags($text), $CDATA));
     }
 
+    /**
+     * Devuelve archivos enviados
+     * @return  array   {{name,data},{name,data}}
+     */
+    public function get_files(){
+        $files=array();
+        if($this->parse->request->files){
+            foreach($this->parse->request->files->children() as $f){
+                array_push($files, array("name"=>$f->getName(),"data"=>$f));
+            }
+        }
+        return $files;
+        
+    }
+    
 }
 
 ?>

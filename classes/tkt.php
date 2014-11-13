@@ -505,15 +505,10 @@ class TKT extends TREE {
     }
 
     /**
-     * Cierra el tkt
-     * @param type $type {USER | EXT}
-     * @param type $data
-     *      IDWI -> id tkt wi
-     *      MASTERTH -> objeto TH close master // autollamado
-     *      EXTTKT -> id tkt externo cerrado
-     *      EXTTYPE -> IM - SD - RQ_SIMPLIT
+     * Cierra el ticket y sus hijos
+     * @return type
      */
-    function close($type, $data = NULL) {
+    function close() {
 
         $l = $GLOBALS[UL];
         $UB = $l->get_prop("usr");
@@ -768,7 +763,7 @@ class TKT extends TREE {
         else {
             $this->UA = $this->usr;
             $this->id = $this->dbinstance->get_lastID();
-            return $this->add_tktH("ABRIR", $this->get_prop("idequipo"));
+            return "ok";
         }
         
     }

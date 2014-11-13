@@ -133,39 +133,49 @@ class itform {
      * @param string $id
      * @return string
      */
-    public function get_value($id){
+    public function get_value($id) {
+        if (!$this->xml_output) {
+            return null;
+        }
         foreach ($this->xml_output->element as $field) {
-            if($field->id==$id){
+            if ($field->id == $id) {
                 return $field->value->asXML();
             }
         }
         return null;
     }
+
     /**
      * Elimina elemento del formulario
      * @return boolean
      */
-    public function delete_value($id){
-        $i=0;
+    public function delete_value($id) {
+        if (!$this->xml_output) {
+            return null;
+        }
+        $i = 0;
         foreach ($this->xml_output->element as $field) {
-            if($field->id==$id){
+            if ($field->id == $id) {
                 unset($this->xml_output->element[$i]);
             }
             $i++;
         }
         return null;
     }
-    
-     /**
+
+    /**
      * Devuelve valor del form y lo elimina
      * @param string $id
      * @return string
      */
-    public function getAnddelete($id){
-        $i=0;
+    public function getAnddelete($id) {
+        if (!$this->xml_output) {
+            return null;
+        }
+        $i = 0;
         foreach ($this->xml_output->element as $field) {
-            if($field->id==$id){
-                $value= $field->value->asXML();
+            if ($field->id == $id) {
+                $value = $field->value->asXML();
                 unset($this->xml_output->element[$i]);
                 return $value;
             }
@@ -173,14 +183,34 @@ class itform {
         }
         return null;
     }
+
+    /**
+     * Elimina los que tengan notsave
+     */
+    private function deleteNotSave() {
+        if (!$this->xml_output) {
+            return null;
+        }
+        $tmp=$this->xml_output;
+        $i=0;
+        foreach ($tmp->element as $field) {
+            if ($field->notsave == "true") {
+                unset($tmp->element[$i]);
+            }
+            $i++;
+        }
+        return $tmp;
+    }
     
+
     /**
      * Devuelve el formulario de salida
      * @return string
      */
     public function get_output() {
         if ($this->xml_output) {
-            return $this->xml_output->asXML();
+            $final=$this->deleteNotSave();
+            return $final->asXML();
         }
         return null;
     }

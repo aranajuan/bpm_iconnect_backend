@@ -9,11 +9,8 @@ require_once 'classes/abstract/itobject.php';
 class TKT_H extends itobject {
 
     private $id;    /* id del evento */
-    private $idtkt; /* id del ticket del evento*/
     private $TKT;   /* objeto ticket */
     private $view;  /* vista de la accion */
-    private $idaccion;  /* id de la accion */
-    private $valoraccion;   /* valor de la accion */
     private $FA;    /* fecha de generacion */
     private $UA;    /* usuario generacion */
     private $FB;    /* fecha baja */
@@ -21,18 +18,18 @@ class TKT_H extends itobject {
     private $estado;    /* estado de la accion */
     
     /* tickets_m_details  */
-    
-    private $detalle;   /* detalle de la accion */
     private $filesHTML; /* html de los archivos adjuntos */
     private $detalle_Show; /* comentario a mostrar */
 
-    /* accion */
+    /**
+     *
+     * @var ACTION 
+     */
     private $accion; /* objeto accion */
 
     
     
     function load_DB($id, $TKT = null) {
-
         $this->error = FALSE;
         $this->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
@@ -47,23 +44,12 @@ class TKT_H extends itobject {
         return "error " . $id;
     }
 
+    /**
+     * Carga la accion que se va a ejecutar
+     * @param type $tmpU
+     */
     function load_VEC($tmpU) {
-        $this->accion = new ACTION();
-        if (isset($tmpU["nombreaccion"])) {
-            if ($this->accion->loadDB_name($tmpU["nombreaccion"]) != "ok") {
-                return "Evento invalido";
-            }
-            $this->idaccion = $this->accion->get_prop("id");
-        } else {
-            $this->idaccion = $tmpU["idaccion"];
-            if ($this->accion->loadDB_id($this->idaccion) != "ok") {
-                return "Evento invalido";
-            }
-        }
-        $this->idtkt = $tmpU["idtkt"];
-        $this->detalle = $tmpU["detalle"];
-        $this->valoraccion = $tmpU["valoraccion"];
-        $this->detalle_Show = null;
+        $this->accion = $tmpU;
     }
 
     function load_detailsShow() {
@@ -137,70 +123,58 @@ class TKT_H extends itobject {
     }
 
     /* Elimina registros abiertos */
-
     private function delete_open() {
-
-        $l = $GLOBALS[UL];
-        $ssql = "update TBL_TICKETS_M set FB=now(), UB=" . $l->get_prop("id") . " where FB is NULL and idtkt=" . $this->idtkt;
-        return $this->query($ssql);
+        $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where FB is NULL and idtkt=" . intval($this->accion->getTKT()->get_prop("id"));
+        return $this->dbinstance->query($ssql);
     }
 
     /* Inserta nuevo registro y carga ID en el objeto
      */
-
     function insert_DB() {
-        if ($this->delete_open())
-            return "<b>Error (TKT_H - Delete):</b>" . $this->details;
-        $l = $GLOBALS[UL];
+        if ($this->delete_open()){
+            return "TKTH_Delete" . $this->dbinstance->details;
+        }
+        
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB)
-             values (" . $this->idtkt . "," . $this->idaccion . "," . $this->valoraccion . ",now()," . $l->get_prop("id") . ",NULL,NULL);";
-        if ($this->query($ssql))
-            return "<b>Error(TKT_H - Insert):</b>" . $this->details;
+             values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
+                intval($this->accion->get_prop("id")) . "," .
+                intval($this->accion->get_prop("value")) . ",now(),'" 
+                . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL);";
+        
+        if ($this->dbinstance->query($ssql)){
+            return "TKTH_Insert: " . $this->dbinstance->details;
+        }
         else {
-            $this->id = $this->get_lastID();
-            $this->detalle = trim($this->detalle);
-            if ($this->detalle == "" || $this->detalle == NULL)
+            $this->id = $this->dbinstance->get_lastID();
+            $form=$this->accion->getitform()->get_output();
+            $this->save_files();
+            if (!$this->accion->get_prop("formulario") || trim($form)==""){ // accion sin formulario
                 return "ok";
+            }
             /* Agregar a tabla detalles */
             $ssql = "insert into TBL_TICKETS_M_DETALLES (idtktm,detalle)
-                        values (" . $this->id . ",'" . strToSQL($this->detalle) . "')";
+                        values (" . intval($this->id ). ",'" . strToSQL($form) . "')";
 
-            if ($this->query($ssql))
-                return "<b>Error no se guardaron los detalles pero si se avanzo el tkt:</b>" . $this->details;
-            $this->move_files();
+            if ($this->dbinstance->query($ssql)){
+                return "THTH_D_insert: Error no se guardaron los detalles pero si se avanzo el tkt:" . $this->dbinstance->details;
+            }
             return "ok";
         }
     }
 
-    private function move_files() {
-
-        $l = $GLOBALS[UL];
-        $dir = FILEUP_TMP_FOLDER;
-        if (is_dir($dir)) {
-            if ($dh = opendir($dir)) {
-                while (($file = readdir($dh)) !== false) {
-                    if (strpos("-" . $file, (string) $l->get_prop("id"))) {
-                        $fileV = explode(".", $file);
-                        $fileNV = explode("_", $fileV[0]);
-                        rename($dir . "/" . $file, EXTERNAL_FILES . "/" . FILEUP_ATTACH_FOLDER . "/" . $this->id . "_" . $fileNV[1] . "." . $fileV[1]);
-                    }
-                }
-                closedir($dh);
-            }
-        }
-
-        $dir = FILEUP_TMP_FOLDER_THUMB;
-        if (is_dir($dir)) {
-            if ($dh = opendir($dir)) {
-                while (($file = readdir($dh)) !== false) {
-                    if (strpos("-" . $file, (string) $l->get_prop("id"))) {
-                        $fileV = explode(".", $file);
-                        $fileNV = explode("_", $fileV[0]);
-                        rename($dir . "/" . $file, EXTERNAL_FILES . "/" . FILEUP_ATTACH_FOLDER_THUMN . "/" . $this->id . "_" . $fileNV[1] . "." . $fileV[1]);
-                    }
-                }
-                closedir($dh);
-            }
+    /**
+     * Guarda archivos
+     */
+    private function save_files() {
+        $path = $this->getInstance()->get_prop("archivos_externos");
+        $path.="/adjuntos";
+        $files=$this->accion->getFiles();
+        foreach($files as $f){
+            $fileexp = explode(".", $f["name"]);
+            $count= explode("_",$fileexp[0]);
+            $fname=$path."/".$this->id."_".$count[1].".".$fileexp[1];
+            $fileO = fopen($fname, "w");
+            fwrite($fileO,  base64_decode($f["data"]));
         }
     }
 

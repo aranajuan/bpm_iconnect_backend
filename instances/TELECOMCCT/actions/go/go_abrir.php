@@ -2,13 +2,15 @@
 
 /**
  * 
- * @param TKT $TKT
- * @param itform $itf
+ * @param ACTION $action
  * @return array    $response=array("result"=>"","msj"=>"");
  */
-function GO_action($TKT, $itf) {
+function GO_action($action) {
 
     $response = array("result" => "", "msj" => "");
+
+    $TKT = $action->getTKT();
+    $itf = $action->getitform();
 
     if (!$TKT->is_active()) {
         $response["result"] = "error";
@@ -38,16 +40,13 @@ function GO_action($TKT, $itf) {
     /**
      *  revisar master y campos ocultos
      */
+    $idmaster = $itf->get_value("idmaster");
+
     
-    $idmaster = $itf->getAnddelete("idmaster");
-
-
-    if ($lstOption->get_prop("ruta_destino") == NULL) { //se derivará directamente a un equipo
-        $TKT->load_detail($itf->get_output());
-    }
-
     /* abre ticket */
     $rtaOP = $TKT->open();
+
+    $action->loadValue($TKT->get_prop("idequipo"));
 
     if ($rtaOP != "ok") {
         $response["result"] = "error";
@@ -61,15 +60,19 @@ function GO_action($TKT, $itf) {
         $response["type"] = "file";
         $response["file"] = $lstOption->get_prop("ruta_destino");
         if ($lstOption->get_prop("autocerrar") == 1) {
-            $TKT->close("USER");
+            $AC = new ACTION();
+            $AC->load_DB("AUTOCERRAR");
+            $AC->loadTKT($TKT);
+            $rc = $AC->ejecute();
             $response["status"] = "close";
+            $response["close"]=$rc;
         } else {
             $response["status"] = "open";
         }
         return $response;
     }
 
-    if (is_numeric($idmaster) && $idmaster>0) {
+    if (is_numeric($idmaster) && $idmaster > 0) {
         $master = new TKT();
         $rtaMA = $master->load_DB($idmaster);
         if ($rtaMA != "ok") {

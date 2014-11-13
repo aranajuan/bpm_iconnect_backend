@@ -44,18 +44,24 @@ function GO($RC) {
         }
 
         if ($topts["object"]) {
-
-            $X = $topts["object"]->get_prop("pretext");
-            $dom = new DOMDocument();
-            $dom->loadXML($X);
-            $joined = $RC->append_xml($dom->documentElement);
-            if ($joined) {
+            if ($topts["object"]->get_prop("idequipo_destino") && $topts["object"]->get_prop("ruta_destino") == NULL) {
+                $X = $topts["object"]->get_prop("pretext");
+                $dom = new DOMDocument();
+                $dom->loadXML($X);
+                $joined = $RC->append_xml($dom->documentElement);
+                if ($joined) {
+                    $opendata = $RC->createElement("opendata");
+                    $opendata->appendChild($joined);
+                    $treeL->appendChild($opendata);
+                    return $treeL;
+                } else {
+                    return $RC->createElement("error", "imposible unir");
+                }
+            } else {
                 $opendata = $RC->createElement("opendata");
-                $opendata->appendChild($joined);
+                $opendata->appendChild($RC->createElement("msj", "No se necesitan datos adicionales. Puedes generar el itracker."));
                 $treeL->appendChild($opendata);
                 return $treeL;
-            } else {
-                return $RC->createElement("error", "imposible unir");
             }
         } else {
 

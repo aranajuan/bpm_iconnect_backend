@@ -365,41 +365,6 @@ abstract class TREE extends itobject {
     }
 
     /**
-     * @return Array<String> Archivos
-     */
-    public function user_files() {
-        $ret = array();
-        $i = 0;
-        $l = $GLOBALS[UL];
-        $dirs = array(FILEUP_TMP_FOLDER . "/", FILEUP_TMP_FOLDER_THUMB . "/");
-        foreach ($dirs as $dir) {
-            if (is_dir($dir)) {
-                if ($dh = opendir($dir)) {
-                    $archivos = glob($dir . $l->get_prop("id") . "_*.*");
-                    foreach ($archivos as $archivo) {
-                        if (strpos($archivo, (string) $l->get_prop("id"))) {
-                            $ret[$i] = $archivo;
-                            $i++;
-                        }
-                    }
-                    closedir($dh);
-                }
-            }
-        }
-        return $ret;
-    }
-
-    /**
-     * Elimina temporales de fileuploader 
-     */
-    public function delete_file_tmp() {
-        $list = $this->user_files();
-        foreach ($list as $f) {
-            unlink($f);
-        }
-    }
-
-    /**
      * Devuelve ultima opcion [OPTION]
      * @return null 
      */

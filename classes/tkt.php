@@ -38,6 +38,47 @@ class TKT extends TREE {
     );
 
     /**
+     * Carga tickets aplicando filtros
+     * @param array $filter open - open/close
+     *                               openby - lista de usuarios separado por coma
+     * 
+     */
+    public function list_fiter($filter){
+        $sql_filter="";
+        
+        $openfilter="";
+        if($filter["open"]=="open"){
+            $openfilter = "and UB is null";
+        }elseif($filter["open"]=="close" && $filter["from"]!="" && $filter["to"]!=""){
+            $fecha_d = @STRdate_format($filter["from"], USERDATE_READ, DBDATE_WRITE);
+            $fecha_h = @STRdate_format($filter["to"], USERDATE_READ, DBDATE_WRITE);
+            $openfilter = "and FB between '".$fecha_d."' and '".$fecha_h."'";
+        }
+        
+        $openbyfilter="";
+        if($filter["openby"]){
+            $arr=explode(",",$filter["openby"]);
+            foreach($arr as &$a){
+                $a="'".strToSQL($a)."'";
+            }
+            $openbyfilter="and UA in (".  implode(",",$arr).")";
+        }
+        
+    $ssql="select id from TBL_TICKETS where id is not null ".$openfilter." ".$openbyfilter;
+    
+        $this->dbinstance->loadRS($ssql);
+        error_log($this->dbinstance->cReg);
+        $i=0;
+        $list=array();
+        while($idV=$this->dbinstance->get_vector()){
+            $list[$i]=new TKT();
+            $list[$i]->load_DB($idV[0]);
+            $i++;
+        }
+        return $list;
+    }
+    
+    /**
      * Carga de base de datos
      * @param type $id
      * @return string

@@ -56,8 +56,11 @@ function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
         return -1;
     }
     try {
-        $date = DateTime::createFromFormat($origin, $str)->format($format);
-        return $date;
+        $date = DateTime::createFromFormat($origin, $str);
+        if($date){
+            return $date->format($format);
+        }
+        return -1;
     } catch (Exception $e) {
         return -1;
     }

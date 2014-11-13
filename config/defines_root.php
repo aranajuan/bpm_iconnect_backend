@@ -35,7 +35,7 @@ define('DBPASS_ROOT','juan314');					// PASS DB
 //Parametros y constantes
 define('USERDATE_READ','d-m-Y H:i');
 
-if(DBSERVER=='mysql'){
+if(DBSERVER_ALL=='mysql'){
     define('DBDATE_READ','Y-m-d H:i:s');
     define('DBDATE_WRITE','Y-m-d H:i');
 }

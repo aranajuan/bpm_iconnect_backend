@@ -30,14 +30,14 @@ define('DBSERVER_ALL','mysql');				// mssql o mysql
 /* conexion a root */
 define('DBHOST_ROOT','localhost');			//SERVIDOR DB
 define('DBUSER_ROOT','root');				// Usuario DB
-define('DBPASS_ROOT','juan314');					// PASS DB
+define('DBPASS_ROOT','');					// PASS DB
 
 //Parametros y constantes
 define('USERDATE_READ','d-m-Y H:i');
 
 if(DBSERVER_ALL=='mysql'){
     define('DBDATE_READ','Y-m-d H:i:s');
-    define('DBDATE_WRITE','Y-m-d H:i');
+    define('DBDATE_WRITE','Y-m-d H:i:s');
 }
 else{
     define('DBDATE_READ','M d Y h:i:s:uA');

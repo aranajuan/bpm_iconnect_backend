@@ -15,8 +15,20 @@ function GO($RC) {
     }else{
         return null;
     }
+
+    $ids=explode(",",$RC->get_params("teams"));
+    $teamsall = $RC->get_User()->get_prop("equiposobj");
+    $uids=array();
+    foreach ($teamsall as $t){
+        if(in_array($t->get_prop("id"),$ids)){
+            $usrs=$t->get_users();
+            foreach($usrs as $u){
+                array_push($uids, $u->get_prop("usr"));
+            }
+        }
+    }
     
-    $filter=  array_merge($filter,array("openby"=>$RC->get_User()->get_prop("usr")));
+    $filter=  array_merge($filter,array("openby"=>implode(",",$uids)));
     
     $ALL = new TKT();
     
@@ -28,6 +40,7 @@ function GO($RC) {
     }
     
     $ALL_v = $ALL->list_fiter($filter);
+
     $response=$RC->createElement("data");
     $response->appendChild($RC->createElement("view", $view));
     $listL=$RC->createElement("list");

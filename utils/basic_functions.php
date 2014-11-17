@@ -6,14 +6,13 @@
  * @param array<itobject> $array
  * @param string $field campo a comparar
  */
-function objinarray($obj,$array,$field="id"){
-    foreach($array as $o){
-        if($o->get_prop($field)===$obj->get_prop($field) && get_class($o)===get_class($obj)){
+function objinarray($obj, $array, $field = "id") {
+    foreach ($array as $o) {
+        if ($o->get_prop($field) === $obj->get_prop($field) && get_class($o) === get_class($obj)) {
             return true;
-        } 
+        }
     }
     return false;
-    
 }
 
 /**
@@ -22,9 +21,9 @@ function objinarray($obj,$array,$field="id"){
  * @param string $spliter
  * @return null/array
  */
-function arrayornull($spliter,$str){
-    if($str!="" && $str){
-        return explode($spliter,$str);
+function arrayornull($spliter, $str) {
+    if ($str != "" && $str) {
+        return explode($spliter, $str);
     }
     return null;
 }
@@ -57,7 +56,7 @@ function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
     }
     try {
         $date = DateTime::createFromFormat($origin, $str);
-        if($date){
+        if ($date) {
             return $date->format($format);
         }
         return -1;
@@ -109,10 +108,10 @@ function space_delete($str) {
  * @param boolean $CDATA
  * @return string
  */
-function xmlEscape($string,$CDATA=false) {
-    if($CDATA){
+function xmlEscape($string, $CDATA = false) {
+    if ($CDATA) {
         str_replace("]]>", "&cdatag;", $string);
-        return "<![CDATA[".$string."]]>";
+        return "<![CDATA[" . $string . "]]>";
     }
     return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $string);
 }
@@ -122,8 +121,8 @@ function xmlEscape($string,$CDATA=false) {
  * @param string $string
  * @return string
  */
-function xmlText($string){
-    return str_replace(array('&amp;', '&lt;', '&gt;','&cdatag;'),array('&', '<', '>',']]>') , $string);
+function xmlText($string) {
+    return str_replace(array('&amp;', '&lt;', '&gt;', '&cdatag;'), array('&', '<', '>', ']]>'), $string);
 }
 
 /**
@@ -204,20 +203,29 @@ function option_button($text, $width, $styleN, $Jfunction = "") {
     $size = array(28, 28);
     $Maxlenght = round($width / 8);
     $text = maxLenShow($text, $Maxlenght);
+    /*
+      $html = "
+      <div style='width:" . $width . "px;height:" . $size[$styleN] . "px;overflow:hidden;cursor:pointer;' onclick=\"" . $Jfunction . "\">
+      <div style='float:left;'>
+      <img src=\"" . HIMG_DIR . "/base/but_i_$styleN.png\" />
+      </div>
+      <div style='float:left;background-color:" . $colors[$styleN] . ";height:100%;width: " . ($width - 13) . "px;font-size:15px;padding-top:2px;text-align:center;'>
+      " . htmltoupper($text) . "
+      </div>
+      <div style='float:right;'>
+      <img src=\"" . HIMG_DIR . "/base/but_d_$styleN.png\" />
+      </div>
+      </div>
+      "; */
     $html = "
         <div style='width:" . $width . "px;height:" . $size[$styleN] . "px;overflow:hidden;cursor:pointer;' onclick=\"" . $Jfunction . "\">
-            <div style='float:left;'>
-                <img src=\"" . HIMG_DIR . "/base/but_i_$styleN.png\" />
-            </div>
+
             <div style='float:left;background-color:" . $colors[$styleN] . ";height:100%;width: " . ($width - 13) . "px;font-size:15px;padding-top:2px;text-align:center;'>
                 " . htmltoupper($text) . "
             </div>
-            <div style='float:right;'>
-                <img src=\"" . HIMG_DIR . "/base/but_d_$styleN.png\" />
-            </div>
+
         </div>
     ";
-
     return $html;
 }
 
@@ -290,7 +298,6 @@ function microtime_float() {
 /**
  * se ejecuta al finalizar script */
 function finish() {
-
     
 }
 
@@ -299,12 +306,12 @@ class Encrypter {
     private static $Key = "sistemasdeventas";
 
     public static function encrypt($input) {
-        $output = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5(Encrypter::$Key), $input, MCRYPT_MODE_CBC, md5(md5(Encrypter::$Key))));
+        $output = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, sha1(Encrypter::$Key), $input, MCRYPT_MODE_CBC, sha1(sha1(Encrypter::$Key))));
         return $output;
     }
 
     public static function decrypt($input) {
-        $output = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5(Encrypter::$Key), base64_decode($input), MCRYPT_MODE_CBC, md5(md5(Encrypter::$Key))), "\0");
+        $output = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, sha1(Encrypter::$Key), base64_decode($input), MCRYPT_MODE_CBC, sha1(sha1(Encrypter::$Key))), "\0");
         return $output;
     }
 

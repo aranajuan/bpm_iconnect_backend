@@ -20,7 +20,7 @@ abstract class itobject implements XmlPropInterface, dbobject {
     function __construct($conn = null) {
         if ($conn) {
             $this->conn = $conn;
-        }else{
+        } else {
             $this->conn = $this->get_RH()->get_Connection();
         }
         $this->dbinstance = new DB($this->conn, false);
@@ -30,10 +30,10 @@ abstract class itobject implements XmlPropInterface, dbobject {
      * Devuelve controlador
      * @return Rcontroller
      */
-    protected function get_RH(){
+    protected function get_RH() {
         return $GLOBALS["RH"];
     }
-    
+
     /**
      * 
      * @param XMLhandler $doc
@@ -43,7 +43,18 @@ abstract class itobject implements XmlPropInterface, dbobject {
     public function getXML($doc, $props) {
         $el = $doc->createElement(get_called_class());
         foreach ($props as $p) {
-            $el->appendChild($doc->createElement($p, $this->get_prop($p)));
+            $pparts = explode(".", $p);
+            if (count($pparts) == 1) {
+                 $pv=$this->get_prop($p);
+            }else{
+                $po=$this->get_prop($pparts[0]);
+                if($po){
+                    $pv=$po->get_prop($pparts[1]);
+                }else{
+                    $pv="";
+                }
+            }
+            $el->appendChild($doc->createElement($p,$pv));
         }
         return $el;
     }

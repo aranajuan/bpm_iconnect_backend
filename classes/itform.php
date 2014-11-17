@@ -100,8 +100,14 @@ class itform {
         if ($id == null) {
             return null;
         }
+        if ($formname) {
+            $nid = $formname . "_" . $id;
+        }else{
+            $nid=$id;
+        }
+            
         foreach ($arr as $a) {
-            if ($a["id"] == $formname . "_" . $id) {
+            if ($a["id"] == $nid) {
                 return $a["value"];
             }
         }
@@ -114,7 +120,7 @@ class itform {
      * @param type $formname    nombre del form para id
      * @return string
      */
-    public function load_values($arr, $formname) {
+    public function load_values($arr, $formname = null) {
         $this->xml_output = $this->xml_input;
         foreach ($this->xml_output->element as $field) {
             $value = trim($this->find_elementVal($arr, $field->id, $formname));
@@ -191,8 +197,8 @@ class itform {
         if (!$this->xml_output) {
             return null;
         }
-        $tmp=$this->xml_output;
-        $i=0;
+        $tmp = $this->xml_output;
+        $i = 0;
         foreach ($tmp->element as $field) {
             if ($field->notsave == "true") {
                 unset($tmp->element[$i]);
@@ -201,7 +207,6 @@ class itform {
         }
         return $tmp;
     }
-    
 
     /**
      * Devuelve el formulario de salida
@@ -209,7 +214,7 @@ class itform {
      */
     public function get_output() {
         if ($this->xml_output) {
-            $final=$this->deleteNotSave();
+            $final = $this->deleteNotSave();
             return $final->asXML();
         }
         return null;

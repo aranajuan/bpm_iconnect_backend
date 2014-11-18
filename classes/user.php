@@ -600,13 +600,13 @@ class USER extends itobject {
         $i = 0;
         while ($v = $this->dbinstance->get_vector()) {
             if ($v["relacion"] == "*") {
-                $this->perfil_vista[$i] = array("nombre" => "*", "costo" => 0, "vista" => $v["vista"], "prioridad" => 0, "tipos_eventos" => explode(",", $v["tipos_eventos"]), "archivo_vistaprevia" => $v["archivo_vistaprevia"], "archivo_descarga" => $v["archivo_descarga"]);
+                $this->perfil_vista[$i] = array("nombre" => "*", "costo" => 0, "vista" => $v["vista"], "prioridad" => 0, "tipos_eventos" => explode(",", $v["tipos_eventos"]),  "archivo_descarga" => $v["archivo_descarga"]);
                 return;
             } else {
                 $rels = explode(",", $v["relacion"]);
                 foreach ($rels as $r) {
                     $relDat = get_relation($r["relacion"]); //nombre - costo
-                    $this->perfil_vista[$i] = array("nombre" => $relDat[0], "costo" => $relDat[1], "prioridad" => $v["prioridad"], "vista" => $v["vista"], "tipos_eventos" => explode(",", $v["tipos_eventos"]), "archivo_vistaprevia" => $v["archivo_vistaprevia"], "archivo_descarga" => $v["archivo_descarga"]);
+                    $this->perfil_vista[$i] = array("nombre" => $relDat[0], "costo" => $relDat[1], "prioridad" => $v["prioridad"], "vista" => $v["vista"], "tipos_eventos" => explode(",", $v["tipos_eventos"]), "archivo_descarga" => $v["archivo_descarga"]);
                     $i++;
                 }
             }

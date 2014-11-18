@@ -212,15 +212,14 @@ class TKT extends TREE {
         $this->tkt_hOBJ = array();
 
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . $this->id . " and estado = " . I_ACTIVE . "
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . "
         ";
-        $db = new DATOS();
-        $db->loadRS($ssql);
+        $this->dbinstance->loadRS($ssql);
         $i = 0;
-        if ($db->noEmpty) {
-            while ($TH = $db->get_vector()) {
+        if ($this->dbinstance->noEmpty) {
+            while ($TH = $this->dbinstance->get_vector()) {
                 $THO = new TKT_H();
-                if ($THO->load_DB($TH[0], $this) == "ok") {
+                if ($THO->load_DB($TH[0], $this->view) == "ok") {
                     $this->tkt_hOBJ[$i] = $THO;
                     $i++;
                 }
@@ -327,22 +326,6 @@ class TKT extends TREE {
     }
 
     /**
-     * Genera HTML de eventos
-     * @return string
-     */
-    function get_tktH() {
-        if (!(is_array($this->get_tktHObj()) && count($this->tkt_hOBJ)))
-            return "No hay datos para mostrar";
-        $HTMLR = "";
-        foreach ($this->tkt_hOBJ as $TH) {
-            start_measure("OBJ:TKT:action_show");
-            $HTMLR.=$TH->get_html();
-            show_measure("OBJ:TKT:action_show");
-        }
-        return $HTMLR;
-    }
-
-    /**
      * Carga equipo owner
      */
     private function load_team() {
@@ -408,7 +391,9 @@ class TKT extends TREE {
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
+        error_log($action);
         $A->loadFormValues($values);
+        error_log("Ejecutando cerrar");
         return $A->ejecute();
     }
 
@@ -510,6 +495,12 @@ class TKT extends TREE {
         $this->UB = NULL;
         $this->FB = NULL;
         if ($this->is_master()) {
+            $ch = $this->get_prop("childs");
+            foreach ($ch as $c) {
+                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
+            }
+        } else {
+            $this->ejecute_action("SET_MASTER");
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
@@ -687,8 +678,10 @@ class TKT extends TREE {
 
         $this->idmaster = NULL;
         $this->master = NULL;
-        $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
 
+        $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
+        
+        $this->childs = null;
         //reestablece detalles
 
         return "ok";
@@ -713,24 +706,27 @@ class TKT extends TREE {
 
         /* Deriva si el master esta en otro equipo */
         if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
-            $rta = $this->ejecute_action("DERIVAR",array(array("id"=>"idequipo","value"=>$master->get_prop("idequipo"))));
-            if($master->get_prop("idequipo") != $this->get_prop("idequipo")){
-                return "TKT_derive_join: ".$rta["msj"];
+            $rta = $this->ejecute_action("DERIVAR", array(
+                array("id" => "idequipo", "value" => $master->get_prop("idequipo")),
+                array("id" => "comment", "value" => "Derivado para unir a master"),
+            ));
+            if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
+                return "TKT_derive_join: " . $rta["msj"];
             }
         }
 
         $ssql = "update TBL_TICKETS set idmaster=" . intval($master->get_prop("id")) . " where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)){
-            return "TKT_join: ".$this->dbinstance->details;
+        if ($this->dbinstance->query($ssql)) {
+            return "TKT_join: " . $this->dbinstance->details;
         }
-        
+
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
-        
-        foreach ($this->childs as $c){
+
+        foreach ($this->childs as $c) {
             $c->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $master->get_prop("id"))));
         }
-        
+
         return "ok";
     }
 
@@ -740,8 +736,8 @@ class TKT extends TREE {
      */
     function un_join() {
         $ssql = "update TBL_TICKETS set idmaster=NULL where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)){
-            return "TKT_separar: ".$this->dbinstance->details;
+        if ($this->dbinstance->query($ssql)) {
+            return "TKT_separar: " . $this->dbinstance->details;
         }
         $this->idmaster = NULL;
         $this->master = NULL;

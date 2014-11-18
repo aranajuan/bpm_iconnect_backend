@@ -2,15 +2,13 @@
 
 /**
  * 
- * @param ACTION $action
+ * @param ACTION $this
  * @return array    $response=array("result"=>"","msj"=>"");
  */
-function GO_action($action) {
-
     $response = array("result" => "", "msj" => "");
 
-    $TKT = $action->getTKT();
-    $itf = $action->getitform();
+    $TKT = $this->getTKT();
+    $itf = $this->getitform();
 
     if (!$TKT->is_active()) {
         $response["result"] = "error";
@@ -42,11 +40,11 @@ function GO_action($action) {
      */
     $idmaster = $itf->get_value("idmaster");
 
-    
+
     /* abre ticket */
     $rtaOP = $TKT->open();
 
-    $action->loadValue($TKT->get_prop("idequipo"));
+    $this->loadValue($TKT->get_prop("idequipo"));
 
     if ($rtaOP != "ok") {
         $response["result"] = "error";
@@ -55,47 +53,32 @@ function GO_action($action) {
     } else {
         $response["result"] = "ok";
         $response["id"] = $TKT->get_prop("id");
+        $this->force_tkth();
     }
-    if ($lstOption->get_prop("ruta_destino")) {
+    if ($lstOption->get_prop("ruta_destino")) { //no une
         $response["type"] = "file";
         $response["file"] = $lstOption->get_prop("ruta_destino");
         if ($lstOption->get_prop("autocerrar") == 1) {
-            $AC = new ACTION();
-            $AC->load_DB("AUTOCERRAR");
-            $AC->loadTKT($TKT);
-            $rc = $AC->ejecute();
-            $response["status"] = "close";
-            $response["close"]=$rc;
+            $rta = $TKT->ejecute_action("CERRAR",array(array("id"=>"comment","value"=>"Cerrado con archivo. ".$lstOption->get_prop("ruta_destino"))));
+            if ($rta["result"] == "ok") {
+                $response["status"] = "close";
+            }else{
+                $response["status"] = "open";
+            }
         } else {
             $response["status"] = "open";
         }
-        return $response;
+        return $response; //no une
     }
 
     if (is_numeric($idmaster) && $idmaster > 0) {
-        $master = new TKT();
-        $rtaMA = $master->load_DB($idmaster);
-        if ($rtaMA != "ok") {
+        $rta = $TKT->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $idmaster)));
+        if ($rta["result"] != "ok") {
             $response["result"] = "ok";
             $response["type"] = "tkt";
-            $response["msj"] = "No se pudo cargar el master.";
-            $response["id"] = $TKT->get_prop("id");
-            return $response;
+            $response["msj"] = "No se pudo unir al master." . $rta["msj"];
         }
-        $rtaJOI = $TKT->join($master);
-        if ($rtaJOI != "ok") {
-            $response["result"] = "ok";
-            $response["type"] = "tkt";
-            $response["msj"] = "No se pudo unir al master." . $rtaJOI;
-            $response["id"] = $TKT->get_prop("id");
-            return $response;
-        }
-        $response["result"] = "ok";
-        $response["type"] = "tkt";
-        $response["id"] = $TKT->get_prop("id");
-        return $response;
     }
     return $response;
-}
 
 ?>

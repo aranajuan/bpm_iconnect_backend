@@ -105,9 +105,8 @@ class itform {
         }else{
             $nid=$id;
         }
-            
         foreach ($arr as $a) {
-            if ($a["id"] == $nid) {
+            if (trim($a["id"]) == trim($nid)) {
                 return $a["value"];
             }
         }
@@ -199,12 +198,20 @@ class itform {
         }
         $tmp = $this->xml_output;
         $i = 0;
-        foreach ($tmp->element as $field) {
-            if ($field->notsave == "true") {
-                unset($tmp->element[$i]);
+        $delete = array();
+        foreach ($this->xml_output->element as $field) {
+            if (trim($field->notsave) == "true") {
+                array_push($delete, $i);
             }
             $i++;
         }
+        $back=0;
+        foreach($delete as $p){
+            error_log("Eliminado ".$tmp->element[$p-$back]->asXML());
+            unset($tmp->element[$p-$back]);
+            $back++;
+        }
+        
         return $tmp;
     }
 

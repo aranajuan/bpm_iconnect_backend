@@ -15,12 +15,11 @@ class TKT_H extends itobject {
     private $UA;    /* usuario generacion */
     private $FB;    /* fecha baja */
     private $UB;    /* usuario baja */
+    private $detalle;
+    private $idaccion;
+    private $valoraccion;
     private $estado;    /* estado de la accion */
     
-    /* tickets_m_details  */
-    private $filesHTML; /* html de los archivos adjuntos */
-    private $detalle_Show; /* comentario a mostrar */
-
     /**
      *
      * @var ACTION 
@@ -29,14 +28,14 @@ class TKT_H extends itobject {
 
     
     
-    function load_DB($id, $TKT = null) {
+    function load_DB($id, $TKTvista = null) {
         $this->error = FALSE;
-        $this->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
+        $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
                             where H.id=$id and H.estado = " . I_ACTIVE);
-        if ($this->noEmpty && $this->cReg == 1) {
-            $tmpU = $this->get_vector();
-            $this->TKT = $TKT;
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
+            $this->view = $TKTvista;
             return $this->load_DV($tmpU);
         } else {
             $this->error = TRUE;
@@ -107,18 +106,13 @@ class TKT_H extends itobject {
         $this->UA = $tmpU["UA"];
         $this->FB = $tmpU["FB"];
         $this->UB = $tmpU["UB"];
+        $this->idaccion = $tmpU["idaccion"];
+        $this->valoraccion = $tmpU["valoraccion"];
         $this->estado = $tmpU["estado"];
-        $this->load_VEC($tmpU);
-        if ($this->TKT == null) {
-            $TKT = new TKT();
-            if ($TKT->load_DB($this->idtkt) == "ok") {
-                $this->TKT = $TKT;
-            } else {
-                $this->idtkt=null;
-                return "Error al cargar tkt.";
-            }
-        }
-        $this->idtkt=$TKT->get_prop("id");
+        $accion= new ACTION();
+        $accion->load_DB($this->idaccion);
+        $this->detalle= $tmpU["detalle"];
+        $this->accion=$accion;
         return "ok";
     }
 
@@ -137,8 +131,8 @@ class TKT_H extends itobject {
         
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
-                intval($this->accion->get_prop("id")) . "," .
-                intval($this->accion->get_prop("value")) . ",now(),'" 
+                intval($this->accion->get_prop("id")) . ",'" .
+                strToSQL($this->accion->get_prop("value")) . "',now(),'" 
                 . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL);";
         
         if ($this->dbinstance->query($ssql)){
@@ -212,18 +206,28 @@ class TKT_H extends itobject {
     }
 
     /**
-     * Devuelve html con vista del elemento
-     * @param array $view   de get view usuario
+     * Devuelve xml con vista del elemento
+     * @return DOMDocument
      */
-    function get_html() {
+    function getXML_H() {
         if ($this->check_access() == false)
-            return "";
-        return $this->accion->get_view($this, true);
+            return null;
+        $el= new DOMDocument();
+        
+        $element = $el->createElement("element");
+        $action = $el->createElement("action");
+        $action->appendChild($el->createElement("alias", $this->accion->get_prop("alias")));
+        $action->appendChild($el->createElement("ejecute", $this->accion->get_prop("ejectue")));
+        $action->appendChild($el->createElement("value", $this->get_prop("valoraccion")));
+        $element->appendChild($action);
+        $element->appendChild($el->createElement("form", $this->get_prop("detalle")));
+        //cargar archivos
+        
+        return $element;
     }
 
     function check_access() {
-        $this->view = $this->TKT->get_prop("view");
-        if ($this->get_prop("UA") == $GLOBALS[UL]->get_prop("id")) {
+        if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
             return true;
         }
         if ($this->view["tipos_eventos"][0] != "*") {

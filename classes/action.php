@@ -14,6 +14,9 @@ class ACTION extends itobject {
     private $nombre;    /* nombre de la accion */
     private $tipo;  /* tipo de accion, agrupador // ver perfiles */
     private $formulario;    /* requiere formulario o es de ejecucion directa */
+    private $ejecuta;
+    private $estadotkt;
+    private $alias;
 
     /*
       Habilitadores: 0: DC 1: Si 2: NO
@@ -33,22 +36,22 @@ class ACTION extends itobject {
     private $estado;    /* activo o no activo */
     private $form; /* formulario para cargar accion */
     private $files; /* archivos */
-    
-    
     private $value; //valor de accion ejecutada
+
+    private $forceEveRta; // respuesta de evento forzado
     
     /**
      *
      * @var itform
      */
     private $itf;
-    
+
     /**
      *  ticket evaluado
      * @var TKT 
      */
     private $TKT;
-    
+
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -114,23 +117,23 @@ class ACTION extends itobject {
      * @return type
      */
     public function load_DB($id) {
-        if(is_int($id)){
-            return $this->loadDB_id ($id);
-        }else{
+        if (is_int($id)) {
+            return $this->loadDB_id($id);
+        } else {
             return $this->loadDB_name($id);
         }
     }
-    
+
     /**
      * Carga ticket para ejecutar accion o consultar
      * @param TKT $TKT
      * @return  boolean se pudo cargar
      */
-    public function loadTKT($TKT){
-        $this->TKT=$TKT;
-        if($this->nombre=="ABRIR"){
+    public function loadTKT($TKT) {
+        $this->TKT = $TKT;
+        if ($this->nombre == "ABRIR") {
             $to = $TKT->get_last();
-            if($to){
+            if ($to) {
                 //cambia el form por el de la opcion
                 $this->form = $to->get_prop("pretext");
                 return true;
@@ -139,61 +142,64 @@ class ACTION extends itobject {
         }
         return true;
     }
-    
+
     /**
      * Carga Archivos
      * @param array $files 
      */
-    public function loadFiles($files){
-        $this->files=$files;
+    public function loadFiles($files) {
+        $this->files = $files;
     }
-    
-      /**
+
+    /**
      * Devuelve Archivos
      * @return array $files 
      */
-    public function getFiles(){
+    public function getFiles() {
         return $this->files;
     }
-    
-    
+
     /**
      * Devuelve ticket cargado
      * @return TKT
      */
-    public function getTKT(){
+    public function getTKT() {
         return $this->TKT;
     }
-    
+
     /**
      * Carga valores de formulario y valida con itform
      * @param array $values
      */
-    public function loadFormValues($values,$formname){
-        
-        if($this->TKT==null){
+    public function loadFormValues($values, $formname=null) {
+        error_log("cargando valores ".$this->form);
+        if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
-        if(!$this->formulario || $this->form==""){  //no requiere formulario esta accion
-            $this->itf= new itform();
+        if (!$this->formulario || $this->form == "") {  //no requiere formulario esta accion
+            $this->itf = new itform();   
+            error_log("sin form");
             return "ok";
         }
-        
-        if(!$this->itf->load_xml($this->form)){
+
+        if (!$this->itf->load_xml($this->form)) {
+            error_log("error form");
             return "Error al cargar formulario de la tipificacion.";
         }
-        
-        return $this->itf->load_values($values,$formname);
-        
+
+        $rta = $this->itf->load_values($values, $formname);
+        error_log($rta);
+        return $rta;
     }
-    
+
     /*
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
+
     private function loadDB_id($id) {
         $this->error = FALSE;
-        $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=".intval($id));
+        $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
@@ -243,6 +249,9 @@ class ACTION extends itobject {
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
         $this->form = trim($tmpU["form"]);
+        $this->ejecuta = trim($tmpU["ejecuta"]);
+        $this->estadotkt = trim($tmpU["estadotkt"]);
+        $this->alias = trim($tmpU["alias"]);
         $this->itf = new itform();
     }
 
@@ -261,10 +270,10 @@ class ACTION extends itobject {
      * Carga valor para tktH
      * @param int $value
      */
-    public function loadValue($value){
-        $this->value=$value;
+    public function loadValue($value) {
+        $this->value = $value;
     }
-    
+
     /**
      * Valida accion
      * @param TKT $TKT
@@ -328,67 +337,58 @@ class ACTION extends itobject {
         return "ok";
     }
 
-    
-    /**
-     * Devuelve vista en base a los datos del historico
-     * @param TKT_H $TH
-     * @param boolean $users mostrar usuario
-     * @return String html evento
-     */
-    public function get_view($TH, $users){
-        $l = $this->getLogged();
-        $Usuario = $TH->get_prop("UA_o");
-        if ($Usuario)
-            $NombreUsuario = $Usuario->get_prop("nombre_popup");
-        else
-            $NombreUsuario = "Error al cargar usuario";
-        $TKT = $TH->get_prop("TKT");
-        ob_start();
-        include(INCLUDE_DIR ."/actions/show_" . strtolower($this->get_prop("nombre") . ".php"));
-        $rta = ob_get_contents();
-        ob_clean();
-        return $rta;
-    }
-    
     /**
      * Ejecuta accion
      * @return array resultado
      */
-    public function ejecute(){
-        $I = $this->getInstance();
-        $file = $I->get_instancepath()."/actions/go/go_".strtolower($this->get_prop("nombre")).".php";
-        include($file);
-        $response = GO_action($this);
-        $response["tkth"]=$this->addTKT_H();
-        $response["sendfiles"]=$response["tkth"];
+    public function ejecute() {
+        $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+        $response = include($file);
+        $response["tkth"] = $this->addTKT_H();
+        $response["sendfiles"] = $response["tkth"];
         return $response;
+    }
+
+    /**
+     * Fuerza guardado de evento
+     * @return String
+     */
+    public function force_tkth(){
+        $this->forceEveRta=$this->addTKT_H();
+        return $this->forceEveRta;
     }
     
     /**
      * Guarda evento
      * @return string
      */
-    private function addTKT_H(){
+    private function addTKT_H() {
+        if($this->forceEveRta){
+            return $this->forceEveRta;
+        }
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
         $rta = $tktH->insert_DB();
+        $this->forceEveRta=$rta;
         return $rta;
     }
-    
+
     /**
      * Devuelve formulario
      * @return itform
      */
-    public function getitform(){
+    public function getitform() {
         return $this->itf;
     }
-    
+
     public function get_prop($property) {
         switch ($property) {
             case 'id':
                 return ucwords($this->id);
             case 'nombre':
                 return $this->nombre;
+            case 'ejecuta':
+                return $this->ejecuta;
             case 'tipo':
                 return $this->tipo;
             case 'form':

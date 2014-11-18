@@ -207,7 +207,6 @@ class itform {
         }
         $back=0;
         foreach($delete as $p){
-            error_log("Eliminado ".$tmp->element[$p-$back]->asXML());
             unset($tmp->element[$p-$back]);
             $back++;
         }

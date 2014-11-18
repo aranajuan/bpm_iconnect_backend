@@ -148,7 +148,9 @@ class TKT extends TREE {
      * @return array<ACTION>
      */
     function valid_actions() {
-        return ACTION::load_filtered($this);
+        $A=new ACTION();
+        $A->loadTKT($this);
+        return $A->load_filtered();
     }
 
     /**
@@ -391,9 +393,7 @@ class TKT extends TREE {
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
-        error_log($action);
         $A->loadFormValues($values);
-        error_log("Ejecutando cerrar");
         return $A->ejecute();
     }
 

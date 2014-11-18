@@ -19,15 +19,13 @@ class TKT_H extends itobject {
     private $idaccion;
     private $valoraccion;
     private $estado;    /* estado de la accion */
-    
+
     /**
      *
      * @var ACTION 
      */
     private $accion; /* objeto accion */
 
-    
-    
     function load_DB($id, $TKTvista = null) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
@@ -51,15 +49,17 @@ class TKT_H extends itobject {
         $this->accion = $tmpU;
     }
 
-    function load_detailsShow() {
-
-        $this->view = $this->TKT->get_prop("view");
-
-        $this->detalle_Show = $this->detalle;
-
+    /**
+     * Devuelve segun vista
+     * @return String
+     */
+    function get_detailsShow() {
+        return $this->detalle;
+        $output="";
         /* verificar master */
 
-        if ($this->get_prop("UA") != $GLOBALS[UL]->get_prop("id")) { // solo verificar accesos si no es movimiento del usr
+        if ($this->get_prop("UA") != $GLOBALS[UL]->get_prop("id")) { 
+            // solo verificar accesos si no es movimiento del usr
             if (!$this->check_access()) {
                 $this->detalle_Show = null;
                 return false;
@@ -109,14 +109,15 @@ class TKT_H extends itobject {
         $this->idaccion = $tmpU["idaccion"];
         $this->valoraccion = $tmpU["valoraccion"];
         $this->estado = $tmpU["estado"];
-        $accion= new ACTION();
-        $accion->load_DB($this->idaccion);
-        $this->detalle= $tmpU["detalle"];
-        $this->accion=$accion;
+        $accion = new ACTION();
+        $rta = $accion->load_DB($this->idaccion);
+        $this->detalle = $tmpU["detalle"];
+        $this->accion = $accion;
         return "ok";
     }
 
     /* Elimina registros abiertos */
+
     private function delete_open() {
         $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where FB is NULL and idtkt=" . intval($this->accion->getTKT()->get_prop("id"));
         return $this->dbinstance->query($ssql);
@@ -124,36 +125,69 @@ class TKT_H extends itobject {
 
     /* Inserta nuevo registro y carga ID en el objeto
      */
+
     function insert_DB() {
-        if ($this->delete_open()){
+        if ($this->delete_open()) {
             return "TKTH_Delete" . $this->dbinstance->details;
         }
-        
+
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
-                strToSQL($this->accion->get_prop("value")) . "',now(),'" 
+                strToSQL($this->accion->get_prop("value")) . "',now(),'"
                 . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL);";
-        
-        if ($this->dbinstance->query($ssql)){
+
+        if ($this->dbinstance->query($ssql)) {
             return "TKTH_Insert: " . $this->dbinstance->details;
-        }
-        else {
+        } else {
             $this->id = $this->dbinstance->get_lastID();
-            $form=$this->accion->getitform()->get_output();
+            $form = $this->accion->getitform()->get_output();
             $this->save_files();
-            if (!$this->accion->get_prop("formulario") || trim($form)==""){ // accion sin formulario
+            if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
                 return "ok";
             }
             /* Agregar a tabla detalles */
             $ssql = "insert into TBL_TICKETS_M_DETALLES (idtktm,detalle)
-                        values (" . intval($this->id ). ",'" . strToSQL($form) . "')";
+                        values (" . intval($this->id) . ",'" . strToSQL($form) . "')";
 
-            if ($this->dbinstance->query($ssql)){
+            if ($this->dbinstance->query($ssql)) {
                 return "THTH_D_insert: Error no se guardaron los detalles pero si se avanzo el tkt:" . $this->dbinstance->details;
             }
             return "ok";
         }
+    }
+
+    /**
+     * Devuelve xml con vista del elemento
+     * @return SimpleXMLElement
+     */
+    function getXML_H() {
+        if ($this->check_access() == false)
+            return null;
+        $element = new SimpleXMLElement("<element></element>");
+
+        $action = $element->addChild("action");
+        $action->addChild("alias", $this->accion->get_prop("alias"));
+        $action->addChild("ejecuta", $this->accion->get_prop("ejecuta"));
+        $action->addChild("value", $this->get_prop("valoraccion"));
+        $formEl = $element->addChild("form");
+        if ($this->get_prop("detalle") != "") {
+            $form = new SimpleXMLElement($this->get_prop("detalle"));
+            append_simplexml($formEl, $form);
+        }
+        return $element;
+    }
+
+    function check_access() {
+        if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
+            return true;
+        }
+        if ($this->view["tipos_eventos"][0] != "*") {
+            if (!(in_array($this->accion->get_prop("tipo"), $this->view["tipos_eventos"]))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -162,13 +196,13 @@ class TKT_H extends itobject {
     private function save_files() {
         $path = $this->getInstance()->get_prop("archivos_externos");
         $path.="/adjuntos";
-        $files=$this->accion->getFiles();
-        foreach($files as $f){
+        $files = $this->accion->getFiles();
+        foreach ($files as $f) {
             $fileexp = explode(".", $f["name"]);
-            $count= explode("_",$fileexp[0]);
-            $fname=$path."/".$this->id."_".$count[1].".".$fileexp[1];
+            $count = explode("_", $fileexp[0]);
+            $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
-            fwrite($fileO,  base64_decode($f["data"]));
+            fwrite($fileO, base64_decode($f["data"]));
         }
     }
 
@@ -205,39 +239,6 @@ class TKT_H extends itobject {
         }
     }
 
-    /**
-     * Devuelve xml con vista del elemento
-     * @return DOMDocument
-     */
-    function getXML_H() {
-        if ($this->check_access() == false)
-            return null;
-        $el= new DOMDocument();
-        
-        $element = $el->createElement("element");
-        $action = $el->createElement("action");
-        $action->appendChild($el->createElement("alias", $this->accion->get_prop("alias")));
-        $action->appendChild($el->createElement("ejecute", $this->accion->get_prop("ejectue")));
-        $action->appendChild($el->createElement("value", $this->get_prop("valoraccion")));
-        $element->appendChild($action);
-        $element->appendChild($el->createElement("form", $this->get_prop("detalle")));
-        //cargar archivos
-        
-        return $element;
-    }
-
-    function check_access() {
-        if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
-            return true;
-        }
-        if ($this->view["tipos_eventos"][0] != "*") {
-            if (!(in_array($this->accion->get_prop("tipo"), $this->view["tipos_eventos"]))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     function get_prop($property) {
         switch ($property) {
             case 'id':
@@ -251,9 +252,7 @@ class TKT_H extends itobject {
             case 'accion':
                 return $this->accion;
             case 'detalle':
-                if ($this->detalle_Show == null)
-                    $this->load_detailsShow();
-                return $this->detalle_Show;
+                 return $this->get_detailsShow();
             case 'UA':
                 return $this->UA;
             case 'UA_o':

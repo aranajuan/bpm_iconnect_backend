@@ -37,9 +37,8 @@ class ACTION extends itobject {
     private $form; /* formulario para cargar accion */
     private $files; /* archivos */
     private $value; //valor de accion ejecutada
-
     private $forceEveRta; // respuesta de evento forzado
-    
+
     /**
      *
      * @var itform
@@ -104,7 +103,7 @@ class ACTION extends itobject {
         $ret = array();
 
         while ($actV = $this->dbinstance->get_vector()) {
-            $ret[$i] = new ACTION($this->conn);
+            $ret[$i] = new ACTION();
             $ret[$i]->loadDB_id($actV["id"]);
             $i++;
         }
@@ -117,8 +116,9 @@ class ACTION extends itobject {
      * @return type
      */
     public function load_DB($id) {
-        if (is_int($id)) {
-            return $this->loadDB_id($id);
+        $idInt=  intval($id);
+        if (is_int($idInt) && $idInt>0 ) {
+            return $this->loadDB_id($idInt);
         } else {
             return $this->loadDB_name($id);
         }
@@ -171,24 +171,20 @@ class ACTION extends itobject {
      * Carga valores de formulario y valida con itform
      * @param array $values
      */
-    public function loadFormValues($values, $formname=null) {
-        error_log("cargando valores ".$this->form);
+    public function loadFormValues($values, $formname = null) {
         if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
         if (!$this->formulario || $this->form == "") {  //no requiere formulario esta accion
-            $this->itf = new itform();   
-            error_log("sin form");
+            $this->itf = new itform();
             return "ok";
         }
 
         if (!$this->itf->load_xml($this->form)) {
-            error_log("error form");
             return "Error al cargar formulario de la tipificacion.";
         }
 
         $rta = $this->itf->load_values($values, $formname);
-        error_log($rta);
         return $rta;
     }
 
@@ -290,7 +286,7 @@ class ACTION extends itobject {
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
         }else { // en otro equipo
             if ($this->habilita_equipo == 1)
-                return "Esta accion no se puede aplicar a un ticket de otro equipo";
+                return "Esta accion no se puede aplicar a un ticket de otro equipo".$this->TKT->get_prop("idequipo")."//";
         }
 
         if ($this->TKT->get_prop("idmaster")) { //no es master
@@ -353,23 +349,23 @@ class ACTION extends itobject {
      * Fuerza guardado de evento
      * @return String
      */
-    public function force_tkth(){
-        $this->forceEveRta=$this->addTKT_H();
+    public function force_tkth() {
+        $this->forceEveRta = $this->addTKT_H();
         return $this->forceEveRta;
     }
-    
+
     /**
      * Guarda evento
      * @return string
      */
     private function addTKT_H() {
-        if($this->forceEveRta){
+        if ($this->forceEveRta) {
             return $this->forceEveRta;
         }
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
         $rta = $tktH->insert_DB();
-        $this->forceEveRta=$rta;
+        $this->forceEveRta = $rta;
         return $rta;
     }
 
@@ -389,6 +385,8 @@ class ACTION extends itobject {
                 return $this->nombre;
             case 'ejecuta':
                 return $this->ejecuta;
+            case 'alias':
+                return $this->alias;
             case 'tipo':
                 return $this->tipo;
             case 'form':

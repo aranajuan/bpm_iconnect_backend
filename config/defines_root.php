@@ -30,7 +30,7 @@ define('DBSERVER_ALL','mysql');				// mssql o mysql
 /* conexion a root */
 define('DBHOST_ROOT','localhost');			//SERVIDOR DB
 define('DBUSER_ROOT','root');				// Usuario DB
-define('DBPASS_ROOT','');					// PASS DB
+define('DBPASS_ROOT','juan314');					// PASS DB
 
 //Parametros y constantes
 define('USERDATE_READ','d-m-Y H:i');

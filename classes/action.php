@@ -340,6 +340,9 @@ class ACTION extends itobject {
     public function ejecute() {
         $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
         $response = include($file);
+        if($response["result"]!="ok"){
+            return $response;
+        }
         $response["tkth"] = $this->addTKT_H();
         $response["sendfiles"] = $response["tkth"];
         return $response;

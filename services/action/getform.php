@@ -24,7 +24,9 @@ function GO($RC) {
     }
     
     $parser = new DOMDocument();
-    $parser->loadXML($formTXT);
+    if($parser->loadXML($formTXT)==false){
+        return $RC->createElement("error", "Formulario invalido");
+    }
     
     $ret = $RC->append_xml($parser->getElementsByTagName("itform")->item(0));
     

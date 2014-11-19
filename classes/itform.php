@@ -101,9 +101,9 @@ class itform {
             return null;
         }
         if ($formname) {
-            $nid = $formname . "_" . $id;
-        }else{
-            $nid=$id;
+            $nid = $formname . "_" . trim($id);
+        } else {
+            $nid = $id;
         }
         foreach ($arr as $a) {
             if (trim($a["id"]) == trim($nid)) {
@@ -120,6 +120,7 @@ class itform {
      * @return string
      */
     public function load_values($arr, $formname = null) {
+        $arr = make_arrayobj($arr);
         $this->xml_output = $this->xml_input;
         foreach ($this->xml_output->element as $field) {
             $value = trim($this->find_elementVal($arr, $field->id, $formname));
@@ -143,8 +144,8 @@ class itform {
             return null;
         }
         foreach ($this->xml_output->element as $field) {
-            if ($field->id == $id) {
-                return $field->value->asXML();
+            if (trim($field->id) == trim($id)) {
+                return $field->value;
             }
         }
         return null;
@@ -193,6 +194,7 @@ class itform {
      * Elimina los que tengan notsave
      */
     private function deleteNotSave() {
+        $active = 0;
         if (!$this->xml_output) {
             return null;
         }
@@ -202,15 +204,20 @@ class itform {
         foreach ($this->xml_output->element as $field) {
             if (trim($field->notsave) == "true") {
                 array_push($delete, $i);
+            } else {
+                $active++;
             }
             $i++;
         }
-        $back=0;
-        foreach($delete as $p){
-            unset($tmp->element[$p-$back]);
+        if ($active == 0) {
+            return null;
+        }
+        $back = 0;
+        foreach ($delete as $p) {
+            unset($tmp->element[$p - $back]);
             $back++;
         }
-        
+
         return $tmp;
     }
 
@@ -221,7 +228,10 @@ class itform {
     public function get_output() {
         if ($this->xml_output) {
             $final = $this->deleteNotSave();
-            return $final->asXML();
+            if ($final) {
+                return $final->asXML();
+            }
+            return "";
         }
         return null;
     }

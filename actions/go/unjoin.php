@@ -9,7 +9,7 @@
     $response = array("result" => "", "msj" => "");
     $TKT = $this->getTKT();
     
-    $rtaOP = $TKT->free();
+    $rtaOP = $TKT->un_join();
     if($rtaOP!="ok"){
         $response = array("result" => "error", "msj" => $rtaOP);
     }else{

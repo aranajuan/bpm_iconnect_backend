@@ -21,6 +21,7 @@ function GO($RC) {
 
     $A = new ACTION();
     $A->load_DB($RC->get_params("action"));
+    $TKT->setWorking();
     $validation = $A->loadTKT($TKT);
 
     if (!$validation) {
@@ -34,7 +35,7 @@ function GO($RC) {
     }
 
     $form = json_decode($RC->get_params("form"),true);
-    $validation = $A->loadFormValues($form,"openform");
+    $validation = $A->loadFormValues($form,"actionform");
 
     
     if ($validation != "ok") {

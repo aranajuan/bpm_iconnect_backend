@@ -16,6 +16,7 @@
         $response = array("result" => "error", "msj" => "Erro al cargar tkt.");
     }
     
+   
     $rtaOP = $TKT->join($master);
     
     $this->loadValue($master->get_prop("id"));

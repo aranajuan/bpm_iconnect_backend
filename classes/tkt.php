@@ -34,6 +34,8 @@ class TKT extends TREE {
         array("RED", "BLUE", "BLACK"),
         array(3, 6, 9)
     );
+    
+    private $working;
 
     /**
      * Carga tickets aplicando filtros
@@ -80,6 +82,7 @@ class TKT extends TREE {
      */
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
+        $this->working=false;
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_TICKETS where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
@@ -90,6 +93,29 @@ class TKT extends TREE {
         $this->error = TRUE;
         return "error";
     }
+
+    /**
+     * Setea como ticket en trabajo
+     */
+    public function setWorking(){
+        $this->working=true;
+    }
+    
+    /**
+     *  Elimina seteo de ticket en trabajo
+     */
+    public function unsetWorking(){
+         $this->working=false;
+    }
+    
+    /**
+     * Ticket llamado para trabajarlo
+     * @return boolean
+     */
+    public function  isWorking(){
+        return $this->working;
+    }
+
 
     /**
      * Carga datos de la base a propiedades y la vista del usuario
@@ -499,8 +525,9 @@ class TKT extends TREE {
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
             }
-        } else {
+        } elseif($this->isWorking()){
             $this->ejecute_action("SET_MASTER");
+            $this->clear_childs();
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));

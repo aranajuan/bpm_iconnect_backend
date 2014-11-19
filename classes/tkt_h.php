@@ -9,7 +9,13 @@ require_once 'classes/abstract/itobject.php';
 class TKT_H extends itobject {
 
     private $id;    /* id del evento */
+
+    /**
+     *
+     * @var TKT 
+     */
     private $TKT;   /* objeto ticket */
+    private $idtkt;
     private $view;  /* vista de la accion */
     private $FA;    /* fecha de generacion */
     private $UA;    /* usuario generacion */
@@ -54,52 +60,27 @@ class TKT_H extends itobject {
      * @return String
      */
     function get_detailsShow() {
-        return $this->detalle;
-        $output="";
+        $output = "";
         /* verificar master */
 
-        if ($this->get_prop("UA") != $GLOBALS[UL]->get_prop("id")) { 
-            // solo verificar accesos si no es movimiento del usr
-            if (!$this->check_access()) {
-                $this->detalle_Show = null;
-                return false;
-            }
-
-
-            //verificar cifrado
-            if ($this->view["vista"] == 2) {
-                $this->detalle_Show = preg_replace("/[0-9\-\.]{5,}/", "*****", $this->detalle);
-            } else {
-                $this->detalle_Show = $this->detalle;
-            }
-
-            //verificar archivos
-            if ($this->view["archivo_vistaprevia"] == 1) {
-
-                /* si hay detalle y estan visible los archivos los carga */
-                if ($this->detalle) {
-                    $this->load_files();
-                }
-
-                if ($this->view["archivo_descarga"] == 1) {
-                    $this->detalle_Show .= $this->filesHTML; //acceso full
-                } else {
-                    //puede ver pero no descargar se eliminan links
-                    $this->detalle_Show .= preg_replace("/href='\S*'/", "href='javascript:alert_p(\"No tienes permiso para descargar.\",\"Error acceso\")'", $this->filesHTML);
-                }
-            }
-        } else {
-
-            /* movimiento del usuario - muestra todo */
-            if ($this->detalle) {
-                $this->load_files();
-            }
-            $this->detalle_Show = $this->detalle . $this->filesHTML;
+        if (!$this->check_access()) {
+            return "";
         }
-        //$this->detalle_Show.="( relacion: " . $this->view["nombre"] . ")";
-        return true;
+
+        if ($this->view["vista"] == 2) {
+            $output = preg_replace("/<value>[^<]*<\/value>/", "<value> ***** </value>", $this->detalle);
+        } else {
+            $output = $this->detalle;
+        }
+
+        return $output;
     }
 
+    /**
+     * Carga vector desde base
+     * @param type $tmpU
+     * @return string
+     */
     private function load_DV($tmpU) {
         $this->id = $tmpU["id"];
         $this->FA = $tmpU["FA"];
@@ -109,6 +90,7 @@ class TKT_H extends itobject {
         $this->idaccion = $tmpU["idaccion"];
         $this->valoraccion = $tmpU["valoraccion"];
         $this->estado = $tmpU["estado"];
+        $this->idtkt = $tmpU["idtkt"];
         $accion = new ACTION();
         $rta = $accion->load_DB($this->idaccion);
         $this->detalle = $tmpU["detalle"];
@@ -167,18 +149,29 @@ class TKT_H extends itobject {
         $element = new SimpleXMLElement("<element></element>");
 
         $action = $element->addChild("action");
+        $action->addChild("id", $this->get_prop("id"));
         $action->addChild("alias", $this->accion->get_prop("alias"));
         $action->addChild("ejecuta", $this->accion->get_prop("ejecuta"));
         $action->addChild("value", $this->get_prop("valoraccion"));
+        $action->addChild("usr", $this->get_prop("UA"));
+        $action->addChild("date", $this->get_prop("FA"));
         $formEl = $element->addChild("form");
         if ($this->get_prop("detalle") != "") {
             $form = new SimpleXMLElement($this->get_prop("detalle"));
             append_simplexml($formEl, $form);
         }
+        $files_h = $this->get_files();
+        if ($files_h && count($files_h)) {
+            $files = $element->addChild("files");
+            foreach ($files_h as $f) {
+                $files->addChild("file", $f);
+            }
+        }
         return $element;
     }
 
-    function check_access() {
+    public function check_access() {
+        $this->loadview();
         if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
             return true;
         }
@@ -206,37 +199,38 @@ class TKT_H extends itobject {
         }
     }
 
-    private function load_files() {
-        $this->filesHTML = "";
-        $count = 0;
-        $tmp = "<div style='height:35px;'>";
-        $dir = EXTERNAL_FILES . "/" . FILEUP_ATTACH_FOLDER . "/";
-        if (is_dir($dir)) {
-            if ($dh = opendir($dir)) {
-                while (($file = readdir($dh)) !== false) {
-                    $fileV = explode("_", $file);
-                    if ($fileV[0] == $this->id) {
-                        $fileVV = explode(".", $file);
-                        if (file_exists(EXTERNAL_FILES . "/" . FILEUP_ATTACH_FOLDER_THUMN . "/" . $file))
-                            $thumb = "download.php?path=" . FILEUP_ATTACH_FOLDER_THUMN . "&file=" . $file;
-                        else {
-                            if (file_exists(EXTERNAL_FILES . "/" . FILEUP_ATTACH_FOLDER_THUMN . "/" . $fileVV[0] . ".jpg")) {
-                                $thumb = "download.php?path=" . FILEUP_ATTACH_FOLDER_THUMN . "&file=" . $fileVV[0] . ".jpg";
-                            } else {
-                                $thumb = HIMG_DIR . "/thumbnail/" . $fileVV[count($fileVV) - 1] . ".png";
-                            }
-                        }
-                        $count++;
-                        $tmp.="<div style='position:relative;display:inline;padding-right:10px;'><a href='download.php?path=" . FILEUP_ATTACH_FOLDER . "&file=" . $file . "' target='_blank'><img src='" . $thumb . "' height='30' /></a></div>";
-                    }
-                }
-                closedir($dh);
+    /**
+     * @return array<string> filesnames
+     */
+    private function get_files() {
+
+        if (intval($this->view["archivo_descarga"]) != 1) {
+            return null;
+        }
+
+        $path = $this->getInstance()->get_prop("archivos_externos") . "/adjuntos";
+
+        if (is_dir($path)) {
+
+            $dh = opendir($path);
+            if (!$dh) {
+                return null;
             }
+
+            $list = array();
+            $count = 0;
+            while (($file = readdir($dh)) !== false) {
+                $fileV = explode("_", $file);
+
+                if ($fileV[0] == $this->id) {
+                    $list[$count] = $file;
+                    $count++;
+                }
+            }
+            closedir($dh);
+            return $list;
         }
-        $tmp.="</div>";
-        if ($count) {
-            $this->filesHTML = $tmp;
-        }
+        return null;
     }
 
     function get_prop($property) {
@@ -252,7 +246,7 @@ class TKT_H extends itobject {
             case 'accion':
                 return $this->accion;
             case 'detalle':
-                 return $this->get_detailsShow();
+                return $this->get_detailsShow();
             case 'UA':
                 return $this->UA;
             case 'UA_o':
@@ -272,6 +266,33 @@ class TKT_H extends itobject {
             default:
                 return "Propiedad invalida.";
         }
+    }
+
+    /**
+     * Carga ticket y vista si es necesario
+     */
+    private function loadview() {
+        if ($this->view == null) {
+            if ($this->TKT == null) {
+                $this->TKT = new TKT();
+                if ($this->TKT->load_DB($this->get_prop("idtkt")) != "ok") {
+                    echo "error TKT" . $this->get_prop("idtkt");
+                    $this->view = null;
+                }
+                $this->view = $this->TKT->get_prop("view");
+            } else {
+                $this->view = $this->TKT->get_prop("view");
+            }
+        }
+    }
+
+    /**
+     * Puede descargar
+     * @return boolean
+     */
+    public function candownload() {
+        $this->loadview();
+        return intval($this->view["archivo_descarga"]) == 1 && $this->check_access();
     }
 
     public function check_data() {

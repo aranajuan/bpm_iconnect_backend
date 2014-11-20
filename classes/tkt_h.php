@@ -151,10 +151,15 @@ class TKT_H extends itobject {
         $action = $element->addChild("action");
         $action->addChild("id", $this->get_prop("id"));
         $action->addChild("alias", $this->accion->get_prop("alias"));
-        $action->addChild("ejecuta", $this->accion->get_prop("ejecuta"));
-        $action->addChild("value", $this->get_prop("valoraccion"));
+        if(file_exists(INCLUDE_DIR."/actions/show/".$this->accion->get_prop("ejecuta").".php")){
+            $val=include INCLUDE_DIR."/actions/show/".$this->accion->get_prop("ejecuta").".php";
+            $action->addChild("value", $val);
+        }else{
+            $action->addChild("value", $this->get_prop("valoraccion"));
+        }
         $action->addChild("usr", $this->get_prop("UA"));
         $action->addChild("date", $this->get_prop("FA"));
+        $action->addChild("ejecuta", $this->accion->get_prop("ejecuta"));
         $formEl = $element->addChild("form");
         if ($this->get_prop("detalle") != "") {
             $form = new SimpleXMLElement($this->get_prop("detalle"));

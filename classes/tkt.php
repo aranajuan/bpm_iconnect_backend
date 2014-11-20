@@ -34,7 +34,6 @@ class TKT extends TREE {
         array("RED", "BLUE", "BLACK"),
         array(3, 6, 9)
     );
-    
     private $working;
 
     /**
@@ -62,8 +61,34 @@ class TKT extends TREE {
             $openbyfilter = "and UA in (" . implode(",", $arr) . ")";
         }
 
-        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter;
+        $opentotaken = "";
+        if ($filter["opento"]) {
+            $opentotaken = "and idequipo=" . $filter["opento"];
+            if ($filter["taken"]) {
+                if ($filter["taken"] == "*") {
+                    $opentotaken.=" and u_tom is not null";
+                } else {
+                    $listv = explode(",", $filter["taken"]);
+                    $arr = array();
+                    $null="";
+                    foreach ($listv as $v) {
+                        if ($v != "null") {
+                            array_push($arr, "'" . $v . "'");
+                        } else {
+                            $null="u_tom is null";
+                        }
+                    }
+                    if(count($arr)){
+                        if($null!=""){ $null="or ".$null;}
+                        $opentotaken.=" and ( u_tom in(".implode(",",$arr).") $null ) ";
+                    }else{
+                        $opentotaken.=" and $null ";
+                    }
+                }
+            }
+        }
 
+        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter. " ".$opentotaken ;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();
@@ -82,7 +107,7 @@ class TKT extends TREE {
      */
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
-        $this->working=false;
+        $this->working = false;
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_TICKETS where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
@@ -97,25 +122,24 @@ class TKT extends TREE {
     /**
      * Setea como ticket en trabajo
      */
-    public function setWorking(){
-        $this->working=true;
+    public function setWorking() {
+        $this->working = true;
     }
-    
+
     /**
      *  Elimina seteo de ticket en trabajo
      */
-    public function unsetWorking(){
-         $this->working=false;
+    public function unsetWorking() {
+        $this->working = false;
     }
-    
+
     /**
      * Ticket llamado para trabajarlo
      * @return boolean
      */
-    public function  isWorking(){
+    public function isWorking() {
         return $this->working;
     }
-
 
     /**
      * Carga datos de la base a propiedades y la vista del usuario
@@ -174,7 +198,7 @@ class TKT extends TREE {
      * @return array<ACTION>
      */
     function valid_actions() {
-        $A=new ACTION();
+        $A = new ACTION();
         $A->loadTKT($this);
         return $A->load_filtered();
     }
@@ -525,7 +549,7 @@ class TKT extends TREE {
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
             }
-        } elseif($this->isWorking()){
+        } elseif ($this->isWorking()) {
             $this->ejecute_action("SET_MASTER");
             $this->clear_childs();
             $ch = $this->get_prop("childs");
@@ -707,7 +731,7 @@ class TKT extends TREE {
         $this->master = NULL;
 
         $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
-        
+
         $this->childs = null;
         //reestablece detalles
 

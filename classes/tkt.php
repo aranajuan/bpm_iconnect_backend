@@ -29,7 +29,7 @@ class TKT extends TREE {
     private $tkt_hOBJ;  /* objeto tkt H */
     private $childs;    /* tickets adjuntos */
     private $view;  /* vista para el usuario */
-    private static $priorities = array(
+    public static $priorities = array(
         array("ALTA", "MEDIA", "BAJA"),
         array("RED", "BLUE", "BLACK"),
         array(3, 6, 9)
@@ -631,6 +631,7 @@ class TKT extends TREE {
      * @return string
      */
     function set_priority($idP) {
+        $idP=intval($idP);
         if (!is_numeric($idP))
             return "Prioridad invalida";
 

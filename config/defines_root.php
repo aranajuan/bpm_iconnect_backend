@@ -26,11 +26,14 @@ define('INCLUDE_DIR',ROOT_DIR."");
 date_default_timezone_set ( 'America/Argentina/Buenos_Aires' );
 
 define('DBSERVER_ALL','mysql');				// mssql o mysql
-
+define('DBSERVER_PREFIX',''); // 'dbo.'
 /* conexion a root */
 define('DBHOST_ROOT','localhost');			//SERVIDOR DB
 define('DBUSER_ROOT','root');				// Usuario DB
-define('DBPASS_ROOT','juan314');					// PASS DB
+define('DBPASS_ROOT','txKiP8BpK0LbEpwkumD1RTiSw6W9XgDFr04N7VOC5To=');					// PASS DB
+//txKiP8BpK0LbEpwkumD1RTiSw6W9XgDFr04N7VOC5To=  LOCAL
+//YsUMJpZak1xKmsyotXuBgajNQ1fCkTCe4U5wBuO/0sw=  DWIN
+
 
 //Parametros y constantes
 define('USERDATE_READ','d-m-Y H:i');

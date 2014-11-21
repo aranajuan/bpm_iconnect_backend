@@ -337,7 +337,7 @@ function finish() {
 
 class Encrypter {
 
-    private static $Key = "sistemasdeventas";
+    private static $Key = "ssvent1";
 
     public static function encrypt($input) {
         $output = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, sha1(Encrypter::$Key), $input, MCRYPT_MODE_CBC, sha1(sha1(Encrypter::$Key))));

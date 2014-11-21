@@ -824,7 +824,7 @@ class USER extends itobject {
      */
     private function newSession($front, $ipuser) {
 
-        $hash = hash("md2", (string) microtime());
+        $hash = hash("sha1", (string) microtime());
 
         $this->closeSession();
         $ssql = "insert into TBL_SESIONES (usr,front,ip,hash,fecha) values ('" . strToSQL($this->usr) . "'," . $front->get_prop("id") . ",'" . strToSQL($ipuser) . "','" . $hash . "',now())";

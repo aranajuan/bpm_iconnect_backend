@@ -64,20 +64,20 @@ class INSTANCE extends itobject {
      */
     public function get_alias() {
         return array(
-            array("TBL_LISTIN", "itracker_".$this->get_prop("nombre")."_uta.listines"),
-            array("TBL_USUARIOS", "itracker_".$this->get_prop("nombre")."_uta.usuarios"),
-            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."_uta.sisdir"),
-            array("TBL_SISTEMAS", "itracker_".$this->get_prop("nombre")."_uta.sistemas"),
-            array("TBL_ACCIONES", "itracker_".$this->get_prop("nombre")."_uta.acciones"),
-            array("TBL_PREGUNTAS", "itracker_".$this->get_prop("nombre")."_uta.preguntas"),
-            array("TBL_OPCIONES", "itracker_".$this->get_prop("nombre")."_uta.opciones"),
-            array("TBL_EQUIPOS", "itracker_".$this->get_prop("nombre")."_uta.equipos"),
-            array("TBL_DIRECCION", "itracker_".$this->get_prop("nombre")."_uta.direccion"),
-            array("TBL_TICKETS_M_DETALLES", "itracker_".$this->get_prop("nombre")."_tkt.tickets_m_detalles"),
-            array("TBL_TICKETS_M", "itracker_".$this->get_prop("nombre")."_tkt.tickets_m"),
-            array("TBL_TICKETS", "itracker_".$this->get_prop("nombre")."_tkt.tickets"),
-            array("TBL_PERFILES_VISTAS", "itracker_".$this->get_prop("nombre")."_uta.prefiles_vistas"),
-            array("TBL_PERFILES", "itracker_".$this->get_prop("nombre")."_uta.perfiles"),
+            array("TBL_LISTIN", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."listines"),
+            array("TBL_USUARIOS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."usuarios"),
+            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."sisdir"),
+            array("TBL_SISTEMAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."sistemas"),
+            array("TBL_ACCIONES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."acciones"),
+            array("TBL_PREGUNTAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."preguntas"),
+            array("TBL_OPCIONES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."opciones"),
+            array("TBL_EQUIPOS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."equipos"),
+            array("TBL_DIRECCION", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."direccion"),
+            array("TBL_TICKETS_M_DETALLES", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets_m_detalles"),
+            array("TBL_TICKETS_M", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets_m"),
+            array("TBL_TICKETS", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets"),
+            array("TBL_PERFILES_VISTAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."prefiles_vistas"),
+            array("TBL_PERFILES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."perfiles"),
         );
     }
 

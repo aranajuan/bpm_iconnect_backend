@@ -63,14 +63,15 @@ function GO($RC) {
     $equipo = $u->get_team_obj($idteam);
     $view = $equipo->get_prop("staffhome_vista");
 
-    $ALL_v = $ALL->list_fiter($filter);
+    $ALL_v = $ALL->list_fiter(array_merge($filter,array("master"=>"null")));
 
     $response = $RC->createElement("data");
     $response->appendChild($RC->createElement("view", $view));
     $listL = $RC->createElement("list");
+    $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","status","critic");
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
-            $listL->appendChild($l->getXML($RC, array("id", "FA", "usr_o.nombre")));
+            $listL->appendChild($l->getXML($RC, $fields));
         }
         $response->appendChild($listL);
         return $response;

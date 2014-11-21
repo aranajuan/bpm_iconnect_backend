@@ -70,25 +70,36 @@ class TKT extends TREE {
                 } else {
                     $listv = explode(",", $filter["taken"]);
                     $arr = array();
-                    $null="";
+                    $null = "";
                     foreach ($listv as $v) {
                         if ($v != "null") {
                             array_push($arr, "'" . $v . "'");
                         } else {
-                            $null="u_tom is null";
+                            $null = "u_tom is null";
                         }
                     }
-                    if(count($arr)){
-                        if($null!=""){ $null="or ".$null;}
-                        $opentotaken.=" and ( u_tom in(".implode(",",$arr).") $null ) ";
-                    }else{
+                    if (count($arr)) {
+                        if ($null != "") {
+                            $null = "or " . $null;
+                        }
+                        $opentotaken.=" and ( u_tom in(" . implode(",", $arr) . ") $null ) ";
+                    } else {
                         $opentotaken.=" and $null ";
                     }
                 }
             }
         }
 
-        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter. " ".$opentotaken ;
+        $ismaster = "";
+        if (isset($filter["master"])) {
+            if ($filter["master"] == "null") {
+                $ismaster = "and idmaster is null";
+            } else {
+                $ismaster = "and idmaster=" . $filter["master"];
+            }
+        }
+
+        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();
@@ -291,7 +302,7 @@ class TKT extends TREE {
     public function get_status() {
         $TKTHF = $this->get_last_tktH();
         if ($this->UB)
-            $status = "Cerrado (" . $this->get_prop("FB") . ")";
+            $status = "Cerrado";
         else
         if ($TKTHF) {
             if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
@@ -331,15 +342,15 @@ class TKT extends TREE {
         if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . $this->id . " and estado = " . I_ACTIVE . " and UB is null order by FA
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . " and UB is null order by FA
         ";
-        $db = new DATOS();
-        $db->loadRS($ssql);
-        if ($db->noEmpty) {
+        $this->dbinstance->loadRS($ssql);
+        if ($this->dbinstance->noEmpty) {
             $THO = new TKT_H();
-            $THID = $db->get_vector();
-            if ($THO->load_DB($THID[0], $this) == "ok")
+            $THID = $this->dbinstance->get_vector();
+            if ($THO->load_DB($THID[0], $this) == "ok") {
                 return $THO;
+            }
             return NULL;
         }
         return NULL;
@@ -631,7 +642,7 @@ class TKT extends TREE {
      * @return string
      */
     function set_priority($idP) {
-        $idP=intval($idP);
+        $idP = intval($idP);
         if (!is_numeric($idP))
             return "Prioridad invalida";
 
@@ -861,9 +872,22 @@ class TKT extends TREE {
                 return $this->u_asig_o;
             case 'prioridad':
                 return $this->prioridad;
+            case 'prioridadtext':
+                $ar = $this->get_priority_textcolor();
+                return $ar[0];
             case 'childs':
                 $this->load_childs();
                 return $this->childs;
+            case 'origen_json':
+                return json_encode($this->get_tree_history());
+            case 'childsc':
+                return $this->load_childs();
+            case 'critic':
+                return $this->get_critic();
+            case 'status':
+                $ar = $this->get_status();
+                ;
+                return $ar[1];
             case 'UA':
                 return $this->UA;
             case 'UB':

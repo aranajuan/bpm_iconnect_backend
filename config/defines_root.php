@@ -11,7 +11,7 @@ define ("MAP_U",""); // mapea a otro usuario EJ: 548391>223547;
 ini_set("SMTP","smtpappl01");
 define("MAIL_ENABLED",0);
 
-define("DOMAINS","TELECOM,CCPI,ITRACKER");
+define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT");
 define("INSTANCES","TELECOMCCT,AGENTESTP");
 
 // Configuraciones Base

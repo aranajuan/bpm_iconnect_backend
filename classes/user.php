@@ -71,7 +71,7 @@ class USER extends itobject {
     private $dbroot;
     private $estado;
 
-    function __construct($conn=null) {
+    function __construct($conn = null) {
         parent::__construct($conn);
         $this->dbroot = new DB($this->conn, true);
     }
@@ -600,7 +600,7 @@ class USER extends itobject {
         $i = 0;
         while ($v = $this->dbinstance->get_vector()) {
             if ($v["relacion"] == "*") {
-                $this->perfil_vista[$i] = array("nombre" => "*", "costo" => 0, "vista" => $v["vista"], "prioridad" => 0, "tipos_eventos" => explode(",", $v["tipos_eventos"]),  "archivo_descarga" => $v["archivo_descarga"]);
+                $this->perfil_vista[$i] = array("nombre" => "*", "costo" => 0, "vista" => $v["vista"], "prioridad" => 0, "tipos_eventos" => explode(",", $v["tipos_eventos"]), "archivo_descarga" => $v["archivo_descarga"]);
                 return;
             } else {
                 $rels = explode(",", $v["relacion"]);
@@ -807,6 +807,30 @@ class USER extends itobject {
                         return "Usuario o contrase&ntilde;a invalidos.";
                 }else {
                     return "Error en servicio de logeo";
+                }
+                break;
+            case "SHAREPOINT":
+                $SPF= new FRONT();
+                $SPF->load_DB("SHAREPOINT");
+                $ssql="select fecha from TBL_SESIONES where "
+                        . "usr='".strToSQL($this->get_prop("usr"))."' "
+                        . "and front=".$SPF->get_prop("id")." and hash='".strToSQL($passL)."'"
+                        . " and ip='".strToSQL($ipuser)."' ";
+                $this->dbroot->loadRS($ssql);
+                if($this->dbroot->cReg!=1){
+                    return "Usuario o contrase&ntilde;a invalidos.";
+                }
+                $v=$this->dbroot->get_vector();
+                $f1 = strtotime($v["fecha"]);
+                if($f1==false){
+                    return "fecha invalida ".$v["fecha"];
+                }
+                $f2=  strtotime('now');
+                if($f2==false){
+                    return "fecha invalida";
+                }
+                if(($f2-$f1)>60){
+                    return "Usuario o contrase&ntilde;a invalidos. timeout".($f2-$f1);
                 }
                 break;
             default:

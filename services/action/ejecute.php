@@ -1,5 +1,5 @@
 <?php
-
+require_once 'classes/notify.php';
 require_once 'classes/action.php';
 
 /**
@@ -47,8 +47,14 @@ function GO($RC) {
         $A->loadFiles($files);
     }
     
+    $Notif = new NOTIFY();
+    $Notif->load_TKTEXT($TKT);
     $actionResult = $A->ejecute();
     
+    if($actionResult["result"]){
+        $Notif->load_actionOBJ($A);
+        $actionResult["mail"]= $Notif->send();
+    }
     $result= $RC->createElement("data");
     foreach($actionResult as $k=>$v){
         $result->appendChild($RC->createElement($k, $v));

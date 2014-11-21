@@ -24,7 +24,7 @@ class ConnectionManager {
     public function connect_root($motor, $host, $user, $pass, $dbAlias) {
         $this->serverMotor = $motor;
         $this->dbRootAlias = $dbAlias;
-        $lnk = $this->new_link($host, $user, $pass);
+    $lnk = $this->new_link($host, $user, $pass);
         if ($lnk) {
             $this->dbRootlink = $lnk;
             $this->status = "root_ok";
@@ -68,9 +68,9 @@ class ConnectionManager {
      */
     private function new_link($host, $user, $pass) {
         if ($this->serverMotor == 'mysql') {
-            return mysql_connect($host, $user, $pass);
+            return mysql_connect($host, $user, Encrypter::decrypt($pass));
         } elseif ($this->serverMotor  == 'mssql') {
-            return mssql_connect($host, $user, $pass);
+            return mssql_connect($host, $user, Encrypter::decrypt($pass));
         }
     }
 

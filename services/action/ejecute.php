@@ -1,5 +1,5 @@
 <?php
-
+require_once 'classes/notify.php';
 require_once 'classes/action.php';
 
 /**
@@ -21,6 +21,7 @@ function GO($RC) {
 
     $A = new ACTION();
     $A->load_DB($RC->get_params("action"));
+    $TKT->setWorking();
     $validation = $A->loadTKT($TKT);
 
     if (!$validation) {
@@ -34,7 +35,7 @@ function GO($RC) {
     }
 
     $form = json_decode($RC->get_params("form"),true);
-    $validation = $A->loadFormValues($form,"openform");
+    $validation = $A->loadFormValues($form,"actionform");
 
     
     if ($validation != "ok") {
@@ -46,8 +47,14 @@ function GO($RC) {
         $A->loadFiles($files);
     }
     
+    $Notif = new NOTIFY();
+    $Notif->load_TKTEXT($TKT);
     $actionResult = $A->ejecute();
     
+    if($actionResult["result"]){
+        $Notif->load_actionOBJ($A);
+        $actionResult["mail"]= $Notif->send();
+    }
     $result= $RC->createElement("data");
     foreach($actionResult as $k=>$v){
         $result->appendChild($RC->createElement($k, $v));

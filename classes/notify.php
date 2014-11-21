@@ -37,7 +37,7 @@ define("MAIL_CC", MAIL_TO);
 /**
  * Clase para enviar notificaciones y armar mails
  */
-class NOTIFY {
+class NOTIFY extends itobject {
 
     private $tkt_origen = NULL; /* Objeto TKT inicial */
     private $tkt_final = NULL; /* Objeto TKT actualizado */
@@ -50,6 +50,7 @@ class NOTIFY {
     private $cc_body; /* cuerpo del mail CC armado */
     private $too; /* array de destinos TO */
     private $cc; /* array de destinos CC */
+    private $dbroot;
 
     /**
      * Condiciones que seran reemplazadas en el array
@@ -91,6 +92,11 @@ class NOTIFY {
         "html_dir",
         "FA"
     );
+
+    function __construct($conn = null) {
+        parent::__construct($conn);
+        $this->dbroot = new DB($this->conn, true);
+    }
 
     /**
      * Combierte la condicion en un valor para compararlo
@@ -348,38 +354,15 @@ class NOTIFY {
     }
 
     /**
-     * Carga el ticket destino
-     * @param type $TKT
-     */
-    function load_TKTNEW($TKT) {
-        $this->tkt_final = $TKT;
-    }
-
-    /**
-     * Carga objeto accion de base y parametros full_destino, mail_body, accion y accionObj
-     * @param type $name
-     */
-    function load_action($name) {
-        $A = new ACTION();
-        if ($A->loadDB_name($name) == "ok") {
-            load_actionOBJ($A);
-        } else {
-            $this->full_destino = "";
-            $this->mail_body = "";
-            $this->accion = "";
-            $this->accionObj = NULL;
-        }
-    }
-
-    /**
      * Carga objeto accion y parametros full_destino, mail_body, accion y accionObj
-     * @param type $name
+     * @param ACTION $A
      */
     function load_actionOBJ($A) {
         $this->full_destino = $A->get_prop("notificacion_param");
         $this->mail_body = $A->get_prop("notificacion_texto");
         $this->accion = $A->get_prop("nombre");
         $this->accionObj = $A;
+        $this->tkt_final=$A->getTKT();
     }
 
     /**
@@ -480,35 +463,96 @@ class NOTIFY {
      * Envia mail e informa resultado
      * @return string
      */
-    function send() {
-        if (MAIL_ENABLED == 0)
-            return "ok";
-        if ($this->accion == "" || $this->mail_body == "" || $this->full_destino == "" || $this->tkt_final == NULL || $this->tkt_origen == NULL)
-            return "ok";
+    public function send() {
+        if (MAIL_ENABLED == 0){
+            return "Mail desactivado";    
+        }
+            
+        if ($this->accion == "" 
+                || $this->mail_body == ""
+                || $this->full_destino == "" 
+                || $this->tkt_final == NULL 
+                || $this->tkt_origen == NULL){
+            return "Faltan datos para enviar mail";
+                }
         $this->split_str();
         $this->load_destiny();
         $this->clean_destiny();
 
-        if (count($this->too) == 0 && count($this->cc) == 0)
-            return "ok";
+        if (count($this->too) == 0 && count($this->cc) == 0){
+            return "No hay destinatarios para esta notificacion";
+        }
+        
         $this->load_body();
         $this->load_cc_body();
 
         $ok = true;
         foreach ($this->too as $t) {
-            $r = mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO)), "From: sistemas_de_ventas@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1");
-            $r = 1;
-            if (!$r)
-                $ok = false;
+           $this->send_mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO)), "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1");
         }
 
         foreach ($this->cc as $t) {
-            if (!mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC)), "From: sistemas_de_ventas@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1"))
-                $ok = false;
+            $this->send_mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC)), "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1");
         }
-        if ($ok)
-            return "ok";
-        return "No se pudo informar a todos los destinatarios.";
+        
+        return "ok";
+    }
+
+    /**
+     * Envia mail a destinatarios por SP
+     * @param type $to
+     * @param type $subject
+     * @param type $body
+     * @param type $cc
+     * @param type $type
+     * @param type $from
+     * @return int
+     */
+    private function send_mail($to, $subject, $body, $cc, $type, $from) {
+
+        $this->dbroot->query("
+	EXEC msdb.dbo.sp_send_dbmail
+	@profile_name = 'sistemas',
+	@copy_recipients ='$cc',
+        @recipients  = '$to',
+        @subject = '$subject',
+
+        @importance =  'High',
+        @body_format = '$type',
+        @body = '$body';
+	
+	");
+
+
+        return 1;
+    }
+
+    public function check_data() {
+        
+    }
+
+    public function delete_DB() {
+        
+    }
+
+    public function get_prop($property) {
+        
+    }
+
+    public function insert_DB() {
+        
+    }
+
+    public function load_DB($id) {
+        
+    }
+
+    public function load_VEC($tmpU) {
+        
+    }
+
+    public function update_DB() {
+        
     }
 
 }

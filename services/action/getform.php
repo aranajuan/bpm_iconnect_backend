@@ -22,9 +22,10 @@ function GO($RC) {
     if($formTXT==""){
         return $RC->createElement("error", "No se pudo cargar formulario");
     }
-    
     $parser = new DOMDocument();
-    $parser->loadXML($formTXT);
+    if($parser->loadXML($formTXT)==false){
+        return $RC->createElement("error", "Formulario invalido");
+    }
     
     $ret = $RC->append_xml($parser->getElementsByTagName("itform")->item(0));
     

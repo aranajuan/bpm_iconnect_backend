@@ -31,6 +31,7 @@ function GO($RC) {
             append_simplexml($th, $el);
         }
     }
+    $response->addChild("master",$TKT->get_prop("idmaster"));
     $actions = $response->addChild("actions");
     $AL = $TKT->valid_actions();
     foreach($AL as $A){

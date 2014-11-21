@@ -18,9 +18,9 @@ class FRONT extends itobject {
      */
     private $DBobj;
     
-    function  __construct($conn){
+    function  __construct($conn=null){
         parent::__construct($conn);
-        $this->DBobj = new DB($conn, true);
+        $this->DBobj = new DB($this->conn, true);
     }
     
     /**

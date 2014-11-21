@@ -29,11 +29,12 @@ class TKT extends TREE {
     private $tkt_hOBJ;  /* objeto tkt H */
     private $childs;    /* tickets adjuntos */
     private $view;  /* vista para el usuario */
-    private static $priorities = array(
+    public static $priorities = array(
         array("ALTA", "MEDIA", "BAJA"),
         array("RED", "BLUE", "BLACK"),
         array(3, 6, 9)
     );
+    private $working;
 
     /**
      * Carga tickets aplicando filtros
@@ -60,8 +61,45 @@ class TKT extends TREE {
             $openbyfilter = "and UA in (" . implode(",", $arr) . ")";
         }
 
-        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter;
+        $opentotaken = "";
+        if ($filter["opento"]) {
+            $opentotaken = "and idequipo=" . $filter["opento"];
+            if ($filter["taken"]) {
+                if ($filter["taken"] == "*") {
+                    $opentotaken.=" and u_tom is not null";
+                } else {
+                    $listv = explode(",", $filter["taken"]);
+                    $arr = array();
+                    $null = "";
+                    foreach ($listv as $v) {
+                        if ($v != "null") {
+                            array_push($arr, "'" . $v . "'");
+                        } else {
+                            $null = "u_tom is null";
+                        }
+                    }
+                    if (count($arr)) {
+                        if ($null != "") {
+                            $null = "or " . $null;
+                        }
+                        $opentotaken.=" and ( u_tom in(" . implode(",", $arr) . ") $null ) ";
+                    } else {
+                        $opentotaken.=" and $null ";
+                    }
+                }
+            }
+        }
 
+        $ismaster = "";
+        if (isset($filter["master"])) {
+            if ($filter["master"] == "null") {
+                $ismaster = "and idmaster is null";
+            } else {
+                $ismaster = "and idmaster=" . $filter["master"];
+            }
+        }
+
+        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();
@@ -80,6 +118,7 @@ class TKT extends TREE {
      */
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
+        $this->working = false;
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_TICKETS where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
@@ -89,6 +128,28 @@ class TKT extends TREE {
 
         $this->error = TRUE;
         return "error";
+    }
+
+    /**
+     * Setea como ticket en trabajo
+     */
+    public function setWorking() {
+        $this->working = true;
+    }
+
+    /**
+     *  Elimina seteo de ticket en trabajo
+     */
+    public function unsetWorking() {
+        $this->working = false;
+    }
+
+    /**
+     * Ticket llamado para trabajarlo
+     * @return boolean
+     */
+    public function isWorking() {
+        return $this->working;
     }
 
     /**
@@ -148,7 +209,7 @@ class TKT extends TREE {
      * @return array<ACTION>
      */
     function valid_actions() {
-        $A=new ACTION();
+        $A = new ACTION();
         $A->loadTKT($this);
         return $A->load_filtered();
     }
@@ -241,7 +302,7 @@ class TKT extends TREE {
     public function get_status() {
         $TKTHF = $this->get_last_tktH();
         if ($this->UB)
-            $status = "Cerrado (" . $this->get_prop("FB") . ")";
+            $status = "Cerrado";
         else
         if ($TKTHF) {
             if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
@@ -281,15 +342,15 @@ class TKT extends TREE {
         if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . $this->id . " and estado = " . I_ACTIVE . " and UB is null order by FA
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . " and UB is null order by FA
         ";
-        $db = new DATOS();
-        $db->loadRS($ssql);
-        if ($db->noEmpty) {
+        $this->dbinstance->loadRS($ssql);
+        if ($this->dbinstance->noEmpty) {
             $THO = new TKT_H();
-            $THID = $db->get_vector();
-            if ($THO->load_DB($THID[0], $this) == "ok")
+            $THID = $this->dbinstance->get_vector();
+            if ($THO->load_DB($THID[0], $this) == "ok") {
                 return $THO;
+            }
             return NULL;
         }
         return NULL;
@@ -499,8 +560,9 @@ class TKT extends TREE {
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
             }
-        } else {
+        } elseif ($this->isWorking()) {
             $this->ejecute_action("SET_MASTER");
+            $this->clear_childs();
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
                 $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
@@ -580,6 +642,7 @@ class TKT extends TREE {
      * @return string
      */
     function set_priority($idP) {
+        $idP = intval($idP);
         if (!is_numeric($idP))
             return "Prioridad invalida";
 
@@ -680,7 +743,7 @@ class TKT extends TREE {
         $this->master = NULL;
 
         $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
-        
+
         $this->childs = null;
         //reestablece detalles
 
@@ -809,9 +872,22 @@ class TKT extends TREE {
                 return $this->u_asig_o;
             case 'prioridad':
                 return $this->prioridad;
+            case 'prioridadtext':
+                $ar = $this->get_priority_textcolor();
+                return $ar[0];
             case 'childs':
                 $this->load_childs();
                 return $this->childs;
+            case 'origen_json':
+                return json_encode($this->get_tree_history());
+            case 'childsc':
+                return $this->load_childs();
+            case 'critic':
+                return $this->get_critic();
+            case 'status':
+                $ar = $this->get_status();
+                ;
+                return $ar[1];
             case 'UA':
                 return $this->UA;
             case 'UB':

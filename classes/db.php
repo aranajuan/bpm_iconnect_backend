@@ -142,34 +142,4 @@ class DB {
 
 }
 
-/**
- * Envia mail a destinatarios por SP
- * @param type $to
- * @param type $subject
- * @param type $body
- * @param type $cc
- * @param type $type
- * @param type $from
- * @return int
- */
-function send_mail($to, $subject, $body, $cc, $type, $from) {
-
-    $DB = new DBroot();
-    $DB->query("
-	EXEC msdb.dbo.sp_send_dbmail
-	@profile_name = 'sistemas',
-	@copy_recipients ='$cc',
-        @recipients  = '$to',
-        @subject = '$subject',
-
-        @importance =  'High',
-        @body_format = '$type',
-        @body = '$body';
-	
-	");
-
-
-    return 1;
-}
-
 ?>

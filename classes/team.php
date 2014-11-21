@@ -84,7 +84,6 @@ class TEAM extends itobject {
         $this->idlistin = trim($tmpU["idlistin"]);
         $this->t_conformidad = trim($tmpU["t_conformidad"]);
         $this->iddireccion = trim($tmpU["iddireccion"]);
-        $this->tipo = trim($tmpU["tipo"]);
         $this->idsequiposderiva = trim($tmpU["idsequipos_deriva"]);
         $this->idsequiposvisible = trim($tmpU["idsequipos_visible"]);
         $this->mytkts_vista = trim($tmpU["mytkts_vista"]);

@@ -1,5 +1,19 @@
 <?php
 
+
+/**
+ * Si no es una array lo convierte
+ * @param type $arr
+ */
+function make_arrayobj($arr){
+    if (!isset($arr[0]) || !is_array($arr)) {
+        $tmp = $arr;
+        $arr = array();
+        $arr[0] = $tmp;
+    }
+    return $arr;
+}
+
 /**
  * Une XML
  * @param SimpleXMLElement $simplexml_to

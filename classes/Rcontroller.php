@@ -124,7 +124,7 @@ class Rcontroller extends XMLhandler {
         $U = new USER($this->conections);
         $rta = $U->load_DB($this->getUser());
         if ($rta != "ok") {
-            $this->error = "Usuario o contrase&ntilde;a ivalidos";
+            $this->error = "Usuario o contrase&ntilde;a invalidos";
             return false;
         }
 

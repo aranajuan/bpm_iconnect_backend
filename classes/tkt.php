@@ -279,11 +279,20 @@ class TKT extends TREE {
         ";
         $this->dbinstance->loadRS($ssql);
         $i = 0;
+        $idteam = null;
         if ($this->dbinstance->noEmpty) {
             while ($TH = $this->dbinstance->get_vector()) {
                 $THO = new TKT_H();
                 if ($THO->load_DB($TH[0], $this->view) == "ok") {
                     $this->tkt_hOBJ[$i] = $THO;
+                    $eje = $THO->get_prop('accion')->get_prop("ejecuta");
+                    if ($eje === "open") {
+                        $idteam = $THO->get_prop("valoraccion");
+                        $THO->set_idteam($idteam);
+                    }
+                    if ($eje === "derive") {
+                        $idteam = $THO->get_prop("valoraccion");
+                    }
                     $i++;
                 }
             }
@@ -348,7 +357,10 @@ class TKT extends TREE {
         if ($this->dbinstance->noEmpty) {
             $THO = new TKT_H();
             $THID = $this->dbinstance->get_vector();
-            if ($THO->load_DB($THID[0], $this) == "ok") {
+            if ($THO->load_DB($THID[0], $this->view) == "ok") {
+                if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
+                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                }
                 return $THO;
             }
             return NULL;
@@ -366,13 +378,16 @@ class TKT extends TREE {
         $ssql = "
             select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as A on ( TH.idaccion = A.id) where TH.idtkt=" . $this->id . " and A.nombre='ABRIR' order by FA
         ";
-        $db = new DATOS();
-        $db->loadRS($ssql);
-        if ($db->noEmpty) {
+        $this->dbinstance->loadRS($ssql);
+        if ($this->dbinstance->noEmpty) {
             $THO = new TKT_H();
-            $THID = $db->get_vector();
-            if ($THO->load_DB($THID[0], $this) == "ok")
+            $THID = $this->dbinstance->get_vector();
+            if ($THO->load_DB($THID[0], $this->view) == "ok") {
+                if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
+                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                }
                 return $THO;
+            }
             return NULL;
         }
         return NULL;
@@ -383,8 +398,9 @@ class TKT extends TREE {
      * @return array<TKT_H>
      */
     function get_tktHObj() {
-        if (!(is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ)))
+        if (!(is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))) {
             $this->load_tktH();
+        }
         return $this->tkt_hOBJ;
     }
 
@@ -550,6 +566,11 @@ class TKT extends TREE {
      * @return string result
      */
     public function re_open() {
+        if($this->get_prop("minFromClose") > HsToMin($this->get_prop("equipo")->get_prop("t_conformidad"))){
+            return "Se supero el maximo tiempo de reapertura "
+            . "(".$this->get_prop("equipo")->get_prop("t_conformidad").") para este equipo. ";
+        }
+        
         $ssql = "update TBL_TICKETS set UB=NULL, FB=NULL where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql))
             return "Ticket_reabrir: " . $this->dbinstance->details;

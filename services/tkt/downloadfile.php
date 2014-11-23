@@ -16,10 +16,10 @@ function GO($RC) {
         $fv=explode("_",$reqFile);
         $TH=new TKT_H();
         if($TH->load_DB($fv[0])!="ok"){
-            return $RC->createElement("error","Archivo invalido, acceso denegado.");
+            return $RC->createElement("error","Archivo invalido, acceso denegado 1.");
         }
         if(!$TH->candownload()){
-            return $RC->createElement("error","Archivo invalido, acceso denegado.");
+            return $RC->createElement("error","Archivo invalido, acceso denegado 2.");
         }
         $filepath = $RC->get_Instance()->get_prop("archivos_externos")."/adjuntos/".$fname;
     }elseif($type==="anexo"){

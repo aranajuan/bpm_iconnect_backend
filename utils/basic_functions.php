@@ -1,11 +1,10 @@
 <?php
 
-
 /**
  * Si no es una array lo convierte
  * @param type $arr
  */
-function make_arrayobj($arr){
+function make_arrayobj($arr) {
     if (!isset($arr[0]) || !is_array($arr)) {
         $tmp = $arr;
         $arr = array();
@@ -19,31 +18,36 @@ function make_arrayobj($arr){
  * @param SimpleXMLElement $simplexml_to
  * @param SimpleXMLElement $simplexml_from
  */
-function append_simplexml(&$simplexml_to, &$simplexml_from) 
-{ 
-    foreach ($simplexml_from->children() as $simplexml_child) 
-    { 
-        $simplexml_temp = $simplexml_to->addChild($simplexml_child->getName(), (string) $simplexml_child); 
-        foreach ($simplexml_child->attributes() as $attr_key => $attr_value) 
-        { 
-            $simplexml_temp->addAttribute($attr_key, $attr_value); 
-        } 
-        
-        append_simplexml($simplexml_temp, $simplexml_child); 
-    } 
-} 
+function append_simplexml(&$simplexml_to, &$simplexml_from) {
+    foreach ($simplexml_from->children() as $simplexml_child) {
+        $simplexml_temp = $simplexml_to->addChild($simplexml_child->getName(), (string) $simplexml_child);
+        foreach ($simplexml_child->attributes() as $attr_key => $attr_value) {
+            $simplexml_temp->addAttribute($attr_key, $attr_value);
+        }
 
+        append_simplexml($simplexml_temp, $simplexml_child);
+    }
+}
 
 /**
  * Busca objeto en array
  * @param itobject $obj
  * @param array<itobject> $array
  * @param string $field campo a comparar
+ * @param boolean $objcompare Si es true compara objetos sino obj es tomado como la propiedad
  */
-function objinarray($obj, $array, $field = "id") {
+function objinarray($obj, $array, $field = "id", $objcompare = true) {
     foreach ($array as $o) {
-        if ($o->get_prop($field) === $obj->get_prop($field) && get_class($o) === get_class($obj)) {
-            return true;
+        if ($objcompare) {
+            if ($o->get_prop($field) === $obj->get_prop($field) && get_class($o) === get_class($obj)) {
+                return true;
+            }
+        } else {
+            if ($o != null) {
+                if ($o->get_prop($field) === $obj) {
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -193,8 +197,7 @@ function strToJava($txt) {
 function maxLenShow($txt, $max) {
     if (strlen($txt) > $max) {
         return substr($txt, 0, $max - 3) . "...";
-    }
-    else
+    } else
         return $txt;
 }
 

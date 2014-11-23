@@ -23,9 +23,13 @@ function GO($RC) {
 
         if ($opts) {
             foreach ($opts as $o) {
+                $ans=$o["ans"];
+                if($RC->get_User()->get_prop("perfil")==1){
+                    $ans.="/".$o["path"];
+                }
                 $option = $previous->appendChild($RC->createElement("OPTION"));
                 $option->appendChild($RC->createElement("question", $o["question"]));
-                $option->appendChild($RC->createElement("ans", $o["ans"]));
+                $option->appendChild($RC->createElement("ans", $ans));
                 $previous->appendChild($option);
             }
         }

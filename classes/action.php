@@ -116,8 +116,8 @@ class ACTION extends itobject {
      * @return type
      */
     public function load_DB($id) {
-        $idInt=  intval($id);
-        if (is_int($idInt) && $idInt>0 ) {
+        $idInt = intval($id);
+        if (is_int($idInt) && $idInt > 0) {
             return $this->loadDB_id($idInt);
         } else {
             return $this->loadDB_name($id);
@@ -202,8 +202,7 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return "ok";
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -221,8 +220,7 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return "ok";
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -286,7 +284,7 @@ class ACTION extends itobject {
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
         }else { // en otro equipo
             if ($this->habilita_equipo == 1)
-                return "Esta accion no se puede aplicar a un ticket de otro equipo".$this->TKT->get_prop("idequipo")."//";
+                return "Esta accion no se puede aplicar a un ticket de otro equipo" . $this->TKT->get_prop("idequipo") . "//";
         }
 
         if ($this->TKT->get_prop("idmaster")) { //no es master
@@ -338,10 +336,14 @@ class ACTION extends itobject {
      * @return array resultado
      */
     public function ejecute() {
-        $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
-        $response = include($file);
-        if($response["result"]!="ok"){
-            return $response;
+        if ($this->get_prop("ejecuta")) {
+            $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+            $response = include($file);
+            if ($response["result"] != "ok") {
+                return $response;
+            }
+        }else{
+            $response["result"]="ok";
         }
         $response["tkth"] = $this->addTKT_H();
         $response["sendfiles"] = $response["tkth"];

@@ -25,6 +25,8 @@ class TKT_H extends itobject {
     private $idaccion;
     private $valoraccion;
     private $estado;    /* estado de la accion */
+    private $idteam;    /* equipo que genero el evento */
+    private $UA_o;
 
     /**
      *
@@ -45,6 +47,14 @@ class TKT_H extends itobject {
             $this->error = TRUE;
         }
         return "error " . $id;
+    }
+
+    /**
+     * Setea id del equipo
+     * @param int $id
+     */
+    public function set_idteam($id) {
+        $this->idteam = $id;
     }
 
     /**
@@ -151,10 +161,10 @@ class TKT_H extends itobject {
         $action = $element->addChild("action");
         $action->addChild("id", $this->get_prop("id"));
         $action->addChild("alias", $this->accion->get_prop("alias"));
-        if(file_exists(INCLUDE_DIR."/actions/show/".$this->accion->get_prop("ejecuta").".php")){
-            $val=include INCLUDE_DIR."/actions/show/".$this->accion->get_prop("ejecuta").".php";
+        if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
+            $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
             $action->addChild("value", $val);
-        }else{
+        } else {
             $action->addChild("value", $this->get_prop("valoraccion"));
         }
         $action->addChild("usr", $this->get_prop("UA"));
@@ -177,15 +187,42 @@ class TKT_H extends itobject {
 
     public function check_access() {
         $this->loadview();
+
         if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
             return true;
         }
+
         if ($this->view["tipos_eventos"][0] != "*") {
             if (!(in_array($this->accion->get_prop("tipo"), $this->view["tipos_eventos"]))) {
                 return false;
             }
         }
+
+        if ($this->get_UA() == null) {
+            return false;
+        }
+
+        if (!$this->getLogged()->cansee($this->get_UA())) {
+            return false;
+        }
+
         return true;
+    }
+
+    /**
+     * Carga UA y lo devuelve
+     * @return USER usuario evento
+     */
+    private function get_UA() {
+        if ($this->UA_o) {
+            return $this->UA_o;
+        }
+        $UA = new USER();
+        if ($UA->load_DB($this->UA) == "ok") {
+            $this->UA_o = $UA;
+            return $this->UA_o;
+        }
+        return null;
     }
 
     /**
@@ -255,6 +292,8 @@ class TKT_H extends itobject {
             case 'UA':
                 return $this->UA;
             case 'UA_o':
+                return $this->get_UA();
+            case 'UA_o':
                 $ua_o = new USER();
                 if ($ua_o->load_DB($this->UA) == "ok")
                     return $ua_o;
@@ -297,7 +336,7 @@ class TKT_H extends itobject {
      */
     public function candownload() {
         $this->loadview();
-        return intval($this->view["archivo_descarga"]) == 1 && $this->check_access();
+        return (intval($this->view["archivo_descarga"]) == 1 && $this->check_access());
     }
 
     public function check_data() {

@@ -195,9 +195,9 @@ class USER extends itobject {
         $this->pass = $tmpU["pass"];
         $this->fronts = $tmpU["fronts"];
         $this->frontsV = explode(",", $this->fronts);
-
-        $this->perfil = trim($tmpU["perfil"]);
-
+        if ($tmpU["perfil"] > 1) {
+            $this->perfil = trim($tmpU["perfil"]);
+        }
         $this->mail = trim($tmpU["mail"]);
 
         $this->tel = trim($tmpU["tel"]);
@@ -224,7 +224,7 @@ class USER extends itobject {
         }
 
         $this->load_VEC($tmpU);
-
+        $this->perfil = trim($tmpU["perfil"]); // carga por si es adm que no se permite por vec
         $this->instancias = $tmpU["instancias"];
         $this->instanciasV = explode(",", $this->instancias);
         $this->estado = trim($tmpU["estado"]);
@@ -658,6 +658,25 @@ class USER extends itobject {
     }
 
     /**
+     * Puede ver eventos de usuario
+     * @param USER $U
+     * @return boolean
+     */
+    public function cansee($U){
+        $uteams = explode(",",$U->get_prop("idsequipos"));
+        $mytview = $this->get_viewTeams();
+        foreach($uteams as $tid){
+            if($this->in_team($tid)){
+                return true;
+            }
+            if(in_array($tid,$mytview)){
+                return true;
+            }
+        }
+    }
+
+
+    /**
      * Verifica si se cumple relacion
      * @param type $rel
      * @param TKT $TKT
@@ -698,7 +717,7 @@ class USER extends itobject {
                         return true;
                 }
                 break;
-            case "equipo_visible":
+            case "generado_equipo_visible":
 
                 $uT = $TKT->get_prop("usr_o");
                 if ($uT == null)
@@ -810,27 +829,27 @@ class USER extends itobject {
                 }
                 break;
             case "SHAREPOINT":
-                $SPF= new FRONT();
+                $SPF = new FRONT();
                 $SPF->load_DB("SHAREPOINT");
-                $ssql="select fecha from TBL_SESIONES where "
-                        . "usr='".strToSQL($this->get_prop("usr"))."' "
-                        . "and front=".$SPF->get_prop("id")." and hash='".strToSQL($passL)."'"
-                        . " and ip='".strToSQL($ipuser)."' ";
+                $ssql = "select fecha from TBL_SESIONES where "
+                        . "usr='" . strToSQL($this->get_prop("usr")) . "' "
+                        . "and front=" . $SPF->get_prop("id") . " and hash='" . strToSQL($passL) . "'"
+                        . " and ip='" . strToSQL($ipuser) . "' ";
                 $this->dbroot->loadRS($ssql);
-                if($this->dbroot->cReg!=1){
+                if ($this->dbroot->cReg != 1) {
                     return "Usuario o contrase&ntilde;a invalidos.";
                 }
-                $v=$this->dbroot->get_vector();
+                $v = $this->dbroot->get_vector();
                 $f1 = strtotime($v["fecha"]);
-                if($f1==false){
-                    return "fecha invalida ".$v["fecha"];
+                if ($f1 == false) {
+                    return "fecha invalida " . $v["fecha"];
                 }
-                $f2=  strtotime('now');
-                if($f2==false){
+                $f2 = strtotime('now');
+                if ($f2 == false) {
                     return "fecha invalida";
                 }
-                if(($f2-$f1)>60){
-                    return "Usuario o contrase&ntilde;a invalidos. timeout".($f2-$f1);
+                if (($f2 - $f1) > 60) {
+                    return "Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1);
                 }
                 break;
             default:

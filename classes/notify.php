@@ -71,7 +71,7 @@ class NOTIFY extends itobject {
         "team", //equipo asignado
         "clients", //generador y adjuntos
         "client", //generador
-        "clients->team" //equipos del generador y adjuntos
+        "clients->teams" //equipos del generador y adjuntos
             // ademas se podra indicar cualquier nombre de los perfiles
     );
 
@@ -120,7 +120,7 @@ class NOTIFY extends itobject {
      * @param boolean   $too    //es too o cc
      * @return string cadena reemplazada
      */
-    private function get_mail_value($name,$too) {
+    private function get_mail_value($name, $too) {
         $nv = explode("=>", $name);
         if (count($nv) > 1) {
             switch ($nv[0]) {
@@ -145,7 +145,7 @@ class NOTIFY extends itobject {
                     }
                     return $result;
                 default:
-                    return "NULL".MAIL_SPLITER;
+                    return "NULL" . MAIL_SPLITER;
             }
         } else {
             switch ($name) {
@@ -164,10 +164,10 @@ class NOTIFY extends itobject {
                         $result = $tu->get_prop("mail");
                     break;
                 case "team":
-                    if ($this->tkt_final->get_prop("equipo") && $this->tkt_final->get_prop("equipo")->get_prop("listinobj")){
-                        if($too){
+                    if ($this->tkt_final->get_prop("equipo") && $this->tkt_final->get_prop("equipo")->get_prop("listinobj")) {
+                        if ($too) {
                             $result = $this->tkt_final->get_prop("equipo")->get_prop("listinobj")->get_prop("too");
-                        }else{
+                        } else {
                             $result = $this->tkt_final->get_prop("equipo")->get_prop("listinobj")->get_prop("cc");
                         }
                     }
@@ -189,21 +189,21 @@ class NOTIFY extends itobject {
                     break;
                 case "clients->teams":
                     $result = "";
-                    if($too){
-                        $dest="too";
-                    }else{
-                        $dest="cc";
+                    if ($too) {
+                        $dest = "too";
+                    } else {
+                        $dest = "cc";
                     }
-                    $ulist=array();
+                    $ulist = array();
                     array_push($ulist, $this->tkt_final->get_prop("usr_o"));
                     if ($this->tkt_final->is_master()) {
-                        foreach ($this->tkt_final->get_prop("childs") as $tktc){
+                        foreach ($this->tkt_final->get_prop("childs") as $tktc) {
                             array_push($ulist, $tktc->get_prop("usr_o"));
                         }
                     }
-                    foreach($ulist as $u){
-                        if($u){
-                            foreach($u->get_prop("equiposobj") as $t){
+                    foreach ($ulist as $u) {
+                        if ($u) {
+                            foreach ($u->get_prop("equiposobj") as $t) {
                                 $result.=MAIL_SPLITER . $t->get_prop("listinobj")->get_prop($dest);
                             }
                         }
@@ -225,22 +225,22 @@ class NOTIFY extends itobject {
      * @param boolean $too too, sino cc
      * @return string cadena reemplazada
      */
-    private function remake_mail($mail,$too) {
+    private function remake_mail($mail, $too) {
         $mailR = strtolower($mail);
         //buscar y reemplazar perfiles
         foreach ($this->getLogged()->list_allprofiles() as $prof) {
             if (strpos(" " . $mailR, "{team_profile=>" . $prof["nombre"] . "}")) {
-                $mailR = str_replace("{team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("team_profile=>" . $prof["nombre"],$too), $mailR);
+                $mailR = str_replace("{team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("team_profile=>" . $prof["nombre"], $too), $mailR);
             }
             if (strpos(" " . $mailR, "{client_team_profile=>" . $prof["nombre"] . "}")) {
-                $mailR = str_replace("{client_team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("client_team_profile=>" . $prof["nombre"],$too), $mailR);
+                $mailR = str_replace("{client_team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("client_team_profile=>" . $prof["nombre"], $too), $mailR);
             }
         }
 
         //buscar y reemplazar constantes
         foreach (self::$MAIL_VALS as $tosearch) {
             if (strpos(" " . $mailR, "{" . $tosearch . "}")) {
-                $mailR = str_replace("{" . $tosearch . "}", $this->get_mail_value($tosearch,$too), $mailR);
+                $mailR = str_replace("{" . $tosearch . "}", $this->get_mail_value($tosearch, $too), $mailR);
             }
         }
         return $mailR;
@@ -269,8 +269,8 @@ class NOTIFY extends itobject {
         }
 
         //reemplazar parametros
-        $tooSTR = $this->remake_mail($tooSTR,true);
-        $ccSTR = $this->remake_mail($ccSTR,false);
+        $tooSTR = $this->remake_mail($tooSTR, true);
+        $ccSTR = $this->remake_mail($ccSTR, false);
         //separar array y verificar mails validos
         $too = explode(MAIL_SPLITER, $tooSTR);
         $cc = explode(MAIL_SPLITER, $ccSTR);

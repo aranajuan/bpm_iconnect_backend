@@ -202,23 +202,6 @@ function maxLenShow($txt, $max) {
 }
 
 /**
- * Dibuja barra azul de filtros
- */
-function filter_bar($content, $style = "") {
-
-    $html = "
-    <table style=\"$style\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" >
-        <tr>
-            <td style=\"background-color: #b2c8f2; padding: 3px;height: 100%;\">
-                $content
-            </td>
-        </tr>
-    </table>
-    ";
-    return $html;
-}
-
-/**
  * html a mayusc
  */
 function htmltoupper($str) {
@@ -228,42 +211,6 @@ function htmltoupper($str) {
     $str = strtoupper($str);
     $str = htmlentities($str);
     return $str;
-}
-
-/**
- * Dibuja boton de opciones de arbol
- */
-function option_button($text, $width, $styleN, $Jfunction = "") {
-
-    $colors = array("#9bc1f9", "#beb5d8");
-    $fontC = array("5a5a5a", "5a5a5a");
-    $size = array(28, 28);
-    $Maxlenght = round($width / 8);
-    $text = maxLenShow($text, $Maxlenght);
-    /*
-      $html = "
-      <div style='width:" . $width . "px;height:" . $size[$styleN] . "px;overflow:hidden;cursor:pointer;' onclick=\"" . $Jfunction . "\">
-      <div style='float:left;'>
-      <img src=\"" . HIMG_DIR . "/base/but_i_$styleN.png\" />
-      </div>
-      <div style='float:left;background-color:" . $colors[$styleN] . ";height:100%;width: " . ($width - 13) . "px;font-size:15px;padding-top:2px;text-align:center;'>
-      " . htmltoupper($text) . "
-      </div>
-      <div style='float:right;'>
-      <img src=\"" . HIMG_DIR . "/base/but_d_$styleN.png\" />
-      </div>
-      </div>
-      "; */
-    $html = "
-        <div style='width:" . $width . "px;height:" . $size[$styleN] . "px;overflow:hidden;cursor:pointer;' onclick=\"" . $Jfunction . "\">
-
-            <div style='float:left;background-color:" . $colors[$styleN] . ";height:100%;width: " . ($width - 13) . "px;font-size:15px;padding-top:2px;text-align:center;'>
-                " . htmltoupper($text) . "
-            </div>
-
-        </div>
-    ";
-    return $html;
 }
 
 /**

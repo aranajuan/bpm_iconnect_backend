@@ -48,7 +48,6 @@ function GO($RC) {
     }
     
     $Notif = new NOTIFY();
-    $Notif->load_TKTEXT($TKT);
     $actionResult = $A->ejecute();
     
     if($actionResult["result"]){

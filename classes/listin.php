@@ -72,7 +72,7 @@ class LISTIN extends itobject {
      * @return boolean
      */
     private function mail_validate($mails) {
-        $mV = explode(";", $mails);
+        $mV = explode(MAIL_SPLITER, $mails);
         foreach ($mV as $m) {
             if (!filter_var(trim($m), FILTER_VALIDATE_EMAIL))
                 return false;

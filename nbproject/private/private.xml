@@ -3,7 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/opt/lampp/htdocs/itracker_app/config/access.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/services/user/idsel_profiles.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/services/tkt/downloadfile.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/services/tkt/get_tree_options.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/actions/show/open.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/user.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/action.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/services/tkt/listmy.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/utils/basic_functions.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/services/tkt/geth.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/tkt_h.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/tkt.php</file>
         </group>
     </open-files>
 </project-private>

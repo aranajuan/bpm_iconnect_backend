@@ -30,7 +30,7 @@ function GO($RC) {
     
     $im = file_get_contents($filepath);
     if(!$im){
-        return $RC->createElement("error","Error al leer archivo.");
+        return $RC->createElement("error","Error al leer archivo.".$filepath);
     }
     
     $imdata = base64_encode($im);

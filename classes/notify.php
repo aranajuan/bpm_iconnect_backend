@@ -39,7 +39,6 @@ define("MAIL_CC", MAIL_TO);
  */
 class NOTIFY extends itobject {
 
-    private $tkt_origen = NULL; /* Objeto TKT inicial */
     private $tkt_final = NULL; /* Objeto TKT actualizado */
     private $full_destino = NULL; /* destino y condiciones en string */
     private $condition = array(); /* condiciones para cada destino */
@@ -56,13 +55,9 @@ class NOTIFY extends itobject {
      * Condiciones que seran reemplazadas en el array
      */
     private static $COND_VALS = array(
-        "u_tom",
-        "idmaster",
-        "u_asig",
-        "ub",
-        "fb",
-        "prioridad",
-        "prev_u_tom"
+        "is_master",
+        "is_teaken",
+        "always"
     );
 
     /**
@@ -70,13 +65,13 @@ class NOTIFY extends itobject {
      * Destinos que se reemplazaran por los destinatarios correspondientes
      */
     private static $MAIL_VALS = array(
-        "u_tom",
-        "u_asig",
-        "ub",
-        "team",
-        "prev_team",
-        "clients",
-        "client"
+        "u_tom", //usuario toma
+        "u_asig", //usuario asigna
+        "ub", //usuario cierre
+        "team", //equipo asignado
+        "clients", //generador y adjuntos
+        "client", //generador
+        "clients->team" //equipos del generador y adjuntos
             // ademas se podra indicar cualquier nombre de los perfiles
     );
 
@@ -84,13 +79,12 @@ class NOTIFY extends itobject {
      * Valores que se reemplazaran en el cuerpo del msj
      */
     private static $BODY_VALS = array(
-        "u_tom->name",
-        "system->name",
-        "prev_team->name",
-        "dest_team->name",
-        "id",
-        "html_dir",
-        "FA"
+        "u_tom->name", //usuario toma
+        "system->name", //sistema
+        "team->name", //equipo actual
+        "id", //id del ticket
+        "html_dir", //ruta a it
+        "FA"    //fecha apertura
     );
 
     function __construct($conn = null) {
@@ -99,65 +93,34 @@ class NOTIFY extends itobject {
     }
 
     /**
-     * Combierte la condicion en un valor para compararlo
-     * @param type $name
-     * @return string valor reemplazado
+     * Verifica condicion
+     * @param string $c
+     * @return boolean
      */
-    private function get_condition_value($name) {
-        switch ($name) {
-            case "u_tom":
-                $result = $this->tkt_final->get_prop("u_tom");
-                break;
-            case "fb":
-                $result = $this->tkt_final->get_prop("FB");
-                if ($result) {
-                    $result = "'" . $result . "'";
-                }
-                break;
-            case "idmaster":
-                $result = $this->tkt_final->get_prop("idmaster");
-                break;
-            case "u_asig":
-                $result = $this->tkt_final->get_prop("u_asig");
-                break;
-            case "ub":
-                $result = $this->tkt_final->get_prop("UB");
-                break;
-            case "prioridad":
-                $result = $this->tkt_final->get_prop("prioridad");
-                break;
-            case "prev_u_tom":
-                $result = $this->tkt_origen->get_prop("u_tom");
-                break;
+    private function check_condition($c) {
+        if ($this->tkt_final == null) {
+            return false;
+        }
+        switch (trim($c)) {
+            case "always":
+                return true;
+            case "is_master":
+                return $this->tkt_final->is_master();
+            case "is_taken":
+                return ($this->tkt_final->get_prop("u_tom") != null);
             default:
-                $result = "NULL";
+                return false;
         }
-        if ($result)
-            return $result;
-        return "NULL";
-    }
-
-    /**
-     * Reemplaza todas las condiciones con los valores
-     * @param type $cond
-     * @return type cadena reemplazada
-     */
-    private function remake_condition($cond) {
-        $tmp_str = strtolower($cond);
-        foreach (self::$COND_VALS as $tosearch) {
-            if (strpos(" " . $tmp_str, "{" . $tosearch . "}")) {
-                $tmp_str = str_replace("{" . $tosearch . "}", $this->get_condition_value($tosearch), $tmp_str);
-            }
-        }
-        return $tmp_str;
+        return false;
     }
 
     /**
      * Cambia el parametro por el destino de mail correspondiente
      * @param type $name
+     * @param boolean   $too    //es too o cc
      * @return string cadena reemplazada
      */
-    private function get_mail_value($name) {
+    private function get_mail_value($name,$too) {
         $nv = explode("=>", $name);
         if (count($nv) > 1) {
             switch ($nv[0]) {
@@ -166,7 +129,7 @@ class NOTIFY extends itobject {
                     //buscar equipo, ejecutar funcion de equipo para traer usuarios.
                     $users = $this->tkt_final->get_prop("equipo")->get_users($nv[1]);
                     foreach ($users as $u) {
-                        $result.=$u->get_prop("mail") . ";";
+                        $result.=$u->get_prop("mail") . MAIL_SPLITER;
                     }
                     return $result;
                 case "client_team_profile":
@@ -176,13 +139,13 @@ class NOTIFY extends itobject {
                         foreach ($teams as $t) {
                             $users = $t->get_users($nv[1]);
                             foreach ($users as $u) {
-                                $result.=$u->get_prop("mail") . ";";
+                                $result.=$u->get_prop("mail") . MAIL_SPLITER;
                             }
                         }
                     }
                     return $result;
                 default:
-                    return "NULL;";
+                    return "NULL".MAIL_SPLITER;
             }
         } else {
             switch ($name) {
@@ -201,12 +164,13 @@ class NOTIFY extends itobject {
                         $result = $tu->get_prop("mail");
                     break;
                 case "team":
-                    if ($this->tkt_final->get_prop("equipo") && $this->tkt_final->get_prop("equipo")->get_prop("listinobj"))
-                        $result = $this->tkt_final->get_prop("equipo")->get_prop("listinobj")->get_prop("too");
-                    break;
-                case "prev_team":
-                    if ($this->tkt_origen->get_prop("equipo") && $this->tkt_origen->get_prop("equipo")->get_prop("listinobj"))
-                        $result = $this->tkt_origen->get_prop("equipo")->get_prop("listinobj")->get_prop("too");
+                    if ($this->tkt_final->get_prop("equipo") && $this->tkt_final->get_prop("equipo")->get_prop("listinobj")){
+                        if($too){
+                            $result = $this->tkt_final->get_prop("equipo")->get_prop("listinobj")->get_prop("too");
+                        }else{
+                            $result = $this->tkt_final->get_prop("equipo")->get_prop("listinobj")->get_prop("cc");
+                        }
+                    }
                     break;
                 case "client":
                     if ($this->tkt_final->get_prop("usr_o"))
@@ -220,39 +184,63 @@ class NOTIFY extends itobject {
                         $this->tkt_final->load_childs();
                         foreach ($this->tkt_final->get_prop("childs") as $tktc)
                             if ($tktc->get_prop("usr_o"))
-                                $result.=";" . $tktc->get_prop("usr_o")->get_prop("mail");
+                                $result.=MAIL_SPLITER . $tktc->get_prop("usr_o")->get_prop("mail");
                     }
+                    break;
+                case "clients->teams":
+                    $result = "";
+                    if($too){
+                        $dest="too";
+                    }else{
+                        $dest="cc";
+                    }
+                    $ulist=array();
+                    array_push($ulist, $this->tkt_final->get_prop("usr_o"));
+                    if ($this->tkt_final->is_master()) {
+                        foreach ($this->tkt_final->get_prop("childs") as $tktc){
+                            array_push($ulist, $tktc->get_prop("usr_o"));
+                        }
+                    }
+                    foreach($ulist as $u){
+                        if($u){
+                            foreach($u->get_prop("equiposobj") as $t){
+                                $result.=MAIL_SPLITER . $t->get_prop("listinobj")->get_prop($dest);
+                            }
+                        }
+                    }
+                    return $result;
                     break;
                 default:
                     $result = "NULL";
             }
         }
         if ($result)
-            return $result . ";";
+            return $result . MAIL_SPLITER;
         return "NULL;";
     }
 
     /**
      * Reemplaza todos los mails 
      * @param type $mail
+     * @param boolean $too too, sino cc
      * @return string cadena reemplazada
      */
-    private function remake_mail($mail) {
+    private function remake_mail($mail,$too) {
         $mailR = strtolower($mail);
         //buscar y reemplazar perfiles
-        foreach ($GLOBALS["PROFILES"] as $prof) {
-            if (strpos(" " . $mailR, "{team_profile=>" . $prof . "}")) {
-                $mailR = str_replace("{team_profile=>" . $prof . "}", $this->get_mail_value("team_profile=>" . $prof), $mailR);
+        foreach ($this->getLogged()->list_allprofiles() as $prof) {
+            if (strpos(" " . $mailR, "{team_profile=>" . $prof["nombre"] . "}")) {
+                $mailR = str_replace("{team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("team_profile=>" . $prof["nombre"],$too), $mailR);
             }
-            if (strpos(" " . $mailR, "{client_team_profile=>" . $prof . "}")) {
-                $mailR = str_replace("{client_team_profile=>" . $prof . "}", $this->get_mail_value("client_team_profile=>" . $prof), $mailR);
+            if (strpos(" " . $mailR, "{client_team_profile=>" . $prof["nombre"] . "}")) {
+                $mailR = str_replace("{client_team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("client_team_profile=>" . $prof["nombre"],$too), $mailR);
             }
         }
 
         //buscar y reemplazar constantes
         foreach (self::$MAIL_VALS as $tosearch) {
             if (strpos(" " . $mailR, "{" . $tosearch . "}")) {
-                $mailR = str_replace("{" . $tosearch . "}", $this->get_mail_value($tosearch), $mailR);
+                $mailR = str_replace("{" . $tosearch . "}", $this->get_mail_value($tosearch,$too), $mailR);
             }
         }
         return $mailR;
@@ -281,11 +269,11 @@ class NOTIFY extends itobject {
         }
 
         //reemplazar parametros
-        $tooSTR = $this->remake_mail($tooSTR);
-        $ccSTR = $this->remake_mail($ccSTR);
+        $tooSTR = $this->remake_mail($tooSTR,true);
+        $ccSTR = $this->remake_mail($ccSTR,false);
         //separar array y verificar mails validos
-        $too = explode(";", $tooSTR);
-        $cc = explode(";", $ccSTR);
+        $too = explode(MAIL_SPLITER, $tooSTR);
+        $cc = explode(MAIL_SPLITER, $ccSTR);
 
         return array($too, $cc);
     }
@@ -310,8 +298,7 @@ class NOTIFY extends itobject {
         $this->cc = array();
         $i = 0;
         foreach ($this->condition as $c) {
-            $cond = $this->remake_condition($c);
-            if (trim($cond) != "" && eval("return (" . $cond . ");")) {
+            if ($this->check_condition($c)) {
                 $toAdd = $this->get_full_mail_destiny($this->destiny[$i]);
                 $this->too = array_merge($this->too, $toAdd[0]);
                 $this->cc = array_merge($this->cc, $toAdd[1]);
@@ -346,14 +333,6 @@ class NOTIFY extends itobject {
     }
 
     /**
-     * Carga el ticket de origen
-     * @param type $TKT
-     */
-    function load_TKTEXT($TKT) {
-        $this->tkt_origen = $TKT;
-    }
-
-    /**
      * Carga objeto accion y parametros full_destino, mail_body, accion y accionObj
      * @param ACTION $A
      */
@@ -362,7 +341,7 @@ class NOTIFY extends itobject {
         $this->mail_body = $A->get_prop("notificacion_texto");
         $this->accion = $A->get_prop("nombre");
         $this->accionObj = $A;
-        $this->tkt_final=$A->getTKT();
+        $this->tkt_final = $A->getTKT();
     }
 
     /**
@@ -397,13 +376,6 @@ class NOTIFY extends itobject {
                 break;
             case "dest_team->name":
                 $tt = $this->tkt_final->get_prop("equipo");
-                if ($tt)
-                    $result = $tt->get_prop("nombre");
-                else
-                    $result = "NULL";
-                break;
-            case "prev_team->name":
-                $tt = $this->tkt_origen->get_prop("equipo");
                 if ($tt)
                     $result = $tt->get_prop("nombre");
                 else
@@ -454,7 +426,7 @@ class NOTIFY extends itobject {
 
         $ccMail = "
         Se ejecuto la accion:  " . strtoupper($this->accion) . " sobre el tkt: {id}.<br />
-        Puedes verlo en <a href=\"{html_dir}\">ITRACKER</a>.
+        Puedes verlo en ITRACKER.
         ";
         $this->cc_body = $this->remake_body($ccMail);
     }
@@ -464,37 +436,39 @@ class NOTIFY extends itobject {
      * @return string
      */
     public function send() {
-        if (MAIL_ENABLED == 0){
-            return "Mail desactivado";    
+        if (MAIL_ENABLED == 0) {
+            return "Mail desactivado";
         }
-            
-        if ($this->accion == "" 
-                || $this->mail_body == ""
-                || $this->full_destino == "" 
-                || $this->tkt_final == NULL 
-                || $this->tkt_origen == NULL){
+
+        if ($this->accion == "" || $this->mail_body == "" || $this->full_destino == "" || $this->tkt_final == NULL) {
             return "Faltan datos para enviar mail";
-                }
+        }
         $this->split_str();
         $this->load_destiny();
         $this->clean_destiny();
 
-        if (count($this->too) == 0 && count($this->cc) == 0){
+        if (count($this->too) == 0 && count($this->cc) == 0) {
             return "No hay destinatarios para esta notificacion";
         }
-        
+
         $this->load_body();
         $this->load_cc_body();
 
-        $ok = true;
+        $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . ")";
+        $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
+        $extras = "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
+
         foreach ($this->too as $t) {
-           $this->send_mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO)), "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1");
+            $this->send_mail($t, $subject, $tobody, $extras);
         }
 
+        $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC));
+
+
         foreach ($this->cc as $t) {
-            $this->send_mail($t, "Notificacion Itracker (" . $this->get_body_value("system->name") . ")", str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC)), "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1");
+            $this->send_mail($t, $subject, $cbody, $extras);
         }
-        
+
         return "ok";
     }
 

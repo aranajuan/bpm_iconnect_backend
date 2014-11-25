@@ -179,39 +179,6 @@ function strToSQL($txt) {
     return $tmp;
 }
 
-/**
- * convierte una cadena para pasarla como parametro a una funcion js
- */
-function strToJava($txt) {
-    $tmp = str_replace("\\", "\\\\", $txt);
-    $tmp = str_replace("\"", "&quot;", $tmp);
-    $tmp = str_replace("'", "\\'", $tmp);
-    $tmp = str_replace("\n", "\\n", $tmp);
-    $tmp = str_replace("\r", "", $tmp);
-    return $tmp;
-}
-
-/**
- * corta el string para que entre en el tamaño designado
- */
-function maxLenShow($txt, $max) {
-    if (strlen($txt) > $max) {
-        return substr($txt, 0, $max - 3) . "...";
-    } else
-        return $txt;
-}
-
-/**
- * html a mayusc
- */
-function htmltoupper($str) {
-    $trans = get_html_translation_table(HTML_ENTITIES);
-    $trans = array_flip($trans);
-    $str = strtr($str, $trans);
-    $str = strtoupper($str);
-    $str = htmlentities($str);
-    return $str;
-}
 
 /**
  * Bloquea mensajes de error y lo pone en una variable global

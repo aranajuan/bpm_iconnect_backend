@@ -459,14 +459,14 @@ class NOTIFY extends itobject {
         $extras = "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
 
         foreach ($this->too as $t) {
-            $this->send_mail($t, $subject, $tobody, $extras);
+            $this->send_mail($t, $subject, $tobody,"","HTML","itracker@ta.telecom.com.ar");
         }
 
         $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC));
 
 
         foreach ($this->cc as $t) {
-            $this->send_mail($t, $subject, $cbody, $extras);
+            $this->send_mail($t, $subject, $cbody,"","HTML","itracker@ta.telecom.com.ar");
         }
 
         return "ok";

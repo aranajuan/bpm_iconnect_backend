@@ -95,8 +95,12 @@ class INSTANCE extends itobject {
             case 'dbhost':
                 return $this->dbhost;
             case 'dbuser':
+                if($this->dbuser=='' || $this->dbuser==null)
+                    return DBUSER_ROOT;
                 return $this->dbuser;
             case 'dbpass':
+                if($this->dbuser=='' || $this->dbuser==null)
+                    return DBPASS_ROOT;
                 return $this->dbpass;
             default:
                 return "Propiedad invalida.";

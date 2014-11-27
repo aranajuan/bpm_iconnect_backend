@@ -106,6 +106,9 @@ class Rcontroller extends XMLhandler {
 
         if (!$this->user->logged($this->getHash(), $this->front, $this->getIp())) {
             $this->error = "Usuario no logeado";
+            if($this->get_class()!="user" || $this->get_method()!="login"){
+                return false;
+            }
         }
 
         if (!$this->user->validAction($this->get_class(), $this->get_method())) {

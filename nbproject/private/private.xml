@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/user.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/instance.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/utils/basic_functions.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/config/defines_root.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/config/init.php</file>
+            <file>file:/opt/lampp/htdocs/itracker_app/classes/Rcontroller.php</file>
+        </group>
     </open-files>
 </project-private>

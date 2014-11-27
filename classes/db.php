@@ -5,11 +5,12 @@
  */
 
 class DB {
+
     /**
      *
      * @var ConnectionManager
      */
-    private $connection;  
+    private $connection;
     private $RI; //root-instance
     private $error = FALSE; /* error en la ultima consulta */
     private $lstIDmss = NULL;   /* ultimo id-> para mssql */
@@ -18,6 +19,7 @@ class DB {
     var $cReg;  /*  q de registros en recordset */
     var $noEmpty;   /* consulta con datos */
     var $lastSQL;
+
     /**
      * Carga connectionmanager
      * 
@@ -32,17 +34,16 @@ class DB {
     }
 
     private function tablenames($ssql) {
-        $array=$this->connection->get_alias($this->RI);
+        $array = $this->connection->get_alias($this->RI);
         $tmp = $ssql;
         foreach ($array as $t)
-            $tmp = str_replace($t[0], strtolower ($t[1]), $tmp);
+            $tmp = str_replace($t[0], strtolower($t[1]), $tmp);
         return $tmp;
     }
 
-    private function get_link(){
+    private function get_link() {
         return $this->connection->get_link($this->RI);
     }
-
 
     /**
      * Carga recordset
@@ -51,12 +52,12 @@ class DB {
     public function loadRS($ssql) {
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
-            mysql_query("SET NAMES 'utf8'",$this->get_link());
+            mysql_query("SET NAMES 'utf8'", $this->get_link());
             $this->RS = mysql_query($ssql, $this->get_link());
-            $this->lastSQL=$ssql;
+            $this->lastSQL = $ssql;
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = mysql_error();
+                $this->details = "Error al ejecutar solicitud.";//mysql_error();
                 $this->noEmpty = 0;
                 $this->cReg = 0;
             } else {
@@ -71,7 +72,7 @@ class DB {
             $this->RS = mssql_query($ssql, $this->get_link());
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = mssql_get_last_message();
+                $this->details = "Error al ejecutar solicitud.";//mssql_get_last_message();
                 $this->noEmpty = 0;
                 $this->cReg = 0;
             } else {
@@ -94,7 +95,7 @@ class DB {
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
             if (!mysql_query($ssql, $this->get_link())) {
-                $this->details = mysql_error();
+                $this->details ="Error al ejecutar solicitud.";// mysql_error();
                 return mysql_error();
             }
             else
@@ -104,7 +105,7 @@ class DB {
             $ssql = str_replace("now()", "getdate()", $ssql);
             $ssql = mb_convert_encoding($ssql, 'ISO-8859-1', 'UTF-8');
             if (!mssql_query($ssql, $this->get_link())) {
-                $this->details = mssql_get_last_message();
+                $this->details = "Error al ejecutar solicitud.";//mssql_get_last_message();
                 $this->lstIDmss = NULL;
                 return 1;
             } else {
@@ -124,7 +125,13 @@ class DB {
         if ($this->connection->get_motor() == 'mysql') {
             return mysql_fetch_array($this->RS);
         } elseif ($this->connection->get_motor() == 'mssql') {
-            return mssql_fetch_array($this->RS);
+            $arr = mssql_fetch_array($this->RS);
+            if ($arr) {
+                foreach ($arr as &$a) {
+                    $a = mb_convert_encoding($a, "UTF-8");
+                }
+            }
+            return $arr;
         }
     }
 

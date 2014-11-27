@@ -46,7 +46,9 @@ function GO($RC) {
         $action->addChild("formulario", $A->get_prop("formulario"));
     }
     $conv = new DOMDocument();
-    $conv->loadXML($response->asXML());
+    if($conv->loadXML($response->asXML())==false){
+        return $RC->createElement("error", "Error al parsear xml.");
+    }
     $nodes = $conv->getElementsByTagName("data");
     $ret = $RC->append_xml($nodes->item(0));
 

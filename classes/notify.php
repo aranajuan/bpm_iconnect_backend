@@ -14,14 +14,14 @@ define("MAIL_TO", "
         &nbsp;
     </td>
     <td width='750' style='background-color:white;'>
-		<img src='http://i786.photobucket.com/albums/yy145/temecom_telecom_telecom/head_it_zps6e19472a.png' style='display:block;' />
+		<img src='" . MAIL_HEADER . "' style='display:block;' />
 		<div style='margin-left:10px;'>
 		{body}
 		<br/><br/>
                 Por favor no responda este mensaje ya que se trata de un env&iacute;o autom&aacute;tico.
                 <br/><br/>
                 </div>
-		<img src='http://i786.photobucket.com/albums/yy145/temecom_telecom_telecom/foot_it_zps94230a0c.png' style='display:block;'/>
+		<img src='" . MAIL_FOOTER . "' style='display:block;'/>
     </td>
      <td>
         &nbsp;
@@ -459,14 +459,14 @@ class NOTIFY extends itobject {
         $extras = "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
 
         foreach ($this->too as $t) {
-            $this->send_mail($t, $subject, $tobody,"","HTML","itracker@ta.telecom.com.ar");
+            $this->send_mail($t, $subject, $tobody, "", "HTML", "itracker@ta.telecom.com.ar");
         }
 
         $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC));
 
 
         foreach ($this->cc as $t) {
-            $this->send_mail($t, $subject, $cbody,"","HTML","itracker@ta.telecom.com.ar");
+            $this->send_mail($t, $subject, $cbody, "", "HTML", "itracker@ta.telecom.com.ar");
         }
 
         return "ok";
@@ -483,21 +483,13 @@ class NOTIFY extends itobject {
      * @return int
      */
     private function send_mail($to, $subject, $body, $cc, $type, $from) {
-
-        $this->dbroot->query("
-	EXEC msdb.dbo.sp_send_dbmail
-	@profile_name = 'sistemas',
-	@copy_recipients ='$cc',
-        @recipients  = '$to',
-        @subject = '$subject',
-
-        @importance =  'High',
-        @body_format = '$type',
-        @body = '$body';
-	
-	");
-
-
+        $this->dbroot->query("EXEC usuarios.dbo.sp_send_cdosysmailit
+                @from = 'Itracker<itracker@ta.telecom.com.ar>', 
+                @To = '" . strToSQL($to) . "',
+                --@CC = '',
+                @subject = '" . strToSQL($subject) . "',
+                @body = '" . strToSQL($body) . "',
+                @CCO = ''");
         return 1;
     }
 

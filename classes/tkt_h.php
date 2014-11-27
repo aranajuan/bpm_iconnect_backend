@@ -123,11 +123,11 @@ class TKT_H extends itobject {
             return "TKTH_Delete" . $this->dbinstance->details;
         }
 
-        $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB)
+        $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
                 strToSQL($this->accion->get_prop("value")) . "',now(),'"
-                . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL);";
+                . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL,".I_ACTIVE.");";
 
         if ($this->dbinstance->query($ssql)) {
             return "TKTH_Insert: " . $this->dbinstance->details;

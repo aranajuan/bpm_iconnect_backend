@@ -28,6 +28,10 @@ abstract class XMLhandler {
         try {
             $this->parse = new SimpleXMLElement($text);
         } catch (Exception $e) {
+            if($ipOr=="::1" || $ipOr=="127.0.0.1"){
+                echo Encrypter::encrypt($_GET["text"]);
+                exit();
+            }
             $this->error = $e->getMessage();
             $this->parse = null;
             $this->input = null;

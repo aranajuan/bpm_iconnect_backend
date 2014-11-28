@@ -662,19 +662,18 @@ class USER extends itobject {
      * @param USER $U
      * @return boolean
      */
-    public function cansee($U){
-        $uteams = explode(",",$U->get_prop("idsequipos"));
+    public function cansee($U) {
+        $uteams = explode(",", $U->get_prop("idsequipos"));
         $mytview = $this->get_viewTeams();
-        foreach($uteams as $tid){
-            if($this->in_team($tid)){
+        foreach ($uteams as $tid) {
+            if ($this->in_team($tid)) {
                 return true;
             }
-            if(in_array($tid,$mytview)){
+            if (in_array($tid, $mytview)) {
                 return true;
             }
         }
     }
-
 
     /**
      * Verifica si se cumple relacion
@@ -797,7 +796,9 @@ class USER extends itobject {
 
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
-
+        if ($passL == "" || $this->error == true)
+            return "Usuario o contrase&ntilde;a invalidos.2";
+        
         if ($front->is_trusted()) {
             return $this->newSession($front, $ipuser);
         }
@@ -837,19 +838,19 @@ class USER extends itobject {
                         . " and ip='" . strToSQL($ipuser) . "' ";
                 $this->dbroot->loadRS($ssql);
                 if ($this->dbroot->cReg != 1) {
-                    return "Usuario o contrase&ntilde;a invalidos.";
+                    return "SP::Usuario o contrase&ntilde;a invalidos.";
                 }
                 $v = $this->dbroot->get_vector();
                 $f1 = strtotime($v["fecha"]);
                 if ($f1 == false) {
-                    return "fecha invalida " . $v["fecha"];
+                    return "SP::fecha invalida " . $v["fecha"];
                 }
                 $f2 = strtotime('now');
                 if ($f2 == false) {
-                    return "fecha invalida";
+                    return "SP::fecha invalida";
                 }
                 if (($f2 - $f1) > 60) {
-                    return "Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1);
+                    return "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1);
                 }
                 break;
             default:

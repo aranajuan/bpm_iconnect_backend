@@ -213,12 +213,12 @@ abstract class TREE extends itobject {
             for ($i = 0; $i <= $this->path_max; $i++) {
                 switch ($i) {
                     case 0:
-                        $rta[$i]["question"] = "Area";
+                        $rta[$i]["question"] = "Canal";
                         $rta[$i]["ans"] = $this->get_division()->get_prop("nombre");
                         $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id") . "-";
                         break;
                     case 1:
-                        $rta[$i]["question"] = "Inconveniente";
+                        $rta[$i]["question"] = "Tipo";
                         $rta[$i]["ans"] = $this->get_system()->get_prop("nombre");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . "-";
                         break;

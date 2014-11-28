@@ -33,7 +33,7 @@ define('DBSERVER_PREFIX',''); // 'dbo.'
 /* conexion a root */
 define('DBHOST_ROOT','localhost');			//SERVIDOR DB
 define('DBUSER_ROOT','root');				// Usuario DB
-define('DBPASS_ROOT','txKiP8BpK0LbEpwkumD1RTiSw6W9XgDFr04N7VOC5To=');					// PASS DB
+define('DBPASS_ROOT','XtEh5Bu8fdWaBvSv62dKYD7Pp9DYGp8fWT5Gc8a/sI4=');					// PASS DB
 //txKiP8BpK0LbEpwkumD1RTiSw6W9XgDFr04N7VOC5To=  LOCAL
 //YsUMJpZak1xKmsyotXuBgajNQ1fCkTCe4U5wBuO/0sw=  DWIN
 

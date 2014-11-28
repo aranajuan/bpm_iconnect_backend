@@ -269,9 +269,9 @@ class Encrypter {
     public static function decrypt($data) {
         $key=self::encryptionKey("ssvent","AS#fdfes");
         return
-                mcrypt_decrypt(
+               trim( mcrypt_decrypt(
                 MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), base64_decode($data), MCRYPT_MODE_CBC, substr($key[1], 0, 32)
-        );
+        ));
     }
 
 }

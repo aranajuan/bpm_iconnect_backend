@@ -28,7 +28,7 @@ abstract class XMLhandler {
         try {
             $this->parse = new SimpleXMLElement($text);
         } catch (Exception $e) {
-            if($ipOr=="::1" || $ipOr=="127.0.0.1"){
+            if(($ipOr=="::1" || $ipOr=="127.0.0.1" || $ipOr==IPLOCAL) && $_GET["text"]!=""){
                 echo Encrypter::encrypt($_GET["text"]);
                 exit();
             }

@@ -20,7 +20,7 @@ define("INSTANCES","TELECOMCCT,AGENTESTP");
 // Configuraciones Base
 
 define('BASE_DIR',realpath(dirname(realpath(dirname(__FILE__)).'/../../../')));
-
+define("IPLOCAL","::1");
 define('ROOT_DIR',BASE_DIR.'/itracker_app');
 //echo ROOT_DIR;
 define('INCLUDE_DIR',ROOT_DIR.""); 

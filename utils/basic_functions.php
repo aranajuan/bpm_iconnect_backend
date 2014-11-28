@@ -179,7 +179,6 @@ function strToSQL($txt) {
     return $tmp;
 }
 
-
 /**
  * Bloquea mensajes de error y lo pone en una variable global
  */
@@ -254,16 +253,25 @@ function finish() {
 
 class Encrypter {
 
-    private static $Key = "ssvent1";
-
-    public static function encrypt($input) {
-        $output = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, sha1(Encrypter::$Key), $input, MCRYPT_MODE_CBC, sha1(sha1(Encrypter::$Key))));
-        return $output;
+    private static function encryptionKey($username, $password, $ivseed = "345dfs4#asD") {
+        $username = strtolower($username);
+        return array(hash("sha1", $password . $username), hash("sha1", $username . $ivseed));
     }
 
-    public static function decrypt($input) {
-        $output = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, sha1(Encrypter::$Key), base64_decode($input), MCRYPT_MODE_CBC, sha1(sha1(Encrypter::$Key))), "\0");
-        return $output;
+    public static function encrypt($data) {
+        $key=self::encryptionKey("ssvent","AS#fdfes");
+        return
+                trim(base64_encode(mcrypt_encrypt(
+                                MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), $data, MCRYPT_MODE_CBC, substr($key[1], 0, 32)
+        )));
+    }
+
+    public static function decrypt($data) {
+        $key=self::encryptionKey("ssvent","AS#fdfes");
+        return
+                mcrypt_decrypt(
+                MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), base64_decode($data), MCRYPT_MODE_CBC, substr($key[1], 0, 32)
+        );
     }
 
 }

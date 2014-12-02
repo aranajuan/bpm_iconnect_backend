@@ -57,7 +57,9 @@ class DB {
             $this->lastSQL = $ssql;
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud.";//mysql_error();
+                $this->details = "Error al ejecutar solicitud."; //mysql_error();
+                error_log("IT:sqlErr:" . mysql_error());
+                error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
             } else {
@@ -72,7 +74,9 @@ class DB {
             $this->RS = mssql_query($ssql, $this->get_link());
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud.";//mssql_get_last_message();
+                $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
+                error_log("IT:sqlErr:" . mssql_get_last_message());
+                error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
             } else {
@@ -95,7 +99,9 @@ class DB {
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
             if (!mysql_query($ssql, $this->get_link())) {
-                $this->details ="Error al ejecutar solicitud.";// mysql_error();
+                $this->details = "Error al ejecutar solicitud."; // mysql_error();
+                error_log("IT:sqlErr:" . mysql_error());
+                error_log("IT:sql:" . $ssql);
                 return mysql_error();
             }
             else
@@ -105,7 +111,9 @@ class DB {
             $ssql = str_replace("now()", "getdate()", $ssql);
             $ssql = mb_convert_encoding($ssql, 'ISO-8859-1', 'UTF-8');
             if (!mssql_query($ssql, $this->get_link())) {
-                $this->details = "Error al ejecutar solicitud.";//mssql_get_last_message();
+                $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
+                error_log("IT:sqlErr:" . mssql_get_last_message());
+                error_log("IT:sql:" . $ssql);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {

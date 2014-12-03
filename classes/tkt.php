@@ -276,6 +276,7 @@ class TKT extends TREE {
 
         $ssql = "
             select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . "
+                order by id
         ";
         $this->dbinstance->loadRS($ssql);
         $i = 0;

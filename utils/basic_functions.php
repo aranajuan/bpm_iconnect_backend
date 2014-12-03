@@ -1,6 +1,19 @@
 <?php
 
 /**
+ * Convierte a un array de int
+ * @param array $arr
+ * @return array<int>
+ */
+function makeintarr($arr) {
+    $finalA=array();
+    foreach($arr as $a){
+        array_push($finalA, intval($a));
+    }
+    return $finalA;
+}
+
+/**
  * Si no es una array lo convierte
  * @param type $arr
  */
@@ -259,7 +272,7 @@ class Encrypter {
     }
 
     public static function encrypt($data) {
-        $key=self::encryptionKey("ssvent","AS#fdfes");
+        $key = self::encryptionKey("ssvent", "AS#fdfes");
         return
                 trim(base64_encode(mcrypt_encrypt(
                                 MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), $data, MCRYPT_MODE_CBC, substr($key[1], 0, 32)
@@ -267,10 +280,10 @@ class Encrypter {
     }
 
     public static function decrypt($data) {
-        $key=self::encryptionKey("ssvent","AS#fdfes");
+        $key = self::encryptionKey("ssvent", "AS#fdfes");
         return
-               trim( mcrypt_decrypt(
-                MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), base64_decode($data), MCRYPT_MODE_CBC, substr($key[1], 0, 32)
+                trim(mcrypt_decrypt(
+                        MCRYPT_RIJNDAEL_256, substr($key[0], 0, 32), base64_decode($data), MCRYPT_MODE_CBC, substr($key[1], 0, 32)
         ));
     }
 

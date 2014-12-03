@@ -1,38 +1,11 @@
 <?php
 
+require_once 'classes/abstract/basicobject.php';
 require_once 'classes/interfaces/xmlpropinterface.php';
 require_once 'classes/interfaces/dbobject.php';
 
-abstract class itobject implements XmlPropInterface, dbobject {
+abstract class itobject extends basicobject implements XmlPropInterface, dbobject {
 
-    /**
-     *
-     * @var ConnectionManager 
-     */
-    protected $conn;
-
-    /**
-     *
-     * @var DB 
-     */
-    protected $dbinstance;
-
-    function __construct($conn = null) {
-        if ($conn) {
-            $this->conn = $conn;
-        } else {
-            $this->conn = $this->get_RH()->get_Connection();
-        }
-        $this->dbinstance = new DB($this->conn, false);
-    }
-
-    /**
-     * Devuelve controlador
-     * @return Rcontroller
-     */
-    protected function get_RH() {
-        return $GLOBALS["RH"];
-    }
 
     /**
      * 
@@ -59,21 +32,6 @@ abstract class itobject implements XmlPropInterface, dbobject {
         return $el;
     }
 
-    /**
-     * Usuario logueado
-     * @return USER
-     */
-    protected function getLogged() {
-        return $this->get_RH()->get_User();
-    }
-
-    /**
-     * Insatncia logueada
-     * @return INSTANCE
-     */
-    protected function getInstance() {
-        return $this->get_RH()->get_Instance();
-    }
 
 }
 

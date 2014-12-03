@@ -355,7 +355,6 @@ class TEAM extends itobject {
                 return $this->mytkts_vista;
             case 'staffhome_vista':
                 return $this->staffhome_vista;
-
             case 'direccionobj':
                 $this->load_division();
                 return $this->direccion;

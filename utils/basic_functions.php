@@ -14,6 +14,20 @@ function makeintarr($arr) {
 }
 
 /**
+ * 
+ * @param array<itobject> $objarr
+ * @param string $prop
+ * @return array
+ */
+function makeproparr($objarr,$prop){
+    $arRes=array();
+    foreach($objarr as $o){
+        array_push($arRes, $o->get_prop($prop));
+    }
+    return $arRes;
+}
+
+/**
  * Si no es una array lo convierte
  * @param type $arr
  */

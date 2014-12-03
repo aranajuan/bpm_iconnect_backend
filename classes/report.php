@@ -10,24 +10,55 @@ class REPORT extends basicobject {
 
     private $fromdate;
     private $todate;
-
+    private $valid;
+    private $resultids;
+    private $resultobjts;
+    
     /**
      * Carga fecha from
      * @param string $date  USERREAD
      */
     public function setFrom($date) {
         $this->fromdate = strToSQL(@STRdate_format($date, USERDATE_READ, DBDATE_WRITE));
+        $this->setvalid();
     }
 
+    /**
+     * Carga fecha to
+     * @param string $date  USERREAD
+     */
     public function setTo($date) {
-        $this->to = strToSQL(@STRdate_format($date, USERDATE_READ, DBDATE_WRITE));
+        $this->todate = strToSQL(@STRdate_format($date, USERDATE_READ, DBDATE_WRITE));
+        $this->setvalid();
+    }
+
+    /**
+     * Verifica las fechas cargadas y tiempo maximo de filtro
+     */
+    private function setvalid() {
+        $fo = strtotime($this->fromdate);
+        $fd = strtotime($this->todate);
+        $days = (($fd - $fo) / 86400);
+        $this->valid = REPORT_DAYSMAX >= $days;
+    }
+
+    /**
+     * Se puede ejecutar
+     * @return boolean
+     */
+    public function isvalid() {
+        return $this->valid;
     }
 
     /**
      * Carga todos los tkts que tocaron a un arrea (apertura/derivacion)
-     * @param array<int> $idsteams
+     * @param array<TEAM> $teams
      */
-    public function listTouchStaffteam($idsteams) {
+    public function listTouchStaffteam($teams) {
+        if (!$this->isvalid()) {
+            return null;
+        }
+        $idsteams = makeproparr($teams, "id");
         $retArr = array();
         $idsteamsInt = makeintarr($idsteams);
         $idsT = "'" . implode("','", $idsteamsInt) . "'";
@@ -35,35 +66,61 @@ class REPORT extends basicobject {
                 . "inner join TBL_ACCIONES as TA on (TH.idaccion=TA.id)"
                 . " where TA.ejecuta in('open','derive')"
                 . " and TH.valoraccion in (" . $idsT . ")"
-                . " and TH.FA between '".$this->fromdate."' and '".$this->todate."'";
+                . " and TH.FA between '" . $this->fromdate . "' and '" . $this->todate . "'";
         $this->dbinstance->loadRS($ssql);
         while ($tid = $this->dbinstance->get_vector()) {
             array_push($retArr, $tid["idtkt"]);
         }
-        return implode(",", $retArr);
+        $this->resultids=$retArr;
+        $this->loadObjs();
     }
 
     /**
      * Carga todos los tickets abiertos por algun usuario de los equipos
-     * @param array<int> $idsteams
+     * @param array<TEAM> $teams
      */
-    public function openbyOpTeam($idsteams) {
-        $idsteamsInt = makeintarr($idsteams);
+    public function openbyOpTeam($teams) {
+        if (!$this->isvalid()) {
+            return null;
+        }
+        $retArr = array();
         $ulist = array();
-        foreach ($idsteamsInt as $id) {
-            $t = new TEAM();
-            if ($t->load_DB($id) == "ok") {
-                $ul = $t->get_users();
-                foreach ($ul as $u) {
-                    array_push($ulist, $u->get_prop("usr"));
-                }
+        foreach ($teams as $t) {
+            $ul = $t->get_users();
+            foreach ($ul as $u) {
+                array_push($ulist, $u->get_prop("usr"));
             }
         }
 
         $ssql = "Select id from TBL_TICKETS where "
                 . "UA in ('" . implode("','", $ulist) . "')"
-                . " and TH.FA between '".$this->fromdate."' and '".$this->todate."'";
-        return $ssql;
+                . " and TH.FA between '" . $this->fromdate . "' and '" . $this->todate . "'";
+        $this->dbinstance->loadRS($ssql);
+        while ($tid = $this->dbinstance->get_vector()) {
+            array_push($retArr, $tid["id"]);
+        }
+        $this->resultids=$retArr;
+        $this->loadObjs();
     }
 
+    /**
+     * Carga vector de objetos TKT
+     */
+    private function loadObjs(){
+        $this->resultobjts=array();
+        foreach($this->resultids as $id){
+            $T = new TKT();
+            if($T->load_DB($id)=="ok"){
+                array_push($this->resultobjts,$T);
+            } 
+        }
+    }
+    
+    /**
+     * Lista de tickets filtrados
+     * @return array<TKT>
+     */
+    public function getObjs(){
+        return $this->resultobjts;
+    }
 }

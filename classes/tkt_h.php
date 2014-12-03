@@ -289,6 +289,12 @@ class TKT_H extends itobject {
                 return $this->accion;
             case 'detalle':
                 return $this->get_detailsShow();
+            case 'detalle.xml':
+                $dom = new DOMDocument();
+                if($dom->loadXML($this->get_detailsShow())){
+                    return $dom;
+                }
+                return null;
             case 'UA':
                 return $this->UA;
             case 'UA_o':

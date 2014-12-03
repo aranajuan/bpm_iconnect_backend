@@ -30,6 +30,7 @@ date_default_timezone_set ( 'America/Argentina/Buenos_Aires' );
 
 define('DBSERVER_ALL','mysql');				// mssql o mysql
 define('DBSERVER_PREFIX',''); // 'dbo.'
+define("DBSERVER_ODBC","pwin");
 /* conexion a root */
 define('DBHOST_ROOT','localhost');			//SERVIDOR DB
 define('DBUSER_ROOT','root');				// Usuario DB

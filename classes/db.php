@@ -20,6 +20,7 @@ class DB {
     var $noEmpty;   /* consulta con datos */
     var $lastSQL;
 
+    var $resultarr; /* array resultado de PDO */
     /**
      * Carga connectionmanager
      * 
@@ -71,16 +72,17 @@ class DB {
                 }
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
-            $this->RS = mssql_query($ssql, $this->get_link());
+            $this->RS = $this->get_link()->quey($ssql);
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" . mssql_get_last_message());
+                error_log("IT:sqlErr:" . print_r($this->get_link()->errorInfo()));
                 error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
             } else {
-                $this->cReg = mssql_num_rows($this->RS);
+                $this->resultarr=$this->RS->fetchAll();
+                $this->cReg =count($this->resultarr);
                 if ($this->cReg)
                     $this->noEmpty = 1;
                 else
@@ -110,16 +112,16 @@ class DB {
         elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
             $ssql = mb_convert_encoding($ssql, 'ISO-8859-1', 'UTF-8');
-            if (!mssql_query($ssql, $this->get_link())) {
+            if (!($this->get_link()->query($ssql))) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" . mssql_get_last_message());
+                error_log("IT:sqlErr:" .print_r($this->get_link()->errorInfo()));
                 error_log("IT:sql:" . $ssql);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {
-                $rs = mssql_query("select @@identity as lastid;", $this->get_link());
-                $lstID = mssql_fetch_array($rs);
-                $this->lstIDmss = $lstID[0];
+                $rs = $this->get_link()->query("select @@identity as lastid;");
+                $lstID = $rs->fetchColumn();
+                $this->lstIDmss = $lstID;
                 return 0;
             }
         }
@@ -133,7 +135,7 @@ class DB {
         if ($this->connection->get_motor() == 'mysql') {
             return mysql_fetch_array($this->RS);
         } elseif ($this->connection->get_motor() == 'mssql') {
-            $arr = mssql_fetch_array($this->RS);
+            $arr = array_pop($this->resultarr);
             if ($arr) {
                 foreach ($arr as &$a) {
                     $a = mb_convert_encoding($a, "UTF-8");

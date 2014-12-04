@@ -816,7 +816,7 @@ class USER extends itobject {
                     if ($rta["response"] != "true")
                         return "Usuario o contrase&ntilde;a invalidos.";
                 }else {
-                    return "Error en servicio de logeo";
+                    return "Error en servicio de logeo".$rta["description"];
                 }
                 break;
             case "TELECOM":

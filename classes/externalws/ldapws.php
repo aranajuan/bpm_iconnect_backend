@@ -69,6 +69,7 @@ class LDAPWS {
         $requestTS = $this->domRequest->saveXML(null, LIBXML_NOEMPTYTAG);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, LDAP_DIR);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestTS);

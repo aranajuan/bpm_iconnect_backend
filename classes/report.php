@@ -94,7 +94,7 @@ class REPORT extends basicobject {
 
         $ssql = "Select id from TBL_TICKETS where "
                 . "UA in ('" . implode("','", $ulist) . "')"
-                . " and TH.FA between '" . $this->fromdate . "' and '" . $this->todate . "'";
+                . " and FA between '" . $this->fromdate . "' and '" . $this->todate . "'";
         $this->dbinstance->loadRS($ssql);
         while ($tid = $this->dbinstance->get_vector()) {
             array_push($retArr, $tid["id"]);

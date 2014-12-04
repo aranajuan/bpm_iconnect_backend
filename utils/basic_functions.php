@@ -120,7 +120,7 @@ function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
         return -1;
     }
     try {
-        $date = DateTime::createFromFormat($origin, $str);
+        $date = date_create($str);
         if ($date) {
             return $date->format($format);
         }

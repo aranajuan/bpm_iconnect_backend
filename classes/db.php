@@ -72,11 +72,11 @@ class DB {
                 }
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
-            $this->RS = $this->get_link()->quey($ssql);
+            $this->RS = $this->get_link()->query($ssql);
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" . print_r($this->get_link()->errorInfo()));
+                error_log("IT:sqlErr:" . print_r($this->get_link()->errorInfo(),true));
                 error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
@@ -111,10 +111,10 @@ class DB {
         }
         elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
-            $ssql = mb_convert_encoding($ssql, 'ISO-8859-1', 'UTF-8');
+            $ssql = mb_convert_encoding($ssql, 'ISO-8859-15', 'UTF-8');
             if (!($this->get_link()->query($ssql))) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" .print_r($this->get_link()->errorInfo()));
+                error_log("IT:sqlErr:" .print_r($this->get_link()->errorInfo(),true));
                 error_log("IT:sql:" . $ssql);
                 $this->lstIDmss = NULL;
                 return 1;
@@ -135,10 +135,10 @@ class DB {
         if ($this->connection->get_motor() == 'mysql') {
             return mysql_fetch_array($this->RS);
         } elseif ($this->connection->get_motor() == 'mssql') {
-            $arr = array_pop($this->resultarr);
+            $arr = array_shift($this->resultarr);
             if ($arr) {
                 foreach ($arr as &$a) {
-                    $a = mb_convert_encoding($a, "UTF-8");
+                    $a = mb_convert_encoding($a, "UTF-8","ISO-8859-15");
                 }
             }
             return $arr;

@@ -326,7 +326,7 @@ class TKT extends TREE {
                     if ($this->master->get_prop("u_tom"))
                         $status = "En analisis";
                     else
-                    if ($TKTHF->get_prop("accion")->get_prop("nombre") == "DERIVAR")
+                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
                         $status = "Derivado";
                     else
                         $status = "Pendiente";
@@ -334,7 +334,7 @@ class TKT extends TREE {
                     if ($this->u_tom)
                         $status = "En analisis";
                     else
-                    if ($TKTHF->get_prop("accion")->get_prop("nombre") == "DERIVAR")
+                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
                         $status = "Derivado";
                     else
                         $status = "Pendiente";

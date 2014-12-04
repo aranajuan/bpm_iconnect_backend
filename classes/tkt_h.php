@@ -289,7 +289,7 @@ class TKT_H extends itobject {
                 return $this->accion;
             case 'detalle':
                 return $this->get_detailsShow();
-            case 'detalle.xml':
+            case 'detalle_xml':
                 $dom = new DOMDocument();
                 if($dom->loadXML($this->get_detailsShow())){
                     return $dom;

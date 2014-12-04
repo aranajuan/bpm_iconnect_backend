@@ -3,6 +3,10 @@
 require_once 'classes/report.php';
 require_once 'classes/tkt.php';
 
+function add_node($tnode, $form) {
+    
+}
+
 /**
  * Lista
  * @param Rcontroller $RC
@@ -84,18 +88,28 @@ function GO($RC) {
                     $fields = $form->getElementsByTagName("element");
 
                     foreach ($fields as $field) {
-                    $lbl = $field->getElementsByTagName("label");
-                    $val = $field->getElementsByTagName("value");
-                    $id = $field->getElementsByTagName("id");
-                    if ($id->item(0)->textContent) {
-                        $lblt=trim(space_delete($lbl->item(0)->textContent));
-                        $idt=trim(space_delete($id->item(0)->textContent));
-                        $tnode->appendChild($RC->createElement("id".$idt, $val->item(0)->textContent));
-                        if (!in_array("id".$idt . "=>" . $lblt, $fieldClist)) {
-                            array_push($fieldClist, "id".$idt . "=>" . $lblt);
+                        $lbl = $field->getElementsByTagName("label");
+                        $val = $field->getElementsByTagName("value");
+                        $id = $field->getElementsByTagName("id");
+                        $value = $val->item(0)->textContent;
+                        if ($id->item(0)->textContent && $value) {
+                            $type = trim(space_delete($field->getElementsByTagName("type")->item(0)->textContent));
+                            if ($type == "select") {
+                                $opts = $field->getElementsByTagName("option");
+                                foreach ($opts as $o) {
+                                    if (trim(space_delete($o->getElementsByTagName("value")->item(0)->textContent)) == $value) {
+                                        $value = $o->getElementsByTagName("text")->item(0)->textContent;
+                                    }
+                                }
+                            }
+                            $lblt = trim(space_delete($lbl->item(0)->textContent));
+                            $idt = trim(space_delete($id->item(0)->textContent));
+                            $tnode->appendChild($RC->createElement("id" . $idt, $value));
+                            if (!in_array("id" . $idt . "=>" . $lblt, $fieldOlist)) {
+                                array_push($fieldOlist, "id" . $idt . "=>" . $lblt);
+                            }
                         }
                     }
-                }
                 }
             }
 
@@ -117,12 +131,22 @@ function GO($RC) {
                     $lbl = $field->getElementsByTagName("label");
                     $val = $field->getElementsByTagName("value");
                     $id = $field->getElementsByTagName("id");
-                    if ($id->item(0)->textContent) {
-                        $lblt=trim(space_delete($lbl->item(0)->textContent));
-                        $idt=trim(space_delete($id->item(0)->textContent));
-                        $tnode->appendChild($RC->createElement("id".$idt, $val->item(0)->textContent));
-                        if (!in_array("id".$idt . "=>" . $lblt, $fieldClist)) {
-                            array_push($fieldClist, "id".$idt . "=>" . $lblt);
+                    $value = $val->item(0)->textContent;
+                    if ($id->item(0)->textContent && $value) {
+                        $type = trim(space_delete($field->getElementsByTagName("type")->item(0)->textContent));
+                        if ($type == "select") {
+                            $opts = $field->getElementsByTagName("option");
+                            foreach ($opts as $o) {
+                                if (trim(space_delete($o->getElementsByTagName("value")->item(0)->textContent)) == $value) {
+                                    $value = $o->getElementsByTagName("text")->item(0)->textContent;
+                                }
+                            }
+                        }
+                        $lblt = trim(space_delete($lbl->item(0)->textContent));
+                        $idt = trim(space_delete($id->item(0)->textContent));
+                        $tnode->appendChild($RC->createElement("id" . $idt, $value));
+                        if (!in_array("id" . $idt . "=>" . $lblt, $fieldClist)) {
+                            array_push($fieldClist, "id" . $idt . "=>" . $lblt);
                         }
                     }
                 }
@@ -136,7 +160,7 @@ function GO($RC) {
     for ($i = 1; $i <= $tifMax; $i++) {
         $tlisTXT.=",T" . $i;
     }
-    $fields = implode(",", $fieldClist);
+    $fields = implode(",", $fieldOlist) .",". implode(",", $fieldClist);
     $data->appendChild($RC->createElement("view", "id,FA" . $tlisTXT . ",UA,EA,status,FC,asignadoa," . $fields));
     $data->appendChild($list);
     return $data;

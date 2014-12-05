@@ -49,7 +49,7 @@ function GO($RC) {
 
         if ($topts["object"]) {
             if ($topts["object"]->get_prop("idequipo_destino") && $topts["object"]->get_prop("ruta_destino") == NULL) {
-                $X = $topts["object"]->get_prop("pretext");
+                $X =trim(space_delete($topts["object"]->get_prop("pretext")));
                 $dom = new DOMDocument();
                 $dom->loadXML($X);
                 $joined = $RC->append_xml($dom->documentElement);

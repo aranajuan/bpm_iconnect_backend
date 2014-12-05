@@ -28,8 +28,13 @@ abstract class XMLhandler {
         try {
             $this->parse = new SimpleXMLElement($text);
         } catch (Exception $e) {
-            if(($ipOr=="::1" || $ipOr=="127.0.0.1" || $ipOr==IPLOCAL) && $_GET["text"]!=""){
-                echo Encrypter::encrypt($_GET["text"]);
+            if(($ipOr=="::1" || $ipOr=="127.0.0.1" || $ipOr==IPLOCAL)){
+		if($_GET["text"]!=""){
+                	echo Encrypter::encrypt($_GET["text"]);
+		}else{
+			echo "<input type=\"text\" id=\"pass\" />";
+			echo "<input type=\"button\" value=\"Cifrar\" onclick=\"location.href='?text='+encodeURIComponent(document.getElementById('pass').value)\" />";
+		}
                 exit();
             }
             $this->error = $e->getMessage();

@@ -156,13 +156,11 @@ function HsToMin($hs) {
 /**
  * elimina todos los espacios del texto (en cualquier lugar)
  */
-function space_delete($str) {
-
-    $rta = str_replace(" ", "", $str);
-    $rta = str_replace("\t", "", $rta);
-    $rta = str_replace("\n", "", $rta);
-    $rta = str_replace("\0", "", $rta);
-    $rta = str_replace("\x0B", "", $rta);
+function space_delete($str,$charL=null) {
+	if($charL==null){
+		$charL=array(" ","\t","\n","\0","\x0B");
+	}
+    $rta = str_replace($charL, "", $str);
 
     return $rta;
 }

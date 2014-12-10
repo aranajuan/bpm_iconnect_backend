@@ -121,7 +121,7 @@ class OPTION extends itobject {
             case 'idequipo_destino':
                 return $this->idequipo_destino;
             case 'pretext':
-                return str_replace(array("\\r\\n", "\\r", "\\n"), "", $this->pretext);
+                return trim(space_delete( $this->pretext,array("\t","\n","\0","\x0B")));
             case 'texto_critico':
                 return $this->texto_critico;
             case 'idpregunta_destino':

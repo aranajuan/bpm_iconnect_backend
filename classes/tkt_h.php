@@ -288,10 +288,10 @@ class TKT_H extends itobject {
             case 'accion':
                 return $this->accion;
             case 'detalle':
-                return $this->get_detailsShow();
+                return trim(space_delete($this->get_detailsShow(),array("\t","\n","\0","\x0B")));
             case 'detalle_xml':
                 $dom = new DOMDocument();
-                if($dom->loadXML($this->get_detailsShow())){
+                if($dom->loadXML($this->get_prop('detalle'))){
                     return $dom;
                 }
                 return null;

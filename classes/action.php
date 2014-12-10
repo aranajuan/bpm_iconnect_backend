@@ -24,6 +24,7 @@ class ACTION extends itobject {
     private $habilita_t_propio; /* tomado por el usuario */
     private $habilita_tomado;   /* tomado por cuaklquier usuario -> menos el logueado (marcar tambien la anterior) */
     private $habilita_perfiles; /* perfiles habilitados (separados por coma) */
+    private $habilita_equipos;   /* equipo habilitados para esta accion */
     private $habilita_a_propio; /* abierto por el usuario */
     private $habilita_abierto;  /* abierto */
     private $habilita_equipo;   /* equipo del usuario */
@@ -87,6 +88,8 @@ class ACTION extends itobject {
 
         $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles ='*')";
 
+	$equipos = "(habilita_equipos like '%" . $this->TKT->get_prop("idequipo") . ",%' or habilita_equipos ='*')";
+		
         if ($l->in_team($this->TKT->get_prop("idequipo")))
             $equipo = "habilita_equipo in (0,1)"; // ticket en el equipo del usuario logueado
         else
@@ -97,7 +100,7 @@ class ACTION extends itobject {
         else
             $abierto = "habilita_abierto in (0,1)";
 
-        $ssql = "select id from TBL_ACCIONES where $t_propio and $a_propio and $tomado and $perfil and $equipo and $abierto and $master and estado=" . I_ACTIVE;
+        $ssql = "select id from TBL_ACCIONES where $t_propio and $a_propio and $tomado and $perfil and $equipos and $equipo and $abierto and $master and estado=" . I_ACTIVE;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $ret = array();
@@ -234,6 +237,7 @@ class ACTION extends itobject {
         $this->formulario = trim($tmpU["formulario"]);
         $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
         $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
+	$this->habilita_equipos = trim($tmpU["habilita_equipos"]);
         $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
         $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
         $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
@@ -275,10 +279,13 @@ class ACTION extends itobject {
      */
     public function check_valid() {
         $l = $this->getLogged();
-
+		
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
             return "Esta accion no esta disponible para tu perfil";
-
+			
+		if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
+            return "Esta accion no esta disponible para tu equipo";	
+			
         if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";

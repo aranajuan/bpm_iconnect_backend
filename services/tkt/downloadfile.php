@@ -41,6 +41,7 @@ function GO($RC) {
     
     $arch = $RC->createElement("file");
     $arch->appendChild($RC->createElement("name",$fname));
+    $arch->appendChild($RC->createElement("idtkt",$TH->get_prop("idtkt")));
     $arch->appendChild($RC->createElement("data",$imdata));
     
     return $arch;

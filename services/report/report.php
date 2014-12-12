@@ -161,7 +161,7 @@ function GO($RC) {
         $tlisTXT.=",T" . $i;
     }
     $fields = implode(",", $fieldOlist) .",". implode(",", $fieldClist);
-    $data->appendChild($RC->createElement("view", "id,FA" . $tlisTXT . ",UA,EA,status,FC,asignadoa," . $fields));
+    $data->appendChild($RC->createElement("view", "id,FA=>fecha apertura" . $tlisTXT . ",UA=>Usuario apertura,EA=>Equipo apertura,status,FC=>Fecha cierre,asignadoa," . $fields));
     $data->appendChild($list);
     return $data;
 }

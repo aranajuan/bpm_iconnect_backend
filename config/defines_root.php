@@ -4,6 +4,7 @@ define("DEBUG_SQL_MSG",0); // mostrar errores sql
 define("DEBUG_SQL_QUERY",0); //mostrar sentencias SQL
 define("DEBUG_MEASURE",0); // mostrar tiempos de ejecucion
 define("DEBUG_ACCESS_ONLY",0); // acceso solo a usuarios debug
+define("ERROR_REPORTINGCONST",E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 define ("MAP_U",""); // mapea a otro usuario EJ: 548391>223547;
 

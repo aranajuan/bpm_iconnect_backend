@@ -102,6 +102,15 @@ class FRONT extends itobject {
     }
 
     /**
+     * Verifica la ip contra la lista habilitada
+     * @return boolean la ip es valida para el front
+     */
+    public function validip($ip){
+        $ips=explode(",",$this->get_prop("ip"));
+        return in_array($ip, $ips);
+    }
+    
+    /**
      * Devuelve propiedades
      * @param type $property
      * @return string

@@ -145,8 +145,8 @@ function GO($RC) {
                         $lblt = trim(space_delete($lbl->item(0)->textContent));
                         $idt = trim(space_delete($id->item(0)->textContent));
                         $tnode->appendChild($RC->createElement("id" . $idt, $value));
-                        if (!in_array("id" . $idt . "=>" . $lblt, $fieldClist)) {
-                            array_push($fieldClist, "id" . $idt . "=>" . $lblt);
+                        if (!in_array("id" . $idt . "=>cierre_" . $lblt, $fieldClist)) {
+                            array_push($fieldClist, "id" . $idt . "=>cierre_" . $lblt);
                         }
                     }
                 }

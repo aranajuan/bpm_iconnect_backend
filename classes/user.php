@@ -195,7 +195,7 @@ class USER extends itobject {
         $this->pass = $tmpU["pass"];
         $this->fronts = $tmpU["fronts"];
         $this->frontsV = explode(",", $this->fronts);
-        if ($tmpU["perfil"] > 1) {
+        if ($tmpU["perfil"] > 1 && $this->perfil!=1) {
             $this->perfil = trim($tmpU["perfil"]);
         }
         $this->mail = trim($tmpU["mail"]);

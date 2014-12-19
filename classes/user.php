@@ -265,7 +265,8 @@ class USER extends itobject {
         $resultF = array_merge($result, $finalAdmTeams);
 
         $this->dbteams = implode(",", $resultF);
-
+        if(!is_numeric($resultF[0]) && count($resultF)==1)
+            return 0;
         return count($resultF);
     }
 

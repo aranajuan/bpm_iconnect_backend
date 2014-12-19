@@ -796,12 +796,13 @@ class USER extends itobject {
 
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
-        if ($passL == "" || $this->error == true)
-            return "Usuario o contrase&ntilde;a invalidos.2";
         
         if ($front->is_trusted()) {
             return $this->newSession($front, $ipuser);
         }
+        
+        if ($passL == "" || $this->error == true)
+            return "Usuario o contrase&ntilde;a invalidos.2";
 
         switch ($this->dominio) {
             case "ITRACKER":
@@ -835,7 +836,7 @@ class USER extends itobject {
                 $ssql = "select fecha from TBL_SESIONES where "
                         . "usr='" . strToSQL($this->get_prop("usr")) . "' "
                         . "and front=" . $SPF->get_prop("id") . " and hash='" . strToSQL($passL) . "'"
-                        . " and ip='" . strToSQL($ipuser) . "' ";
+                        . " ";
                 $this->dbroot->loadRS($ssql);
                 if ($this->dbroot->cReg != 1) {
                     return "SP::Usuario o contrase&ntilde;a invalidos.";

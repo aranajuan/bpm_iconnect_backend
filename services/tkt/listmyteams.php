@@ -44,7 +44,7 @@ function GO($RC) {
     $response=$RC->createElement("data");
     $response->appendChild($RC->createElement("view", $view));
     $listL=$RC->createElement("list");
-    $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","status","critic");
+    $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","equipo.nombre","status","critic");
     if ($ALL_v) {
         foreach ($ALL_v as $l){
             $listL->appendChild($l->getXML($RC,$fields));

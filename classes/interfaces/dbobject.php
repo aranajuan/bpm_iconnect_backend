@@ -13,6 +13,7 @@ interface dbobject {
     
      /**
      * Carga datos desde DB
+     * @deprecated v3.3 Iniciar desde objectcache
      * @param string $ID
      * @return string
      */

@@ -162,6 +162,7 @@ class TKT_H extends itobject {
         $action->addChild("id", $this->get_prop("id"));
         $action->addChild("alias", $this->accion->get_prop("alias"));
         if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
+            $obCI = OBJECTCACHE::getInstance();
             $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
             $action->addChild("value", $val);
         } else {

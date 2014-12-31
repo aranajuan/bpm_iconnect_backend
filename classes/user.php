@@ -122,12 +122,6 @@ class USER extends itobject {
         return explode(",", DOMAINS);
     }
 
-    /**
-     * Carga usuario de ROOT
-     * @param type $usr
-     * @param boolean $request - si e el usr requiriente (almacena recursos)
-     * @return string
-     */
     public function load_DB($usr) {
 
         if ($usr == "") {

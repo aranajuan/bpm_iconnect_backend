@@ -111,11 +111,6 @@ class TKT extends TREE {
         return $list;
     }
 
-    /**
-     * Carga de base de datos
-     * @param type $id
-     * @return string
-     */
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
         $this->working = false;

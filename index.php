@@ -2,6 +2,7 @@
 
 require_once 'config/init.php';
 require_once 'classes/Rcontroller.php';
+require_once 'classes/objectcache.php';
 
 $RQ = trim(file_get_contents('php://input'));
 

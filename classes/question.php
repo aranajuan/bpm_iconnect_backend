@@ -17,11 +17,7 @@ class QUESTION extends itobject {
     private $opciones; /* objetos opciones dependientes de la pregunta */
     private $error = FALSE; /* erro al cargar de la base */
 
-    /**
-     * Carga de base de datos
-     * @param int $id
-     * @return string
-     */
+
     function load_DB($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_PREGUNTAS where id=" . intval($id));

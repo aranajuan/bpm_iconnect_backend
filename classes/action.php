@@ -113,11 +113,6 @@ class ACTION extends itobject {
         return $ret;
     }
 
-    /**
-     * Carga por nombre o id
-     * @param int|string $id
-     * @return type
-     */
     public function load_DB($id) {
         $idInt = intval($id);
         if (is_int($idInt) && $idInt > 0) {
@@ -344,6 +339,7 @@ class ACTION extends itobject {
      */
     public function ejecute() {
         if ($this->get_prop("ejecuta")) {
+            $obCI = OBJECTCACHE::getInstance();
             $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
             $response = include($file);
             if ($response["result"] != "ok") {

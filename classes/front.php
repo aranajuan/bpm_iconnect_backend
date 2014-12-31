@@ -42,11 +42,6 @@ class FRONT extends itobject {
         return $list;
     }
     
-    /**
-     * Carga desde base el nombre
-     * @param type $nombre
-     * @return string error/eliminado/ok
-     */
     function load_DB($name) {
         $this->DBobj->loadRS("select * from TBL_FRONTS where nombre='" . strToSQL($name) . "'");
         if ($this->DBobj->noEmpty && $this->DBobj->cReg == 1) {

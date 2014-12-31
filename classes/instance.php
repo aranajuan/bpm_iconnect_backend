@@ -21,11 +21,6 @@ class INSTANCE extends itobject {
         $this->DBobj = new DB($conn, true);
     }
 
-    /**
-     * Carga desde base el nombre
-     * @param type $nombre
-     * @return string error/eliminado/ok
-     */
     function load_DB($name) {
         $this->DBobj->loadRS("select * from TBL_INSTANCIAS where nombre='" . strToSQL($name) . "'");
         if ($this->DBobj->noEmpty && $this->DBobj->cReg == 1) {

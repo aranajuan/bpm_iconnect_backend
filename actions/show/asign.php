@@ -1,5 +1,8 @@
 <?php
 
-$uas= new USER();
-$uas->load_DB($this->get_prop("valoraccion"));
-return "Se ha asignado a ".$uas->get_prop("nombre");
+$uas= $obCI->get_object('USER', $this->get_prop("valoraccion"));
+if($uas){
+    return "Se ha asignado a ".$uas->get_prop("nombre");
+}else{
+    return "No se puede determinar usuario";
+}

@@ -12,9 +12,9 @@ require_once 'classes/team.php';
     $itf = $this->getitform();
     
     $idequipo = $itf->get_value("idequipo");
-    $td = new TEAM();
-    if($td->load_DB($idequipo)!="ok"){
-        $response = array("result" => "error", "msj" => "Erro al cargar equipo.");
+    $td = $obCI->get_object('TEAM', $idequipo);
+    if($obCI->get_status('TEAM', $idequipo)!="ok"){
+        return array("result" => "error", "msj" => "Erro al cargar equipo.");
     }
     
     $rtaOP = $TKT->derive($td);

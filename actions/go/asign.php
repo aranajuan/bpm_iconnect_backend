@@ -11,9 +11,9 @@
     $itf = $this->getitform();
     
     $idusr = $itf->get_value("idusr");
-    $tou = new USER();
-    if($tou->load_DB($idusr)!="ok"){
-        $response = array("result" => "error", "msj" => "Erro al cargar usuario.");
+    $tou = $obCI->get_object('USER', $idusr);
+    if($obCI->get_status('USER', $idusr)!="ok"){
+        return array("result" => "error", "msj" => "Erro al cargar usuario.");
     }
     
     $rtaOP = $TKT->asign($tou);

@@ -11,9 +11,9 @@
     $itf = $this->getitform();
     
     $idmaster = $itf->get_value("idmaster");
-    $master = new TKT();
-    if($master->load_DB($idmaster)!="ok"){
-        $response = array("result" => "error", "msj" => "Erro al cargar tkt.");
+    $master = $obCI->get_object('TKT', $idmaster);
+    if($obCI->get_status('TKT', $idmaster)!="ok"){
+        return array("result" => "error", "msj" => "Erro al cargar tkt.");
     }
     
    

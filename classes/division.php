@@ -35,11 +35,6 @@ class DIVISION extends itobject {
         return $list;
     }
     
-    /**
-     * Carga de base de datos
-     * @param int $id
-     * @return string
-     */
     function load_DB($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_DIRECCION where id=".intval($id));

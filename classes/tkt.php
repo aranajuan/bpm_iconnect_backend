@@ -98,7 +98,11 @@ class TKT extends TREE {
                 $ismaster = "and idmaster=" . $filter["master"];
             }
         }
-
+           
+        if($openbyfilter=="" && $opentotaken=""){
+            return null;
+        }
+        
         $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
         $this->dbinstance->loadRS($ssql);
         $i = 0;

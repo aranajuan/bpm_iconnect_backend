@@ -11,9 +11,9 @@ function GO($RC) {
     
     $actionName = $RC->get_params("action");
     
-    $A= new ACTION();
+    $A= $RC->get_objcache()->get_object("ACTION", $actionName);
     
-    if($A->load_DB($actionName)!="ok"){
+    if($RC->get_objcache()->get_status("ACTION", $actionName)!="ok"){
         return $RC->createElement("error", "No se pudo cargar la accion");
     }
     

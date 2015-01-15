@@ -6,8 +6,8 @@ require_once 'classes/tkt.php';
  * @return null
  */
 function GO($RC) {
-    $TKT = new TKT();
-    if($TKT->load_DB($RC->get_params("idtkt"))!="ok"){
+    $TKT = $RC->get_objcache()->get_object("TKT", $RC->get_params("idtkt"));
+    if($RC->get_objcache()->get_status("TKT", $RC->get_params("idtkt"))!="ok"){
         return $RC->createElement("error", "Ticket invalido");
     }
     

@@ -158,8 +158,7 @@ class NOTIFY extends itobject {
                         $result = $this->tkt_final->get_prop("u_asig_o")->get_prop("mail");
                     break;
                 case "ub":
-                    $tu = new USER();
-                    $tu->load_DB($this->tkt_final->get_prop("UB"));
+                    $tu = $this->objsCache->get_object("USER", $this->tkt_final->get_prop("UB"));
                     if ($tu)
                         $result = $tu->get_prop("mail");
                     break;

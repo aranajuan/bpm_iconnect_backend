@@ -60,7 +60,9 @@ define('I_NEWID',-1);
 
 define("FILEUP_ATTACH_FOLDER","adjuntos");
 
-define("REPORT_DAYSMAX",32);
+define("REPORT_DAYSMAX",390);
+
+define("OBJ_CACHE_ENABLED",1);
 
 ini_set('include_path',ini_get('include_path').'./'.PATH_SEPARATOR.INCLUDE_DIR);
 

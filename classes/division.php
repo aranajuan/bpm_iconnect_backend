@@ -28,8 +28,7 @@ class DIVISION extends itobject {
         $i=0;
         $list=array();
         while($idV=$this->dbinstance->get_vector()){
-            $list[$i]=new DIVISION($this->conn);
-            $list[$i]->load_DB($idV[0]);
+            $list[$i]= $this->objsCache->get_object(get_class(), $idV[0]);
             $i++;
         }
         return $list;
@@ -69,10 +68,10 @@ class DIVISION extends itobject {
         $nameTemp = array();
         while ($sis = $this->dbinstance->get_vector()) {
 
-            $s = new SYSTEM($this->conn);
-            if ($s->load_DB($sis["idsistema"]) == "ok") {
-                $q = new QUESTION($this->conn);
-                if ($q->load_DB($sis["p_pregunta"]) == "ok") {
+            $s = $this->objsCache->get_object("SYSTEM", $sis["idsistema"]);
+            if ($this->objsCache->get_status("SYSTEM", $sis["idsistema"]) == "ok") {
+                $q = $this->objsCache->get_object("QUESTION", $sis["p_pregunta"]);
+                if ($this->objsCache->get_status("QUESTION", $sis["p_pregunta"]) == "ok") {
                     $this->idsistemas[$i] = $s->get_prop("id");
                     $this->sistemas[$i] = $s;
                     $nameTemp[$i]=$s->get_prop("nombre");

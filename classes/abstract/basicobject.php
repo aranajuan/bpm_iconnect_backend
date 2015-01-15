@@ -17,6 +17,12 @@ abstract class basicobject {
      */
     protected $dbinstance;
 
+     /**
+     *
+     * @var OBJECTCACHE
+     */
+    protected $objsCache;
+    
     function __construct($conn = null) {
         if ($conn) {
             $this->conn = $conn;
@@ -24,6 +30,8 @@ abstract class basicobject {
             $this->conn = $this->get_RH()->get_Connection();
         }
         $this->dbinstance = new DB($this->conn, false);
+        //prepara la clase de cache para acceso
+        $this->objsCache=  OBJECTCACHE::getInstance();
     }
 
     /**

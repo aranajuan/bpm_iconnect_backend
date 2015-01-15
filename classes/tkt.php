@@ -104,8 +104,7 @@ class TKT extends TREE {
         $i = 0;
         $list = array();
         while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i] = new TKT();
-            $list[$i]->load_DB($idV[0]);
+            $list[$i] = $this->objsCache->get_object(get_class(), $idV[0]);
             $i++;
         }
         return $list;
@@ -235,8 +234,8 @@ class TKT extends TREE {
 
         if ($this->dbinstance->noEmpty) {
             while ($tc = $this->dbinstance->get_vector()) {
-                $TKT = new TKT();
-                if ($TKT->load_DB($tc["id"]) === "ok") {
+                $TKT = $this->objsCache->get_object("TKT", $tc["id"]);
+                if ($this->objsCache->get_status("TKT", $tc["id"]) === "ok") {
                     $this->childs[$i] = $TKT;
                     $i++;
                 }
@@ -278,8 +277,9 @@ class TKT extends TREE {
         $idteam = null;
         if ($this->dbinstance->noEmpty) {
             while ($TH = $this->dbinstance->get_vector()) {
-                $THO = new TKT_H();
-                if ($THO->load_DB($TH[0], $this->view) == "ok") {
+                $THO = $this->objsCache->get_object("TKT_H", $TH[0]);
+                if ($this->objsCache->get_status("TKT_H", $TH[0]) == "ok") {
+                    $THO->set_view($this->view);
                     $this->tkt_hOBJ[$i] = $THO;
                     $eje = $THO->get_prop('accion')->get_prop("ejecuta");
                     if ($eje === "open") {
@@ -351,9 +351,10 @@ class TKT extends TREE {
         ";
         $this->dbinstance->loadRS($ssql);
         if ($this->dbinstance->noEmpty) {
-            $THO = new TKT_H();
             $THID = $this->dbinstance->get_vector();
-            if ($THO->load_DB($THID[0], $this->view) == "ok") {
+            $THO = $this->objsCache->get_object("TKT_H", $THID[0]);
+            if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
+                $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
                     $THO->set_idteam($THO->get_prop("valoraccion"));
                 }
@@ -376,9 +377,10 @@ class TKT extends TREE {
         ";
         $this->dbinstance->loadRS($ssql);
         if ($this->dbinstance->noEmpty) {
-            $THO = new TKT_H();
             $THID = $this->dbinstance->get_vector();
-            if ($THO->load_DB($THID[0], $this->view) == "ok") {
+            $THO = $this->objsCache->get_object("TKT_H", $THID[0]);
+            if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
+                $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
                     $THO->set_idteam($THO->get_prop("valoraccion"));
                 }
@@ -412,8 +414,8 @@ class TKT extends TREE {
             $this->equipo = NULL;
             return;
         }
-        $t = new TEAM();
-        $rta = $t->load_DB($this->idequipo);
+        $t = $this->objsCache->get_object("TEAM", $this->idequipo);
+        $rta = $this->objsCache->get_status("TEAM", $this->idequipo);
         switch ($rta) {
             case "eliminado":
                 $this->can_edit = 0;
@@ -439,8 +441,8 @@ class TKT extends TREE {
     private function load_master() {
         // si esta cerrado no se puede editar este tkt, si no existe este se independiza
         if ($this->idmaster && $this->master == NULL) {
-            $t = new TKT();
-            if ($t->load_DB($this->idmaster) == "error" && $this->UB == NULL) {
+            $t = $this->objsCache->get_object("TKT", $this->idmaster);
+            if ($this->objsCache->get_status("TKT", $this->idmaster) == "error" && $this->UB == NULL) {
                 $this->idmaster = NULL;
                 $this->master = NULL;
                 $this->ejecute_action("SEPARAR");
@@ -461,8 +463,8 @@ class TKT extends TREE {
      * @return string
      */
     public function ejecute_action($action, $values = null) {
-        $A = new ACTION();
-        if ($A->load_DB($action) != "ok") {
+        $A = $this->objsCache->get_object("ACTION", $action);
+        if ($this->objsCache->get_status("ACTION", $action) != "ok") {
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
@@ -477,15 +479,15 @@ class TKT extends TREE {
         // si no coincide usr con equipo se libera (funcion para liberar)
         if ($this->u_tom) {
 
-            $u = new USER();
-            $rta = $u->load_DB($this->u_tom);
+            $u = $this->objsCache->get_object("USER", $this->u_tom);
+            $rta = $this->objsCache->get_status("USER", $this->u_tom);
 
             if ($rta == "ok") { // existe
                 if ($u->in_team($this->get_prop("idequipo"))) { // usuario pertenece al equipo
                     $this->u_tom_o = $u;
-                    $u = new USER();
+                    $u = null;
                     if ($this->u_asig) {
-                        $u->load_DB($this->u_asig);
+                        $u=$this->objsCache->get_object("USER", $this->u_asig);
                         $this->u_asig_o = $u;
                     }
                 } else {
@@ -496,8 +498,8 @@ class TKT extends TREE {
             }
         }
         if ($this->usr) {
-            $u = new USER();
-            $u->load_DB($this->usr);
+            $u = null;
+            $u=$this->objsCache->get_object("USER", $this->usr);
             $this->usr_o = $u;
         }
     }

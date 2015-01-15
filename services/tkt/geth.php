@@ -10,8 +10,8 @@ require_once 'classes/tkt.php';
 function GO($RC) {
     $idtkt = $RC->get_params("id");
 
-    $TKT = new TKT();
-    if ($TKT->load_DB($idtkt) != "ok") {
+    $TKT = $RC->get_objcache()->get_object("TKT", $idtkt);
+    if ($RC->get_objcache()->get_status("TKT", $idtkt) != "ok") {
         return $RC->createElement("error", "Ticket invalido.");
     }
     $response = new SimpleXMLElement("<data></data>");

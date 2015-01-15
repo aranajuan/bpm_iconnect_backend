@@ -10,8 +10,8 @@ require_once 'classes/tkt.php';
 function GO($RC) {
     $params = $RC->get_params("sel_params");
     $arr=  json_decode($params);
-    $TKT = new TKT();
-    if($TKT->load_DB($arr->idtkt)!="ok"){
+    $TKT = $RC->get_objcache()->get_object("TKT", $arr->idtkt);
+    if($RC->get_objcache()->get_status("TKT", $arr->idtkt)!="ok"){
         return $RC->createElement("error","ticket invalido".print_r($arr,true));
     }
     

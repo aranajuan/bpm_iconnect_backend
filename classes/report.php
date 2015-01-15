@@ -109,8 +109,8 @@ class REPORT extends basicobject {
     private function loadObjs(){
         $this->resultobjts=array();
         foreach($this->resultids as $id){
-            $T = new TKT();
-            if($T->load_DB($id)=="ok"){
+            $T = $this->objsCache->get_object("TKT", $id);
+            if($this->objsCache->get_status("TKT", $id)=="ok"){
                 array_push($this->resultobjts,$T);
             } 
         }

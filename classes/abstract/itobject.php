@@ -6,7 +6,7 @@ require_once 'classes/interfaces/dbobject.php';
 
 abstract class itobject extends basicobject implements XmlPropInterface, dbobject {
 
-
+  
     /**
      * 
      * @param XMLhandler $doc

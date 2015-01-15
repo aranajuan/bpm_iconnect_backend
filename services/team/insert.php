@@ -14,8 +14,8 @@ function GO($RC) {
     if ($result === "ok") {
         $adms=explode(",", $RC->get_params("idsadms"));
         foreach ($adms as $usr) {
-            $U = new USER($RC->get_Connection());
-            if($U->load_DB($usr)==="ok"){
+            $U = $RC->get_objcache()->get_object("USER",$usr);
+            if($RC->get_objcache()->get_status("USER",$usr)==="ok"){
                 $U->add_adm($O->get_prop("id"));
             }
         }

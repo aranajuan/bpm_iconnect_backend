@@ -351,8 +351,8 @@ class USER extends itobject {
 
         $i = 0;
         foreach ($tmpT as $TID) {
-            $t = new TEAM($this->conn);
-            $rta = $t->load_DB($TID);
+            $t = $this->objsCache->get_object("TEAM", $TID);
+            $rta = $this->objsCache->get_status("TEAM", $TID);
             if ($rta == "ok") {
                 $this->equipos[$i] = $t;
                 $this->idsequiposV[$i] = $TID;
@@ -384,8 +384,8 @@ class USER extends itobject {
         $tmpT = explode(",", $this->idsequiposadm);
         $i = 0;
         foreach ($tmpT as $TID) {
-            $t = new TEAM($this->conn);
-            $rta = $t->load_DB($TID);
+            $t = $this->objsCache->get_object("TEAM", $TID);
+            $rta = $this->objsCache->get_status("TEAM", $TID);
             if ($rta == "ok") {
                 $this->equiposadm[$i] = $t;
                 $this->idsequiposadmV[$i] = $TID;

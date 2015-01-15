@@ -34,14 +34,13 @@ class TKT_H extends itobject {
      */
     private $accion; /* objeto accion */
 
-    function load_DB($id, $TKTvista = null) {
+    function load_DB($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
                             where H.id=$id and H.estado = " . I_ACTIVE);
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $this->view = $TKTvista;
             return $this->load_DV($tmpU);
         } else {
             $this->error = TRUE;
@@ -49,6 +48,37 @@ class TKT_H extends itobject {
         return "error " . $id;
     }
 
+    /**
+     * Establece perfil vista del evento
+     * @param array $TKTvista
+     */
+    public function set_view($TKTvista){
+        $this->view=$TKTvista;
+    }
+
+
+    /**
+     * Carga vector desde base
+     * @param type $tmpU
+     * @return string
+     */
+    private function load_DV($tmpU) {
+        $this->id = $tmpU["id"];
+        $this->FA = $tmpU["FA"];
+        $this->UA = $tmpU["UA"];
+        $this->FB = $tmpU["FB"];
+        $this->UB = $tmpU["UB"];
+        $this->idaccion = $tmpU["idaccion"];
+        $this->valoraccion = $tmpU["valoraccion"];
+        $this->estado = $tmpU["estado"];
+        $this->idtkt = $tmpU["idtkt"];
+        $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
+        $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
+        $this->detalle = $tmpU["detalle"];
+        $this->accion = $accion;
+        return "ok";
+    }
+    
     /**
      * Setea id del equipo
      * @param int $id
@@ -86,27 +116,6 @@ class TKT_H extends itobject {
         return $output;
     }
 
-    /**
-     * Carga vector desde base
-     * @param type $tmpU
-     * @return string
-     */
-    private function load_DV($tmpU) {
-        $this->id = $tmpU["id"];
-        $this->FA = $tmpU["FA"];
-        $this->UA = $tmpU["UA"];
-        $this->FB = $tmpU["FB"];
-        $this->UB = $tmpU["UB"];
-        $this->idaccion = $tmpU["idaccion"];
-        $this->valoraccion = $tmpU["valoraccion"];
-        $this->estado = $tmpU["estado"];
-        $this->idtkt = $tmpU["idtkt"];
-        $accion = new ACTION();
-        $rta = $accion->load_DB($this->idaccion);
-        $this->detalle = $tmpU["detalle"];
-        $this->accion = $accion;
-        return "ok";
-    }
 
     /* Elimina registros abiertos */
 
@@ -218,8 +227,8 @@ class TKT_H extends itobject {
         if ($this->UA_o) {
             return $this->UA_o;
         }
-        $UA = new USER();
-        if ($UA->load_DB($this->UA) == "ok") {
+        $UA = $this->objsCache->get_object("USER", $this->UA);
+        if ($this->objsCache->get_status("USER", $this->UA) == "ok") {
             $this->UA_o = $UA;
             return $this->UA_o;
         }
@@ -301,8 +310,8 @@ class TKT_H extends itobject {
             case 'UA_o':
                 return $this->get_UA();
             case 'UA_o':
-                $ua_o = new USER();
-                if ($ua_o->load_DB($this->UA) == "ok")
+                $ua_o = $this->objsCache->get_object("USER", $this->UA);
+                if ($this->objsCache->get_status("USER", $this->UA) == "ok")
                     return $ua_o;
                 else
                     return NULL;
@@ -325,8 +334,8 @@ class TKT_H extends itobject {
     private function loadview() {
         if ($this->view == null) {
             if ($this->TKT == null) {
-                $this->TKT = new TKT();
-                if ($this->TKT->load_DB($this->get_prop("idtkt")) != "ok") {
+                $this->TKT = $this->objsCache->get_object("TKT", $this->get_prop("idtkt"));
+                if ($this->objsCache->get_status("TKT", $this->get_prop("idtkt")) != "ok") {
                     echo "error TKT" . $this->get_prop("idtkt");
                     $this->view = null;
                 }

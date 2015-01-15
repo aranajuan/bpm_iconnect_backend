@@ -6,7 +6,6 @@ require_once   'classes/division.php';
  * @return null
  */
 function GO($RC) {
-    $D= new DIVISION($RC->get_Connection());
-    $D->load_DB($RC->get_params("id"));
+    $D= $RC->get_objcache()->get_object("DIVISION",$RC->get_params("id"));
     return $RC->createElement("result",$D->delete_DB());
 }

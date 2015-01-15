@@ -6,8 +6,7 @@ require_once   'classes/team.php';
  * @return null
  */
 function GO($RC) {
-    $O= new TEAM($RC->get_Connection());
-    $O->load_DB($RC->get_params("id"));
+    $O= $RC->get_objcache()->get_object("TEAM",$RC->get_params("id"));
     $O->load_VEC($RC->get_params(null));
     $adms = $O->get_prop("adms");
     $newadms=explode(",",$RC->get_params("idsadms"));
@@ -23,8 +22,8 @@ function GO($RC) {
     
     foreach($newadms as $Na){
         if(!in_array($Na, $admsok)){
-            $U=new USER($RC->get_Connection());
-            if($U->load_DB($Na)==="ok"){
+            $U= $RC->get_objcache()->get_object("USER",$Na);
+            if($RC->get_objcache()->get_status("USER",$Na)==="ok"){
                 $U->add_adm($O->get_prop("id"));
             }
         }

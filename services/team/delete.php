@@ -6,7 +6,6 @@ require_once   'classes/team.php';
  * @return null
  */
 function GO($RC) {
-    $O= new TEAM($RC->get_Connection());
-    $O->load_DB($RC->get_params("id"));
+    $O= $RC->get_objcache()->get_object("TEAM",$RC->get_params("id"));
     return $RC->createElement("result",$O->delete_DB());
 }

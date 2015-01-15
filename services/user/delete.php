@@ -6,8 +6,8 @@
  * @return null
  */
 function GO($RC) {
-    $Ul = new USER($RC->get_Connection());
-    $loadR = $Ul->load_DB($RC->get_params("usr"));
+    $Ul = $RC->get_objcache()->get_object("USER", $RC->get_params("usr"));
+    $loadR = $RC->get_objcache()->get_status("USER", $RC->get_params("usr"));
     $userD = $RC->createElement("result");
     if ($loadR !== "ok") {
         $result = "Usuario invalido";

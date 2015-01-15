@@ -26,9 +26,9 @@ class Rcontroller extends XMLhandler {
 
     /**
      * administrador de conexiones
-     * @var ConectionManager 
+     * @var ConnectionManager 
      */
-    private $conections; // 
+    private $connections; // 
 
     /**
      *
@@ -36,7 +36,18 @@ class Rcontroller extends XMLhandler {
      */
     private $instance;
     
+    /**
+     *
+     * @var OBJECTCACHE
+     */
+    private $objCache;
+    
     private $error;
+
+    public function __construct() {
+        $this->objCache=  OBJECTCACHE::getInstance();
+    }
+
 
     /**
      * Prepara conexiones a db, carga input, valida datos
@@ -50,8 +61,8 @@ class Rcontroller extends XMLhandler {
             return false;
         }
 
-        $this->conections = new ConnectionManager();
-        if ($this->conections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
+        $this->connections = new ConnectionManager();
+        if ($this->connections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos.");
             return false;
         }
@@ -61,7 +72,7 @@ class Rcontroller extends XMLhandler {
             return false;
         }
 
-        if ($this->conections->connect_instance($this->instance->get_prop("dbhost"), $this->instance->get_prop("dbuser"), $this->instance->get_prop("dbpass"), $this->instance->get_alias()) == false) {
+        if ($this->connections->connect_instance($this->instance->get_prop("dbhost"), $this->instance->get_prop("dbuser"), $this->instance->get_prop("dbpass"), $this->instance->get_alias()) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos de la instancia.");
             return false;
         }
@@ -124,9 +135,8 @@ class Rcontroller extends XMLhandler {
      * @return boolean
      */
     private function load_user() {
-        $U = new USER($this->conections);
-        $rta = $U->load_DB($this->getUser());
-        if ($rta != "ok") {
+        $U = $this->objCache->get_object("USER", $this->getUser());
+        if ($this->objCache->get_status("USER", $this->getUser()) != "ok") {
             $this->error = "Usuario o contrase&ntilde;a invalidos";
             return false;
         }
@@ -150,8 +160,8 @@ class Rcontroller extends XMLhandler {
      * @return boolean
      */
     private function load_instance() {
-        $I = new INSTANCE($this->conections);
-        if ($I->load_DB($this->getInstance()) != "ok") {
+        $I = $this->objCache->get_object("INSTANCE", $this->getInstance());
+        if ($this->objCache->get_status("INSTANCE", $this->getInstance()) != "ok") {
             $this->instance = null;
             return false;
         }
@@ -166,8 +176,8 @@ class Rcontroller extends XMLhandler {
      */
     private function load_front() {
         //validar usuario - front - acceso del usr a funcion
-        $front = new FRONT($this->conections);
-        if ($front->load_DB($this->getFrontName()) != "ok") {
+        $front = $this->objCache->get_object("FRONT",$this->getFrontName());
+        if ($this->objCache->get_status("FRONT",$this->getFrontName()) != "ok") {
             $this->error = "Error en el origen de la solicitud - #6.1";
             return false;
         }
@@ -208,7 +218,7 @@ class Rcontroller extends XMLhandler {
      * @return ConnectionManager
      */
     public function get_Connection(){
-        return $this->conections;
+        return $this->connections;
     }
     
     /**
@@ -217,6 +227,14 @@ class Rcontroller extends XMLhandler {
      */
     public function get_Instance(){
         return $this->instance;
+    }
+    
+    /**
+     * Objeto de cache
+     * @return OBJECTCACHE
+     */
+    public function get_objcache(){
+        return $this->objCache;
     }
     
 }

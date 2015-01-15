@@ -48,8 +48,7 @@ class TEAM extends itobject {
         $i = 0;
         $list = array();
         while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i] = new TEAM($this->conn);
-            $list[$i]->load_DB($idV[0]);
+            $list[$i]=$this->objsCache->get_object(get_class(), $idV[0]);
             $i++;
         }
         return $list;
@@ -112,8 +111,8 @@ class TEAM extends itobject {
         $this->adms = array();
         $this->idsadmsV = array();
         while ($usr = $this->dbinstance->get_vector()) {
-            $U = new USER($this->conn);
-            if ($U->load_DB($usr["usr"]) === "ok") {
+            $U = $this->objsCache->get_object("USER", $usr["usr"]);
+            if($this->objsCache->get_status("USER", $usr["usr"]) === "ok") {
                 if ($U->isadm($this->id)) {
                     array_push($this->adms, $U);
                     array_push($this->idsadmsV, $U->get_prop("usr"));
@@ -156,8 +155,8 @@ class TEAM extends itobject {
      * @return boolean ok
      */
     private function load_listin() {
-        $this->listin = new LISTIN($this->conn);
-        if ($this->listin->load_DB($this->idlistin) == "ok")
+        $this->listin = $this->objsCache->get_object("LISTIN", $this->idlistin);
+        if ($this->objsCache->get_status("LISTIN", $this->idlistin) == "ok")
             return TRUE;
         $this->listin = NULL;
         $this->idlistin = NULL;
@@ -171,8 +170,8 @@ class TEAM extends itobject {
     private function load_division() {
         if($this->iddireccion===null)
             return true;
-        $this->direccion = new DIVISION($this->conn);
-        if ($this->direccion->load_DB($this->iddireccion) == "ok")
+        $this->direccion = $this->objsCache->get_object("DIVISION", $this->iddireccion);
+        if ( $this->objsCache->get_status("DIVISION", $this->iddireccion) == "ok")
             return TRUE;
         $this->direccion = NULL;
         return FALSE;
@@ -188,9 +187,9 @@ class TEAM extends itobject {
         $i = 0;
         foreach ($arrTeam as $tid) {
             if (is_numeric($tid)) {
-                $t = new TEAM($this->conn);
+                $t =  $this->objsCache->get_object("TEAM", $tid);
 
-                if ($t->load_DB($tid) == "ok") {
+                if ($this->objsCache->get_status("TEAM", $tid) == "ok") {
 
                     $this->equiposderiva[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
@@ -212,8 +211,8 @@ class TEAM extends itobject {
         $i = 0;
         foreach ($arrTeam as $tid) {
             if (is_numeric($tid)) {
-                $t = new TEAM($this->conn);
-                if ($t->load_DB($tid) == "ok") {
+                $t = $this->objsCache->get_object("TEAM", $tid);
+                if ($this->objsCache->get_status("TEAM", $tid) == "ok") {
                     $this->equiposvisible[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
                     $i++;
@@ -269,8 +268,8 @@ class TEAM extends itobject {
         if ($this->dbinstance->noEmpty) {
             while ($rs = $this->dbinstance->get_vector()) {
                 if (in_array($this->id, explode(",", $rs["idsequipos"]))) {
-                    $u = new USER($this->conn);
-                    if ($u->load_DB($rs["usr"]) == "ok") {
+                    $u = $this->objsCache->get_object("USER", $rs["usr"]);
+                    if ($this->objsCache->get_status("USER", $rs["usr"]) == "ok") {
                         $users[$i] = $u;
                         $i++;
                     }

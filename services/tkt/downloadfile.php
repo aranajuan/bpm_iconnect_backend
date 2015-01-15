@@ -14,8 +14,8 @@ function GO($RC) {
     if($type==="adjunto"){
         //validate tkt view
         $fv=explode("_",$reqFile);
-        $TH=new TKT_H();
-        if($TH->load_DB($fv[0])!="ok"){
+        $TH= $RC->get_objcache()->get_object("TKT_H", $fv[0]);
+        if($RC->get_objcache()->get_status("TKT_H", $fv[0])!="ok"){
             return $RC->createElement("error","Archivo invalido, acceso denegado 1.");
         }
         if(!$TH->candownload()){

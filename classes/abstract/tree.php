@@ -76,18 +76,19 @@ abstract class TREE extends itobject {
         for ($i = 0; $i <= $this->path_max; $i++) {
             switch (substr($this->path[$i], 0, 1)) {
                 case "D":
-                    $o = new DIVISION($this->conn);
+                    $ct = "DIVISION";
                     break;
                 case "S":
-                    $o = new SYSTEM($this->conn);
+                    $ct = "SYSTEM";
                     break;
                 case "O":
-                    $o = new OPTION($this->conn);
+                    $ct = "OPTION";
                     break;
                 default:
                     return "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)";
             }
-            $rta = $o->load_DB(substr($this->path[$i], 1));
+            $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1));
+            $rta = $this->objsCache->get_status($ct, substr($this->path[$i], 1));
             if ($rta != "error") {
                 $this->path_obj[$i] = $o;
             } else {
@@ -145,8 +146,8 @@ abstract class TREE extends itobject {
         $i = 0;
         $tktV = array();
         while ($tm = $this->dbinstance->get_vector()) {
-            $tkt = new TKT($this->conn);
-            if ($tkt->load_DB($tm["id"]) == "ok") {
+            $tkt = $this->objsCache->get_object("TKT", $tm["id"]);
+            if ($this->objsCache->get_status("TKT", $tm["id"]) == "ok") {
                 //verificar textos criticos y comparar con actual
                 $countC = count(array_intersect($criticVC, explode("-", $tkt->get_prop("critic"))));
                 if ($countC) {
@@ -223,9 +224,8 @@ abstract class TREE extends itobject {
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . "-";
                         break;
                     default:
-                        $q = new QUESTION($this->conn);
                         $o = $this->path_obj[$i];
-                        $q->load_DB($o->get_prop("idpregunta"));
+                        $q=$this->objsCache->get_object("QUESTION", $o->get_prop("idpregunta"));
                         $rta[$i]["question"] = $q->get_prop("texto");
                         $rta[$i]["ans"] = $o->get_prop("texto");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . "-";
@@ -335,8 +335,7 @@ abstract class TREE extends itobject {
                 // otros casos
                 if ($actualO->get_prop("idpregunta_destino")) {
                     // cargar opciones
-                    $q = new QUESTION($this->conn);
-                    $q->load_DB($actualO->get_prop("idpregunta_destino"));
+                    $q= $this->objsCache->get_object("QUESTION", $actualO->get_prop("idpregunta_destino"));
                     $rta["title"] = $q->get_prop("texto");
                     $rta["detail"] = $q->get_prop("detalle");
                     $opts = $q->get_prop("opcionesobj");

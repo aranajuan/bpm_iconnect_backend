@@ -10,21 +10,18 @@ class INSTANCE extends itobject {
     private $dbhost;
     private $dbuser;
     private $dbpass;
+    private $dbroot;
 
-    /**
-     *
-     * @var DB
-     */
-    private $DBobj;
 
-    function INSTANCE($conn) {
-        $this->DBobj = new DB($conn, true);
+    function __construct($conn = null) {
+        parent::__construct($conn);
+        $this->dbroot = new DB($this->conn, true);
     }
-
+    
     function load_DB($name) {
-        $this->DBobj->loadRS("select * from TBL_INSTANCIAS where nombre='" . strToSQL($name) . "'");
-        if ($this->DBobj->noEmpty && $this->DBobj->cReg == 1) {
-            $tmpU = $this->DBobj->get_vector();
+        $this->dbroot->loadRS("select * from TBL_INSTANCIAS where nombre='" . strToSQL($name) . "'");
+        if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
+            $tmpU = $this->dbroot->get_vector();
             return $this->load_DV($tmpU);
         }
         else

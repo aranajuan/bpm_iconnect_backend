@@ -80,8 +80,8 @@ function GO($RC) {
                 //carga campos de apertura
                 $idt = $e->get_prop('valoraccion');
                 $form = $e->get_prop('detalle_xml');
-                $tA = new TEAM();
-                if ($tA->load_DB($idt) == "ok") {
+                $tA = $RC->get_objcache()->get_object("TEAM", $idt);
+                if ($RC->get_objcache()->get_status("TEAM", $idt) == "ok") {
                     $tnode->appendChild($RC->createElement("asignadoa", $tA->get_prop("nombre")));
                 }
                 if ($form) {

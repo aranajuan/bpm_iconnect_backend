@@ -24,8 +24,7 @@ class LISTIN extends itobject {
         $i = 0;
         $list = array();
         while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i] = new LISTIN($this->conn);
-            $list[$i]->load_DB($idV[0]);
+            $list[$i] = $this->objsCache->get_object(get_class(), $idV[0]);
             $i++;
         }
         return $list;

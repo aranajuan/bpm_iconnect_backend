@@ -10,17 +10,15 @@ require_once 'classes/action.php';
 function GO($RC) {
 
     $idtkt = $RC->get_params("idtkt");
-   
-    $TKT = new TKT();
-
+    
     if ($idtkt) {
-        $TKT->load_DB($idtkt);
+        $TKT= $RC->get_objcache()->get_object("TKT",$idtkt);
     }else{
+        $TKT = new TKT();
         $TKT->load_VEC(array("origen" => $RC->get_params("path")));
     }
 
-    $A = new ACTION();
-    $A->load_DB($RC->get_params("action"));
+    $A = $RC->get_objcache()->get_object("ACTION",$RC->get_params("action"));
     $TKT->setWorking();
     $validation = $A->loadTKT($TKT);
 

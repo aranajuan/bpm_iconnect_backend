@@ -6,7 +6,6 @@ require_once   'classes/listin.php';
  * @return null
  */
 function GO($RC) {
-    $L= new LISTIN($RC->get_Connection());
-    $L->load_DB($RC->get_params("id"));
+    $L= $RC->get_objcache()->get_object("LISTIN",$RC->get_params("id"));
     return $RC->createElement("result",$L->delete_DB());
 }

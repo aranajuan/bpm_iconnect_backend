@@ -99,7 +99,7 @@ class TKT extends TREE {
             }
         }
            
-        if($openbyfilter=="" && $opentotaken=""){
+        if($openbyfilter=="" && $opentotaken==""){
             return null;
         }
         

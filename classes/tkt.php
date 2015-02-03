@@ -103,7 +103,7 @@ class TKT extends TREE {
             }
         }
            
-        if($openbyfilter=="" && $opentotaken=""){
+        if($openbyfilter=="" && $opentotaken==""){
             return null;
         }
         
@@ -118,7 +118,6 @@ class TKT extends TREE {
         }
         
         $ssql = "select id from TBL_TICKETS where id is not null ". $originfilter. " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
-        echo $ssql;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();

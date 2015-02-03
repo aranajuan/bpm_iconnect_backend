@@ -39,11 +39,15 @@ class TKT extends TREE {
     /**
      * Carga tickets aplicando filtros
      * @param array $filter open - open/close
-     *                               openby - lista de usuarios separado por coma
-     * 
+     *                              cfrom y cto para close
+     *                      openby - lista de usuarios separado por coma
+     *                      opento - id equipo
+     *                      taken - * / lista usuarios separado por coma 
+     *                      master - seteado y 'null' (sin master) / idmaster
+     *                      origin  - filtro especifico de origen %xxxxx% separado por coma
      */
     public function list_fiter($filter) {
-        $openfilter = "";
+        $openfilter = "";        
         if ($filter["open"] == "open") {
             $openfilter = "and UB is null";
         } elseif ($filter["open"] == "closed" && $filter["cfrom"] != "" && $filter["cto"] != "") {
@@ -103,7 +107,18 @@ class TKT extends TREE {
             return null;
         }
         
-        $ssql = "select id from TBL_TICKETS where id is not null " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
+        $originfilter="";
+        if($filter["origin"]){
+            $originslst = explode(',',$filter["origin"]);
+            $originfilter=" and (";
+            foreach($originslst as $o){
+                $originfilter.= " origen like '%".strToSQL($o)."%' or";
+            }
+            $originfilter=  substr($originfilter, 0, strlen($originfilter)-2).") ";
+        }
+        
+        $ssql = "select id from TBL_TICKETS where id is not null ". $originfilter. " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
+        echo $ssql;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();

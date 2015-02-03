@@ -123,7 +123,7 @@ class Rcontroller extends XMLhandler {
         }
 
         if (!$this->user->validAction($this->get_class(), $this->get_method())) {
-            $this->error = "Sin acceso";
+            $this->error = "Acceso denegado a ".$this->get_class()."/".$this->get_method();
             return false;
         }
         return true;

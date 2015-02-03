@@ -1,14 +1,16 @@
 <?php
 include_once 'config/defines_root.php'; //definiciones main de itracker
 
+ini_set('include_path',ini_get('include_path').'./'.PATH_SEPARATOR.INCLUDE_DIR);
+
 error_reporting(ERROR_REPORTINGCONST);
 ini_set('display_errors', '1');
 
-include_once 'utils/basic_functions.php'; // funciones basicas adicionales
+include_once 'basic_functions.php'; // funciones basicas adicionales
 
 include_once 'config/dbtables_root.php'; // tablas root
 
-include_once 'config/access.php'; // lista de accesos
+include_once 'access.php'; // lista de accesos
 
 if(DBSERVER_ALL=='mssql')
     header('Content-Type: text/html; charset=iso-8859-1');

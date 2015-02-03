@@ -1,6 +1,6 @@
 <?php
 
-require_once 'config/init.php';
+require_once 'utils/init.php';
 require_once 'classes/Rcontroller.php';
 require_once 'classes/objectcache.php';
 

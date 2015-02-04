@@ -57,6 +57,8 @@ function GO($RC) {
                     $opendata = $RC->createElement("opendata");
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
+                    $simi =$RC->createElement("no_anexar",$topts["object"]->get_prop("no_anexar"));
+                    $treeL->appendChild($simi);
                     return $treeL;
                 } else {
                     return $RC->createElement("error", "imposible unir");

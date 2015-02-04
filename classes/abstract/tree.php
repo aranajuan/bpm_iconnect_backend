@@ -129,7 +129,7 @@ abstract class TREE extends itobject {
      * Vector de TKTS similares
      * @return array<TKT>|null 
      */
-    protected function get_similar() {
+    public function get_similar() {
         if (!$this->critico_v) {
             $this->load_critic();
         }

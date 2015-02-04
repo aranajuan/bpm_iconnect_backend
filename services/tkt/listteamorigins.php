@@ -20,7 +20,12 @@ function GO($RC) {
         "opento" => $idteam,
         "origin" => $RC->get_params("origin")
     );
-
+    
+    $taken = $RC->get_params("taken");
+    if($taken){
+        $filter= array_merge($filter,array("taken"=>$taken));
+    }
+    
     $ALL = new TKT();
 
     $ALL_v = $ALL->list_fiter(array_merge($filter, array("master" => "null")));
@@ -32,6 +37,9 @@ function GO($RC) {
         foreach ($ALL_v as $l) {
             $tkt = $listL->addChild("tkt");
             $tkt->addChild("id", $l->get_prop('id'));
+            $tkt->addChild("FA", $l->get_prop('FA'));
+            $tkt->addChild("UA", $l->get_prop('UA'));
+            $tkt->addChild("origen", $l->get_prop('origen'));
             $fstTH = $l->get_first_tktH();
             if ($fstTH) {
                 $openxml = $fstTH->getXML_H();

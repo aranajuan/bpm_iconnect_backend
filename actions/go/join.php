@@ -16,6 +16,11 @@
         return array("result" => "error", "msj" => "Erro al cargar tkt.");
     }
     
+    if($this->isWorking()){
+        if(!$this->getLogged()->in_team($master->get_prop("idequipo"))){
+            return array("result" => "error", "msj" => "El ticket master no esta en tu equipo");
+        }
+    }
    
     $rtaOP = $TKT->join($master);
     

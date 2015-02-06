@@ -18,7 +18,9 @@ function GO($RC) {
         $TKT->load_VEC(array("origen" => $RC->get_params("path")));
     }
 
-    $A = $RC->get_objcache()->get_object("ACTION",$RC->get_params("action"));
+    $A = new ACTION();
+    $A->load_DB($RC->get_params("action"));
+    $A->setWorking();
     $TKT->setWorking();
     $validation = $A->loadTKT($TKT);
 

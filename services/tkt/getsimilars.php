@@ -23,31 +23,31 @@ function GO($RC) {
         return null;
     }
 
-    $listL = new SimpleXMLElement("<list></list>");
+     $listL = new DOMDocument();
+    $list = $listL->createElement("list");
 
-
-    foreach ($ALL_v as $l) {
-        $tkt = $listL->addChild("tkt");
-        $tkt->addChild("id", $l->get_prop('id'));
-        $tkt->addChild("FA", $l->get_prop('FA'));
-        $tkt->addChild("UA", $l->get_prop('UA'));
-        $tkt->addChild("origen", $l->get_prop('origen'));
-        $fstTH = $l->get_first_tktH();
-        if ($fstTH) {
-            $openxml = $fstTH->getXML_H();
-            if ($openxml) {
-                append_simplexml($tkt, $openxml);
+    if ($ALL_v) {
+        foreach ($ALL_v as $l) {
+            $tkt = $listL->createElement("tkt");
+            $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
+            $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
+            $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
+            $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
+            $tkt->appendChild($listL->createElement("childsc", $l->get_count_childs()));
+            $fstTH = $l->get_first_tktH();
+            if ($fstTH) {
+                $openxml = $fstTH->getXML_H();
+                if ($openxml) {
+                    $nod=$listL->importNode($openxml,true);
+                    $tkt->appendChild($nod);
+                }
             }
+            $list->appendChild($tkt);
         }
-        $listL->addChild($tkt);
-    }
 
-    $conv = new DOMDocument();
-    if ($conv->loadXML($listL->asXML()) == false) {
-        return $RC->createElement("error", "Error al parsear xml.");
-    }
-    $nodes = $conv->getElementsByTagName("list");
-    $ret = $RC->append_xml($nodes->item(0));
+        $ret = $RC->append_xml($list);
 
-    return $ret;
+        return $ret;
+    }
+    return null;
 }

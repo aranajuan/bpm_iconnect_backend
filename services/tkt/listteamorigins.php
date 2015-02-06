@@ -20,42 +20,39 @@ function GO($RC) {
         "opento" => $idteam,
         "origin" => $RC->get_params("origin")
     );
-    
+
     $taken = $RC->get_params("taken");
-    if($taken){
-        $filter= array_merge($filter,array("taken"=>$taken));
+    if ($taken) {
+        $filter = array_merge($filter, array("taken" => $taken));
     }
-    
+
     $ALL = new TKT();
 
     $ALL_v = $ALL->list_fiter(array_merge($filter, array("master" => "null")));
 
 
-    $listL = new SimpleXMLElement("<list></list>");
+    $listL = new DOMDocument();
+    $list = $listL->createElement("list");
 
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
-            $tkt = $listL->addChild("tkt");
-            $tkt->addChild("id", $l->get_prop('id'));
-            $tkt->addChild("FA", $l->get_prop('FA'));
-            $tkt->addChild("UA", $l->get_prop('UA'));
-            $tkt->addChild("origen", $l->get_prop('origen'));
+            $tkt = $listL->createElement("tkt");
+            $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
+            $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
+            $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
+            $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
             $fstTH = $l->get_first_tktH();
             if ($fstTH) {
                 $openxml = $fstTH->getXML_H();
                 if ($openxml) {
-                    append_simplexml($tkt, $openxml);
+                    $nod=$listL->importNode($openxml,true);
+                    $tkt->appendChild($nod);
                 }
             }
-            $listL->addChild($tkt);
+            $list->appendChild($tkt);
         }
-        
-        $conv = new DOMDocument();
-        if ($conv->loadXML($listL->asXML()) == false) {
-            return $RC->createElement("error", "Error al parsear xml.");
-        }
-        $nodes = $conv->getElementsByTagName("list");
-        $ret = $RC->append_xml($nodes->item(0));
+
+        $ret = $RC->append_xml($list);
 
         return $ret;
     }

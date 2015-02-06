@@ -104,10 +104,8 @@ class ACTION extends itobject {
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $ret = array();
-
         while ($actV = $this->dbinstance->get_vector()) {
-            $ret[$i] = new ACTION();
-            $ret[$i]->loadDB_id($actV["id"]);
+            $ret[$i] = $this->objsCache->get_object(get_class(), $actV["id"]);
             $i++;
         }
         return $ret;

@@ -771,7 +771,12 @@ class TKT extends TREE {
         $lastMaster = $this->master;
 
         /* elimina el master actual y marca como tomado por el usuario del master */
-        $ssql = "update TBL_TICKETS set idmaster=NULL, u_tom='" . strToSQL($lastMaster->get_prop("u_tom")) . "' where id=" . intval($this->id);
+        if($lastMaster->get_prop("u_tom")){
+            $utom="'".strToSQL($lastMaster->get_prop("u_tom"))."'";
+        }  else {
+            $utom = "null";
+        }
+        $ssql = "update TBL_TICKETS set idmaster=NULL, u_tom=" . $utom . " where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_setmaster: " . $this->dbinstance->details;
         }

@@ -38,7 +38,7 @@
     /**
      *  revisar master y campos ocultos
      */
-    $idmaster = $itf->get_value("idmaster");
+    $idmaster = $itf->get_value_arr("idmaster");
 
 
     /* abre ticket */
@@ -55,6 +55,7 @@
         $response["id"] = $TKT->get_prop("id");
         $this->force_tkth();
     }
+
     if ($lstOption->get_prop("ruta_destino")) { //no une
         $response["type"] = "file";
         $response["file"] = $lstOption->get_prop("ruta_destino");

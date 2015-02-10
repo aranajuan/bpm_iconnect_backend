@@ -23,15 +23,16 @@ function GO($RC) {
         return null;
     }
 
-     $listL = new DOMDocument();
+    $listL = new DOMDocument();
     $list = $listL->createElement("list");
 
+    $cc=0;
+    
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $tkt = $listL->createElement("tkt");
             $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
             $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
-            $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
             $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
             $tkt->appendChild($listL->createElement("childsc", $l->get_count_childs()));
             $fstTH = $l->get_first_tktH();
@@ -40,11 +41,14 @@ function GO($RC) {
                 if ($openxml) {
                     $nod=$listL->importNode($openxml,true);
                     $tkt->appendChild($nod);
+                     $list->appendChild($tkt);
+                     $cc++;
                 }
             }
-            $list->appendChild($tkt);
         }
-
+        if($cc==0){
+            return null;
+        }
         $ret = $RC->append_xml($list);
 
         return $ret;

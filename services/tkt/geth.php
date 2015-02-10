@@ -17,6 +17,8 @@ function GO($RC) {
     $response = new DOMDocument();
     $responseData = $response->createElement("data");
     
+    $responseData->appendChild($response->createElement("idmaster",$TKT->get_prop("idmaster")));
+    
     $opts = $TKT->get_tree_history();
     $tree = $response->createElement("tree");
     foreach ($opts as $o) {

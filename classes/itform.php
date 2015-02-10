@@ -23,6 +23,10 @@ class itform {
      */
     private $xml_output;
 
+    private $arr_val;
+    
+    private $formname;
+    
     /**
      * Carga xml y lo parsea
      * @param string $xml
@@ -121,6 +125,8 @@ class itform {
      */
     public function load_values($arr, $formname = null) {
         $arr = make_arrayobj($arr);
+        $this->arr_val=$arr;
+        $this->formname=$formname;
         $this->xml_output = $this->xml_input;
         foreach ($this->xml_output->element as $field) {
             $value = trim($this->find_elementVal($arr, $field->id, $formname));
@@ -151,6 +157,15 @@ class itform {
         return null;
     }
 
+    /**
+     * Devuelve valor del array de valores ingresado (aunque no este en form)
+     * @param string $id
+     * @return string
+     */
+    public function get_value_arr($id){
+        return trim($this->find_elementVal($this->arr_val, $id, $this->formname));
+    }
+    
     /**
      * Elimina elemento del formulario
      * @return boolean

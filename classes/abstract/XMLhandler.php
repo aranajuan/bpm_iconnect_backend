@@ -233,6 +233,20 @@ abstract class XMLhandler {
     }
 
     /**
+     * Crea elemento en dom sin verificar y en base64
+     * @param type $k
+     * @param type $v
+     */
+    public function createElementSecure($k, $v){
+        if($v==null or $v=='') return null;
+        $val = base64_encode($v);
+        if($val){
+            return $this->get_responseDOM()->createElement($this->make_param($k), $val);
+        }
+        return null;
+    }
+    
+    /**
      * Importa documento
      * @param DOMdocumment $dom
      * @return DOMNode

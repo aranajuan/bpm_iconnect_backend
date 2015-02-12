@@ -15,6 +15,8 @@ function GO($RC) {
         return $RC->createElement("error", "Equipo invalido. Acceso denegado.");
     }
 
+    $actions = $RC->get_params("actions");
+
     $filter = array(
         "open" => "open",
         "opento" => $idteam,
@@ -41,15 +43,23 @@ function GO($RC) {
             $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
             $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
             $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
-            $fstTH = $l->get_first_tktH();
-            if ($fstTH) {
-                $openxml = $fstTH->getXML_H();
-                if ($openxml) {
-                    $nod=$listL->importNode($openxml,true);
-                    $tkt->appendChild($nod);
+            $tkths = $listL->createElement("ths");
+            $ths = $l->get_tktHObj($actions);
+            $c = 0;
+            if ($ths && count($ths)) {
+                foreach ($ths as $th) {
+                    $xmldetail = $th->getXML_H();
+                    if ($xmldetail) {
+                        $nod = $listL->importNode($xmldetail, true);
+                        $tkths->appendChild($nod);
+                        $c++;
+                    }
                 }
             }
-            $list->appendChild($tkt);
+            if ($c) {
+                $tkt->appendChild($tkths);
+                $list->appendChild($tkt);
+            }
         }
 
         $ret = $RC->append_xml($list);

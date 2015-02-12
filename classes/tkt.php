@@ -35,6 +35,8 @@ class TKT extends TREE {
         array(3, 6, 9)
     );
     private $working;
+    
+    private $tkthActionsLoaded; // lista de acciones cargadas en tkth * | array
 
     /**
      * Carga tickets aplicando filtros
@@ -47,7 +49,7 @@ class TKT extends TREE {
      *                      origin  - filtro especifico de origen %xxxxx% separado por coma
      */
     public function list_fiter($filter) {
-        $openfilter = "";        
+        $openfilter = "";
         if ($filter["open"] == "open") {
             $openfilter = "and UB is null";
         } elseif ($filter["open"] == "closed" && $filter["cfrom"] != "" && $filter["cto"] != "") {
@@ -102,22 +104,22 @@ class TKT extends TREE {
                 $ismaster = "and idmaster=" . $filter["master"];
             }
         }
-           
-        if($openbyfilter=="" && $opentotaken==""){
+
+        if ($openbyfilter == "" && $opentotaken == "") {
             return null;
         }
-        
-        $originfilter="";
-        if($filter["origin"]){
-            $originslst = explode(',',$filter["origin"]);
-            $originfilter=" and (";
-            foreach($originslst as $o){
-                $originfilter.= " origen like '%".strToSQL($o)."%' or";
+
+        $originfilter = "";
+        if ($filter["origin"]) {
+            $originslst = explode(',', $filter["origin"]);
+            $originfilter = " and (";
+            foreach ($originslst as $o) {
+                $originfilter.= " origen like '%" . strToSQL($o) . "%' or";
             }
-            $originfilter=  substr($originfilter, 0, strlen($originfilter)-2).") ";
+            $originfilter = substr($originfilter, 0, strlen($originfilter) - 2) . ") ";
         }
-        
-        $ssql = "select id from TBL_TICKETS where id is not null ". $originfilter. " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
+
+        $ssql = "select id from TBL_TICKETS where id is not null " . $originfilter . " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $list = array();
@@ -280,16 +282,31 @@ class TKT extends TREE {
 
     /**
      * Carga eventos historicos
+     * @param string $actions ALL | Lista de acciones (ABRIR,CERRAR_EXT...)
      * @return int cantidad de eventos cargados
      */
-    private function load_tktH() {
+    private function load_tktH($actions = "*") {
 
         $this->tkt_hOBJ = array();
-
-        $ssql = "
+        if ($actions == "*") {
+            $this->tkthActionsLoaded="*";
+            $ssql = "
             select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . "
                 order by id
-        ";
+            ";
+        }else{
+            $actionsV = explode(",",$actions);
+            $this->tkthActionsLoaded=$actionsV;
+            foreach($actionsV as &$av){
+                $av="'".strToSQL($av)."'";
+            }
+            $actionsT=  implode(",", $actionsV);
+            $ssql = "
+            select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion) 
+            where TH.idtkt=" . intval($this->id) . " and TH.estado = " . I_ACTIVE . " and TA.nombre in (".$actionsT.")
+                order by id
+            ";
+        }
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $idteam = null;
@@ -302,8 +319,8 @@ class TKT extends TREE {
                     $eje = $THO->get_prop('accion')->get_prop("ejecuta");
                     if ($eje === "open") {
                         $idteam = $THO->get_prop("valoraccion");
-                        $THO->set_idteam($idteam);
                     }
+                    $THO->set_idteam($idteam);
                     if ($eje === "derive") {
                         $idteam = $THO->get_prop("valoraccion");
                     }
@@ -362,7 +379,7 @@ class TKT extends TREE {
      * @return \TKT_H|null
      */
     public function get_last_tktH() {
-        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))
+        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded=="*")
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
             select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . " and UB is null order by FA
@@ -384,11 +401,27 @@ class TKT extends TREE {
     }
 
     /**
+     * Verifica si la accion esta cargada TKTH
+     * @param String $action    Separados por coma (tienen que estar todas)
+     * @return boolean
+     */
+    private function isloadedaction($action){
+        if($this->tkthActionsLoaded=="*") return true;
+        if($action=="*") return false;
+        $actionsV = explode(",",$action);
+        foreach($actionsV as $av){
+          if(!in_array($av, $this->tkthActionsLoaded))
+                return false;
+        }
+        return true;
+    }
+    
+    /**
      * Devuelve el primer evento / apertura
      * @return \TKT_H|null
      */
     public function get_first_tktH() {
-        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))
+        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->isloadedaction("ABRIR"))
             return $this->tkt_hOBJ[0];
         $ssql = "
             select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as A on ( TH.idaccion = A.id) where TH.idtkt=" . $this->id . " and A.nombre='ABRIR' order by FA
@@ -411,13 +444,24 @@ class TKT extends TREE {
 
     /**
      * Devuelve eventos
+     * @param String $actions    Separados por coma
      * @return array<TKT_H>
      */
-    function get_tktHObj() {
-        if (!(is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ))) {
-            $this->load_tktH();
+    function get_tktHObj($actions="*") {
+        if(!$this->isloadedaction($actions)){
+            $this->load_tktH($actions);
+            return $this->tkt_hOBJ;
+        }else{
+            if($actions=="*") return $this->tkt_hOBJ;
+            $actionsV=explode(",",$actions);
+            $THL = array();
+            foreach($this->tkt_hOBJ as $TH){
+                if(in_array($TH->get_prop("action")->get_prop("nombre"),$actionsV)){
+                    array_push($THL, $TH);
+                }
+            }
+            return $THL;
         }
-        return $this->tkt_hOBJ;
     }
 
     /**
@@ -505,7 +549,7 @@ class TKT extends TREE {
                     $this->u_tom_o = $u;
                     $u = null;
                     if ($this->u_asig) {
-                        $u=$this->objsCache->get_object("USER", $this->u_asig);
+                        $u = $this->objsCache->get_object("USER", $this->u_asig);
                         $this->u_asig_o = $u;
                     }
                 } else {
@@ -517,7 +561,7 @@ class TKT extends TREE {
         }
         if ($this->usr) {
             $u = null;
-            $u=$this->objsCache->get_object("USER", $this->usr);
+            $u = $this->objsCache->get_object("USER", $this->usr);
             $this->usr_o = $u;
         }
     }
@@ -582,11 +626,11 @@ class TKT extends TREE {
      * @return string result
      */
     public function re_open() {
-        if($this->get_prop("minFromClose") > HsToMin($this->get_prop("equipo")->get_prop("t_conformidad"))){
+        if ($this->get_prop("minFromClose") > HsToMin($this->get_prop("equipo")->get_prop("t_conformidad"))) {
             return "Se supero el maximo tiempo de reapertura "
-            . "(".$this->get_prop("equipo")->get_prop("t_conformidad").") para este equipo. ";
+                    . "(" . $this->get_prop("equipo")->get_prop("t_conformidad") . ") para este equipo. ";
         }
-        
+
         $ssql = "update TBL_TICKETS set UB=NULL, FB=NULL where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql))
             return "Ticket_reabrir: " . $this->dbinstance->details;

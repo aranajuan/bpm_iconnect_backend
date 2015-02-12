@@ -33,9 +33,7 @@ function GO($RC) {
         return $RC->createElement("error","Error al leer archivo.");
     }
     
-    $imdata = base64_encode($im);
-    
-    if(!$imdata){
+    if(!$im){
         return $RC->createElement("error","Error al leer archivo.2.");
     }
     
@@ -44,7 +42,7 @@ function GO($RC) {
     if($TH){
         $arch->appendChild($RC->createElement("idtkt",$TH->get_prop("idtkt")));
     }
-    $arch->appendChild($RC->createElement("data",$imdata));
+    $arch->appendChild($RC->createElementSecure("data",$im));
     
     return $arch;
     

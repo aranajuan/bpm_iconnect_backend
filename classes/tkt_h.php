@@ -22,6 +22,12 @@ class TKT_H extends itobject {
     private $FB;    /* fecha baja */
     private $UB;    /* usuario baja */
     private $detalle;
+
+    /**
+     * Dom de detalle
+     * @var DOMDocument
+     */
+    private $detalleDOM;
     private $idaccion;
     private $valoraccion;
     private $estado;    /* estado de la accion */
@@ -52,10 +58,9 @@ class TKT_H extends itobject {
      * Establece perfil vista del evento
      * @param array $TKTvista
      */
-    public function set_view($TKTvista){
-        $this->view=$TKTvista;
+    public function set_view($TKTvista) {
+        $this->view = $TKTvista;
     }
-
 
     /**
      * Carga vector desde base
@@ -75,10 +80,14 @@ class TKT_H extends itobject {
         $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
         $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
         $this->detalle = $tmpU["detalle"];
+        if($this->detalle!=null && $this->detalle!=""){
+            $this->detalleDOM = new DOMDocument();
+            $this->detalleDOM->loadXML($this->detalle);
+        }
         $this->accion = $accion;
         return "ok";
     }
-    
+
     /**
      * Setea id del equipo
      * @param int $id
@@ -94,28 +103,6 @@ class TKT_H extends itobject {
     function load_VEC($tmpU) {
         $this->accion = $tmpU;
     }
-
-    /**
-     * Devuelve segun vista
-     * @return String
-     */
-    function get_detailsShow() {
-        $output = "";
-        /* verificar master */
-
-        if (!$this->check_access()) {
-            return "";
-        }
-
-        if ($this->view["vista"] == 2) {
-            $output = preg_replace("/<value>[^<]*<\/value>/", "<value> ***** </value>", $this->detalle);
-        } else {
-            $output = $this->detalle;
-        }
-
-        return $output;
-    }
-
 
     /* Elimina registros abiertos */
 
@@ -136,7 +123,7 @@ class TKT_H extends itobject {
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
                 strToSQL($this->accion->get_prop("value")) . "',now(),'"
-                . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL,".I_ACTIVE.");";
+                . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL," . I_ACTIVE . ");";
 
         if ($this->dbinstance->query($ssql)) {
             return "TKTH_Insert: " . $this->dbinstance->details;
@@ -159,42 +146,68 @@ class TKT_H extends itobject {
     }
 
     /**
+     * Bloquea vista de elementos con acceso restringido
+     * @param int $viewL
+     *
+     */
+    private function lock_view($viewL) {
+        if($this->detalleDOM == null) return;
+        $elements = $this->detalleDOM->getElementsByTagName("element");
+        foreach ($elements as $e) {
+            $vRQ = intval($e->getElementsByTagName("view")->item(0)->nodeValue || 0);
+            if ($vRQ != 0 && $viewL > $vRQ) {
+                $e->getElementsByTagName("value")->item(0)->nodeValue = "****";
+            }
+        }
+    }
+
+    /**
      * Devuelve xml con vista del elemento
-     * @return SimpleXMLElement
+     * @return DOMElement
      */
     function getXML_H() {
+
         if ($this->check_access() == false)
             return null;
-        $element = new SimpleXMLElement("<element></element>");
+        $element = new DOMDocument();
 
-        $action = $element->addChild("action");
-        $action->addChild("id", $this->get_prop("id"));
-        $action->addChild("alias", $this->accion->get_prop("alias"));
+        $elementData= $element->createElement("th");
+        
+        $action = $element->createElement("action");
+        $action->appendChild($element->createElement("id", $this->get_prop("id")));
+        $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
+        $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
         if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
             $obCI = OBJECTCACHE::getInstance();
             $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
-            $action->addChild("value", $val);
+            $action->appendChild($element->createElement("value", $val));
         } else {
-            $action->addChild("value", $this->get_prop("valoraccion"));
+            $action->appendChild($element->createElement("value", $this->get_prop("valoraccion")));
         }
-        $action->addChild("usr", $this->get_prop("UA"));
-        $action->addChild("date", $this->get_prop("FA"));
-        $action->addChild("ejecuta", $this->accion->get_prop("ejecuta"));
-        $formEl = $element->addChild("form");
-        if ($this->get_prop("detalle") != "") {
-            $form = new SimpleXMLElement($this->get_prop("detalle"));
-            append_simplexml($formEl, $form);
+        $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
+        $action->appendChild($element->createElement("date", $this->get_prop("FA")));
+        $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
+        $elementData->appendChild($action);
+        
+        if ($this->get_prop("detalle_xml") != null) {
+            $nodo = $element->importNode($this->get_prop("detalle_xml")->documentElement,true);
+            $elementData->appendChild($nodo);
         }
         $files_h = $this->get_files();
         if ($files_h && count($files_h)) {
-            $files = $element->addChild("files");
+            $files = $element->createElement("files");
             foreach ($files_h as $f) {
-                $files->addChild("file", $f);
+                $files->appendChild($element->createElement("file", $f));
             }
+            $elementData->appendChild($files);
         }
-        return $element;
+        return $elementData;
     }
 
+    /**
+     * Verifica acceso y prepara vista
+     * @return boolean
+     */
     public function check_access() {
         $this->loadview();
 
@@ -216,6 +229,7 @@ class TKT_H extends itobject {
             return false;
         }
 
+        $this->lock_view($this->view["vista"]);
         return true;
     }
 
@@ -298,13 +312,15 @@ class TKT_H extends itobject {
             case 'accion':
                 return $this->accion;
             case 'detalle':
-                return trim(space_delete($this->get_detailsShow(),array("\t","\n","\0","\x0B")));
+                if($this->detalleDOM == null) return null;
+                if (!$this->check_access())
+                    return null;
+                return $this->detalleDOM->saveXML();
             case 'detalle_xml':
-                $dom = new DOMDocument();
-                if($dom->loadXML($this->get_prop('detalle'))){
-                    return $dom;
-                }
-                return null;
+                if($this->detalleDOM == null) return null;
+                if (!$this->check_access())
+                    return null;
+                return $this->detalleDOM;
             case 'UA':
                 return $this->UA;
             case 'UA_o':

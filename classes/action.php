@@ -53,6 +53,12 @@ class ACTION extends itobject {
     private $TKT;
 
     /**
+     * Primer accion trabajada
+     * @var boolean 
+     */
+    private $working;
+    
+    /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
      */
@@ -104,10 +110,8 @@ class ACTION extends itobject {
         $this->dbinstance->loadRS($ssql);
         $i = 0;
         $ret = array();
-
         while ($actV = $this->dbinstance->get_vector()) {
-            $ret[$i] = new ACTION();
-            $ret[$i]->loadDB_id($actV["id"]);
+            $ret[$i] = $this->objsCache->get_object(get_class(), $actV["id"]);
             $i++;
         }
         return $ret;
@@ -165,6 +169,29 @@ class ACTION extends itobject {
         return $this->TKT;
     }
 
+    
+        /**
+     * Setea como ticket en trabajo
+     */
+    public function setWorking() {
+        $this->working = true;
+    }
+
+    /**
+     *  Elimina seteo de ticket en trabajo
+     */
+    public function unsetWorking() {
+        $this->working = false;
+    }
+
+    /**
+     * Ticket llamado para trabajarlo
+     * @return boolean
+     */
+    public function isWorking() {
+        return $this->working;
+    }
+    
     /**
      * Carga valores de formulario y valida con itform
      * @param array $values

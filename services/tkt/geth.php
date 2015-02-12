@@ -14,43 +14,49 @@ function GO($RC) {
     if ($RC->get_objcache()->get_status("TKT", $idtkt) != "ok") {
         return $RC->createElement("error", "Ticket invalido.");
     }
-    $response = new SimpleXMLElement("<data></data>");
+    $response = new DOMDocument();
+    $responseData = $response->createElement("data");
+    
+    $responseData->appendChild($response->createElement("idmaster",$TKT->get_prop("idmaster")));
+    
     $opts = $TKT->get_tree_history();
-    $tree = $response->addChild("tree");
+    $tree = $response->createElement("tree");
     foreach ($opts as $o) {
-        $option = $tree->addChild("option");
-        $option->addChild("question", $o["question"]);
-        $option->addChild("ans", $o["ans"]);
+        $option = $response->createElement("option");
+        $option->appendChild($response->createElement("question", $o["question"]));
+        $option->appendChild($response->createElement("ans", $o["ans"]));
+        $tree->appendChild($option);
     }
-    $moves = $response->addChild("ths");
+    $responseData->appendChild($tree);
+
+    $moves = $response->createElement("ths");
     $THALL = $TKT->get_tktHObj();
-    $cvalid=0;
+    $cvalid = 0;
     foreach ($THALL as $TH) {
         $el = $TH->getXML_H();
         if ($el) {
-            $th = $moves->addChild("th");
-            append_simplexml($th, $el);
+            $th = $response->importNode($el, true);
+            $moves->appendChild($th);
             $cvalid++;
         }
     }
-    if ($cvalid== 0) {
+    if ($cvalid == 0) {
         return $RC->createElement("error", "Ticket invalido.");
     }
-    $response->addChild("master", $TKT->get_prop("idmaster"));
-    $actions = $response->addChild("actions");
+
+    $responseData->appendChild($moves);
+
+    $response->appendChild($response->createElement("master", $TKT->get_prop("idmaster")));
+    $actions = $response->createElement("actions");
     $AL = $TKT->valid_actions();
     foreach ($AL as $A) {
-        $action = $actions->addChild("action");
-        $action->addChild("alias", $A->get_prop("alias"));
-        $action->addChild("nombre", $A->get_prop("nombre"));
-        $action->addChild("formulario", $A->get_prop("formulario"));
+        $action = $response->createElement("action");
+        $action->appendChild($response->createElement("alias", $A->get_prop("alias")));
+        $action->appendChild($response->createElement("nombre", $A->get_prop("nombre")));
+        $action->appendChild($response->createElement("formulario", $A->get_prop("formulario")));
+        $actions->appendChild($action);
     }
-    $conv = new DOMDocument();
-    if($conv->loadXML($response->asXML())==false){
-        return $RC->createElement("error", "Error al parsear xml.");
-    }
-    $nodes = $conv->getElementsByTagName("data");
-    $ret = $RC->append_xml($nodes->item(0));
-
-    return $ret;
+    $responseData->appendChild($actions);
+    
+    return $RC->append_xml($responseData);
 }

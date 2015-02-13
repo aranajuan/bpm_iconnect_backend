@@ -456,7 +456,6 @@ class NOTIFY extends itobject {
 
         $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . ")";
         $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
-        $extras = "From: itracker@ta.telecom.com.ar\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
 
         foreach ($this->too as $t) {
             $this->send_mail($t, $subject, $tobody, "", "HTML", "itracker@ta.telecom.com.ar");
@@ -483,14 +482,8 @@ class NOTIFY extends itobject {
      * @return int
      */
     private function send_mail($to, $subject, $body, $cc, $type, $from) {
-        $this->dbroot->query("EXEC usuarios.dbo.sp_send_cdosysmailit
-                @from = 'Itracker<itracker@ta.telecom.com.ar>', 
-                @To = '" . strToSQL($to) . "',
-                --@CC = '',
-                @subject = '" . strToSQL($subject) . "',
-                @body = '" . strToSQL($body) . "',
-                @CCO = ''");
-        return 1;
+        $extras = "From: $from\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
+        return mail($to,$subject,$body,$extras);
     }
 
     public function check_data() {

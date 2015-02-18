@@ -72,7 +72,16 @@ class NOTIFY extends itobject {
         "clients", //generador y adjuntos
         "client", //generador
         "clients->teams" //equipos del generador y adjuntos
-            // ademas se podra indicar cualquier nombre de los perfiles
+    );
+    
+    /**
+     * Lista de valores complejos
+     * @var array<String> 
+     */
+    private static $MAIL_VALS_COMPLEX = array(
+        "team_profile",
+        "client_team_profile",
+        "event_user"
     );
 
     /**
@@ -123,7 +132,31 @@ class NOTIFY extends itobject {
     private function get_mail_value($name, $too) {
         $nv = explode("=>", $name);
         if (count($nv) > 1) {
+            if(!in_array($nv[0], self::$MAIL_VALS_COMPLEX))
+                    return "NULL" . MAIL_SPLITER;
             switch ($nv[0]) {
+                 case "event_user":
+                    $result = "";
+                    $ths = $this->tkt_final->get_tktHObj();
+                    foreach($ths as $th){
+                        $a = $th->get_prop("accion");
+                        if(!$a){
+                            continue;
+                        }
+                        $actionsV = explode(",", strtoupper($nv[1]));
+                        if(!in_array($a->get_prop("nombre"), $actionsV)){ 
+                            continue;
+                        }
+                        $usr = $th->get_prop("UA_o");
+                        if(!$usr){
+                            continue;
+                        }
+                        
+                        $result.=$usr->get_prop("mail") . MAIL_SPLITER;
+                        
+                    }
+
+                    return $result;
                 case "team_profile":
                     $result = "";
                     //buscar equipo, ejecutar funcion de equipo para traer usuarios.
@@ -148,6 +181,8 @@ class NOTIFY extends itobject {
                     return "NULL" . MAIL_SPLITER;
             }
         } else {
+            if(!in_array($name, self::$MAIL_VALS))
+                    return "NULL" . MAIL_SPLITER;
             switch ($name) {
                 case "u_tom":
                     if ($result = $this->tkt_final->get_prop("u_tom_o"))
@@ -216,7 +251,7 @@ class NOTIFY extends itobject {
         }
         if ($result)
             return $result . MAIL_SPLITER;
-        return "NULL;";
+        return "NULL". MAIL_SPLITER;
     }
 
     /**
@@ -227,22 +262,14 @@ class NOTIFY extends itobject {
      */
     private function remake_mail($mail, $too) {
         $mailR = strtolower($mail);
-        //buscar y reemplazar perfiles
-        foreach ($this->getLogged()->list_allprofiles() as $prof) {
-            if (strpos(" " . $mailR, "{team_profile=>" . $prof["nombre"] . "}")) {
-                $mailR = str_replace("{team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("team_profile=>" . $prof["nombre"], $too), $mailR);
-            }
-            if (strpos(" " . $mailR, "{client_team_profile=>" . $prof["nombre"] . "}")) {
-                $mailR = str_replace("{client_team_profile=>" . $prof["nombre"] . "}", $this->get_mail_value("client_team_profile=>" . $prof["nombre"], $too), $mailR);
-            }
+        $matches=array();
+        preg_match_all("/\\{[^\\}]+\\}/", $mailR, $matches);
+        
+        foreach($matches[0] as $m){
+            $mclear = str_replace(array("{","}"), "", $m);
+            $mailR = str_replace($m, $this->get_mail_value($mclear, $too), $mailR);
         }
-
-        //buscar y reemplazar constantes
-        foreach (self::$MAIL_VALS as $tosearch) {
-            if (strpos(" " . $mailR, "{" . $tosearch . "}")) {
-                $mailR = str_replace("{" . $tosearch . "}", $this->get_mail_value($tosearch, $too), $mailR);
-            }
-        }
+        
         return $mailR;
     }
 
@@ -462,7 +489,6 @@ class NOTIFY extends itobject {
         }
 
         $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC));
-
 
         foreach ($this->cc as $t) {
             $this->send_mail($t, $subject, $cbody, "", "HTML", "itracker@ta.telecom.com.ar");

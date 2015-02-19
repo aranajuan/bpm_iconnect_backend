@@ -33,7 +33,7 @@ function GO($RC) {
     $ALL_v = $ALL->list_fiter(array_merge($filter,array("master"=>"null")));
 
     $response = $RC->createElement("data");
-    $response->appendChild($RC->createElement("view", "id,js:showchilds:id:childsc=>Adjuntos,usr_o.nombre=>Usuario,usr_o.equiposname=>Grupo,FA,FB=>FC,u_tom_o.nombre=>Staff"));
+    $response->appendChild($RC->createElement("view", "id,js:show_childs:id:childsc=>Adjuntos,usr_o.nombre=>Usuario,usr_o.equiposname=>Grupo,FA,FB=>FC,u_tom_o.nombre=>Staff"));
     $listL = $RC->createElement("list");
     $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","equipo.nombre","status","critic");
     if ($ALL_v) {

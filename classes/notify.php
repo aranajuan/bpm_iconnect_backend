@@ -137,23 +137,13 @@ class NOTIFY extends itobject {
             switch ($nv[0]) {
                  case "event_user":
                     $result = "";
-                    $ths = $this->tkt_final->get_tktHObj();
+                    $ths = $this->tkt_final->get_tktHObj(strtoupper($nv[1]));
                     foreach($ths as $th){
-                        $a = $th->get_prop("accion");
-                        if(!$a){
-                            continue;
-                        }
-                        $actionsV = explode(",", strtoupper($nv[1]));
-                        if(!in_array($a->get_prop("nombre"), $actionsV)){ 
-                            continue;
-                        }
                         $usr = $th->get_prop("UA_o");
                         if(!$usr){
                             continue;
                         }
-                        
-                        $result.=$usr->get_prop("mail") . MAIL_SPLITER;
-                        
+                        $result.=$usr->get_prop("mail") . MAIL_SPLITER;  
                     }
 
                     return $result;
@@ -476,7 +466,7 @@ class NOTIFY extends itobject {
         if (count($this->too) == 0 && count($this->cc) == 0) {
             return "No hay destinatarios para esta notificacion";
         }
-
+        
         $this->load_body();
         $this->load_cc_body();
 

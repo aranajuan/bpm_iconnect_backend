@@ -47,9 +47,9 @@ function make_arrayobj($arr) {
  */
 function append_simplexml(&$simplexml_to, &$simplexml_from) {
     foreach ($simplexml_from->children() as $simplexml_child) {
-        $simplexml_temp = $simplexml_to->addChild($simplexml_child->getName(), (string) $simplexml_child);
+        $simplexml_temp = $simplexml_to->addChild($simplexml_child->getName(), xmlEscape((string) $simplexml_child));
         foreach ($simplexml_child->attributes() as $attr_key => $attr_value) {
-            $simplexml_temp->addAttribute($attr_key, $attr_value);
+            $simplexml_temp->addAttribute($attr_key, xmlEscape($attr_value));
         }
 
         append_simplexml($simplexml_temp, $simplexml_child);
@@ -179,14 +179,6 @@ function xmlEscape($string, $CDATA = false) {
     return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $string);
 }
 
-/**
- * Re genera texto de xml
- * @param string $string
- * @return string
- */
-function xmlText($string) {
-    return str_replace(array('&amp;', '&lt;', '&gt;', '&cdatag;'), array('&', '<', '>', ']]>'), $string);
-}
 
 /**
  * si data es null devuelve default

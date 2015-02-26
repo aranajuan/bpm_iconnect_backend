@@ -294,7 +294,7 @@ abstract class XMLhandler {
      * @return string $param
      */
     private function filter_param($value) {
-        return trim(strip_tags(xmlText($value)));
+        return trim(strip_tags($value));
     }
 
     /**

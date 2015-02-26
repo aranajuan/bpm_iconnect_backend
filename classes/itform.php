@@ -129,7 +129,7 @@ class itform {
                 return $rta;
             }
             unset($field->validations);
-            $field->addChild("value", $value);
+            $field->addChild("value", xmlEscape($value));
         }
         return "ok";
     }

@@ -42,6 +42,7 @@ function GO($RC) {
             $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
             $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
             $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
+			$tkt->appendChild($listL->createElement("idmaster", $l->get_prop('idmaster')));
             $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
             $tkths = $listL->createElement("ths");
             $ths = $l->get_tktHObj($actions);

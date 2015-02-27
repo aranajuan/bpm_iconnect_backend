@@ -123,7 +123,6 @@ function GO($RC) {
             $FC = $lastclose->get_prop('FA');
             $form = $lastclose->get_prop('detalle_xml');
             $tnode->appendChild($RC->createElement("FC", $FC));
-            $form = $e->get_prop('detalle_xml');
             if ($form) {
                 $fields = $form->getElementsByTagName("element");
 

@@ -139,6 +139,7 @@ class DB {
             if ($arr) {
                 foreach ($arr as &$a) {
                     $a = mb_convert_encoding($a, "UTF-8","ISO-8859-15");
+                    $a = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $a);
                 }
             }
             return $arr;

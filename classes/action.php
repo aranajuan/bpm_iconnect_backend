@@ -92,9 +92,9 @@ class ACTION extends itobject {
         else
             $a_propio = "habilita_a_propio in (0,2)"; //generado por otro usuario
 
-        $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles like '*')";
+        $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles like '*%')";
 
-	$equipos = "(habilita_equipos like '%" . $this->TKT->get_prop("idequipo") . ",%' or habilita_equipos like '*')";
+	$equipos = "(habilita_equipos like '%" . $this->TKT->get_prop("idequipo") . ",%' or habilita_equipos like '*%')";
 		
         if ($l->in_team($this->TKT->get_prop("idequipo")))
             $equipo = "habilita_equipo in (0,1)"; // ticket en el equipo del usuario logueado

@@ -12,7 +12,7 @@ function GO($RC) {
 
     $TKT = $RC->get_objcache()->get_object("TKT", $idtkt);
     if ($RC->get_objcache()->get_status("TKT", $idtkt) != "ok") {
-        return $RC->createElement("error", "Ticket invalido.");
+        return $RC->createElement("error", "Ticket invalido.#1");
     }
     $response = new DOMDocument();
     $responseData = $response->createElement("data");
@@ -41,7 +41,7 @@ function GO($RC) {
         }
     }
     if ($cvalid == 0) {
-        return $RC->createElement("error", "Ticket invalido.");
+        return $RC->createElement("error", "Ticket invalido.#2");
     }
 
     $responseData->appendChild($moves);

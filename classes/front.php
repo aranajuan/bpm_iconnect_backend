@@ -28,7 +28,7 @@ class FRONT extends itobject {
      * @return array<FRONT>
      */
     function list_all(){
-        $ssql = "select nombre from TBL_FRONTS and estado=".I_ACTIVE;
+        $ssql = "select nombre from TBL_FRONTS where estado=".I_ACTIVE;
         $this->DBobj->loadRS($ssql);
         if (!$this->DBobj->noEmpty)
             return null;

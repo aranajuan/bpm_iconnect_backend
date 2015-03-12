@@ -16,7 +16,6 @@ class OPTION extends itobject {
     private $idequipo_destino; /* equipo al cual se derivara el caso (si hay una ruta de destino sera en la no conformidad) */
     private $pretext; /* contiene el formulario que sera solicitado antes de generar el reclamo */
     private $idpregunta_destino; /* indica el camino a seguir por el arbol si no es ultima opcion */
-    private $autocerrar; /* 1/0 si se cierra automaticamente o no */
     private $no_anexar; /* si ofrece al usuario anexarlo a otro ticket o no ignorando el texto critico */
     private $UA; /* usuario creador */
     private $FA; /* fecha creacion */
@@ -48,7 +47,6 @@ class OPTION extends itobject {
         $this->idequipo_destino = trim($tmpU["idequipo_destino"]);
         $this->pretext = trim($tmpU["pretext"]);
         $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
-        $this->autocerrar = trim($tmpU["autocerrar"]);
         $this->no_anexar = trim($tmpU["no_anexar"]);
     }
 
@@ -126,8 +124,6 @@ class OPTION extends itobject {
                 return $this->texto_critico;
             case 'idpregunta_destino':
                 return $this->idpregunta_destino;
-            case 'autocerrar':
-                return $this->autocerrar;
             case 'no_anexar':
                 return $this->no_anexar;
             default:

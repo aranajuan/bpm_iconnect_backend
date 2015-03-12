@@ -12,8 +12,8 @@ define ("MAP_U",""); // mapea a otro usuario EJ: 548391>223547;
 ini_set("SMTP","smtpappl01");
 define("MAIL_ENABLED",1);
 define("MAIL_SPLITER",",");
-define("MAIL_HEADER","http://i786.photobucket.com/albums/yy145/temecom_telecom_telecom/head_email25_zps4fdb6014.png");
-define("MAIL_FOOTER","http://i786.photobucket.com/albums/yy145/temecom_telecom_telecom/head_email25a_zps0991dbcf.png");
+define("MAIL_HEADER","https://itracker.personal.com.ar/img/head_email.png");
+define("MAIL_FOOTER","https://itracker.personal.com.ar/img/foot_email.png");
 
 define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT");
 define("INSTANCES","TELECOMCCT,AGENTESTP");

@@ -127,7 +127,7 @@ class itform {
         $arr = make_arrayobj($arr);
         $this->arr_val=$arr;
         $this->formname=$formname;
-        $this->xml_output = $this->xml_input;
+        $this->xml_output = clone $this->xml_input;
         foreach ($this->xml_output->element as $field) {
             $value = trim($this->find_elementVal($arr, $field->id, $formname));
             $rta = $this->check_values($value, $field);

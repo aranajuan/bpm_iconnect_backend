@@ -30,7 +30,7 @@ function GO($RC) {
 
     $ALL = new TKT();
 
-    $ALL_v = $ALL->list_fiter(array_merge($filter, array("master" => "null")));
+    $ALL_v = $ALL->list_fiter($filter);
 
 
     $listL = new DOMDocument();

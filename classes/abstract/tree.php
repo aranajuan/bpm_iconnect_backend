@@ -18,6 +18,7 @@ abstract class TREE extends itobject {
      * @param    $crypt  esta encriptado    
      * @return   string
      */
+
     protected function load_path($path, $crypt = 0) {
         $this->path_pos = 0;
         $this->path_obj = NULL;
@@ -36,10 +37,10 @@ abstract class TREE extends itobject {
      *  Devuelve path desencriptado
      * @return string path
      */
-    protected function get_path(){
-        return implode("-",$this->path);
+    protected function get_path() {
+        return implode("-", $this->path);
     }
-    
+
     /**
      * Es activo el arbol (se puede dar de alta)
      * @return boolean
@@ -138,7 +139,7 @@ abstract class TREE extends itobject {
         }
         $criticVC = explode("-", $this->critico);
         $ssql = "
-            select id from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
+            select id,origen from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
         $this->dbinstance->loadRS($ssql);
         if (!$this->dbinstance->noEmpty) {
             return NULL;
@@ -146,11 +147,13 @@ abstract class TREE extends itobject {
         $i = 0;
         $tktV = array();
         while ($tm = $this->dbinstance->get_vector()) {
-            $tkt = $this->objsCache->get_object("TKT", $tm["id"]);
-            if ($this->objsCache->get_status("TKT", $tm["id"]) == "ok") {
-                //verificar textos criticos y comparar con actual
-                $countC = count(array_intersect($criticVC, explode("-", $tkt->get_prop("critic"))));
-                if ($countC) {
+            //verificar textos criticos y comparar con actual
+            $TKTc = new TKT();
+            $TKTc->load_path($tm["origen"], 0);
+            $countC = count(array_intersect($criticVC, explode("-", $TKTc->get_critic())));
+            if ($countC) {
+                $tkt = $this->objsCache->get_object("TKT", $tm["id"]);
+                if ($this->objsCache->get_status("TKT", $tm["id"])=="ok") {
                     $tktV[$i] = $tkt;
                     $i++;
                 }
@@ -225,7 +228,7 @@ abstract class TREE extends itobject {
                         break;
                     default:
                         $o = $this->path_obj[$i];
-                        $q=$this->objsCache->get_object("QUESTION", $o->get_prop("idpregunta"));
+                        $q = $this->objsCache->get_object("QUESTION", $o->get_prop("idpregunta"));
                         $rta[$i]["question"] = $q->get_prop("texto");
                         $rta[$i]["ans"] = $o->get_prop("texto");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . "-";
@@ -255,14 +258,13 @@ abstract class TREE extends itobject {
         if (!is_array($this->path)) {
             // primer opcion, se muestran las direcciones
             //limpiar temporales del usuario
-            
             //verificar si el usuario pertenece solo a una direccion se ingresa directamente
             $usr = $this->getLogged();
-            $usrDirs= $usr->get_divisions();
-            if(count($usrDirs)==1){
-                $dir=$usrDirs[0]->get_prop("id");
-            }else{
-                $dir=-1;
+            $usrDirs = $usr->get_divisions();
+            if (count($usrDirs) == 1) {
+                $dir = $usrDirs[0]->get_prop("id");
+            } else {
+                $dir = -1;
             }
             //$dir=-1;
             if ($dir > 0) {
@@ -282,7 +284,7 @@ abstract class TREE extends itobject {
                 return $rta;
             }
         }
-        
+
         $actualPATH = implode("-", $this->path); //ruta actual, para generar destiny
         $rta["actual"] = Encrypter::encrypt($actualPATH);
         $actualO = $this->get_last();
@@ -335,7 +337,7 @@ abstract class TREE extends itobject {
                 // otros casos
                 if ($actualO->get_prop("idpregunta_destino")) {
                     // cargar opciones
-                    $q= $this->objsCache->get_object("QUESTION", $actualO->get_prop("idpregunta_destino"));
+                    $q = $this->objsCache->get_object("QUESTION", $actualO->get_prop("idpregunta_destino"));
                     $rta["title"] = $q->get_prop("texto");
                     $rta["detail"] = $q->get_prop("detalle");
                     $opts = $q->get_prop("opcionesobj");

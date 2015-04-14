@@ -248,6 +248,7 @@ function get_measure($id) {
 /**
  * muestra el tiempo desde start_measure */
 function show_measure($id, $text = "") {
+    /*
     if (!$GLOBALS[UL])
         return;
     if (!$GLOBALS[UL]->get_prop("debug") || !DEBUG_MEASURE)
@@ -255,6 +256,8 @@ function show_measure($id, $text = "") {
     if ($text == "")
         $text = $id;
     echo "<br/>" . $text . "=>" . get_measure($id);
+     * */
+ 
 }
 
 function microtime_float() {

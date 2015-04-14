@@ -2,6 +2,7 @@
 
 require_once 'classes/report.php';
 require_once 'classes/tkt.php';
+require_once 'classes/report/reportrequest.php';
 
 function add_node($tnode, $form) {
     
@@ -42,8 +43,48 @@ function GO($RC) {
             $R->listTouchStaffteam($teamsVO);
             break;
     }
-
+    $RR= new REPORTREQUEST();
     $lT = $R->getObjs();
+    
+    $RR->loadTKTS($lT);
+    $RR->loadITJson('{
+	"fields":[
+		{
+			"action":"TKT",
+			"property":"usr_o.nombre",
+                        "modificator":"FST",
+			"alias":"Usuario apertura"
+		},
+		{
+			"action":"TKT",
+			"property":"id",
+			"modificator":"FST",
+			"alias":"id"
+		}
+                ,
+		{
+			"action":"TOMAR",
+			"property":"FB",
+			"modificator":"LST",
+			"alias":"usr tom"
+		},
+		{
+			"action":"TOMAR",
+			"property":"FA",
+			"modificator":"FST",
+			"alias":"f tom"
+		},
+		{
+			"action":"UNIR",
+			"property":"valoraccion",
+			"modificator":"LST",
+			"alias":"f tom"
+		}
+]
+                }');
+    
+    $RR->execute();
+    exit();
     $data = $RC->createElement("data");
     $list = $RC->createElement("list");
     $tifMax = 0;

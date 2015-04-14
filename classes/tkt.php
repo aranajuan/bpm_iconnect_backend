@@ -410,7 +410,7 @@ class TKT extends TREE {
         if($action=="*") return false;
         $actionsV = explode(",",$action);
         foreach($actionsV as $av){
-          if(!in_array($av, $this->tkthActionsLoaded))
+          if($this->tkthActionsLoaded==null || !in_array($av, $this->tkthActionsLoaded))
                 return false;
         }
         return true;

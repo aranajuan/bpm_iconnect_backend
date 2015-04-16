@@ -3,6 +3,7 @@
 require_once 'classes/report.php';
 require_once 'classes/tkt.php';
 require_once 'classes/report/reportrequest.php';
+require_once 'classes/report/reportexceladapter.php';
 
 function add_node($tnode, $form) {
     
@@ -49,41 +50,56 @@ function GO($RC) {
     $RR->loadTKTS($lT);
     $RR->loadITJson('{
 	"fields":[
+        	{
+			"action":"TKT",
+			"property":"id",
+			"modificator":"FST",
+			"alias":"id"
+		},
+                {
+			"action":"TKT",
+			"property":"tipificacion",
+			"modificator":"*",
+			"alias":"T1_"
+		}
+                ,
 		{
 			"action":"TKT",
 			"property":"usr_o.nombre",
                         "modificator":"FST",
 			"alias":"Usuario apertura"
 		},
-		{
+                {
 			"action":"TKT",
-			"property":"id",
+			"property":"usr_o.equiposname",
 			"modificator":"FST",
-			"alias":"id"
+			"alias":"Equipo"
+		}
+                ,
+                {
+			"action":"TKT",
+			"property":"tipificacion",
+			"modificator":"*",
+			"alias":"T_"
 		}
                 ,
 		{
 			"action":"TOMAR",
-			"property":"FB",
-			"modificator":"LST",
-			"alias":"usr tom"
+			"property":"UA",
+			"modificator":"*",
+			"alias":"usr tom_"
 		},
 		{
 			"action":"TOMAR",
 			"property":"FA",
-			"modificator":"FST",
-			"alias":"f tom"
-		},
-		{
-			"action":"UNIR",
-			"property":"valoraccion",
 			"modificator":"LST",
-			"alias":"f tom"
-		}
-]
+			"alias":"f tom_"
+		}]
                 }');
     
     $RR->execute();
+    $RPADAPTER = new REPORTEXCELADAPTER($RR);
+    $RPADAPTER->loadExcel();
     exit();
     $data = $RC->createElement("data");
     $list = $RC->createElement("list");

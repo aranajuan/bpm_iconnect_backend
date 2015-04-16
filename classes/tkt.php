@@ -966,6 +966,13 @@ class TKT extends TREE {
                 return $this->childs;
             case 'origen_json':
                 return json_encode($this->get_tree_history());
+            case 'tipificacion':
+                $treeh = $this->get_tree_history();
+                $tipif=array();
+                foreach($treeh as $opt){
+                    array_push($tipif, $opt["ans"]);
+                }
+                return $tipif;
             case 'childsc':
                 return $this->load_childs();
             case 'critic':

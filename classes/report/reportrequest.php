@@ -24,23 +24,30 @@ class REPORTREQUEST {
     private $actionRQ;
 
     /**
-     *
-     * @var array[action]<FIELD>
+     *  optimizado para carga de datos
+     * @var array[action][id]<FIELD>
+     */
+    private $fields_rqGroup;
+
+    /**
+     *  Array ordenado segun solicitud
+     * @var array[$id]<FIELD>
      */
     private $fields;
 
     /**
      *
-     * @var array[action][row]<VALUE>
+     * @var array[$id][idtkt]<VALUE>
      */
     private $values;
 
     public function __construct() {
-        $this->actionRQ= array();
-        $this->fields=array();
-        $this->values=array();
+        $this->actionRQ = array();
+        $this->fields_rqGroup = array();
+        $this->fields = array();
+        $this->values = array();
     }
-    
+
     /**
      *  Carga tickets a reportar
      * @param array<TKT> $tktsDB
@@ -79,50 +86,81 @@ class REPORTREQUEST {
 
             if (!in_array($ft->getAction(), $this->actionRQ))
                 array_push($this->actionRQ, $ft->getAction());
-            if(!isset($this->fields[$ft->getAction()])) $this->fields[$ft->getAction()]=array();
-            array_push($this->fields[$ft->getAction()], $ft);
+            if (!isset($this->fields_rqGroup[$ft->getAction()]))
+                $this->fields_rqGroup[$ft->getAction()] = array();
+            array_push($this->fields_rqGroup[$ft->getAction()], $ft);
             $i++;
         }
         return true;
     }
 
-    public function execute() {    
+    /**
+     *  Ejecuta reporte para los tickets cargados
+     */
+    public function execute() {
         $itkt = 0;
         foreach ($this->tktsDB as $tkt) {
             $this->addValues($itkt, $tkt);
             $itkt++;
-            if($itkt>5) return;
+            if ($itkt > 5)
+                return;
+        }
+        exit();
+    }
+
+    /**
+     * Carga hitorico necesario y genera value para cada evento
+     * @param int $itkt numero de ticket continuo
+     * @param TKT $tkt
+     */
+    private function addValues($itkt, $tkt) {
+
+        if (isset($this->fields_rqGroup["TKT"])) {
+            $this->loadActionValues("TKT", $tkt, null, $itkt);
+        }
+
+        $THL = $tkt->get_tktHObj(implode(",", $this->actionRQ));
+        foreach ($THL as $TH) {
+            $actName = $TH->get_prop("accion")->get_prop("nombre");
+            $this->loadActionValues($actName, $tkt, $TH, $itkt);
+        }
+        
+    }
+
+    /**
+     * Carga todos los valores de la accion
+     * @param string $actionName
+     * @param TKT $tkt
+     * @param TKT_H $th
+     * @param int $itkt
+     */
+    private function loadActionValues($actionName, $tkt, $th, $itkt) {
+        foreach ($this->fields_rqGroup[$actionName] as &$field) {
+            if (!isset($this->values[$field->getOrder()][$itkt])) {
+                $this->values[$field->getOrder()][$itkt] = new REPORTVALUE();
+            }
+            $value = $this->values[$field->getOrder()][$itkt];
+            $field->loadValue($tkt, $th, $value);
+            $this->fields[$field->getOrder()] = $field;
         }
     }
 
-    private function addValues($itkt, $tkt) {
-        
-        if(isset($this->fields["TKT"])){
-            $i=0;
-            foreach($this->fields["TKT"] as &$field){
-                if(!isset($this->values["TKT"][$i][$itkt])){
-                    $this->values["TKT"][$i][$itkt] = new REPORTVALUE();
-                }
-                $value = $this->values["TKT"][$i][$itkt];
-                $field->loadValue($tkt,null,$value);
-                $i++;
-            }
-        }
-        
-        $THL = $tkt->get_tktHObj(implode(",", $this->actionRQ));
-        foreach ($THL as $TH) {
-            $i = 0;
-            $actName = $TH->get_prop("accion")->get_prop("nombre");
-            foreach ($this->fields[$actName] as &$field) {
-                if(!isset($this->values[$actName][$i][$itkt])){
-                    $this->values[$actName][$i][$itkt] = new REPORTVALUE();
-                }
-                $value = $this->values[$actName][$i][$itkt];
-                $field->loadValue($tkt, $TH, $value);
-                $i++;
-            }
-        }
+    /**
+     * Devuelve array de FIELD
+     * @return type
+     */
+    public function getFields() {
+        return $this->fields;
+    }
+
+    /**
+     *  Devuelve valores, misma ubicacion que fields
+     * @return type
+     */
+    public function getValues() {
+        return $this->values;
     }
 
 }
+
 ?>

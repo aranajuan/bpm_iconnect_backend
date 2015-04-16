@@ -1,13 +1,14 @@
 <?php
+
 error_reporting(E_ALL);
+
 class REPORTFIELD {
 
     private $json;
     private $max;
     private $order;
-
     private $modificator;
-    
+
     public function __construct() {
         $this->max = 0;
     }
@@ -18,7 +19,7 @@ class REPORTFIELD {
      */
     public function load($fieldJson) {
         $this->json = $fieldJson;
-        $this->modificator=explode(",",$this->getModificator());
+        $this->modificator = explode(",", $this->getModificator());
         return true;
     }
 
@@ -33,9 +34,7 @@ class REPORTFIELD {
         if ($value->getFinished())
             return;
 
-        $value->nextRcount();
-
-        if ($this->getAction() == "TKT") { 
+        if ($this->getAction() == "TKT") {
             $propval = $tkt->get_Subprop($this->getProperty());
         } else {
             $propval = $th->get_Subprop($this->getProperty());
@@ -44,8 +43,11 @@ class REPORTFIELD {
         if (!is_array($propval))
             $propval = array("value" => $propval);
 
-        $this->setMax($this->addToValue($propval,$value));
+        $this->setMax($this->addToValue($propval, $value));
+
+        $value->nextRcount();
     }
+
     /**
      * Agrega valor segun modificador
      * @param type $propval
@@ -53,17 +55,19 @@ class REPORTFIELD {
      * @return int Posicion insertada
      */
     private function addToValue($propval, &$value) {
-        if($this->modificator[0]=="FST"){
+        if ($this->modificator[0] == "FST") {
             $pos = $value->addValue($propval);
             $value->setFinished();
-        }else if($this->modificator[0]=="LST"){
+        } else if ($this->modificator[0] == "LST") {
             $pos = $value->setValue($propval);
-        }else{
-            if(in_array($value->getRcount(), $this->modificator)){
+        } else if ($this->modificator[0] == "*") {
+            $pos = $value->addValue($propval);
+        } else {
+            if (in_array($value->getRcount(), $this->modificator)) {
                 $pos = $value->addValue($propval);
+            } else {
+                $pos = 0;
             }
-            $pos=0;
-            echo "ERROR NO DEFINIDO MODIFICATOR";
         }
         return $pos;
     }
@@ -72,13 +76,17 @@ class REPORTFIELD {
         $this->order = $pos;
     }
 
+    public function getOrder() {
+        return $this->order;
+    }
+
     private function setMax($val) {
         if ($val > $this->max) {
             $this->max = $val;
         }
     }
 
-    public function getCount() {
+    public function getMax() {
         return $this->max;
     }
 
@@ -93,14 +101,34 @@ class REPORTFIELD {
     }
 
     public function getModificator() {
-        if(isset($this->json->modificator))
+        if (isset($this->json->modificator))
             return $this->json->modificator;
         return "";
     }
 
     public function getType() {
-        return $this->json->type;
+        if (isset($this->json->type))
+            return $this->json->type;
+        return "";
+    }
+
+    public function getAlias() {
+        return $this->json->alias;
+    }
+
+    /**
+     * Compara similitud para alternar
+     * @param REPORTFIELD $field
+     * @return boolean
+     */
+    public function compare($field) {
+        if ($this->getAction() == $field->getAction() &&
+                $this->getMax() == $field->getMax()) {
+            return true;
+        }
+        return false;
     }
 
 }
+
 ?>

@@ -43,23 +43,13 @@ class REPORTVALUE {
      * @return int  Cantidad de elementos
      */
     public function addValue($value) {
-        $this->nextRcount();
         if ($this->getFinished()) {
             return false;
         }
-        $valV = make_arrayobj($value);
-        foreach ($valV as $vals) {
-            if (!isset($vals["title"])) {
-                $this->values[$this->count]["title"] = $this->count;
-            } else {
-                $this->values[$this->count]["title"] = $vals["title"];
-            }
-            $this->values[$this->count]["value"] = $vals["value"];
-            if (isset($vals["type"])) {
-                $this->values[$this->count]["type"] = $vals["type"];
-            }
-            $this->count++;
-        }
+        
+        $this->values[$this->count] = new REPORTVALUEDATA($value);
+        
+        $this->count++;
         return $this->count;
     }
 
@@ -96,6 +86,53 @@ class REPORTVALUE {
         return $this->finished;
     }
 
+    public function getValues() {
+        return $this->values;
+    }
+
 }
 
+
+class REPORTVALUEDATA{
+    
+    private $data;
+    
+    public function __construct($value) {
+        $this->data=array();
+        if(!is_array($value)){
+            $this->data[0]["title"]="0";
+            $this->data[0]["value"]=$value;
+            $this->data[0]["type"]="";
+        }else{
+            $nval = make_arrayobj($value);
+            $i=0;
+            foreach ($nval as $val){
+                if(!isset($val["title"])){
+                    $this->data[$i]["title"]=$i;
+                }else{
+                    $this->data[$i]["title"]=$val["title"];
+                }
+                if(!isset($val["type"])){
+                    $this->data[$i]["type"]="";
+                }else{
+                    $this->data[$i]["type"]=$val["type"];
+                }
+                if(!is_array($val)){
+                    $this->data[$i]["value"]=$val;
+                }else{
+                    $this->data[$i]["value"]=$val["value"];
+                }
+                $i++;
+            }
+        }
+    }
+    
+    public function getData(){
+        return $this->data;
+    }
+    
+    public function getCount(){
+        return count($this->data);
+    }
+}
 ?>

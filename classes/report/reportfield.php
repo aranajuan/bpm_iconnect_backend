@@ -1,16 +1,14 @@
 <?php
 
-error_reporting(E_ALL);
-
 class REPORTFIELD {
 
     private $json;
-    private $max;
+    private $max_cevents;
     private $order;
     private $modificator;
 
     public function __construct() {
-        $this->max = 0;
+        $this->max_cevents = 0;
     }
 
     /**
@@ -40,10 +38,7 @@ class REPORTFIELD {
             $propval = $th->get_Subprop($this->getProperty());
         }
 
-        if (!is_array($propval))
-            $propval = array("value" => $propval);
-
-        $this->setMax($this->addToValue($propval, $value));
+        $this->setMax_cevents($this->addToValue($propval, $value));
 
         $value->nextRcount();
     }
@@ -80,14 +75,14 @@ class REPORTFIELD {
         return $this->order;
     }
 
-    private function setMax($val) {
-        if ($val > $this->max) {
-            $this->max = $val;
+    private function setMax_cevents($val) {
+        if ($val > $this->max_cevents) {
+            $this->max_cevents = $val;
         }
     }
 
-    public function getMax() {
-        return $this->max;
+    public function getMax_cevents() {
+        return $this->max_cevents;
     }
 
     /* configs de json */
@@ -123,7 +118,7 @@ class REPORTFIELD {
      */
     public function compare($field) {
         if ($this->getAction() == $field->getAction() &&
-                $this->getMax() == $field->getMax()) {
+                $this->getMax_cevents() == $field->getMax_cevents()) {
             return true;
         }
         return false;

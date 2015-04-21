@@ -3,16 +3,16 @@
 class REPORTVALUE {
 
     /**
-     * Valores
-     * @var array[$id][title | value]
+     * Valores de eventos
+     * @var array<REPORTVALUEDATA>
      */
     private $values;
 
     /**
-     * Cantidad
+     * Cantidad de eventos
      * @var int 
      */
-    private $count;
+    private $event_count;
 
     /**
      * No insertar mas registros
@@ -33,24 +33,24 @@ class REPORTVALUE {
 
     private function inicialize() {
         $this->values = array();
-        $this->count = 0;
+        $this->event_count = 0;
         $this->finished = false;
     }
 
     /**
      * Agregar valores
      * @param array $value  title | type | value
-     * @return int  Cantidad de elementos
+     * @return int  Cantidad de eventos
      */
     public function addValue($value) {
         if ($this->getFinished()) {
             return false;
         }
         
-        $this->values[$this->count] = new REPORTVALUEDATA($value);
+        $this->values[$this->event_count] = new REPORTVALUEDATA($value);
         
-        $this->count++;
-        return $this->count;
+        $this->event_count++;
+        return $this->event_count;
     }
 
     public function nextRcount() {
@@ -70,8 +70,8 @@ class REPORTVALUE {
      * Cantidad
      * @return int  Cantidad de elementos
      */
-    public function getCount() {
-        return $this->count;
+    public function getEvent_Count() {
+        return $this->event_count;
     }
 
     public function setFinished() {

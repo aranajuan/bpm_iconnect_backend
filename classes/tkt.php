@@ -69,7 +69,7 @@ class TKT extends TREE {
 
         $opentotaken = "";
         if ($filter["opento"]) {
-            $opentotaken = "and idequipo=" . $filter["opento"];
+            $opentotaken = "and idequipo in(" . $filter["opento"].")";
             if ($filter["taken"]) {
                 if ($filter["taken"] == "*") {
                     $opentotaken.=" and u_tom is not null";

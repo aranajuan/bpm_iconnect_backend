@@ -10,16 +10,17 @@ require_once 'classes/tkt.php';
 function GO($RC) {
 
     $u = $RC->get_User();
-    $idteam = $RC->get_params("team");
-    if (!$u->in_team($idteam)) {
-        return $RC->createElement("error", "Equipo invalido. Acceso denegado.");
+    $idteams = explode(",",$RC->get_params("team"));
+    foreach($idteams as $idteam){
+        if (!$u->in_team($idteam)) {
+            return $RC->createElement("error", "Equipo invalido. Acceso denegado.");
+        }
     }
-
     $actions = $RC->get_params("actions");
 
     $filter = array(
         "open" => "open",
-        "opento" => $idteam,
+        "opento" => $RC->get_params("team"),
         "origin" => $RC->get_params("origin")
     );
 

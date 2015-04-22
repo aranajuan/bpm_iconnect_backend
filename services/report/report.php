@@ -57,10 +57,26 @@ function GO($RC) {
 			"alias":"id"
 		},
                 {
-			"action":"TKT",
-			"property":"tipificacion",
+			"action":"ABRIR",
+			"property":"itform.Hola",
 			"modificator":"*",
-			"alias":"T1_"
+			"alias":"legajo"
+		}
+                ,{
+			"action":"ABRIR",
+			"property":"itform.21",
+			"modificator":"*",
+			"alias":"usuario"
+		},{
+			"action":"REABRIR",
+			"property":"itform.comment",
+			"modificator":"FST",
+			"alias":"reabrir_coment"
+		},{
+			"action":"REABRIR",
+			"property":"FA",
+			"modificator":"FST",
+			"alias":"reabrir_fa"
 		}
                 ,
 		{

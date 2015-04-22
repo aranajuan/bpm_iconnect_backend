@@ -1,6 +1,5 @@
 <?php
 
-
 require_once 'classes/question.php';
 
 /**
@@ -15,6 +14,12 @@ class OPTION extends itobject {
     private $ruta_destino; /* ruta a la cual se derivara en caso de elegir esta opcion */
     private $idequipo_destino; /* equipo al cual se derivara el caso (si hay una ruta de destino sera en la no conformidad) */
     private $pretext; /* contiene el formulario que sera solicitado antes de generar el reclamo */
+
+    /**
+     *
+     * @var itform
+     */
+    private $itform; /* formulario cargado ITFORM */
     private $idpregunta_destino; /* indica el camino a seguir por el arbol si no es ultima opcion */
     private $no_anexar; /* si ofrece al usuario anexarlo a otro ticket o no ignorando el texto critico */
     private $UA; /* usuario creador */
@@ -23,18 +28,16 @@ class OPTION extends itobject {
     private $FB; /* fecha en que elimino la opcion */
     private $error = FALSE; /* error al cargar de la base */
 
-
     function load_DB($id) {
         $this->error = FALSE;
-        $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=".intval($id));
+        $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->UB != NULL)
                 return "eliminado";
             return "ok";
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -45,7 +48,13 @@ class OPTION extends itobject {
         $this->texto_critico = trim($tmpU["texto_critico"]);
         $this->ruta_destino = trim($tmpU["ruta_destino"]);
         $this->idequipo_destino = trim($tmpU["idequipo_destino"]);
-        $this->pretext = trim($tmpU["pretext"]);
+        $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
+        if ($this->pretext != "") {
+            $this->itform = new itform();
+            $this->itform->load_xml($this->pretext);
+        } else {
+            $this->itform = null;
+        }
         $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
         $this->no_anexar = trim($tmpU["no_anexar"]);
     }
@@ -118,8 +127,8 @@ class OPTION extends itobject {
                 return $this->ruta_destino;
             case 'idequipo_destino':
                 return $this->idequipo_destino;
-            case 'pretext':
-                return trim(space_delete( $this->pretext,array("\t","\n","\0","\x0B")));
+            case 'itform':
+                return $this->itform;
             case 'texto_critico':
                 return $this->texto_critico;
             case 'idpregunta_destino':

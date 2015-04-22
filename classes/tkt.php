@@ -456,7 +456,7 @@ class TKT extends TREE {
             $actionsV=explode(",",$actions);
             $THL = array();
             foreach($this->tkt_hOBJ as $TH){
-                if(in_array($TH->get_prop("action")->get_prop("nombre"),$actionsV)){
+                if(in_array($TH->get_prop("accion")->get_prop("nombre"),$actionsV)){
                     array_push($THL, $TH);
                 }
             }

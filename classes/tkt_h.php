@@ -25,9 +25,9 @@ class TKT_H extends itobject {
 
     /**
      * Dom de detalle
-     * @var DOMDocument
+     * @var itform
      */
-    private $detalleDOM;
+    private $itform;
     private $idaccion;
     private $valoraccion;
     private $estado;    /* estado de la accion */
@@ -81,8 +81,12 @@ class TKT_H extends itobject {
         $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
         $this->detalle = $tmpU["detalle"];
         if($this->detalle!=null && $this->detalle!=""){
-            $this->detalleDOM = new DOMDocument();
-            $this->detalleDOM->loadXML($this->detalle);
+            $this->itform = new itform();
+            if($this->itform->load_xml($this->detalle)==false){
+                return "Error al cargar formulario ".$this->id;
+            }
+        }else{
+             $this->itform = null;
         }
         $this->accion = $accion;
         return "ok";
@@ -129,7 +133,12 @@ class TKT_H extends itobject {
             return "TKTH_Insert: " . $this->dbinstance->details;
         } else {
             $this->id = $this->dbinstance->get_lastID();
-            $form = $this->accion->getitform()->get_output();
+            $itform = $this->accion->getitform();
+            if($itform){
+                $form=$itform->get_output();
+            }else{
+                $form="";
+            }
             $this->save_files();
             if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
                 return "ok";
@@ -142,22 +151,6 @@ class TKT_H extends itobject {
                 return "THTH_D_insert: Error no se guardaron los detalles pero si se avanzo el tkt:" . $this->dbinstance->details;
             }
             return "ok";
-        }
-    }
-
-    /**
-     * Bloquea vista de elementos con acceso restringido
-     * @param int $viewL
-     *
-     */
-    private function lock_view($viewL) {
-        if($this->detalleDOM == null) return;
-        $elements = $this->detalleDOM->getElementsByTagName("element");
-        foreach ($elements as $e) {
-            $vRQ = intval($e->getElementsByTagName("view")->item(0)->nodeValue || 0);
-            if ($vRQ != 0 && $viewL > $vRQ) {
-                $e->getElementsByTagName("value")->item(0)->nodeValue = "****";
-            }
         }
     }
 
@@ -189,8 +182,10 @@ class TKT_H extends itobject {
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
         
-        if ($this->get_prop("detalle_xml") != null) {
-            $nodo = $element->importNode($this->get_prop("detalle_xml")->documentElement,true);
+        if ($this->get_prop("itform") != null) {
+            $nodo = $element->importNode(
+                    $this->get_prop("itform")->get_outputDOM()->documentElement,
+                    true);
             $elementData->appendChild($nodo);
         }
         $files_h = $this->get_files();
@@ -228,8 +223,10 @@ class TKT_H extends itobject {
         if (!$this->getLogged()->cansee($this->get_UA())) {
             return false;
         }
-
-        $this->lock_view($this->view["vista"]);
+        
+        if($this->itform){
+            $this->itform->set_view($this->view["vista"]);
+        }
         return true;
     }
 
@@ -311,16 +308,11 @@ class TKT_H extends itobject {
                 return $this->valoraccion;
             case 'accion':
                 return $this->accion;
-            case 'detalle':
-                if($this->detalleDOM == null) return null;
+            case 'itform':
+                if($this->itform == null) return null;
                 if (!$this->check_access())
                     return null;
-                return $this->detalleDOM->saveXML();
-            case 'detalle_xml':
-                if($this->detalleDOM == null) return null;
-                if (!$this->check_access())
-                    return null;
-                return $this->detalleDOM;
+                return $this->itform;
             case 'UA':
                 return $this->UA;
             case 'UA_o':

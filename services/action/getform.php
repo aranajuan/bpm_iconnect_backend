@@ -12,22 +12,18 @@ function GO($RC) {
     $actionName = $RC->get_params("action");
     
     $A= $RC->get_objcache()->get_object("ACTION", $actionName);
-    
-    if($RC->get_objcache()->get_status("ACTION", $actionName)!="ok"){
-        return $RC->createElement("error", "No se pudo cargar la accion");
+    $rta =$RC->get_objcache()->get_status("ACTION", $actionName);
+    if($rta!="ok"){
+        return $RC->createElement("error", "No se pudo cargar la accion.".$rta."-");
     }
     
-    $formTXT = $A->get_prop("form");
+    $form = $A->get_prop("itf");
     
-    if($formTXT==""){
+    if(!$form){
         return $RC->createElement("error", "No se pudo cargar formulario");
     }
-    $parser = new DOMDocument();
-    if($parser->loadXML($formTXT)==false){
-        return $RC->createElement("error", "Formulario invalido");
-    }
     
-    $ret = $RC->append_xml($parser->getElementsByTagName("itform")->item(0));
+    $ret = $RC->append_xml($form->get_inputDOM()->documentElement);
     
     return $ret;
     

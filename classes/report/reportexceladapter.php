@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_ALL);
 require_once 'reportrequest.php';
 
 require_once 'classes/imports/PHPExcel/PHPExcel.php';
@@ -78,7 +78,7 @@ class REPORTEXCELADAPTER {
         }
         
         if ($valuePos > -1) { /* detecta recall */
-            $this->writeValues($fields, $values, $fieldPos, $valuePos);
+            $this->writeValue($fields[$fieldPos], $values[$fieldPos], $valuePos);
             if ($AlterNext) { /* si es similar */
                 return $this->writeFields($fields, $values, $fieldPos + 1, $valuePos);
             } else {
@@ -88,7 +88,7 @@ class REPORTEXCELADAPTER {
         $Ceven = $fields[$fieldPos]->getMax_cevents(); // cantidad de eventos para la columna
 
         for ($i = 0; $i < $Ceven; $i++) {
-            $this->writeValues($fields, $values, $fieldPos, $i);
+            $this->writeValue($fields[$fieldPos], $values[$fieldPos], $i);
             if ($AlterNext) {
                 $sig = $this->writeFields($fields, $values, $fieldPos + 1, $i);
             }
@@ -102,23 +102,25 @@ class REPORTEXCELADAPTER {
 
     /**
      * Escribe los valores en las celdas 
-     * @param array<REPORTFIELD> $fields
-     * @param array<REPORTVALUE> $values
+     * @param REPORTFIELD $field
+     * @param REPORTVALUE $value
      * @param int $fieldPos
      * @param int $EvePos
      */
-    private function writeValues($fields, $values, $fieldPos, $EvePos) {
+    private function writeValue($field, $value, $EvePos) {
         $sheet = $this->excel->getActiveSheet();
-        $value_ALLTKTS = $values[$fieldPos];
         $itkt=0;
-        $evec = $fields[$fieldPos]->getMax_cevents();
+        $evec = $field->getMax_cevents();
         
-        foreach($value_ALLTKTS as $valueTKT){
+        foreach($value as $valueTKT){
             $dataS_ALLEVE = $valueTKT->getValues(); //array de datas
-            if(!isset($dataS_ALLEVE[$EvePos])) continue;
+            if(!isset($dataS_ALLEVE[$EvePos])){
+               $itkt++;
+               continue;
+            }
             $dataEve = $dataS_ALLEVE[$EvePos]->getData();
             foreach($dataEve as $dataEveProps){
-                $alias = $this->getAlias($fields[$fieldPos]->getAlias(),
+                $alias = $this->getAlias($field->getAlias(),
                         $evec, 
                         count($dataEve),
                         $EvePos,

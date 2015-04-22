@@ -89,6 +89,7 @@ class REPORTREQUEST {
             if (!isset($this->fields_rqGroup[$ft->getAction()]))
                 $this->fields_rqGroup[$ft->getAction()] = array();
             array_push($this->fields_rqGroup[$ft->getAction()], $ft);
+            $this->fields[$ft->getOrder()] = $ft;
             $i++;
         }
         return true;
@@ -100,6 +101,7 @@ class REPORTREQUEST {
     public function execute() {
         $itkt = 0;
         foreach ($this->tktsDB as $tkt) {
+            $this->createTKTvalues($itkt);
             $this->addValues($itkt, $tkt);
             $itkt++;
             if ($itkt > 5)
@@ -109,12 +111,21 @@ class REPORTREQUEST {
     }
 
     /**
+     * Prepara todos los REPORTVALUE para el ticket
+     * @param int $itkt
+     */
+    private function createTKTvalues($itkt) {
+        foreach($this->fields as $pos => $field){
+            $this->values[$pos][$itkt] = new REPORTVALUE();
+        }       
+    }
+
+    /**
      * Carga hitorico necesario y genera value para cada evento
      * @param int $itkt numero de ticket continuo
      * @param TKT $tkt
      */
     private function addValues($itkt, $tkt) {
-
         if (isset($this->fields_rqGroup["TKT"])) {
             $this->loadActionValues("TKT", $tkt, null, $itkt);
         }
@@ -124,7 +135,6 @@ class REPORTREQUEST {
             $actName = $TH->get_prop("accion")->get_prop("nombre");
             $this->loadActionValues($actName, $tkt, $TH, $itkt);
         }
-        
     }
 
     /**
@@ -136,12 +146,8 @@ class REPORTREQUEST {
      */
     private function loadActionValues($actionName, $tkt, $th, $itkt) {
         foreach ($this->fields_rqGroup[$actionName] as &$field) {
-            if (!isset($this->values[$field->getOrder()][$itkt])) {
-                $this->values[$field->getOrder()][$itkt] = new REPORTVALUE();
-            }
             $value = $this->values[$field->getOrder()][$itkt];
             $field->loadValue($tkt, $th, $value);
-            $this->fields[$field->getOrder()] = $field;
         }
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ALL);
 require_once 'reportrequest.php';
 
@@ -58,7 +59,6 @@ class REPORTEXCELADAPTER {
         $this->saveTmp();
     }
 
-    
     /**
      * Escribe columnas en cadena
      * @param array<REPORTFIELD> $fields
@@ -69,20 +69,20 @@ class REPORTEXCELADAPTER {
      */
     private function writeFields($fields, $values, $fieldPos, $valuePos) {
         $AlterNext = false;
-        
-        /*comparar con siguiente field para alternar*/
+
+        /* comparar con siguiente field para alternar */
         if (isset($fields[$fieldPos + 1])) {
             if ($fields[$fieldPos]->compare($fields[$fieldPos + 1])) {
                 $AlterNext = true;
             }
         }
-        
+        $sig = $fieldPos + 1;
         if ($valuePos > -1) { /* detecta recall */
             $this->writeValue($fields[$fieldPos], $values[$fieldPos], $valuePos);
             if ($AlterNext) { /* si es similar */
                 return $this->writeFields($fields, $values, $fieldPos + 1, $valuePos);
             } else {
-                return $fieldPos + 1;
+                return $sig;
             }
         }
         $Ceven = $fields[$fieldPos]->getMax_cevents(); // cantidad de eventos para la columna
@@ -94,10 +94,7 @@ class REPORTEXCELADAPTER {
             }
         }
 
-        if ($AlterNext) {
-            return $sig;
-        }
-        return $fieldPos + 1;
+        return $sig;
     }
 
     /**
@@ -109,25 +106,21 @@ class REPORTEXCELADAPTER {
      */
     private function writeValue($field, $value, $EvePos) {
         $sheet = $this->excel->getActiveSheet();
-        $itkt=0;
+        $itkt = 0;
         $evec = $field->getMax_cevents();
-        
-        foreach($value as $valueTKT){
+
+        foreach ($value as $valueTKT) {
             $dataS_ALLEVE = $valueTKT->getValues(); //array de datas
-            if(!isset($dataS_ALLEVE[$EvePos])){
-               $itkt++;
-               continue;
+            if (!isset($dataS_ALLEVE[$EvePos])) {
+                $itkt++;
+                continue;
             }
             $dataEve = $dataS_ALLEVE[$EvePos]->getData();
-            foreach($dataEve as $dataEveProps){
-                $alias = $this->getAlias($field->getAlias(),
-                        $evec, 
-                        count($dataEve),
-                        $EvePos,
-                        $dataEveProps["title"]);
+            foreach ($dataEve as $dataEveProps) {
+                $alias = $this->getAlias($field->getAlias(), $evec, count($dataEve), $EvePos, $dataEveProps["title"]);
                 $col = $this->getCol($alias);
-                $sheet->setCellValueByColumnAndRow($col, $itkt + 2, $dataEveProps["value"]);
-            } 
+                $sheet->setCellValueByColumnAndRow($col, $itkt + 2, $dataEveProps["value"]);             
+            }
             $itkt++;
         }
     }
@@ -141,27 +134,36 @@ class REPORTEXCELADAPTER {
      * @param string $fieldtitle    titulo del campo
      * @return type
      */
-    private function getAlias($alias,$evec,$fieldc,$evepos,$fieldtitle){
+    private function getAlias($alias, $evec, $fieldc, $evepos, $fieldtitle) {
         $retAlias = $alias;
-        if($evec>1){
+        if ($evec > 1) {
             $retAlias.=$evepos;
-            if($fieldc>1){
+            if ($fieldc > 1) {
                 $retAlias.=".";
-            }      
+            }
         }
-        if($fieldc>1){
+        if ($fieldc > 1) {
             $retAlias.=$fieldtitle;
         }
-        return $retAlias;
+        return strtoupper($retAlias);
     }
-    
+
     /**
      * Agrega titulos al excel
      */
     private function addHeaders() {
         foreach ($this->mappedCols as $title => $pos) {
             $sheet = $this->excel->getActiveSheet();
-            $sheet->setCellValueByColumnAndRow($pos, 1, $title);
+            $cell = $sheet->getCellByColumnAndRow($pos, 1);
+            $cell->setValue($title);
+            $sheet->getStyleByColumnAndRow($pos, 1)->applyFromArray(
+                    array(
+                        'fill' => array(
+                            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                            'color' => array('rgb' => 'FAFF74')
+                        )
+                    )
+            );
         }
     }
 

@@ -48,70 +48,7 @@ function GO($RC) {
     $lT = $R->getObjs();
     
     $RR->loadTKTS($lT);
-    $RR->loadITJson('{
-	"fields":[
-        	{
-			"action":"TKT",
-			"property":"id",
-			"modificator":"FST",
-			"alias":"id"
-		},
-                {
-			"action":"ABRIR",
-			"property":"itform.Hola",
-			"modificator":"*",
-			"alias":"legajo"
-		}
-                ,{
-			"action":"ABRIR",
-			"property":"itform.21",
-			"modificator":"*",
-			"alias":"usuario"
-		},{
-			"action":"REABRIR",
-			"property":"itform.comment",
-			"modificator":"FST",
-			"alias":"reabrir_coment"
-		},{
-			"action":"REABRIR",
-			"property":"FA",
-			"modificator":"FST",
-			"alias":"reabrir_fa"
-		}
-                ,
-		{
-			"action":"TKT",
-			"property":"usr_o.nombre",
-                        "modificator":"FST",
-			"alias":"Usuario apertura"
-		},
-                {
-			"action":"TKT",
-			"property":"usr_o.equiposname",
-			"modificator":"FST",
-			"alias":"Equipo"
-		}
-                ,
-                {
-			"action":"TKT",
-			"property":"tipificacion",
-			"modificator":"*",
-			"alias":"T_"
-		}
-                ,
-		{
-			"action":"TOMAR",
-			"property":"UA",
-			"modificator":"*",
-			"alias":"usr tom_"
-		},
-		{
-			"action":"TOMAR",
-			"property":"FA",
-			"modificator":"LST",
-			"alias":"f tom_"
-		}]
-                }');
+    $RR->loadITJson(file_get_contents(INCLUDE_DIR."/config/reportmodel.json"));
     
     $RR->execute();
     $RPADAPTER = new REPORTEXCELADAPTER($RR);

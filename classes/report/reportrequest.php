@@ -104,10 +104,7 @@ class REPORTREQUEST {
             $this->createTKTvalues($itkt);
             $this->addValues($itkt, $tkt);
             $itkt++;
-            if ($itkt > 5)
-                return;
         }
-        exit();
     }
 
     /**

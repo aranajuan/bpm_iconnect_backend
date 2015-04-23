@@ -60,51 +60,62 @@ class itform {
 
     /**
      * Valida campo
-     * @param string $value
-     * @param DOMElement $field
+     * @param array $element
      * @return string
      */
-    private function check_values($value, $field) {
-        $validations = $field->getElementsByTagName("validations")->item(0);
-        $name = $field->getElementsByTagName("label")->item(0)->nodeValue;
-        if ($validations == null || !$validations->hasChildNodes()) {
+    private function check_values($element) {
+        if (trim($element["value"]) != "" && $element["value"] != null) {
+            switch ($element["type"]) {
+                case "date":
+                    if (STRdate_format($element["value"], "d-m-Y", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+                case "month":
+                    if (STRdate_format($element["value"], "m-Y", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+                case "datetime":
+                    if (STRdate_format($element["value"], "d-m-Y H:i", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+            }
+        }
+
+        if ($element["validations"] == null || count($element["validations"]) == 0) {
             return "ok";
         }
-        $rta = "";
-        foreach ($validations->childNodes as $v) {
-            $validationV = $v->nodeValue;
-            switch ($v->nodeName) {
+        foreach ($element["validations"] as $valName => $valValue) {
+            switch ($valName) {
                 case "numeric":
-                    if ($validationV == "true" && !is_numeric($value) && !(trim($value) == "" || $value == null)) {
-                        return "El campo " . $name . " debe ser numerico.";
+                    if ($valValue == "true" && !is_numeric($element["value"]) && !(trim($element["value"]) == "" || $element["value"] == null)) {
+                        return "El campo " . $element["label"] . " debe ser numerico.";
                     }
                     break;
                 case "required":
-                    if ($validationV == "true" && (trim($value) == "" || $value == null)) {
-                        return "El campo " . $name . " es obligatorio.";
+                    if ($valValue == "true" && (trim($element["value"]) == "" || $element["value"] == null)) {
+                        return "El campo " . $element["label"] . " es obligatorio.";
                     }
                     break;
                 case "maxlen":
-                    if (strlen($value) > $validationV) {
-                        return "El campo " . $name . " es muy largo. Maximo " . $validationV . " caracteres";
+                    if (strlen($element["value"]) > $valValue) {
+                        return "El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres";
                     }
                     break;
                 case "minlen":
-                    if (strlen($value) < $validationV) {
-                        return "El campo " . $name . " es muy corto. Minimo " . $validationV . " caracteres";
+                    if (strlen($element["value"]) < $valValue) {
+                        return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
                     }
                     break;
                 case "regex":
-                    $valid = preg_match($validationV, $value, $newstr);
+                    $valid = preg_match($valValue, $element["value"], $newstr);
                     if (!$valid) {
-                        return "El campo " . $name . " no cumple el formato solicitado.";
-                    } elseif (is_array($newstr) && $newstr[0] != $value) {
-                        return "El campo " . $name . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
+                        return "El campo " . $element["label"] . " no cumple el formato solicitado.";
+                    } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
+                        return "El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
                     }
                     break;
             }
         }
-        $validations->parentNode->removeChild($validations);
         return "ok";
     }
 
@@ -132,6 +143,26 @@ class itform {
     }
 
     /**
+     * Busca elemento por valor de tag
+     * @param DOMDocument $dom
+     * @param string $tag
+     * @param string $val
+     * @return DOMElement
+     */
+    private function find_field($dom, $tag, $val) {
+        if (!$dom) {
+            return null;
+        }
+        $elements = $dom->getElementsByTagName("element");
+        foreach ($elements as $field) {
+            if (trim($field->getElementsByTagName($tag)->item(0)->nodeValue) == trim($val)) {
+                return $field;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Carga out valida campos
      * @param array $arr    Valores [id=>,value=>]
      * @param type $formname    nombre del form para id
@@ -143,14 +174,43 @@ class itform {
         $this->formname = $formname;
         $nodelist = $this->xml_output->getElementsByTagName("element");
         foreach ($nodelist as $field) {
-            $value = trim($this->find_elementVal($arr, $field->getElementsByTagName("id")->item(0)->nodeValue, $formname));
-            $rta = $this->check_values($value, $field);
+            $nfield = $this->elementToArray($field);
+            $value = trim($this->find_elementVal($arr, $nfield["id"], $formname));
+            $nfield["value"] = $value;
+            $rta = $this->check_values($nfield);
             if ($rta != "ok") {
                 return $rta;
+            }
+            $validations = $field->getElementsByTagName("validations")->item(0);
+            if ($validations) {
+                $field->removeChild($validations);
             }
             $field->appendChild($this->xml_output->createElement("value", xmlEscape($value)));
         }
         return "ok";
+    }
+
+    /**
+     * Convierte DOMElement a Array
+     * @param DOMElement $element
+     * @return array   campo
+     */
+    private function elementToArray($element) {
+        $arr = array();
+        $arr["label"] = $element->getElementsByTagName("label")->item(0)->nodeValue;
+        $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
+        $arr["type"] = $element->getElementsByTagName("type")->item(0)->nodeValue;
+        $arr["value"] = $element->getElementsByTagName("value")->item(0)->nodeValue;
+        $arr["validations"] = array();
+        $validations = $element->getElementsByTagName("validations")->item(0);
+        if ($validations == null || !$validations->hasChildNodes()) {
+            return $arr;
+        } else {
+            foreach ($validations->childNodes as $v) {
+                $arr["validations"][$v->nodeName] = $v->nodeValue;
+            }
+            return $arr;
+        }
     }
 
     /**
@@ -160,14 +220,9 @@ class itform {
      * @return string
      */
     private function get_valueDOM($id, $dom) {
-        if (!$dom) {
-            return null;
-        }
-        $elements = $dom->getElementsByTagName("element");
-        foreach ($elements as $field) {
-            if (trim($field->getElementsByTagName("id")->item(0)->nodeValue) == trim($id)) {
-                return $field->getElementsByTagName("value")->item(0)->nodeValue;
-            }
+        $field = $this->find_field($dom, "id", $id);
+        if ($field) {
+            return $field->getElementsByTagName("value")->item(0)->nodeValue;
         }
         return null;
     }
@@ -180,7 +235,7 @@ class itform {
     public function get_value($id) {
         return $this->get_valueDOM($id, $this->xml_output);
     }
-    
+
     /**
      * Devuelve valor del form / seguro
      * @param string $id
@@ -205,16 +260,11 @@ class itform {
      * @return string
      */
     public function getAnddelete($id) {
-        if (!$this->xml_output) {
-            return null;
-        }
-        $elements = $this->xml_output->getElementsByTagName("element");
-        foreach ($elements as $field) {
-            if ($field->getElementsByTagName("id")->item(0)->nodeValue == $id) {
-                $val = $field->getElementsByTagName("value")->item(0)->nodeValue;
-                $field->parentNode->removeChild($field);
-                return $val;
-            }
+        $field = $this->find_field($this->xml_output, "id", $id);
+        if ($field) {
+            $val = $field->getElementsByTagName("value")->item(0)->nodeValue;
+            $field->parentNode->removeChild($field);
+            return $val;
         }
         return null;
     }
@@ -300,13 +350,50 @@ class itform {
         $this->view_level = $view_level;
     }
 
+     /**
+     * Calcula tipo para reporte
+     * @param array $arr    elementtoarray
+     * @return string   nuevo tipo
+     */
+    private function getReportType($arr){
+        if($arr["type"]=="input"){
+            if($arr["validations"]["numeric"]=="true"){
+                return "number";
+            }
+            return "text";
+        }
+        return $arr["type"];
+    }
+    
+    /**
+     * Genera array con todos los valores de los campos
+     * @return array
+     */
+    private function getArrReport() {
+        $arr = array();
+        $i = 0;
+        $data = $this->get_outputDOM();
+        $els = $data->getElementsByTagName("element");
+        foreach ($els as $el) {
+            $arr[$i] = $this->elementToArray($el);
+            $arr[$i]["type"] = $this->getReportType($arr[$i]);
+            $i++;
+        }
+        return $arr;
+    }
+
+
+    
     public function get_prop($property) {
 
+        if ($property == "*") {
+            return $this->getArrReport();
+        }
+
         $rta = $this->get_valueSecure($property);
-        if($rta){
+        if ($rta) {
             return $rta;
         }
         return "Propiedad invalida.";
     }
-
 }

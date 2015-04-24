@@ -909,6 +909,7 @@ class USER extends itobject {
      * @return string
      */
     public function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'mail':
                 return $this->mail;

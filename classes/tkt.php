@@ -919,6 +919,7 @@ class TKT extends TREE {
     }
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return $this->id;
@@ -979,19 +980,18 @@ class TKT extends TREE {
                 return $this->get_critic();
             case 'status':
                 $ar = $this->get_status();
-                ;
                 return $ar[1];
-            case 'UA':
+            case 'ua':
                 return $this->UA;
-            case 'UB':
+            case 'ub':
                 return $this->UB;
-            case 'FA':
+            case 'fa':
                 return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
-            case 'FB':
+            case 'fb':
                 if ($this->FB == NULL)
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
-            case 'minFromClose':
+            case 'minfromclose':
                 return DiffBetweenDates($this->get_prop("FB"), "NOW");
             default:
                 return "Propiedad invalida.";

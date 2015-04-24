@@ -30,6 +30,18 @@ class TKT_H extends itobject {
     private $itform;
     private $idaccion;
     private $valoraccion;
+
+    /**
+     * Objeto valor accion
+     * @var itobject
+     */
+    private $valoraccion_obj;
+
+    /**
+     * Texto de valoraccion
+     * @var string
+     */
+    private $valoraccion_txt;
     private $estado;    /* estado de la accion */
     private $idteam;    /* equipo que genero el evento */
     private $UA_o;
@@ -74,21 +86,21 @@ class TKT_H extends itobject {
         $this->FB = $tmpU["FB"];
         $this->UB = $tmpU["UB"];
         $this->idaccion = $tmpU["idaccion"];
-        $this->valoraccion = $tmpU["valoraccion"];
         $this->estado = $tmpU["estado"];
         $this->idtkt = $tmpU["idtkt"];
         $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
         $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
         $this->detalle = $tmpU["detalle"];
-        if($this->detalle!=null && $this->detalle!=""){
+        if ($this->detalle != null && $this->detalle != "") {
             $this->itform = new itform();
-            if($this->itform->load_xml($this->detalle)==false){
-                return "Error al cargar formulario ".$this->id;
+            if ($this->itform->load_xml($this->detalle) == false) {
+                return "Error al cargar formulario " . $this->id;
             }
-        }else{
-             $this->itform = null;
+        } else {
+            $this->itform = null;
         }
         $this->accion = $accion;
+        $this->valoraccion = $tmpU["valoraccion"];
         return "ok";
     }
 
@@ -134,10 +146,10 @@ class TKT_H extends itobject {
         } else {
             $this->id = $this->dbinstance->get_lastID();
             $itform = $this->accion->getitform();
-            if($itform){
-                $form=$itform->get_output();
-            }else{
-                $form="";
+            if ($itform) {
+                $form = $itform->get_output();
+            } else {
+                $form = "";
             }
             $this->save_files();
             if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
@@ -154,6 +166,19 @@ class TKT_H extends itobject {
         }
     }
 
+    private function loadValoraccion() {
+        if($this->valoraccion_txt!="") return;
+        if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
+            $obCI = OBJECTCACHE::getInstance();
+            $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
+            $this->valoraccion_obj = $val[0];
+            $this->valoraccion_txt = $val[1];
+        } else {
+            $this->valoraccion_obj = null;
+            $this->valoraccion_txt = $this->get_prop("valoraccion");
+        }
+    }
+
     /**
      * Devuelve xml con vista del elemento
      * @return DOMElement
@@ -164,28 +189,21 @@ class TKT_H extends itobject {
             return null;
         $element = new DOMDocument();
 
-        $elementData= $element->createElement("th");
-        
+        $elementData = $element->createElement("th");
+
         $action = $element->createElement("action");
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
         $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
         $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
-            $obCI = OBJECTCACHE::getInstance();
-            $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
-            $action->appendChild($element->createElement("value", $val));
-        } else {
-            $action->appendChild($element->createElement("value", $this->get_prop("valoraccion")));
-        }
+        $action->appendChild($element->createElement("value", $this->get_prop("valoraccion_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
-        
+
         if ($this->get_prop("itform") != null) {
             $nodo = $element->importNode(
-                    $this->get_prop("itform")->get_outputDOM()->documentElement,
-                    true);
+                    $this->get_prop("itform")->get_outputDOM()->documentElement, true);
             $elementData->appendChild($nodo);
         }
         $files_h = $this->get_files();
@@ -223,8 +241,8 @@ class TKT_H extends itobject {
         if (!$this->getLogged()->cansee($this->get_UA())) {
             return false;
         }
-        
-        if($this->itform){
+
+        if ($this->itform) {
             $this->itform->set_view($this->view["vista"]);
         }
         return true;
@@ -297,37 +315,39 @@ class TKT_H extends itobject {
     }
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return $this->id;
             case 'idtkt':
                 return $this->idtkt;
-            case 'TKT':
+            case 'tkt':
                 return $this->TKT;
             case 'valoraccion':
                 return $this->valoraccion;
+            case 'valoraccion_txt':
+                $this->loadValoraccion();
+                return $this->valoraccion_txt;
+            case 'valoraccion_obj':
+                $this->loadValoraccion();
+                return $this->valoraccion_obj;
             case 'accion':
                 return $this->accion;
             case 'itform':
-                if($this->itform == null) return null;
+                if ($this->itform == null)
+                    return null;
                 if (!$this->check_access())
                     return null;
                 return $this->itform;
-            case 'UA':
+            case 'ua':
                 return $this->UA;
-            case 'UA_o':
+            case 'ua_o':
                 return $this->get_UA();
-            case 'UA_o':
-                $ua_o = $this->objsCache->get_object("USER", $this->UA);
-                if ($this->objsCache->get_status("USER", $this->UA) == "ok")
-                    return $ua_o;
-                else
-                    return NULL;
-            case 'UB':
+            case 'ub':
                 return $this->UB;
-            case 'FA':
+            case 'fa':
                 return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
-            case 'FB':
+            case 'fb':
                 if ($this->FB == NULL)
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);

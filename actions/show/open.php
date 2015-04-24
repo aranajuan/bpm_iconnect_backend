@@ -21,5 +21,5 @@ if($this->get_prop("UA_o")){
     $userGen="Generado por: Indeterminado - Error ".$this->get_prop("UA");
 }
 
-return $userGen.$asignado;
+return array($T, $userGen.$asignado);
 

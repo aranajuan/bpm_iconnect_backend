@@ -155,7 +155,8 @@ class itform {
         }
         $elements = $dom->getElementsByTagName("element");
         foreach ($elements as $field) {
-            if (trim($field->getElementsByTagName($tag)->item(0)->nodeValue) == trim($val)) {
+            if (strtolower(trim($field->getElementsByTagName($tag)->item(0)->nodeValue)
+                    ) == strtolower(trim($val))) {
                 return $field;
             }
         }
@@ -182,9 +183,6 @@ class itform {
                 return $rta;
             }
             $validations = $field->getElementsByTagName("validations")->item(0);
-            if ($validations) {
-                $field->removeChild($validations);
-            }
             $field->appendChild($this->xml_output->createElement("value", xmlEscape($value)));
         }
         return "ok";
@@ -197,10 +195,29 @@ class itform {
      */
     private function elementToArray($element) {
         $arr = array();
-        $arr["label"] = $element->getElementsByTagName("label")->item(0)->nodeValue;
+        
         $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
-        $arr["type"] = $element->getElementsByTagName("type")->item(0)->nodeValue;
+        $label = $element->getElementsByTagName("label");
+        if ($label->length == 0){
+            $arr["label"]=$arr["id"];
+        }else{
+            $arr["label"] = $label->item(0)->nodeValue;
+        }
         $arr["value"] = $element->getElementsByTagName("value")->item(0)->nodeValue;
+        
+        $arr["type"] = $element->getElementsByTagName("type")->item(0)->nodeValue;
+        if($arr["type"]=="select"){
+            $options = $element->getElementsByTagName("option");
+            $arr["valuetxt"]=$arr["value"];
+            foreach($options as $opt){
+                if($opt->getElementsByTagName("value")->item(0)->nodeValue
+                        ==$arr["value"]){
+                  $arr["valuetxt"]=$opt->getElementsByTagName("text")->item(0)
+                          ->nodeValue;
+                 }
+            }
+        }
+        
         $arr["validations"] = array();
         $validations = $element->getElementsByTagName("validations")->item(0);
         if ($validations == null || !$validations->hasChildNodes()) {
@@ -357,7 +374,8 @@ class itform {
      */
     private function getReportType($arr){
         if($arr["type"]=="input"){
-            if($arr["validations"]["numeric"]=="true"){
+            if(isset($arr["validations"]["numeric"]) &&
+                    $arr["validations"]["numeric"]=="true"){
                 return "number";
             }
             return "text";
@@ -377,6 +395,11 @@ class itform {
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);
             $arr[$i]["type"] = $this->getReportType($arr[$i]);
+            $arr[$i]["title"]=$arr[$i]["label"];
+            if($arr[$i]["type"]=="select"){
+                $arr[$i]["type"] ="input";
+                $arr[$i]["value"]=$arr[$i]["valuetxt"];  
+            }
             $i++;
         }
         return $arr;
@@ -385,7 +408,7 @@ class itform {
 
     
     public function get_prop($property) {
-
+        $property = strtolower($property);
         if ($property == "*") {
             return $this->getArrReport();
         }

@@ -1,6 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
 require_once 'reportrequest.php';
 
 require_once 'classes/imports/PHPExcel/PHPExcel.php';
@@ -105,7 +104,6 @@ class REPORTEXCELADAPTER {
      * @param int $EvePos
      */
     private function writeValue($field, $value, $EvePos) {
-        $sheet = $this->excel->getActiveSheet();
         $itkt = 0;
         $evec = $field->getMax_cevents();
 
@@ -119,12 +117,83 @@ class REPORTEXCELADAPTER {
             foreach ($dataEve as $dataEveProps) {
                 $alias = $this->getAlias($field->getAlias(), $evec, count($dataEve), $EvePos, $dataEveProps["title"]);
                 $col = $this->getCol($alias);
-                $sheet->setCellValueByColumnAndRow($col, $itkt + 2, $dataEveProps["value"]);             
+                if ($field->getType()) {
+                    $dataEveProps["type"] = $field->getType();
+                }
+                $this->setCellValue($col, $itkt + 2, $dataEveProps);
             }
             $itkt++;
         }
     }
 
+    /**
+     * Carga valor en la celda y setea el tipo de dato
+     * @param int $col
+     * @param int $row
+     * @param array $data
+     */
+    private function setCellValue($col, $row, $data) {
+        if (trim($data["value"]) == "" || $data["value"] == null)
+            return;
+        $sheet = $this->excel->getActiveSheet();
+        $value = null;
+        switch ($data["type"]) {
+            case "number":
+                $sheet->getCellByColumnAndRow($col, $row)
+                        ->getStyle()
+                        ->getNumberFormat()
+                        ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00);
+                $value = $data["value"];
+                break;
+            case "integer":
+                $sheet->getCellByColumnAndRow($col, $row)
+                        ->getStyle()
+                        ->getNumberFormat()
+                        ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER);
+                $value = $data["value"];
+                break;
+            case "datetime":
+                $date = STRdate_format($data["value"], USERDATE_READ, "datetime");
+                if ($date != -1) {
+                    $value = PHPExcel_Shared_Date::PHPToExcel(
+                                    $date
+                    );
+                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
+                            ->setFormatCode('dd-mm-yyyy h:mm');
+                }else{
+                    $value = $data["value"];
+                }
+                break;
+            case "date":
+                $date = STRdate_format($data["value"], USERDATE_READ_DATE, "datetime");
+                if ($date != -1) {
+                    $value = PHPExcel_Shared_Date::PHPToExcel(
+                                    $date
+                    );
+                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
+                            ->setFormatCode('dd-mm-yyyy');
+                }else{
+                    $value = $data["value"];
+                }
+                break;
+            case "month":
+                $date = STRdate_format("1-" . $data["value"], USERDATE_READ_DATE, "datetime");
+                if ($date != -1) {
+                    $value = PHPExcel_Shared_Date::PHPToExcel(
+                                    $date
+                    );
+                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
+                            ->setFormatCode('mm-yyyy');
+                }else{
+                    $value = $data["value"];
+                }
+                break;
+            default:
+                $value = $data["value"];
+        }
+        $sheet->setCellValueByColumnAndRow($col, $row, $value);
+    }
+    
     /**
      * 
      * @param string $alias alias del campo
@@ -186,8 +255,8 @@ class REPORTEXCELADAPTER {
      * Guarda archivo creado
      */
     private function saveTmp() {
-        $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
-        $objWriter->save(str_replace('.php', '.xls', __FILE__));
+        $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel2007');
+        $objWriter->save(str_replace('.php', '.xlsx', __FILE__));
     }
 
 }

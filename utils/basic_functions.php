@@ -6,8 +6,8 @@
  * @return array<int>
  */
 function makeintarr($arr) {
-    $finalA=array();
-    foreach($arr as $a){
+    $finalA = array();
+    foreach ($arr as $a) {
         array_push($finalA, intval($a));
     }
     return $finalA;
@@ -19,9 +19,9 @@ function makeintarr($arr) {
  * @param string $prop
  * @return array
  */
-function makeproparr($objarr,$prop){
-    $arRes=array();
-    foreach($objarr as $o){
+function makeproparr($objarr, $prop) {
+    $arRes = array();
+    foreach ($objarr as $o) {
         array_push($arRes, $o->get_prop($prop));
     }
     return $arRes;
@@ -113,15 +113,18 @@ function array_get_key_val($value, $heystack) {
 /**
  * Dar formato a fecha
  * $str string d-m-Y H:i
- * return Y-m-d H:i
+ * return Y-m-d H:i //date
  */
 function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
     if (trim($str) == "") {
         return -1;
     }
     try {
-        $date = DateTime::createFromFormat($origin,$str);
+        $date = DateTime::createFromFormat($origin, $str);
         if ($date) {
+            if ($format == "datetime") {
+                return $date;
+            }
             return $date->format($format);
         }
         return -1;
@@ -156,10 +159,10 @@ function HsToMin($hs) {
 /**
  * elimina todos los espacios del texto (en cualquier lugar)
  */
-function space_delete($str,$charL=null) {
-	if($charL==null){
-		$charL=array(" ","\t","\n","\0","\x0B");
-	}
+function space_delete($str, $charL = null) {
+    if ($charL == null) {
+        $charL = array(" ", "\t", "\n", "\0", "\x0B");
+    }
     $rta = str_replace($charL, "", $str);
 
     return $rta;
@@ -178,7 +181,6 @@ function xmlEscape($string, $CDATA = false) {
     }
     return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $string);
 }
-
 
 /**
  * si data es null devuelve default
@@ -249,15 +251,14 @@ function get_measure($id) {
  * muestra el tiempo desde start_measure */
 function show_measure($id, $text = "") {
     /*
-    if (!$GLOBALS[UL])
-        return;
-    if (!$GLOBALS[UL]->get_prop("debug") || !DEBUG_MEASURE)
-        return;
-    if ($text == "")
-        $text = $id;
-    echo "<br/>" . $text . "=>" . get_measure($id);
+      if (!$GLOBALS[UL])
+      return;
+      if (!$GLOBALS[UL]->get_prop("debug") || !DEBUG_MEASURE)
+      return;
+      if ($text == "")
+      $text = $id;
+      echo "<br/>" . $text . "=>" . get_measure($id);
      * */
- 
 }
 
 function microtime_float() {

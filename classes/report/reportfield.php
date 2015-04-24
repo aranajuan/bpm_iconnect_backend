@@ -104,7 +104,7 @@ class REPORTFIELD {
     public function getType() {
         if (isset($this->json->type))
             return $this->json->type;
-        return "";
+        return null;
     }
 
     public function getAlias() {

@@ -6,6 +6,9 @@ require_once 'classes/imports/PHPExcel/PHPExcel.php';
 
 class REPORTEXCELADAPTER {
 
+    private static $OFFSET=3;
+
+
     /**
      *
      * @var PHPExcel
@@ -24,6 +27,8 @@ class REPORTEXCELADAPTER {
      */
     private $mappedCols;
 
+    private $excelFile;
+    
     public function __construct($reportrequest) {
         $this->reportrequest = $reportrequest;
         $this->mappedCols = array();
@@ -39,6 +44,8 @@ class REPORTEXCELADAPTER {
                 ->setKeywords("reporte itracker")
                 ->setCategory("reportes");
         $this->excel->setActiveSheetIndex(0);
+        
+        $this->excelFile=null;
     }
 
     /**
@@ -120,7 +127,7 @@ class REPORTEXCELADAPTER {
                 if ($field->getType()) {
                     $dataEveProps["type"] = $field->getType();
                 }
-                $this->setCellValue($col, $itkt + 2, $dataEveProps);
+                $this->setCellValue($col, $itkt + self::$OFFSET+1, $dataEveProps);
             }
             $itkt++;
         }
@@ -160,7 +167,7 @@ class REPORTEXCELADAPTER {
                     );
                     $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
                             ->setFormatCode('dd-mm-yyyy h:mm');
-                }else{
+                } else {
                     $value = $data["value"];
                 }
                 break;
@@ -172,7 +179,7 @@ class REPORTEXCELADAPTER {
                     );
                     $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
                             ->setFormatCode('dd-mm-yyyy');
-                }else{
+                } else {
                     $value = $data["value"];
                 }
                 break;
@@ -184,7 +191,7 @@ class REPORTEXCELADAPTER {
                     );
                     $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
                             ->setFormatCode('mm-yyyy');
-                }else{
+                } else {
                     $value = $data["value"];
                 }
                 break;
@@ -193,7 +200,7 @@ class REPORTEXCELADAPTER {
         }
         $sheet->setCellValueByColumnAndRow($col, $row, $value);
     }
-    
+
     /**
      * 
      * @param string $alias alias del campo
@@ -221,21 +228,46 @@ class REPORTEXCELADAPTER {
      * Agrega titulos al excel
      */
     private function addHeaders() {
+        //PHPExcel_Shared_Font::setAutoSizeMethod(PHPExcel_Shared_Font::AUTOSIZE_METHOD_EXACT);
+        $sheet = $this->excel->getActiveSheet();
         foreach ($this->mappedCols as $title => $pos) {
-            $sheet = $this->excel->getActiveSheet();
-            $cell = $sheet->getCellByColumnAndRow($pos, 1);
+            $cell = $sheet->getCellByColumnAndRow($pos, self::$OFFSET);
             $cell->setValue($title);
-            $sheet->getStyleByColumnAndRow($pos, 1)->applyFromArray(
+            $this->setBackground($sheet, $pos, self::$OFFSET, 'FAFF74');
+            $sheet->getColumnDimensionByColumn($pos)->setAutoSize(true);
+        }
+        $sheet->setCellValueByColumnAndRow(0, 2, "FECHA");
+        $this->setBackground($sheet, 0, 2, '9999FF');
+        $sheet->setCellValueByColumnAndRow(1, 2, date("d-m-Y"));     
+        $sheet->setCellValueByColumnAndRow(2, 2, "REPORTE");
+        $this->setBackground($sheet, 2, 2, '9999FF');
+        $sheet->mergeCellsByColumnAndRow(3, 2, 5,2);
+        $sheet->setCellValueByColumnAndRow(3, 2, 
+                $this->reportrequest->getTitle());
+        
+       $sheet->mergeCellsByColumnAndRow(0, 1, 5, 1);
+       $sheet->setCellValueByColumnAndRow(0, 1, "ITRACKER - Coordinacion Productos y Servicios");
+        
+    }
+
+    /**
+     * 
+     * @param PHPExcel_Worksheet $sheet
+     * @param int $col
+     * @param int $row
+     * @param string $color
+     */
+    private function setBackground($sheet,$col,$row,$color){
+        $sheet->getStyleByColumnAndRow($col, $row)->applyFromArray(
                     array(
                         'fill' => array(
                             'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                            'color' => array('rgb' => 'FAFF74')
+                            'color' => array('rgb' => $color)
                         )
                     )
             );
-        }
     }
-
+    
     /**
      * Carga el valor en la planilla excel
      * @param REPORTFIELD $field
@@ -256,7 +288,13 @@ class REPORTEXCELADAPTER {
      */
     private function saveTmp() {
         $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel2007');
-        $objWriter->save(str_replace('.php', '.xlsx', __FILE__));
+        ob_start();
+        $objWriter->save('php://output');
+        $this->excelFile= ob_get_clean();
+    }
+    
+    public function getFile(){
+        return $this->excelFile;
     }
 
 }

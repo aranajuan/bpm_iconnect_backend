@@ -189,7 +189,7 @@ class USER extends itobject {
         $this->pass = $tmpU["pass"];
         $this->fronts = $tmpU["fronts"];
         $this->frontsV = explode(",", $this->fronts);
-        if ($tmpU["perfil"] > 1 && $this->perfil!=1) {
+        if ($tmpU["perfil"] > 1 && $this->perfil != 1) {
             $this->perfil = trim($tmpU["perfil"]);
         }
         $this->mail = trim($tmpU["mail"]);
@@ -259,7 +259,7 @@ class USER extends itobject {
         $resultF = array_merge($result, $finalAdmTeams);
 
         $this->dbteams = implode(",", $resultF);
-        if(!is_numeric($resultF[0]) && count($resultF)==1)
+        if (!is_numeric($resultF[0]) && count($resultF) == 1)
             return 0;
         return count($resultF);
     }
@@ -791,11 +791,11 @@ class USER extends itobject {
 
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
-        
+
         if ($front->is_trusted()) {
             return $this->newSession($front, $ipuser);
         }
-        
+
         if ($passL == "" || $this->error == true)
             return "Usuario o contrase&ntilde;a invalidos.2";
 
@@ -812,7 +812,7 @@ class USER extends itobject {
                     if ($rta["response"] != "true")
                         return "Usuario o contrase&ntilde;a invalidos.";
                 }else {
-                    return "Error en servicio de logeo".$rta["description"];
+                    return "Error en servicio de logeo" . $rta["description"];
                 }
                 break;
             case "TELECOM":
@@ -903,6 +903,19 @@ class USER extends itobject {
         $this->dbroot->query($ssql);
     }
 
+    private function getView($type) {
+        $equipos = $this->get_prop("equiposobj");
+        if (count($equipos)) {
+            return $equipos[0]->get_prop($type);
+        } else {
+            return "";
+        }
+    }
+
+    public function getMyView() {
+        return $this->getView("mytkts_vista");
+    }
+
     /**
      * Devuelve propiedad solicitada
      * @param type $property
@@ -951,10 +964,10 @@ class USER extends itobject {
                 return $this->perfil;
             case 'fronts':
                 return $this->fronts;
-            case 'perfilT':
+            case 'perfilt':
                 $this->load_profile();
                 return $this->perfilAccess["nombre"];
-            case 'accessList':
+            case 'accesslist':
                 $this->load_profile();
                 return $this->perfilAccess["accesos"];
             case 'instancias':

@@ -317,7 +317,7 @@ abstract class XMLhandler {
      * @param boolean $CDATA
      * @return string
      */
-    private function make_param($text, $CDATA) {
+    private function make_param($text, $CDATA=false) {
         return trim(xmlEscape(strip_tags($text), $CDATA));
     }
 

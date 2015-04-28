@@ -41,11 +41,25 @@ class REPORTREQUEST {
      */
     private $values;
 
+    /**
+     *
+     * @var string  Titulo del reporte 
+     */
+    private $title;
+    
     public function __construct() {
         $this->actionRQ = array();
         $this->fields_rqGroup = array();
         $this->fields = array();
         $this->values = array();
+    }
+
+    public function setTitle($title){
+        $this->title=$title;
+    }
+
+    public function getTitle(){
+        return $this->title;
     }
 
     /**

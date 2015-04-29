@@ -93,7 +93,8 @@ class NOTIFY extends itobject {
         "team->name", //equipo actual
         "id", //id del ticket
         "html_dir", //ruta a it
-        "FA"    //fecha apertura
+        "FA",    //fecha apertura
+        "ua->teamsnames"
     );
 
     function __construct($conn = null) {
@@ -373,6 +374,21 @@ class NOTIFY extends itobject {
                     $result = $ut->get_prop("nombre");
                 else
                     $result = "NULL";
+                break;
+            case "ua->teamsnames":
+                $ut = $this->tkt_final->get_prop("usr_o");
+                if ($ut)
+                    $result = $ut->get_prop("equiposname");
+                else
+                    $result = "";
+                break;
+            case "tree":
+                $tree = $this->tkt_final->get_tree_history();
+                $rta="";
+                foreach($tree as $t){
+                    $rta .= $t["ans"]."/";
+                }
+                return $rta;
                 break;
             case "system->name":
                 $sy = $this->tkt_final->get_system();

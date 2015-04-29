@@ -13,7 +13,7 @@ function GO($RC) {
     $hasta = date(DBDATE_WRITE, strtotime('+1 day'));
 
     $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$UA, $RC->get_User()->get_prop("usr"));
+    $Tf->set_filter(TKTFILTER::$UA, array($RC->get_User()->get_prop("usr")));
     $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
     $Tf->set_filter(TKTFILTER::$DATE_FROM, $desde);
     $Tf->set_filter(TKTFILTER::$DATE_TO, $hasta);

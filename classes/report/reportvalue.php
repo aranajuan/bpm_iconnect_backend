@@ -46,9 +46,9 @@ class REPORTVALUE {
         if ($this->getFinished()) {
             return false;
         }
-        
+
         $this->values[$this->event_count] = new REPORTVALUEDATA($value);
-        
+
         $this->event_count++;
         return $this->event_count;
     }
@@ -92,47 +92,50 @@ class REPORTVALUE {
 
 }
 
+class REPORTVALUEDATA {
 
-class REPORTVALUEDATA{
-    
     private $data;
-    
+
     public function __construct($value) {
-        $this->data=array();
-        if(!is_array($value)){
-            $this->data[0]["title"]="0";
-            $this->data[0]["value"]=$value;
-            $this->data[0]["type"]="";
-        }else{
+        $this->data = array();
+        if (!is_array($value)) {
+            $this->data[0]["title"] = "0";
+            $this->data[0]["value"] = $value;
+            $this->data[0]["type"] = "";
+        } else {
             $nval = make_arrayobj($value);
-            $i=0;
-            foreach ($nval as $val){
-                if(!isset($val["title"])){
-                    $this->data[$i]["title"]=$i;
-                }else{
-                    $this->data[$i]["title"]=$val["title"];
-                }
-                if(!isset($val["type"])){
-                    $this->data[$i]["type"]="";
-                }else{
-                    $this->data[$i]["type"]=$val["type"];
-                }
-                if(!is_array($val)){
-                    $this->data[$i]["value"]=$val;
-                }else{
-                    $this->data[$i]["value"]=$val["value"];
+            $i = 0;
+            foreach ($nval as $val) {
+                if (!is_array($val)) {
+                    $this->data[$i]["value"] = $val;
+                    $this->data[$i]["title"] = $i;
+                    $this->data[$i]["type"] = "";
+                } else {
+                    if (!isset($val["title"])) {
+                        $this->data[$i]["title"] = $i;
+                    } else {
+                        $this->data[$i]["title"] = $val["title"];
+                    }
+                    if (!isset($val["type"])) {
+                        $this->data[$i]["type"] = "";
+                    } else {
+                        $this->data[$i]["type"] = $val["type"];
+                    }
+                    $this->data[$i]["value"] = $val["value"];
                 }
                 $i++;
             }
         }
     }
-    
-    public function getData(){
+
+    public function getData() {
         return $this->data;
     }
-    
-    public function getCount(){
+
+    public function getCount() {
         return count($this->data);
     }
+
 }
+
 ?>

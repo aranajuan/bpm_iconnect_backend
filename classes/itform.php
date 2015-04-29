@@ -295,8 +295,8 @@ class itform {
             return null;
         }
         $tmp = clone $this->xml_output;
-        $active = 0;
         $elements = $tmp->getElementsByTagName("element");
+        $active = $elements->length;
         $domElemsToRemove = array();
         $domElemsToBlock = array();
         foreach ($elements as $field) {
@@ -305,7 +305,6 @@ class itform {
                 $domElemsToRemove[] = $field;
                 $active--;
             } else {
-                $active++;
                 $viewL = $field->getElementsByTagName("view");
                 if ($viewL->length) {
                     $vRQ = intval($viewL->item(0)->nodeValue || 0);

@@ -11,7 +11,7 @@ require_once 'classes/tktlister.php';
 function GO($RC) {
 
     $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$UA, $RC->get_User()->get_prop("usr"));
+    $Tf->set_filter(TKTFILTER::$UA, array($RC->get_User()->get_prop("usr")));
 
     if ($RC->get_params("status") == "open") {
         $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");

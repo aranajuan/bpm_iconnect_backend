@@ -38,98 +38,6 @@ class TKT extends TREE {
     
     private $tkthActionsLoaded; // lista de acciones cargadas en tkth * | array
 
-    /**
-     * Carga tickets aplicando filtros
-     * @param array $filter open - open/close
-     *                              cfrom y cto para close
-     *                      openby - lista de usuarios separado por coma
-     *                      opento - id equipo
-     *                      taken - * / lista usuarios separado por coma 
-     *                      master - seteado y 'null' (sin master) / idmaster
-     *                      origin  - filtro especifico de origen %xxxxx% separado por coma
-     */
-    public function list_fiter($filter) {
-        $openfilter = "";
-        if ($filter["open"] == "open") {
-            $openfilter = "and UB is null";
-        } elseif ($filter["open"] == "closed" && $filter["cfrom"] != "" && $filter["cto"] != "") {
-            $fecha_d = @STRdate_format($filter["cfrom"], USERDATE_READ, DBDATE_WRITE);
-            $fecha_h = @STRdate_format($filter["cto"], USERDATE_READ, DBDATE_WRITE);
-            $openfilter = "and FB between '" . $fecha_d . "' and '" . $fecha_h . "'";
-        }
-
-        $openbyfilter = "";
-        if ($filter["openby"]) {
-            $arr = explode(",", $filter["openby"]);
-            foreach ($arr as &$a) {
-                $a = "'" . strToSQL($a) . "'";
-            }
-            $openbyfilter = "and UA in (" . implode(",", $arr) . ")";
-        }
-
-        $opentotaken = "";
-        if ($filter["opento"]) {
-            $opentotaken = "and idequipo in(" . $filter["opento"].")";
-            if ($filter["taken"]) {
-                if ($filter["taken"] == "*") {
-                    $opentotaken.=" and u_tom is not null";
-                } else {
-                    $listv = explode(",", $filter["taken"]);
-                    $arr = array();
-                    $null = "";
-                    foreach ($listv as $v) {
-                        if ($v != "null") {
-                            array_push($arr, "'" . $v . "'");
-                        } else {
-                            $null = "u_tom is null";
-                        }
-                    }
-                    if (count($arr)) {
-                        if ($null != "") {
-                            $null = "or " . $null;
-                        }
-                        $opentotaken.=" and ( u_tom in(" . implode(",", $arr) . ") $null ) ";
-                    } else {
-                        $opentotaken.=" and $null ";
-                    }
-                }
-            }
-        }
-
-        $ismaster = "";
-        if (isset($filter["master"])) {
-            if ($filter["master"] == "null") {
-                $ismaster = "and idmaster is null";
-            } else {
-                $ismaster = "and idmaster=" . $filter["master"];
-            }
-        }
-
-        if ($openbyfilter == "" && $opentotaken == "") {
-            return null;
-        }
-
-        $originfilter = "";
-        if ($filter["origin"]) {
-            $originslst = explode(',', $filter["origin"]);
-            $originfilter = " and (";
-            foreach ($originslst as $o) {
-                $originfilter.= " origen like '%" . strToSQL($o) . "%' or";
-            }
-            $originfilter = substr($originfilter, 0, strlen($originfilter) - 2) . ") ";
-        }
-
-        $ssql = "select id from TBL_TICKETS where id is not null " . $originfilter . " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
-        $this->dbinstance->loadRS($ssql);
-        $i = 0;
-        $list = array();
-        while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i] = $this->objsCache->get_object(get_class(), $idV[0]);
-            $i++;
-        }
-        return $list;
-    }
-
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
         $this->working = false;
@@ -410,7 +318,7 @@ class TKT extends TREE {
         if($action=="*") return false;
         $actionsV = explode(",",$action);
         foreach($actionsV as $av){
-          if(!in_array($av, $this->tkthActionsLoaded))
+          if($this->tkthActionsLoaded==null || !in_array($av, $this->tkthActionsLoaded))
                 return false;
         }
         return true;
@@ -456,7 +364,7 @@ class TKT extends TREE {
             $actionsV=explode(",",$actions);
             $THL = array();
             foreach($this->tkt_hOBJ as $TH){
-                if(in_array($TH->get_prop("action")->get_prop("nombre"),$actionsV)){
+                if(in_array($TH->get_prop("accion")->get_prop("nombre"),$actionsV)){
                     array_push($THL, $TH);
                 }
             }
@@ -919,6 +827,7 @@ class TKT extends TREE {
     }
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return $this->id;
@@ -966,25 +875,31 @@ class TKT extends TREE {
                 return $this->childs;
             case 'origen_json':
                 return json_encode($this->get_tree_history());
+            case 'tipificacion':
+                $treeh = $this->get_tree_history();
+                $tipif=array();
+                foreach($treeh as $opt){
+                    array_push($tipif, $opt["ans"]);
+                }
+                return $tipif;
             case 'childsc':
                 return $this->load_childs();
             case 'critic':
                 return $this->get_critic();
             case 'status':
                 $ar = $this->get_status();
-                ;
                 return $ar[1];
-            case 'UA':
+            case 'ua':
                 return $this->UA;
-            case 'UB':
+            case 'ub':
                 return $this->UB;
-            case 'FA':
+            case 'fa':
                 return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
-            case 'FB':
+            case 'fb':
                 if ($this->FB == NULL)
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
-            case 'minFromClose':
+            case 'minfromclose':
                 return DiffBetweenDates($this->get_prop("FB"), "NOW");
             default:
                 return "Propiedad invalida.";

@@ -1,6 +1,7 @@
 <?php
 
 require_once 'classes/tkt.php';
+require_once 'classes/tktlister.php';
 
 /**
  * Lista
@@ -10,65 +11,64 @@ require_once 'classes/tkt.php';
 function GO($RC) {
 
     $u = $RC->get_User();
-    $idteam = $RC->get_params("team");
-    if (!$u->in_team($idteam)) {
-        return $RC->createElement("error", "Equipo invalido. Acceso denegado.");
+    $arrayTeam = array();
+    $idsteams = explode(",", $RC->get_params("team"));
+    foreach ($idsteams as $idteam) {
+        if (!$u->in_team($idteam)) {
+            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
+        }
+        array_push($arrayTeam, $idteam);
     }
+
+    $Tf = new TKTFILTER();
+
+    $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
 
     switch ($RC->get_params("filter")) {
         case "my":
-            $filter = array(
-                "open" => "open",
-                "opento" => $idteam,
-                "taken" => $u->get_prop("usr")
-            );
+            $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+            $Tf->set_filter(TKTFILTER::$TAKENBY, array($u->get_prop("usr")));
             break;
         case "myNtom":
-            $filter = array(
-                "open" => "open",
-                "opento" => $idteam,
-                "taken" => $u->get_prop("usr").",null"
-            );
+            $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+            $Tf->set_filter(TKTFILTER::$TAKENBY, array($u->get_prop("usr"),
+                'null'));
             break;
         case "free":
-            $filter = array(
-                "open" => "open",
-                "opento" => $idteam,
-                "taken" => "null"
-            );
+            $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+            $Tf->set_filter(TKTFILTER::$TAKENBY, array('null'));
             break;
         case "taken":
-            $filter = array(
-                "open" => "open",
-                "opento" => $idteam,
-                "taken" => "*"
-            );
+            $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+            $Tf->set_filter(TKTFILTER::$TAKENBY, array('*'));
             break;
         case "closed":
-            $filter = array("open" => "closed",
-                "cfrom" => $RC->get_params("cfrom"),
-                "cto" => $RC->get_params("cto"),
-                "opento" => $idteam
-            );
+            $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
+            $Tf->set_filter(TKTFILTER::$DATE_FROM, @STRdate_format($RC->get_params("cfrom"), USERDATE_READ, DBDATE_WRITE));
+            $Tf->set_filter(TKTFILTER::$DATE_TO, @STRdate_format($RC->get_params("cto"), USERDATE_READ, DBDATE_WRITE));
             break;
         default: //open todos
-            $filter = array(
-                "open" => "open",
-                "opento" => $idteam
-            );
+            $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
     }
-    
-    $ALL = new TKT();
 
-    $equipo = $u->get_team_obj($idteam);
+    $equipo = $u->get_team_obj($arrayTeam[0]);
     $view = $equipo->get_prop("staffhome_vista");
 
-    $ALL_v = $ALL->list_fiter(array_merge($filter,array("master"=>"null")));
+    $Tf->set_filter(TKTFILTER::$IDMASTER, array('null'));
 
+    $Tl = new TKTLISTER();
+    $Tl->loadFilter($Tf);
+    
+    if(!$Tl->execute()){
+        return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
+    }
+    
+    $ALL_v = $Tl->getObjs();
+    
     $response = $RC->createElement("data");
     $response->appendChild($RC->createElement("view", $view));
     $listL = $RC->createElement("list");
-    $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","equipo.nombre","status","critic");
+    $fields = array("id", "usr_o.nombre", "usr_o.equiposname", "FA", "FB", "u_tom_o.nombre", "prioridadtext", "childsc", "origen_json", "equipo.nombre", "status", "critic");
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $listL->appendChild($l->getXML($RC, $fields));

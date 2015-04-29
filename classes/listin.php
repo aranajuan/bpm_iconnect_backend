@@ -136,6 +136,7 @@ class LISTIN extends itobject {
 
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return ucwords($this->id);

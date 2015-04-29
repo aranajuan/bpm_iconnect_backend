@@ -1,0 +1,42 @@
+{
+    "fields": [
+        {
+            "action": "TKT",
+            "property": "id",
+            "modificator": "*",
+            "alias": "id"
+        },
+        {
+            "action": "TKT",
+            "property": "tipificacion",
+            "modificator": "*",
+            "alias": "tipif_"
+        },
+        {
+            "action": "ABRIR",
+            "property": "itform.Hola",
+            "modificator": "*",
+            "alias": "APERTURA_"
+        },
+        {
+            "action": "TKT",
+            "property": "FA",
+            "modificator": "*",
+            "alias": "Fecha apertura",
+            "type":"datetime"
+        },
+        {
+            "action": "UNIR",
+            "property": "valoraccion",
+            "modificator": "LST",
+            "alias": "IdtktUnido"
+        },
+        {
+            "action": "UNIR",
+            "property": "FA",
+            "modificator": "*",
+            "alias": "Fecha union_"
+        }
+        
+        ]
+}

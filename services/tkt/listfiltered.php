@@ -1,6 +1,7 @@
 <?php
 
 require_once 'classes/tkt.php';
+require_once 'classes/tktlister.php';
 
 /**
  * Lista
@@ -10,29 +11,34 @@ require_once 'classes/tkt.php';
 function GO($RC) {
 
     $u = $RC->get_User();
-    $idteams = explode(",",$RC->get_params("team"));
-    foreach($idteams as $idteam){
+    $arrayTeam=array();
+    $idsteams = explode(",", $RC->get_params("team"));
+    foreach ($idsteams as $idteam) {
         if (!$u->in_team($idteam)) {
-            return $RC->createElement("error", "Equipo invalido. Acceso denegado.");
+            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
+        array_push($arrayTeam, $idteam);
     }
     $actions = $RC->get_params("actions");
 
-    $filter = array(
-        "open" => "open",
-        "opento" => $RC->get_params("team"),
-        "origin" => $RC->get_params("origin")
-    );
+    $Tf = new TKTFILTER();
+    $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+    $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
+    $Tf->set_filter(TKTFILTER::$ORIGINS, explode(',',$RC->get_params("origin")));
 
     $taken = $RC->get_params("taken");
     if ($taken) {
-        $filter = array_merge($filter, array("taken" => $taken));
+        $Tf->set_filter(TKTFILTER::$TAKENBY, explode(",", $taken));
     }
 
-    $ALL = new TKT();
-
-    $ALL_v = $ALL->list_fiter($filter);
-
+    $Tl = new TKTLISTER();
+    $Tl->loadFilter($Tf);
+    
+    if(!$Tl->execute()){
+        return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
+    }
+    
+    $ALL_v = $Tl->getObjs();
 
     $listL = new DOMDocument();
     $list = $listL->createElement("list");
@@ -43,7 +49,7 @@ function GO($RC) {
             $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
             $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));
             $tkt->appendChild($listL->createElement("UA", $l->get_prop('UA')));
-			$tkt->appendChild($listL->createElement("idmaster", $l->get_prop('idmaster')));
+            $tkt->appendChild($listL->createElement("idmaster", $l->get_prop('idmaster')));
             $tkt->appendChild($listL->createElement("origen", $l->get_prop('origen')));
             $tkths = $listL->createElement("ths");
             $ths = $l->get_tktHObj($actions);

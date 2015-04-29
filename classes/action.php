@@ -57,7 +57,7 @@ class ACTION extends itobject {
      * @var boolean 
      */
     private $working;
-    
+
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -94,8 +94,8 @@ class ACTION extends itobject {
 
         $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles like '*%')";
 
-	$equipos = "(habilita_equipos like '%" . $this->TKT->get_prop("idequipo") . ",%' or habilita_equipos like '*%')";
-		
+        $equipos = "(habilita_equipos like '%" . $this->TKT->get_prop("idequipo") . ",%' or habilita_equipos like '*%')";
+
         if ($l->in_team($this->TKT->get_prop("idequipo")))
             $equipo = "habilita_equipo in (0,1)"; // ticket en el equipo del usuario logueado
         else
@@ -137,7 +137,7 @@ class ACTION extends itobject {
             $to = $TKT->get_last();
             if ($to) {
                 //cambia el form por el de la opcion
-                $this->form = $to->get_prop("pretext");
+                $this->itf = $to->get_prop("itform");
                 return true;
             }
             return false;
@@ -169,8 +169,7 @@ class ACTION extends itobject {
         return $this->TKT;
     }
 
-    
-        /**
+    /**
      * Setea como ticket en trabajo
      */
     public function setWorking() {
@@ -191,7 +190,7 @@ class ACTION extends itobject {
     public function isWorking() {
         return $this->working;
     }
-    
+
     /**
      * Carga valores de formulario y valida con itform
      * @param array $values
@@ -200,15 +199,9 @@ class ACTION extends itobject {
         if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
-        if (!$this->formulario || $this->form == "") {  //no requiere formulario esta accion
-            $this->itf = new itform();
+        if (!$this->formulario || $this->itf == null) {  //no requiere formulario esta accion
             return "ok";
         }
-
-        if (!$this->itf->load_xml($this->form)) {
-            return "Error al cargar formulario de la tipificacion.";
-        }
-
         $rta = $this->itf->load_values($values, $formname);
         return $rta;
     }
@@ -223,10 +216,10 @@ class ACTION extends itobject {
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $this->load_DV($tmpU);
+            $rta = $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";
-            return "ok";
+            return $rta;
         } else
             $this->error = TRUE;
         return "error";
@@ -241,10 +234,10 @@ class ACTION extends itobject {
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where nombre='" . strToSQL(strtoupper($name)) . "'");
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $this->load_DV($tmpU);
+            $rta = $this->load_DV($tmpU);
             if ($this->estado == I_DELETED)
                 return "eliminado";
-            return "ok";
+            return $rta;
         } else
             $this->error = TRUE;
         return "error";
@@ -259,7 +252,7 @@ class ACTION extends itobject {
         $this->formulario = trim($tmpU["formulario"]);
         $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
         $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
-	$this->habilita_equipos = trim($tmpU["habilita_equipos"]);
+        $this->habilita_equipos = trim($tmpU["habilita_equipos"]);
         $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
         $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
         $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
@@ -268,11 +261,19 @@ class ACTION extends itobject {
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
-        $this->form = trim($tmpU["form"]);
+        $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
+        if ($this->form != "") {
+            $this->itf = new itform();
+            if ($this->itf->load_xml($this->form) == false) {
+                return "Error al cargar formulario de la tipificacion.";
+            }
+        } else {
+            $this->itf = null;
+        }
         $this->ejecuta = trim($tmpU["ejecuta"]);
         $this->estadotkt = trim($tmpU["estadotkt"]);
         $this->alias = trim($tmpU["alias"]);
-        $this->itf = new itform();
+        return "ok";
     }
 
     /**
@@ -283,7 +284,7 @@ class ACTION extends itobject {
         $this->id = $tmpU["id"];
         $this->estado = $tmpU["estado"];
         $this->nombre = $tmpU["nombre"];
-        $this->load_VEC($tmpU);
+        return $this->load_VEC($tmpU);
     }
 
     /**
@@ -301,13 +302,13 @@ class ACTION extends itobject {
      */
     public function check_valid() {
         $l = $this->getLogged();
-		
+
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
             return "Esta accion no esta disponible para tu perfil";
-			
-		if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
-            return "Esta accion no esta disponible para tu equipo";	
-			
+
+        if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
+            return "Esta accion no esta disponible para tu equipo";
+
         if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
@@ -372,8 +373,8 @@ class ACTION extends itobject {
             if ($response["result"] != "ok") {
                 return $response;
             }
-        }else{
-            $response["result"]="ok";
+        } else {
+            $response["result"] = "ok";
         }
         $response["tkth"] = $this->addTKT_H();
         $response["sendfiles"] = $response["tkth"];
@@ -413,6 +414,7 @@ class ACTION extends itobject {
     }
 
     public function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return ucwords($this->id);
@@ -424,8 +426,8 @@ class ACTION extends itobject {
                 return $this->alias;
             case 'tipo':
                 return $this->tipo;
-            case 'form':
-                return $this->form;
+            case 'itf':
+                return $this->itf;
             case 'formulario':
                 return $this->formulario;
             case 'value':

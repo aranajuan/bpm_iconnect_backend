@@ -951,7 +951,7 @@ class USER extends itobject {
                 foreach ($this->equipos as $t) {
                     $ret.=$t->get_prop("nombre") . "; ";
                 }
-                return substr($ret,0,(strlen($ret)-1));
+                return substr($ret,0,(strlen($ret)-2));
             case 'idsequiposadm':
                 $this->load_teamsAdm();
                 return $this->idsequiposadm;

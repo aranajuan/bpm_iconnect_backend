@@ -20,7 +20,7 @@ class TKTFILTER extends basicobject {
     public static $IDSTEAMS = "TKT.idsteams";
     public static $NOT_IDSTEAMS = "TKT.not_idsteams";
     public static $UA = "TKT.ua";
-    public static $TOUCH_BY_TEAM = "TKT,TKT_H,ACCIONES.touch_by_team";
+    public static $TOUCH_BY_TEAM = "TKT.touch_by_team";
     public static $ORIGINS = "TKT.origins";
     public static $TAKENBY = "TKT.takenby";
     public static $IDMASTER = "TKT.idmaster";
@@ -180,8 +180,13 @@ class TKTFILTER extends basicobject {
                     $SSQL.=")";
                     break;
                 case self::$TOUCH_BY_TEAM:
-                    $SSQL.=" and ACCIONES.ejecuta in ('open','derive') and " .
-                            "TKT_H.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')";
+                    $SSQL.=" and  
+                        ( select count(*) from TBL_TICKETS_M as TKT_H_O 
+                        inner join TBL_ACCIONES as ACCIONES_O on (ACCIONES_O.id=TKT_H_O.idaccion)
+                        where TKT_H_O.idtkt=TKT.id and
+                        ACCIONES_O.ejecuta in ('open','derive') and
+                        TKT_H_O.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')".
+                        ")>0";
                     break;
                 case self::$IDMASTER:
                     $idmaster = $this->get_filter($type);

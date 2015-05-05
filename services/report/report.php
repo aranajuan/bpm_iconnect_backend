@@ -39,7 +39,7 @@ function GO($RC) {
     }
     
     if ($RC->get_params("filter") == "tratadopor") {
-        $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
+        $Tf->set_filter(TKTFILTER::$TOUCH_BY_TEAM, $arrayTeam);
     } else {
         $users=array();
         foreach ($arrayTeam as $id) {

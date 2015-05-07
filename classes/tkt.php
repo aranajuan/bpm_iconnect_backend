@@ -433,7 +433,7 @@ class TKT extends TREE {
      * @return string
      */
     public function ejecute_action($action, $values = null) {
-        $A = $this->objsCache->get_object("ACTION", $action);
+        $A = $this->objsCache->get_object("ACTION", $action,true);
         if ($this->objsCache->get_status("ACTION", $action) != "ok") {
             return "no se puede cargar accion";
         }

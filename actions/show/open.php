@@ -16,7 +16,7 @@ if($T){
 }
 
 if($this->get_prop("UA_o")){
-    $userGen="Generado por ".$this->get_prop("UA_o")->get_prop("nombre")."( ".$this->get_prop("UA_o")->get_prop("equiposname").")";
+    $userGen="Generado por :"." ".$this->get_prop("UA")."-".$this->get_prop("UA_o")->get_prop("nombre")." (".$this->get_prop("UA_o")->get_prop("equiposname").")";
 }else{
     $userGen="Generado por: Indeterminado - Error ".$this->get_prop("UA");
 }

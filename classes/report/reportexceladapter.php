@@ -144,19 +144,14 @@ class REPORTEXCELADAPTER {
             return;
         $sheet = $this->excel->getActiveSheet();
         $value = null;
+        $format=PHPExcel_Style_NumberFormat::FORMAT_GENERAL;
         switch ($data["type"]) {
             case "number":
-                $sheet->getCellByColumnAndRow($col, $row)
-                        ->getStyle()
-                        ->getNumberFormat()
-                        ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00);
+                $format=PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00;
                 $value = $data["value"];
                 break;
             case "integer":
-                $sheet->getCellByColumnAndRow($col, $row)
-                        ->getStyle()
-                        ->getNumberFormat()
-                        ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER);
+                $format=PHPExcel_Style_NumberFormat::FORMAT_NUMBER;
                 $value = $data["value"];
                 break;
             case "datetime":
@@ -165,8 +160,7 @@ class REPORTEXCELADAPTER {
                     $value = PHPExcel_Shared_Date::PHPToExcel(
                                     $date
                     );
-                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
-                            ->setFormatCode('dd-mm-yyyy h:mm');
+                    $format='dd-mm-yyyy h:mm';
                 } else {
                     $value = $data["value"];
                 }
@@ -177,8 +171,7 @@ class REPORTEXCELADAPTER {
                     $value = PHPExcel_Shared_Date::PHPToExcel(
                                     $date
                     );
-                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
-                            ->setFormatCode('dd-mm-yyyy');
+                    $format='dd-mm-yyyy';
                 } else {
                     $value = $data["value"];
                 }
@@ -189,8 +182,7 @@ class REPORTEXCELADAPTER {
                     $value = PHPExcel_Shared_Date::PHPToExcel(
                                     $date
                     );
-                    $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()
-                            ->setFormatCode('mm-yyyy');
+                    $format='mm-yyyy';
                 } else {
                     $value = $data["value"];
                 }
@@ -198,6 +190,7 @@ class REPORTEXCELADAPTER {
             default:
                 $value = $data["value"];
         }
+        $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()->setFormatCode($format);
         $sheet->setCellValueByColumnAndRow($col, $row, $value);
     }
 

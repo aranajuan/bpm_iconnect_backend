@@ -199,7 +199,7 @@ class TKT extends TREE {
         if ($actions == "*") {
             $this->tkthActionsLoaded="*";
             $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . "
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null
                 order by id
             ";
         }else{
@@ -211,7 +211,7 @@ class TKT extends TREE {
             $actionsT=  implode(",", $actionsV);
             $ssql = "
             select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion) 
-            where TH.idtkt=" . intval($this->id) . " and TH.estado = " . I_ACTIVE . " and TA.nombre in (".$actionsT.")
+            where TH.idtkt=" . intval($this->id) . " and TH.UB is null and TA.nombre in (".$actionsT.")
                 order by id
             ";
         }
@@ -290,7 +290,7 @@ class TKT extends TREE {
         if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded=="*")
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . " and UB is null order by FA
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null order by FA
         ";
         $this->dbinstance->loadRS($ssql);
         if ($this->dbinstance->noEmpty) {

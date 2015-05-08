@@ -6,9 +6,11 @@ class REPORTFIELD {
     private $max_cevents;
     private $order;
     private $modificator;
-
+    private $actionV;
+    
     public function __construct() {
         $this->max_cevents = 0;
+        $this->actionV=null;
     }
 
     /**
@@ -89,6 +91,12 @@ class REPORTFIELD {
 
     public function getAction() {
         return $this->json->action;
+    }
+    
+    public function getActionV(){
+        if($this->actionV!=null) return $this->actionV;
+        $this->actionV = explode(",",$this->getAction());
+        return $this->actionV;
     }
 
     public function getProperty() {

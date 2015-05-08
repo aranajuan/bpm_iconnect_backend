@@ -16,7 +16,7 @@ function GO($RC) {
     $rname = $RC->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
     $filepath=INCLUDE_DIR . "/config/reports/".$rname.".json";
     if(!file_exists($filepath)){
-         return $RC->createElement("error", "No hay reporte disponible para el perfil.");
+         return $RC->createElement("error", "No hay reporte disponible para el perfil. $rname");
     }
     $arrayTeam = array();
     $idsteams = explode(",", $RC->get_params("team"));

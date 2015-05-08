@@ -201,19 +201,19 @@ class itform {
         if ($label->length == 0){
             $arr["label"]=$arr["id"];
         }else{
-            $arr["label"] = $label->item(0)->nodeValue;
+            $arr["label"] =trim($label->item(0)->nodeValue);
         }
-        $arr["value"] = $element->getElementsByTagName("value")->item(0)->nodeValue;
+        $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
         
-        $arr["type"] = $element->getElementsByTagName("type")->item(0)->nodeValue;
+        $arr["type"] =trim($element->getElementsByTagName("type")->item(0)->nodeValue);
         if($arr["type"]=="select"){
             $options = $element->getElementsByTagName("option");
             $arr["valuetxt"]=$arr["value"];
             foreach($options as $opt){
-                if($opt->getElementsByTagName("value")->item(0)->nodeValue
-                        ==$arr["value"]){
-                  $arr["valuetxt"]=$opt->getElementsByTagName("text")->item(0)
-                          ->nodeValue;
+                if(trim($opt->getElementsByTagName("value")->item(0)->nodeValue)
+                        ==trim($arr["value"])){
+                  $arr["valuetxt"]=trim($opt->getElementsByTagName("text")->item(0)
+                          ->nodeValue);
                  }
             }
         }
@@ -224,7 +224,7 @@ class itform {
             return $arr;
         } else {
             foreach ($validations->childNodes as $v) {
-                $arr["validations"][$v->nodeName] = $v->nodeValue;
+                $arr["validations"][trim($v->nodeName)] = trim($v->nodeValue);
             }
             return $arr;
         }

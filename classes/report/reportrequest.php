@@ -24,10 +24,10 @@ class REPORTREQUEST {
     private $actionRQ;
 
     /**
-     *  optimizado para carga de datos
-     * @var array[action][id]<FIELD>
+     * Requiere datos de TKT
+     * @var boolean
      */
-    private $fields_rqGroup;
+    private $needtTKT;
 
     /**
      *  Array ordenado segun solicitud
@@ -49,9 +49,9 @@ class REPORTREQUEST {
     
     public function __construct() {
         $this->actionRQ = array();
-        $this->fields_rqGroup = array();
         $this->fields = array();
         $this->values = array();
+        $this->needtTKT=false;
     }
 
     public function setTitle($title){
@@ -97,12 +97,11 @@ class REPORTREQUEST {
             }
 
             $ft->setOrder($i);
-
+            if(in_array("TKT", $ft->getActionV())){
+                $this->needtTKT=true;
+            }
             if (!in_array($ft->getAction(), $this->actionRQ))
                 array_push($this->actionRQ, $ft->getAction());
-            if (!isset($this->fields_rqGroup[$ft->getAction()]))
-                $this->fields_rqGroup[$ft->getAction()] = array();
-            array_push($this->fields_rqGroup[$ft->getAction()], $ft);
             $this->fields[$ft->getOrder()] = $ft;
             $i++;
         }
@@ -137,7 +136,7 @@ class REPORTREQUEST {
      * @param TKT $tkt
      */
     private function addValues($itkt, $tkt) {
-        if (isset($this->fields_rqGroup["TKT"])) {
+        if ($this->needtTKT) {
             $this->loadActionValues("TKT", $tkt, null, $itkt);
         }
 
@@ -156,12 +155,14 @@ class REPORTREQUEST {
      * @param int $itkt
      */
     private function loadActionValues($actionName, $tkt, $th, $itkt) {
-        foreach ($this->fields_rqGroup[$actionName] as &$field) {
-            $value = $this->values[$field->getOrder()][$itkt];
-            $field->loadValue($tkt, $th, $value);
+        foreach ($this->fields as &$field){
+            if(in_array($actionName, $field->getActionV())){
+                $value = $this->values[$field->getOrder()][$itkt];
+                $field->loadValue($tkt, $th, $value);
+            }
         }
     }
-
+       
     /**
      * Devuelve array de FIELD
      * @return type

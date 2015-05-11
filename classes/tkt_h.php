@@ -101,6 +101,9 @@ class TKT_H extends itobject {
         }
         $this->accion = $accion;
         $this->valoraccion = $tmpU["valoraccion"];
+        if ($this->FB != "" && $this->FB != null) {
+            return "eliminado";
+        }
         return "ok";
     }
 
@@ -120,21 +123,10 @@ class TKT_H extends itobject {
         $this->accion = $tmpU;
     }
 
-    /* Elimina registros abiertos */
-
-    private function delete_open() {
-        $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where FB is NULL and idtkt=" . intval($this->accion->getTKT()->get_prop("id"));
-        return $this->dbinstance->query($ssql);
-    }
-
     /* Inserta nuevo registro y carga ID en el objeto
      */
 
     function insert_DB() {
-        if ($this->delete_open()) {
-            return "TKTH_Delete" . $this->dbinstance->details;
-        }
-
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
@@ -167,7 +159,8 @@ class TKT_H extends itobject {
     }
 
     private function loadValoraccion() {
-        if($this->valoraccion_txt!="") return;
+        if ($this->valoraccion_txt != "")
+            return;
         if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
             $obCI = OBJECTCACHE::getInstance();
             $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
@@ -388,7 +381,8 @@ class TKT_H extends itobject {
     }
 
     public function delete_DB() {
-        
+        $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where id=" . intval($this->get_prop("id"));
+        return $this->dbinstance->query($ssql);
     }
 
     public function update_DB() {

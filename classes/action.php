@@ -37,7 +37,7 @@ class ACTION extends itobject {
     private $estado;    /* activo o no activo */
     private $form; /* formulario para cargar accion */
     private $files; /* archivos */
-    private $value; //valor de accion ejecutada
+    private $objadj_id; //id del objeto adjunto
     private $forceEveRta; // respuesta de evento forzado
 
     /**
@@ -220,7 +220,8 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return $rta;
-        } else
+        }
+        else
             $this->error = TRUE;
         return "error";
     }
@@ -238,7 +239,8 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return $rta;
-        } else
+        }
+        else
             $this->error = TRUE;
         return "error";
     }
@@ -288,11 +290,11 @@ class ACTION extends itobject {
     }
 
     /**
-     * Carga valor para tktH
-     * @param int $value
+     * Carga id de objeto para TKTH
+     * @param string $objadj_id
      */
-    public function loadValue($value) {
-        $this->value = $value;
+    public function loadObjadjId($objadj_id) {
+        $this->objadj_id = $objadj_id;
     }
 
     /**
@@ -366,6 +368,7 @@ class ACTION extends itobject {
      * @return array resultado
      */
     public function ejecute() {
+        $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = OBJECTCACHE::getInstance();
             $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
@@ -376,7 +379,8 @@ class ACTION extends itobject {
         } else {
             $response["result"] = "ok";
         }
-        $response["tkth"] = $this->addTKT_H();
+        $rta=$this->addTKT_H();;
+        $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
     }
@@ -386,6 +390,9 @@ class ACTION extends itobject {
      * @return String
      */
     public function force_tkth() {
+        if ($this->forceEveRta) {
+            return $this->forceEveRta;
+        }
         $this->forceEveRta = $this->addTKT_H();
         return $this->forceEveRta;
     }
@@ -400,7 +407,8 @@ class ACTION extends itobject {
         }
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
-        $rta = $tktH->insert_DB();
+        $rta["status"] = $tktH->insert_DB();
+        $rta["id"]=$tktH->get_prop("id");
         $this->forceEveRta = $rta;
         return $rta;
     }
@@ -430,8 +438,8 @@ class ACTION extends itobject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
-            case 'value':
-                return $this->value;
+            case 'objadj_id':
+                return $this->objadj_id;
             case 'habilita_t_propio':
                 return $this->habilita_t_propio;
             case 'habilita_tomado':

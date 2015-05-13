@@ -728,8 +728,9 @@ class USER extends itobject {
             case "derivado":
                 $THs = $TKT->get_tktHObj();
                 foreach ($THs as $TH) {
-                    if ($TH->get_prop("accion")->get_prop("nombre") == "ABRIR" || $TH->get_prop("accion")->get_prop("nombre") == "DERIVAR") {
-                        if ($this->in_team($TH->get_prop("valoraccion"))) {
+                    if ($TH->get_prop("accion")->get_prop("ejecuta") == "open" 
+                            || $TH->get_prop("accion")->get_prop("ejecuta") == "derive") {
+                        if ($this->in_team($TH->get_prop("objadj_id"))) {
                             return true;
                         }
                     }

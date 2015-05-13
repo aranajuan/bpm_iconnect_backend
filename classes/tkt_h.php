@@ -29,19 +29,19 @@ class TKT_H extends itobject {
      */
     private $itform;
     private $idaccion;
-    private $valoraccion;
+    private $objadj_id; /* id del objeto anexo <-valoraccion */
 
     /**
-     * Objeto valor accion
+     * Objeto $objadj_id
      * @var itobject
      */
-    private $valoraccion_obj;
+    private $objadj;
 
     /**
-     * Texto de valoraccion
+     * Texto de $objadj_id
      * @var string
      */
-    private $valoraccion_txt;
+    private $objadj_txt;
     private $estado;    /* estado de la accion */
     private $idteam;    /* equipo que genero el evento */
     private $UA_o;
@@ -88,8 +88,11 @@ class TKT_H extends itobject {
         $this->idaccion = $tmpU["idaccion"];
         $this->estado = $tmpU["estado"];
         $this->idtkt = $tmpU["idtkt"];
+        $this->objadj_id = $tmpU["valoraccion"];
         $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
-        $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
+        if($accion->get_prop('nombre')=="LINK"){
+            return $this->load_DB($this->objadj_id);
+        }
         $this->detalle = $tmpU["detalle"];
         if ($this->detalle != null && $this->detalle != "") {
             $this->itform = new itform();
@@ -100,7 +103,6 @@ class TKT_H extends itobject {
             $this->itform = null;
         }
         $this->accion = $accion;
-        $this->valoraccion = $tmpU["valoraccion"];
         if ($this->FB != "" && $this->FB != null) {
             return "eliminado";
         }
@@ -130,7 +132,7 @@ class TKT_H extends itobject {
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
-                strToSQL($this->accion->get_prop("value")) . "',now(),'"
+                strToSQL($this->accion->get_prop("objadj_id")) . "',now(),'"
                 . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL," . I_ACTIVE . ");";
 
         if ($this->dbinstance->query($ssql)) {
@@ -158,17 +160,17 @@ class TKT_H extends itobject {
         }
     }
 
-    private function loadValoraccion() {
-        if ($this->valoraccion_txt != "")
+    private function loadObjadj() {
+        if ($this->objadj_txt != "")
             return;
         if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
             $obCI = OBJECTCACHE::getInstance();
             $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
-            $this->valoraccion_obj = $val[0];
-            $this->valoraccion_txt = $val[1];
+            $this->objadj = $val[0];
+            $this->objadj_txt = $val[1];
         } else {
-            $this->valoraccion_obj = null;
-            $this->valoraccion_txt = $this->get_prop("valoraccion");
+            $this->objadj = null;
+            $this->objadj_txt = $this->get_prop("objadj_id");
         }
     }
 
@@ -188,7 +190,7 @@ class TKT_H extends itobject {
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
         $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
         $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        $action->appendChild($element->createElement("value", $this->get_prop("valoraccion_txt")));
+        $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
@@ -316,20 +318,20 @@ class TKT_H extends itobject {
                 return $this->idtkt;
             case 'tkt':
                 return $this->TKT;
-            case 'valoraccion':
-                return $this->valoraccion;
-            case 'valoraccion_txt':
-                $this->loadValoraccion();
-                return $this->valoraccion_txt;
-            case 'valoraccion_obj':
-                $this->loadValoraccion();
-                return $this->valoraccion_obj;
+            case 'objadj_id':
+                return $this->objadj_id;
+            case 'objadj_txt':
+                $this->loadObjadj();
+                return $this->objadj_txt;
+            case 'objadj':
+                $this->loadObjadj();
+                return $this->objadj;
             case 'accion':
                 return $this->accion;
             case 'itform':
-                if ($this->itform == null)
-                    return null;
                 if (!$this->check_access())
+                    return null;
+                if ($this->itform == null)
                     return null;
                 return $this->itform;
             case 'ua':

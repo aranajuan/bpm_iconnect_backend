@@ -19,7 +19,7 @@ require_once 'classes/team.php';
     
     $rtaOP = $TKT->derive($td);
     
-    $this->loadValue($td->get_prop("id"));
+    $this->loadObjadjId($td->get_prop("id"));
     
     if($rtaOP!="ok"){
         $response = array("result" => "error", "msj" => $rtaOP);

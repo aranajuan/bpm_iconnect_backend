@@ -24,7 +24,7 @@
    
     $rtaOP = $TKT->join($master);
     
-    $this->loadValue($master->get_prop("id"));
+    $this->loadObjadjId($master->get_prop("id"));
     
     if($rtaOP!="ok"){
         $response = array("result" => "error", "msj" => $rtaOP);

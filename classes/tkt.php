@@ -35,7 +35,12 @@ class TKT extends TREE {
         array(3, 6, 9)
     );
     private $working;
-    
+
+    /**
+     * Accion que se esta ejecutando
+     * @var ACTION
+     */
+    private $ejecutingAction;
     private $tkthActionsLoaded; // lista de acciones cargadas en tkth * | array
 
     function load_DB($id) {
@@ -127,6 +132,22 @@ class TKT extends TREE {
     }
 
     /**
+     * Accion ejecutandose
+     * @param ACTION $action
+     */
+    public function setEjecutingAction($action) {
+        $this->ejecutingAction = $action;
+    }
+
+    /**
+     * Accion ejecutandose
+     * @return ACTION
+     */
+    public function getEjecutingAction() {
+        return $this->ejecutingAction;
+    }
+
+    /**
      *  devuelve lista de acciones validas - vector de la db
      * @return array<ACTION>
      */
@@ -197,21 +218,21 @@ class TKT extends TREE {
 
         $this->tkt_hOBJ = array();
         if ($actions == "*") {
-            $this->tkthActionsLoaded="*";
+            $this->tkthActionsLoaded = "*";
             $ssql = "
             select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null
                 order by id
             ";
-        }else{
-            $actionsV = explode(",",$actions);
-            $this->tkthActionsLoaded=$actionsV;
-            foreach($actionsV as &$av){
-                $av="'".strToSQL($av)."'";
+        } else {
+            $actionsV = explode(",", $actions);
+            $this->tkthActionsLoaded = $actionsV;
+            foreach ($actionsV as &$av) {
+                $av = "'" . strToSQL($av) . "'";
             }
-            $actionsT=  implode(",", $actionsV);
+            $actionsT = implode(",", $actionsV);
             $ssql = "
             select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion) 
-            where TH.idtkt=" . intval($this->id) . " and TH.UB is null and TA.nombre in (".$actionsT.")
+            where TH.idtkt=" . intval($this->id) . " and TH.UB is null and TA.nombre in (" . $actionsT . ")
                 order by id
             ";
         }
@@ -226,11 +247,11 @@ class TKT extends TREE {
                     $this->tkt_hOBJ[$i] = $THO;
                     $eje = $THO->get_prop('accion')->get_prop("ejecuta");
                     if ($eje === "open") {
-                        $idteam = $THO->get_prop("valoraccion");
+                        $idteam = $THO->get_prop("objadj_id");
                     }
                     $THO->set_idteam($idteam);
                     if ($eje === "derive") {
-                        $idteam = $THO->get_prop("valoraccion");
+                        $idteam = $THO->get_prop("objadj_id");
                     }
                     $i++;
                 }
@@ -287,7 +308,7 @@ class TKT extends TREE {
      * @return \TKT_H|null
      */
     public function get_last_tktH() {
-        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded=="*")
+        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded == "*")
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
             select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null order by FA
@@ -299,7 +320,7 @@ class TKT extends TREE {
             if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
                 $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                    $THO->set_idteam($THO->get_prop("objadj_id"));
                 }
                 return $THO;
             }
@@ -313,17 +334,19 @@ class TKT extends TREE {
      * @param String $action    Separados por coma (tienen que estar todas)
      * @return boolean
      */
-    private function isloadedaction($action){
-        if($this->tkthActionsLoaded=="*") return true;
-        if($action=="*") return false;
-        $actionsV = explode(",",$action);
-        foreach($actionsV as $av){
-          if($this->tkthActionsLoaded==null || !in_array($av, $this->tkthActionsLoaded))
+    private function isloadedaction($action) {
+        if ($this->tkthActionsLoaded == "*")
+            return true;
+        if ($action == "*")
+            return false;
+        $actionsV = explode(",", $action);
+        foreach ($actionsV as $av) {
+            if ($this->tkthActionsLoaded == null || !in_array($av, $this->tkthActionsLoaded))
                 return false;
         }
         return true;
     }
-    
+
     /**
      * Devuelve el primer evento / apertura
      * @return \TKT_H|null
@@ -341,7 +364,7 @@ class TKT extends TREE {
             if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
                 $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                    $THO->set_idteam($THO->get_prop("objadj_id"));
                 }
                 return $THO;
             }
@@ -355,16 +378,17 @@ class TKT extends TREE {
      * @param String $actions    Separados por coma
      * @return array<TKT_H>
      */
-    function get_tktHObj($actions="*") {
-        if(!$this->isloadedaction($actions)){
+    function get_tktHObj($actions = "*") {
+        if (!$this->isloadedaction($actions)) {
             $this->load_tktH($actions);
             return $this->tkt_hOBJ;
-        }else{
-            if($actions=="*") return $this->tkt_hOBJ;
-            $actionsV=explode(",",$actions);
+        } else {
+            if ($actions == "*")
+                return $this->tkt_hOBJ;
+            $actionsV = explode(",", $actions);
             $THL = array();
-            foreach($this->tkt_hOBJ as $TH){
-                if(in_array($TH->get_prop("accion")->get_prop("nombre"),$actionsV)){
+            foreach ($this->tkt_hOBJ as $TH) {
+                if (in_array($TH->get_prop("accion")->get_prop("nombre"), $actionsV)) {
                     array_push($THL, $TH);
                 }
             }
@@ -430,15 +454,21 @@ class TKT extends TREE {
      * Ejecuta accion con valores solicitados
      * @param string $action
      * @param array $values
+     * @param string $objadj_id
      * @return string
      */
-    public function ejecute_action($action, $values = null) {
-        $A = $this->objsCache->get_object("ACTION", $action,true);
+    public function ejecute_action($action, $values = null, $objadj_id = null) {
+        $A = $this->objsCache->get_object("ACTION", $action, true);
         if ($this->objsCache->get_status("ACTION", $action) != "ok") {
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
-        $A->loadFormValues($values);
+        if ($values) {
+            $A->loadFormValues($values);
+        }
+        if ($objadj_id) {
+            $A->loadObjadjId($objadj_id);
+        }
         return $A->ejecute();
     }
 
@@ -544,17 +574,22 @@ class TKT extends TREE {
             return "Ticket_reabrir: " . $this->dbinstance->details;
         $this->UB = NULL;
         $this->FB = NULL;
+
+        $rtaAction = $this->getEjecutingAction()->force_tkth();
+        if ($rtaAction["status"] != "ok")
+            return $rtaAction["status"];
+
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
+                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")), $rtaAction["id"]);
             }
         } elseif ($this->isWorking()) {
             $this->ejecute_action("SET_MASTER");
             $this->clear_childs();
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
+                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")), $rtaAction["id"]);
             }
         }
         return "ok";
@@ -576,10 +611,14 @@ class TKT extends TREE {
         }
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
+        $rtaAction = $this->getEjecutingAction()->force_tkth();
+        if ($rtaAction["status"] != "ok")
+            return $rtaAction["status"];
+        
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("CERRAR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") cerrado")));
+                $c->ejecute_action("CERRAR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") cerrado"), $rtaAction["id"]));
             }
         }
         return "ok";
@@ -723,9 +762,9 @@ class TKT extends TREE {
         $lastMaster = $this->master;
 
         /* elimina el master actual y marca como tomado por el usuario del master */
-        if($lastMaster->get_prop("u_tom")){
-            $utom="'".strToSQL($lastMaster->get_prop("u_tom"))."'";
-        }  else {
+        if ($lastMaster->get_prop("u_tom")) {
+            $utom = "'" . strToSQL($lastMaster->get_prop("u_tom")) . "'";
+        } else {
             $utom = "null";
         }
         $ssql = "update TBL_TICKETS set idmaster=NULL, u_tom=" . $utom . " where id=" . intval($this->id);
@@ -877,8 +916,8 @@ class TKT extends TREE {
                 return json_encode($this->get_tree_history());
             case 'tipificacion':
                 $treeh = $this->get_tree_history();
-                $tipif=array();
-                foreach($treeh as $opt){
+                $tipif = array();
+                foreach ($treeh as $opt) {
                     array_push($tipif, $opt["ans"]);
                 }
                 return $tipif;

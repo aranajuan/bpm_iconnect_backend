@@ -94,7 +94,8 @@ class NOTIFY extends itobject {
         "id", //id del ticket
         "html_dir", //ruta a it
         "FA",    //fecha apertura
-        "ua->teamsnames"
+        "ua->teamsnames",
+        "tree"
     );
 
     function __construct($conn = null) {

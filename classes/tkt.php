@@ -224,6 +224,7 @@ class TKT extends TREE {
                 order by id
             ";
         } else {
+            $actions.="LINK";
             $actionsV = explode(",", $actions);
             $this->tkthActionsLoaded = $actionsV;
             foreach ($actionsV as &$av) {

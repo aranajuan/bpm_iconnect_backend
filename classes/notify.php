@@ -95,7 +95,8 @@ class NOTIFY extends itobject {
         "html_dir", //ruta a it
         "FA",    //fecha apertura
         "ua->teamsnames",
-        "tree"
+        "tree",
+        "action->alias"
     );
 
     function __construct($conn = null) {
@@ -391,6 +392,9 @@ class NOTIFY extends itobject {
                 }
                 return $rta;
                 break;
+            case "action->alias":
+                return $this->accionObj->get_prop("alias");
+                break;
             case "system->name":
                 $sy = $this->tkt_final->get_system();
                 if ($sy)
@@ -486,8 +490,8 @@ class NOTIFY extends itobject {
         
         $this->load_body();
         $this->load_cc_body();
-
-        $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . ")";
+        $actName=$this->get_body_value("action->alias");
+        $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . " - $actName)";
         $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
 
         foreach ($this->too as $t) {

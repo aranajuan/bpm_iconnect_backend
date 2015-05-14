@@ -53,6 +53,10 @@ class REPORTVALUE {
         return $this->event_count;
     }
 
+    public function getLastDataElCount(){
+        return $this->values[$this->event_count-1]->getCount();
+    }
+    
     public function nextRcount() {
         $this->rcount++;
     }

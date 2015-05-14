@@ -29,9 +29,12 @@ class REPORTEXCELADAPTER {
 
     private $excelFile;
     
+    private $rewriteError;
+    
     public function __construct($reportrequest) {
         $this->reportrequest = $reportrequest;
         $this->mappedCols = array();
+        $this->rewriteError=array();
         PHPExcel_Settings::setLocale("es_AR");
 
         $this->excel = new PHPExcel();
@@ -113,7 +116,7 @@ class REPORTEXCELADAPTER {
     private function writeValue($field, $value, $EvePos) {
         $itkt = 0;
         $evec = $field->getMax_cevents();
-
+        $subFieldc = $field->getMax_subfields();
         foreach ($value as $valueTKT) {
             $dataS_ALLEVE = $valueTKT->getValues(); //array de datas
             if (!isset($dataS_ALLEVE[$EvePos])) {
@@ -122,7 +125,7 @@ class REPORTEXCELADAPTER {
             }
             $dataEve = $dataS_ALLEVE[$EvePos]->getData();
             foreach ($dataEve as $dataEveProps) {
-                $alias = $this->getAlias($field->getAlias(), $evec, count($dataEve), $EvePos, $dataEveProps["title"]);
+                $alias = $this->getAlias($field->getAlias(), $evec, $subFieldc, $EvePos, $dataEveProps["title"]);
                 $col = $this->getCol($alias);
                 if ($field->getType()) {
                     $dataEveProps["type"] = $field->getType();
@@ -191,7 +194,12 @@ class REPORTEXCELADAPTER {
                 $value = $data["value"];
         }
         $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()->setFormatCode($format);
+        if(isset($this->rewriteError[$col."-".$row])){
+            echo "Error, sobreescritura detectada $col $row $value";
+            exit();
+        }
         $sheet->setCellValueByColumnAndRow($col, $row, $value);
+        $this->rewriteError[$col."-".$row]=true;
     }
 
     /**

@@ -125,6 +125,15 @@ class REPORTEXCELADAPTER {
             }
             $dataEve = $dataS_ALLEVE[$EvePos]->getData();
             foreach ($dataEve as $dataEveProps) {
+                $itformAlias = $this->reportrequest->getitFormAlias($dataEveProps["title"]);
+                if($itformAlias){
+                    if(isset($itformAlias["alias"])){
+                        $dataEveProps["title"]=$itformAlias["alias"];
+                    }
+                    if(isset($itformAlias["type"])){
+                        $dataEveProps["type"]=$itformAlias["type"];
+                    }
+                }
                 $alias = $this->getAlias($field->getAlias(), $evec, $subFieldc, $EvePos, $dataEveProps["title"]);
                 $col = $this->getCol($alias);
                 if ($field->getType()) {
@@ -196,6 +205,7 @@ class REPORTEXCELADAPTER {
         $sheet->getStyleByColumnAndRow($col, $row)->getNumberFormat()->setFormatCode($format);
         if(isset($this->rewriteError[$col."-".$row])){
             echo "Error, sobreescritura detectada $col $row $value";
+            print_r($data);
             exit();
         }
         $sheet->setCellValueByColumnAndRow($col, $row, $value);

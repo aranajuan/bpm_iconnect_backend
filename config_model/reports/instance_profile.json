@@ -38,5 +38,12 @@
             "alias": "Fecha union_"
         }
         
+        ],
+        
+        "itformalias":[
+            {"label":"monto en $",
+             "alias": "montos",
+             "type":"integer"
+            }
         ]
 }

@@ -575,21 +575,17 @@ class TKT extends TREE {
         $this->UB = NULL;
         $this->FB = NULL;
 
-        $rtaAction = $this->getEjecutingAction()->force_tkth();
-        if ($rtaAction["status"] != "ok")
-            return $rtaAction["status"];
-
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")), $rtaAction["id"]);
+                $c->re_open();
             }
         } elseif ($this->isWorking()) {
             $this->ejecute_action("SET_MASTER");
             $this->clear_childs();
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")), $rtaAction["id"]);
+                $c->re_open();
             }
         }
         return "ok";
@@ -611,14 +607,11 @@ class TKT extends TREE {
         }
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
-        $rtaAction = $this->getEjecutingAction()->force_tkth();
-        if ($rtaAction["status"] != "ok")
-            return $rtaAction["status"];
         
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("CERRAR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") cerrado"), $rtaAction["id"]));
+                $c->close();
             }
         }
         return "ok";
@@ -647,11 +640,7 @@ class TKT extends TREE {
 
         if ($this->is_master()) {
             foreach ($this->childs as $c)
-                $c->ejecute_action("DERIVAR", array(
-                    array("id" => "idteam", "value" => $equipo->get_prop("id")),
-                    array("id" => "comment", "value" => "Master(" . $this->id . ") derivado")
-                        )
-                );
+                $c->derive($equipo);
         }
 
         $this->idequipo = $equipo->get_prop("id");
@@ -840,6 +829,19 @@ class TKT extends TREE {
         return "ok";
     }
 
+    /**
+     * Pega link a los hijos
+     * @param TKT_H $TH
+     */
+    public function pasteTKTH($TH){
+        if(!$this->is_master())
+            return;
+        $childs=$this->get_prop("childs");
+        foreach ($childs as $c) {
+            $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
+        }
+    }
+    
     public function delete_DB() {
         return "Funcion en desarrollo.";
     }

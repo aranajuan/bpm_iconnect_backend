@@ -184,9 +184,21 @@ class TKTFILTER extends basicobject {
                         ( select count(*) from TBL_TICKETS_M as TKT_H_O 
                         inner join TBL_ACCIONES as ACCIONES_O on (ACCIONES_O.id=TKT_H_O.idaccion)
                         where TKT_H_O.idtkt=TKT.id and
-                        ACCIONES_O.ejecuta in ('open','derive') and
-                        TKT_H_O.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')".
-                        ")>0";
+                        (
+                            ACCIONES_O.ejecuta in ('open','derive') and
+                            TKT_H_O.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')
+                        ) OR
+                        (
+                            ACCIONES_O.ejecuta in ('link') and (
+                                select TKT_H_O2.valoraccion from TBL_TICKETS_M as TKT_H_O2
+                                inner join TBL_ACCIONES as ACCIONES_O2 on (ACCIONES_O2.id=TKT_H_O2.idaccion)
+                                where
+                                TKT_H_O2.id=TKT_H_O.valoraccion and
+                                ACCIONES_O2.ejecuta in ('derive') and
+                                TKT_H_O2.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')
+                            )
+                        )
+                        )>0";
                     break;
                 case self::$IDMASTER:
                     $idmaster = $this->get_filter($type);

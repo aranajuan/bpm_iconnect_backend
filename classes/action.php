@@ -379,7 +379,7 @@ class ACTION extends itobject {
         } else {
             $response["result"] = "ok";
         }
-        $rta=$this->addTKT_H();;
+        $rta=$this->addTKT_H();
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
@@ -408,7 +408,7 @@ class ACTION extends itobject {
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
         $rta["status"] = $tktH->insert_DB();
-        $rta["id"]=$tktH->get_prop("id");
+        $rta["obj"]=$tktH;
         $this->forceEveRta = $rta;
         return $rta;
     }

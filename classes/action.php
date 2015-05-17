@@ -220,8 +220,7 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return $rta;
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -239,8 +238,7 @@ class ACTION extends itobject {
             if ($this->estado == I_DELETED)
                 return "eliminado";
             return $rta;
-        }
-        else
+        } else
             $this->error = TRUE;
         return "error";
     }
@@ -376,10 +374,12 @@ class ACTION extends itobject {
             if ($response["result"] != "ok") {
                 return $response;
             }
+            $rta = $this->addTKT_H();
+            $this->getTKT()->pasteTKTH($rta["obj"]);
         } else {
             $response["result"] = "ok";
+            $rta = $this->addTKT_H();
         }
-        $rta=$this->addTKT_H();
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
@@ -408,7 +408,7 @@ class ACTION extends itobject {
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
         $rta["status"] = $tktH->insert_DB();
-        $rta["obj"]=$tktH;
+        $rta["obj"] = $tktH;
         $this->forceEveRta = $rta;
         return $rta;
     }

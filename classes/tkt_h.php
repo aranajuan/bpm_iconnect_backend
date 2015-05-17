@@ -200,7 +200,7 @@ class TKT_H extends itobject {
         $action = $element->createElement("action");
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
         if($this->isLinked()){
-            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")." - (en master)"));
+            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")." - (en TKT ".$this->get_prop("idtkt").")"));
         }else{
             $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
         }

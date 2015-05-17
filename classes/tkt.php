@@ -608,7 +608,7 @@ class TKT extends TREE {
         }
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
-        
+
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
@@ -640,8 +640,9 @@ class TKT extends TREE {
         }
 
         if ($this->is_master()) {
-            foreach ($this->childs as $c)
+            foreach ($this->get_prop("childs") as $c) {
                 $c->derive($equipo);
+            }
         }
 
         $this->idequipo = $equipo->get_prop("id");
@@ -669,6 +670,13 @@ class TKT extends TREE {
             return "TKT_priorizar: " . $this->dbinstance->details;
         }
         $this->prioridad = $idP;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->set_priority($idP);
+            }
+        }
+
         return "ok";
     }
 
@@ -678,13 +686,6 @@ class TKT extends TREE {
      */
     function take() {
 
-        if (!$this->is_master())
-            return "No se puede tomar estando anexado a otro tkt, realize esta accion en el master";
-
-        if (!$this->getLogged()->in_team($this->idequipo)) {
-            return "El ticket no esta asignado a tu equipo";
-        }
-
         $ssql = "update TBL_TICKETS set u_tom='" . strToSQL($this->getLogged()->get_prop("usr")) . "', u_asig=NULL where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_tomar: " . $this->dbinstance->details;
@@ -693,6 +694,13 @@ class TKT extends TREE {
         $this->u_tom_o = $this->getLogged();
         $this->u_asig = NULL;
         $this->u_asig_o = NULL;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->take();
+            }
+        }
+
         return "ok";
     }
 
@@ -713,6 +721,13 @@ class TKT extends TREE {
         $this->u_asig = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $tou;
         $this->u_asig_o = $this->getLogged();
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->asign($tou);
+            }
+        }
+
         return "ok";
     }
 
@@ -722,12 +737,6 @@ class TKT extends TREE {
      */
     function free() {
 
-        // solo verifica que sea del area. se debe controlar en la accion post que sea supervisor
-        if (!$this->is_master())
-            return "No se puede liberar estando anexado a otro tkt";
-        $l = $this->getLogged();
-        if (!$l->in_team($this->get_prop("idequipo")))
-            return "Este tkt no esta asignado a su equipo";
         $ssql = "update TBL_TICKETS set u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")) . "' where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_liberar: " . $this->dbinstance->details;
@@ -736,6 +745,13 @@ class TKT extends TREE {
         $this->u_asig = $l->get_prop("usr");
         $this->u_tom_o = NULL;
         $this->u_asig_o = $l;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->free();
+            }
+        }
+
         return "ok";
     }
 
@@ -746,7 +762,7 @@ class TKT extends TREE {
     function set_master() {
 
         if ($this->is_master()) {
-            return "El ticket ya es master";
+            return "ok";
         }
 
         $lastMaster = $this->master;
@@ -765,7 +781,7 @@ class TKT extends TREE {
         $this->idmaster = NULL;
         $this->master = NULL;
 
-        $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
+        $lastMaster->join($this);
 
         $this->childs = null;
         //reestablece detalles
@@ -779,7 +795,7 @@ class TKT extends TREE {
      * @return string
      */
     function join($master) {
-        $this->load_childs();
+        $childs = $this->get_prop("childs");
         if (trim($master->get_prop("id")) == trim($this->id)) {
             return "No se puede adjuntar al mismo ticket";
         }
@@ -787,7 +803,7 @@ class TKT extends TREE {
         if ($master->get_prop("FB") != NULL)
             return "No se puede adjuntar a este tkt, ya se encuentra cerrado.";
 
-        if ($master->get_prop("idmaster"))
+        if (!$master->is_master())
             return "Este ticket esta anexado al tkt:" . $master->get_prop("idmaster") . ". Debe anexarlo a este.";
 
         /* Deriva si el master esta en otro equipo */
@@ -809,8 +825,16 @@ class TKT extends TREE {
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
 
-        foreach ($this->childs as $c) {
-            $c->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $master->get_prop("id"))));
+
+        foreach ($childs as $c) {
+            $c->join($master);
+        }
+
+        $utomM = $master->get_prop("u_tom_o");
+        if ($utomM) {
+            $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM->get_prop("usr"))));
+        } elseif ($this->get_prop("u_tom_o")) {
+            $this->ejecute_action("LIBERAR");
         }
 
         return "ok";
@@ -834,15 +858,15 @@ class TKT extends TREE {
      * Pega link a los hijos
      * @param TKT_H $TH
      */
-    public function pasteTKTH($TH){
-        if(!$this->is_master())
+    public function pasteTKTH($TH) {
+        if (!$this->is_master())
             return;
-        $childs=$this->get_prop("childs");
+        $childs = $this->get_prop("childs");
         foreach ($childs as $c) {
             $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
         }
     }
-    
+
     public function delete_DB() {
         return "Funcion en desarrollo.";
     }

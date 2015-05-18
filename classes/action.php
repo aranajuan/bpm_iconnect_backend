@@ -37,7 +37,7 @@ class ACTION extends itobject {
     private $estado;    /* activo o no activo */
     private $form; /* formulario para cargar accion */
     private $files; /* archivos */
-    private $value; //valor de accion ejecutada
+    private $objadj_id; //id del objeto adjunto
     private $forceEveRta; // respuesta de evento forzado
 
     /**
@@ -57,7 +57,18 @@ class ACTION extends itobject {
      * @var boolean 
      */
     private $working;
-
+    
+    /**
+     * Hijos a notificar
+     * @var array<TKT>
+     */
+    private $childsPaste;
+    
+    /**
+     * Se setearon hijos forzadamente
+     * @var boolean
+     */
+    private $childsSeted;
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -119,6 +130,8 @@ class ACTION extends itobject {
 
     public function load_DB($id) {
         $idInt = intval($id);
+        $this->childsPaste=null;
+        $this->childsSeted=false;
         if (is_int($idInt) && $idInt > 0) {
             return $this->loadDB_id($idInt);
         } else {
@@ -210,7 +223,6 @@ class ACTION extends itobject {
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
-
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -288,11 +300,11 @@ class ACTION extends itobject {
     }
 
     /**
-     * Carga valor para tktH
-     * @param int $value
+     * Carga id de objeto para TKTH
+     * @param string $objadj_id
      */
-    public function loadValue($value) {
-        $this->value = $value;
+    public function loadObjadjId($objadj_id) {
+        $this->objadj_id = $objadj_id;
     }
 
     /**
@@ -366,6 +378,7 @@ class ACTION extends itobject {
      * @return array resultado
      */
     public function ejecute() {
+        $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = OBJECTCACHE::getInstance();
             $file = "actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
@@ -373,10 +386,13 @@ class ACTION extends itobject {
             if ($response["result"] != "ok") {
                 return $response;
             }
+            $rta = $this->addTKT_H();
+            $this->pasteTKTH($rta["obj"]);
         } else {
             $response["result"] = "ok";
+            $rta = $this->addTKT_H();
         }
-        $response["tkth"] = $this->addTKT_H();
+        $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
     }
@@ -386,6 +402,9 @@ class ACTION extends itobject {
      * @return String
      */
     public function force_tkth() {
+        if ($this->forceEveRta) {
+            return $this->forceEveRta;
+        }
         $this->forceEveRta = $this->addTKT_H();
         return $this->forceEveRta;
     }
@@ -400,11 +419,47 @@ class ACTION extends itobject {
         }
         $tktH = new TKT_H();
         $tktH->load_VEC($this);
-        $rta = $tktH->insert_DB();
+        $rta["status"] = $tktH->insert_DB();
+        $rta["obj"] = $tktH;
         $this->forceEveRta = $rta;
         return $rta;
     }
 
+    /**
+     * Carga tkts para generarles link
+     * @param array<TKT>
+     */
+    public function setChilds($childs){
+        $this->childsPaste=$childs;
+        $this->childsSeted=true;
+    }
+    
+    /**
+     * Devuelve array de hijos del tkt
+     * @return array<TKT>
+     */
+    private function getChilds(){
+        if($this->childsSeted){
+            return $this->childsPaste;
+        }
+        if($this->getTKT()){
+            return $this->getTKT()->get_prop("childs");
+        }
+        return null;
+    }
+    
+    
+    /**
+     * Pega link a los hijos
+     * @param TKT_H $TH
+     */
+    private function pasteTKTH($TH) {
+        $childs = $this->getChilds();
+        foreach ($childs as $c) {
+            $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
+        }
+    }
+    
     /**
      * Devuelve formulario
      * @return itform
@@ -430,8 +485,8 @@ class ACTION extends itobject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
-            case 'value':
-                return $this->value;
+            case 'objadj_id':
+                return $this->objadj_id;
             case 'habilita_t_propio':
                 return $this->habilita_t_propio;
             case 'habilita_tomado':

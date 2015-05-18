@@ -1,6 +1,6 @@
 <?php
 
-$T = $obCI->get_object('TEAM', $this->get_prop("valoraccion"));
+$T = $obCI->get_object('TEAM', $this->get_prop("objadj_id"));
 if($T){
     $TT = $obCI->get_object('TKT', $this->get_prop("idtkt"));;
     if($TT){
@@ -12,7 +12,7 @@ if($T){
     
     $asignado = " // Asignado a: ".$T->get_prop("nombre")." ($status)";
 }else{
-    $asignado= " // Asignado a: Indeterminado - Error ".$this->get_prop("valoraccion");
+    $asignado= " // Asignado a: Indeterminado - Error ".$this->get_prop("objadj_id");
 }
 
 if($this->get_prop("UA_o")){

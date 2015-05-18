@@ -3,7 +3,7 @@
 /**
  * Formularios xml para datos itracker
  */
-class itform {
+class itform implements XmlPropInterface{
 
     /**
      *
@@ -391,10 +391,15 @@ class itform {
         $i = 0;
         $data = $this->get_outputDOM();
         $els = $data->getElementsByTagName("element");
+        $arrTitles=array();
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);
             $arr[$i]["type"] = $this->getReportType($arr[$i]);
             $arr[$i]["title"]=$arr[$i]["label"];
+            if(in_array($arr[$i]["title"], $arrTitles)){
+                $arr[$i]["title"].=$arr[$i]["id"];
+            }
+            array_push($arrTitles, $arr[$i]["title"]);
             if($arr[$i]["type"]=="select"){
                 $arr[$i]["type"] ="input";
                 $arr[$i]["value"]=$arr[$i]["valuetxt"];  
@@ -417,5 +422,9 @@ class itform {
             return $rta;
         }
         return "Propiedad invalida.";
+    }
+
+    public function getXML($doc, $props) {
+        return null;
     }
 }

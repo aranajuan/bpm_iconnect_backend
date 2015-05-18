@@ -4,13 +4,14 @@ class REPORTFIELD {
 
     private $json;
     private $max_cevents;
+    private $max_subfields; /* maximo de elementos en data */
     private $order;
     private $modificator;
     private $actionV;
-    
+
     public function __construct() {
         $this->max_cevents = 0;
-        $this->actionV=null;
+        $this->actionV = null;
     }
 
     /**
@@ -41,7 +42,7 @@ class REPORTFIELD {
         }
 
         $this->setMax_cevents($this->addToValue($propval, $value));
-
+        $this->setMax_subfields($value->getLastDataElCount());
         $value->nextRcount();
     }
 
@@ -83,19 +84,30 @@ class REPORTFIELD {
         }
     }
 
+    private function setMax_subfields($val) {
+        if ($val > $this->max_subfields) {
+            $this->max_subfields = $val;
+        }
+    }
+
     public function getMax_cevents() {
         return $this->max_cevents;
     }
 
+    public function getMax_subfields() {
+        return $this->max_subfields;
+    }
+    
     /* configs de json */
 
     public function getAction() {
         return $this->json->action;
     }
-    
-    public function getActionV(){
-        if($this->actionV!=null) return $this->actionV;
-        $this->actionV = explode(",",$this->getAction());
+
+    public function getActionV() {
+        if ($this->actionV != null)
+            return $this->actionV;
+        $this->actionV = explode(",", $this->getAction());
         return $this->actionV;
     }
 

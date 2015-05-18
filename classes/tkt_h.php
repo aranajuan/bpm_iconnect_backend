@@ -51,8 +51,12 @@ class TKT_H extends itobject {
      * @var ACTION 
      */
     private $accion; /* objeto accion */
-    
     private $idLink;
+
+    function __construct($conn = null) {
+        parent::__construct($conn);
+        $this->idLink=null;
+    }
 
     function load_DB($id) {
         $this->error = FALSE;
@@ -92,8 +96,8 @@ class TKT_H extends itobject {
         $this->idtkt = $tmpU["idtkt"];
         $this->objadj_id = $tmpU["valoraccion"];
         $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
-        if($accion->get_prop('nombre')=="LINK"){
-            $this->idLink=$this->id;
+        if ($accion->get_prop('nombre') == "LINK") {
+            $this->idLink = $this->id;
             return $this->load_DB($this->objadj_id);
         }
         $this->detalle = $tmpU["detalle"];
@@ -116,10 +120,10 @@ class TKT_H extends itobject {
      * Es un link
      * @return boolean
      */
-    public function isLinked(){
-        return $this->idLink!=null;
+    public function isLinked() {
+        return $this->idLink != null;
     }
-    
+
     /**
      * Setea id del equipo
      * @param int $id
@@ -199,9 +203,9 @@ class TKT_H extends itobject {
 
         $action = $element->createElement("action");
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
-        if($this->isLinked()){
-            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")." - (en TKT ".$this->get_prop("idtkt").")"));
-        }else{
+        if ($this->isLinked()) {
+            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias") . " - (en TKT " . $this->get_prop("idtkt") . ")"));
+        } else {
             $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
         }
         $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));

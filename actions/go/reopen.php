@@ -12,8 +12,6 @@ $rtaOP = $TKT->re_open();
 if ($rtaOP != "ok") {
     $response = array("result" => "error", "msj" => $rtaOP);
 } else {
-    $rtaTH = $this->force_tkth();
-    $TKT->pasteTKTH($rtaTH["obj"]);
     $response = array("result" => "ok", "msj" => "");
 }
 return $response;

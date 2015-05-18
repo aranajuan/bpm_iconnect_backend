@@ -224,7 +224,7 @@ class TKT extends TREE {
                 order by id
             ";
         } else {
-            $actions.="LINK";
+            $actions.=",LINK";
             $actionsV = explode(",", $actions);
             $this->tkthActionsLoaded = $actionsV;
             foreach ($actionsV as &$av) {
@@ -271,33 +271,34 @@ class TKT extends TREE {
 
     public function get_status() {
         $TKTHF = $this->get_last_tktH();
-        if ($this->UB)
+        if ($this->UB) {
             $status = "Cerrado";
-        else
-        if ($TKTHF) {
-            if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
-                $status = "Se requiere de tu accion (" . $TKTHF->get_prop("FA") . ")";
-            else {
-                //verificar estado del master
-                if ($this->idmaster) {
-                    $this->load_master();
-                }
-                if ($this->master) {
-                    if ($this->master->get_prop("u_tom"))
-                        $status = "En analisis";
-                    else
-                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                        $status = "Derivado";
-                    else
-                        $status = "Pendiente";
-                } else {
-                    if ($this->u_tom)
-                        $status = "En analisis";
-                    else
-                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                        $status = "Derivado";
-                    else
-                        $status = "Pendiente";
+        } else {
+            if ($TKTHF) {
+                if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
+                    $status = "Se requiere de tu accion (" . $TKTHF->get_prop("FA") . ")";
+                else {
+                    //verificar estado del master
+                    if ($this->idmaster) {
+                        $this->load_master();
+                    }
+                    if ($this->master) {
+                        if ($this->master->get_prop("u_tom"))
+                            $status = "En analisis";
+                        else
+                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                            $status = "Derivado";
+                        else
+                            $status = "Pendiente";
+                    } else {
+                        if ($this->u_tom)
+                            $status = "En analisis";
+                        else
+                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                            $status = "Derivado";
+                        else
+                            $status = "Pendiente";
+                    }
                 }
             }
         }
@@ -736,7 +737,7 @@ class TKT extends TREE {
      * @return string rta
      */
     function free() {
-
+        $l = $this->getLogged();
         $ssql = "update TBL_TICKETS set u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")) . "' where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_liberar: " . $this->dbinstance->details;
@@ -806,7 +807,7 @@ class TKT extends TREE {
         if (!$master->is_master())
             return "Este ticket esta anexado al tkt:" . $master->get_prop("idmaster") . ". Debe anexarlo a este.";
 
-        /* Deriva si el master esta en otro equipo */
+        /* ADECUACION EQUIPO */
         if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
             $rta = $this->ejecute_action("DERIVAR", array(
                 array("id" => "idequipo", "value" => $master->get_prop("idequipo")),
@@ -817,6 +818,29 @@ class TKT extends TREE {
             }
         }
 
+        /* ADECUACION USUARIO TOMADO */
+        $utomM = $master->get_prop("u_tom");
+        $utom = $this->get_prop("u_tom");
+        $ul = $this->getLogged()->get_prop("usr");
+
+        if ($utomM == null && $utom != null) {
+            if ($utom == $ul) {
+                $master->ejecute_action("TOMAR");
+            } else {
+                $master->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utom)));
+            }
+        } elseif ($utomM) {
+            if ($utom == null) {
+                if ($utomM == $ul) {
+                    $this->ejecute_action("TOMAR");
+                } else {
+                    $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM)));
+                }
+            } elseif ($utomM != $utom) {
+                return "El master esta tomado por otro usuario";
+            }
+        }
+
         $ssql = "update TBL_TICKETS set idmaster=" . intval($master->get_prop("id")) . " where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_join: " . $this->dbinstance->details;
@@ -824,18 +848,13 @@ class TKT extends TREE {
 
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
-
+        $this->clear_childs();
 
         foreach ($childs as $c) {
             $c->join($master);
         }
 
-        $utomM = $master->get_prop("u_tom_o");
-        if ($utomM) {
-            $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM->get_prop("usr"))));
-        } elseif ($this->get_prop("u_tom_o")) {
-            $this->ejecute_action("LIBERAR");
-        }
+
 
         return "ok";
     }
@@ -852,19 +871,6 @@ class TKT extends TREE {
         $this->idmaster = NULL;
         $this->master = NULL;
         return "ok";
-    }
-
-    /**
-     * Pega link a los hijos
-     * @param TKT_H $TH
-     */
-    public function pasteTKTH($TH) {
-        if (!$this->is_master())
-            return;
-        $childs = $this->get_prop("childs");
-        foreach ($childs as $c) {
-            $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
-        }
     }
 
     public function delete_DB() {

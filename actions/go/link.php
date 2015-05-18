@@ -6,9 +6,9 @@
  * @return array    $response=array("result"=>"","msj"=>"");
  */
 $response = array("result" => "", "msj" => "");
-$TKT = $this->getTKT();
 $itf = $this->getitform();
 $idth = $itf->get_value("idth");
+$this->setChilds(null);
 if(is_numeric($idth)){
     $this->loadObjadjId($idth);
     return array("result" => "ok", "msj" => "");

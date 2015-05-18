@@ -57,7 +57,18 @@ class ACTION extends itobject {
      * @var boolean 
      */
     private $working;
-
+    
+    /**
+     * Hijos a notificar
+     * @var array<TKT>
+     */
+    private $childsPaste;
+    
+    /**
+     * Se setearon hijos forzadamente
+     * @var boolean
+     */
+    private $childsSeted;
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -119,6 +130,8 @@ class ACTION extends itobject {
 
     public function load_DB($id) {
         $idInt = intval($id);
+        $this->childsPaste=null;
+        $this->childsSeted=false;
         if (is_int($idInt) && $idInt > 0) {
             return $this->loadDB_id($idInt);
         } else {
@@ -210,7 +223,6 @@ class ACTION extends itobject {
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
-
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -375,7 +387,7 @@ class ACTION extends itobject {
                 return $response;
             }
             $rta = $this->addTKT_H();
-            $this->getTKT()->pasteTKTH($rta["obj"]);
+            $this->pasteTKTH($rta["obj"]);
         } else {
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
@@ -413,6 +425,41 @@ class ACTION extends itobject {
         return $rta;
     }
 
+    /**
+     * Carga tkts para generarles link
+     * @param array<TKT>
+     */
+    public function setChilds($childs){
+        $this->childsPaste=$childs;
+        $this->childsSeted=true;
+    }
+    
+    /**
+     * Devuelve array de hijos del tkt
+     * @return array<TKT>
+     */
+    private function getChilds(){
+        if($this->childsSeted){
+            return $this->childsPaste;
+        }
+        if($this->getTKT()){
+            return $this->getTKT()->get_prop("childs");
+        }
+        return null;
+    }
+    
+    
+    /**
+     * Pega link a los hijos
+     * @param TKT_H $TH
+     */
+    private function pasteTKTH($TH) {
+        $childs = $this->getChilds();
+        foreach ($childs as $c) {
+            $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
+        }
+    }
+    
     /**
      * Devuelve formulario
      * @return itform

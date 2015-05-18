@@ -33,10 +33,10 @@ abstract class itobject extends basicobject implements XmlPropInterface, dbobjec
             $pv = $this->get_prop($p);
         } else {
             $po = $this->get_prop($pparts[0]);
-            if ($po) {
+            if ($po instanceof XmlPropInterface) {
                 $pv = $po->get_prop($pparts[1]);
             } else {
-                $pv = "";
+                $pv = "ERROR PROPIEDAD $p";
             }
         }
         return $pv;

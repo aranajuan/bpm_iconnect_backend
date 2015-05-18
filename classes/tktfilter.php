@@ -190,13 +190,13 @@ class TKTFILTER extends basicobject {
                         ) OR
                         (
                             ACCIONES_O.ejecuta in ('link') and (
-                                select TKT_H_O2.valoraccion from TBL_TICKETS_M as TKT_H_O2
+                                select count(TKT_H_O2.valoraccion) from TBL_TICKETS_M as TKT_H_O2
                                 inner join TBL_ACCIONES as ACCIONES_O2 on (ACCIONES_O2.id=TKT_H_O2.idaccion)
                                 where
                                 TKT_H_O2.id=TKT_H_O.valoraccion and
                                 ACCIONES_O2.ejecuta in ('derive') and
                                 TKT_H_O2.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')
-                            )
+                            )>0
                         )
                         )>0";
                     break;

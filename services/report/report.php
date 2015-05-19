@@ -1,11 +1,9 @@
 <?php
 
-require_once 'classes/report.php';
 require_once 'classes/tkt.php';
-
-function add_node($tnode, $form) {
-    
-}
+require_once 'classes/tktlister.php';
+require_once 'classes/report/reportrequest.php';
+require_once 'classes/report/reportexceladapter.php';
 
 /**
  * Lista
@@ -14,154 +12,67 @@ function add_node($tnode, $form) {
  */
 function GO($RC) {
 
-    //TODO chequear acceso a reporte  
-    $R = new REPORT();
-
-    $R->setFrom($RC->get_params("from") . "00:00");
-    $R->setTo($RC->get_params("too") . " 23:59");
-    if (!$R->isvalid()) {
-        return $RC->createElement("error", "Fechas invalidas o periodo incorrecto. Seleccione un rango no mayor a " . REPORT_DAYSMAX . " dias.");
-    }
-
-    $teamVid = explode(",", $RC->get_params("teams"));
-    $teamsVO = array();
-
     $u = $RC->get_User();
-    foreach ($teamVid as $id) {
-        $t = $u->get_team_obj($id);
-        if ($t) {
-            array_push($teamsVO, $t);
+    $rname = $RC->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
+    $filepath=INCLUDE_DIR . "/config/reports/".$rname.".json";
+    if(!file_exists($filepath)){
+         return $RC->createElement("error", "No hay reporte disponible para el perfil. $rname");
+    }
+    $arrayTeam = array();
+    $idsteams = explode(",", $RC->get_params("team"));
+    foreach ($idsteams as $idteam) {
+        if (!$u->in_team($idteam)) {
+            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
+        array_push($arrayTeam, $idteam);
     }
 
-    switch ($RC->get_params("filter")) {
-        case "from":
-            $R->openbyOpTeam($teamsVO);
-            break;
-        case "to":
-            $R->listTouchStaffteam($teamsVO);
-            break;
+    $Tf = new TKTFILTER();
+    $Tf->set_filter(TKTFILTER::$DATE_FROM, @STRdate_format($RC->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));
+
+    $Tf->set_filter(TKTFILTER::$DATE_TO, @STRdate_format($RC->get_params("too") . " 23:59", USERDATE_READ, DBDATE_WRITE));
+
+    if($RC->get_params("datefilter") == "apertura"){
+        $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FA);
+    }else{
+        $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_UPDATE);
     }
-
-    $lT = $R->getObjs();
-    $data = $RC->createElement("data");
-    $list = $RC->createElement("list");
-    $tifMax = 0;
-    $fieldOlist = array();
-    $fieldClist = array();
-    foreach ($lT as $tkt) {
-        $tnode = $RC->createElement("TKT");
-        $tnode->appendChild($RC->createElement("id", $tkt->get_prop("id")));
-        $tnode->appendChild($RC->createElement("FA", $tkt->get_prop("FA")));
-        //tipificacion
-        $i = 0;
-        $topt = $tkt->get_tree_history();
-        foreach ($topt as $to) {
-            $i++;
-            $tnode->appendChild($RC->createElement("T" . $i, $to["ans"]));
-        }
-        if ($i > $tifMax) {
-            $tifMax = $i;
-        }
-        $tnode->appendChild($RC->createElement("UA", $tkt->get_prop("usr_o")->get_prop("nombre")));
-        $teamsT = "";
-        foreach ($tkt->get_prop("usr_o")->get_prop("equiposobj") as $t) {
-            $teamsT.=$t->get_prop("nombre") . ";";
-        }
-        $tnode->appendChild($RC->createElement("EA", $teamsT));
-        $cStatus = $tkt->get_status();
-        $tnode->appendChild($RC->createElement("status", $cStatus[1]));
-
-        $events = $tkt->get_tktHObj();
-        $lastclose = null;
-        foreach ($events as $e) {
-
-            if ($e->get_prop('accion')->get_prop('ejecuta') == "open") {
-                //carga campos de apertura
-                $idt = $e->get_prop('valoraccion');
-                $form = $e->get_prop('detalle_xml');
-                $tA = $RC->get_objcache()->get_object("TEAM", $idt);
-                if ($RC->get_objcache()->get_status("TEAM", $idt) == "ok") {
-                    $tnode->appendChild($RC->createElement("asignadoa", $tA->get_prop("nombre")));
-                }
-                if ($form) {
-                    $fields = $form->getElementsByTagName("element");
-
-                    foreach ($fields as $field) {
-                        $lbl = $field->getElementsByTagName("label");
-                        $val = $field->getElementsByTagName("value");
-                        $id = $field->getElementsByTagName("id");
-                        $value = $val->item(0)->textContent;
-                        if ($id->item(0)->textContent && $value) {
-                            $type = trim(space_delete($field->getElementsByTagName("type")->item(0)->textContent));
-                            if ($type == "select") {
-                                $opts = $field->getElementsByTagName("option");
-                                foreach ($opts as $o) {
-                                    if (trim(space_delete($o->getElementsByTagName("value")->item(0)->textContent)) == $value) {
-                                        $value = $o->getElementsByTagName("text")->item(0)->textContent;
-                                    }
-                                }
-                            }
-                            $lblt = trim(space_delete($lbl->item(0)->textContent));
-                            $idt = trim(space_delete($id->item(0)->textContent));
-                            $tnode->appendChild($RC->createElement("id" . $idt, $value));
-                            if (!in_array("id" . $idt . "=>" . $lblt, $fieldOlist)) {
-                                array_push($fieldOlist, "id" . $idt . "=>" . $lblt);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if ($e->get_prop('accion')->get_prop('ejecuta') == "close") {
-                $lastclose = $e;
+    
+    if ($RC->get_params("filter") == "tratadopor") {
+        $Tf->set_filter(TKTFILTER::$TOUCH_BY_TEAM, $arrayTeam);
+    } else {
+        $users=array();
+        foreach ($arrayTeam as $id) {
+            $t = $u->get_team_obj($id);
+            if ($t) {
+                $users= array_merge($users,makeproparr($t->get_users(),"usr"));
             }
         }
-
-        if ($lastclose) {
-            //muestra campos de cierre
-            $FC = $lastclose->get_prop('FA');
-            $form = $lastclose->get_prop('detalle_xml');
-            $tnode->appendChild($RC->createElement("FC", $FC));
-            if ($form) {
-                $fields = $form->getElementsByTagName("element");
-
-                foreach ($fields as $field) {
-                    $lbl = $field->getElementsByTagName("label");
-                    $val = $field->getElementsByTagName("value");
-                    $id = $field->getElementsByTagName("id");
-                    $value = $val->item(0)->textContent;
-                    if ($id->item(0)->textContent && $value) {
-                        $type = trim(space_delete($field->getElementsByTagName("type")->item(0)->textContent));
-                        if ($type == "select") {
-                            $opts = $field->getElementsByTagName("option");
-                            foreach ($opts as $o) {
-                                if (trim(space_delete($o->getElementsByTagName("value")->item(0)->textContent)) == $value) {
-                                    $value = $o->getElementsByTagName("text")->item(0)->textContent;
-                                }
-                            }
-                        }
-                        $lblt = trim(space_delete($lbl->item(0)->textContent));
-                        $idt = trim(space_delete($id->item(0)->textContent));
-                        $tnode->appendChild($RC->createElement("id" . $idt, $value));
-                        if (!in_array("id" . $idt . "=>cierre_" . $lblt, $fieldClist)) {
-                            array_push($fieldClist, "id" . $idt . "=>cierre_" . $lblt);
-                        }
-                    }
-                }
-            }
-        }
-
-        $list->appendChild($tnode);
-        //detalle.xml
+        $Tf->set_filter(TKTFILTER::$UA, $users);
     }
-    $tlisTXT = "";
-    for ($i = 1; $i <= $tifMax; $i++) {
-        $tlisTXT.=",T" . $i;
+
+
+    $Tl = new TKTLISTER();
+    $Tl->loadFilter($Tf);
+    
+    if(!$Tl->execute()){
+        return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
     }
-    $fields = implode(",", $fieldOlist) .",". implode(",", $fieldClist);
-    $data->appendChild($RC->createElement("view", "id,FA=>fecha apertura" . $tlisTXT . ",UA=>Usuario apertura,EA=>Equipo apertura,status,FC=>Fecha cierre,asignadoa," . $fields));
-    $data->appendChild($list);
-    return $data;
+
+    $RR = new REPORTREQUEST();
+    $RR->setTitle($rname);
+    $RR->loadTKTS($Tl->getObjs());
+    
+    $RR->loadITJson(file_get_contents($filepath));
+
+    $RR->execute();
+    $RPADAPTER = new REPORTEXCELADAPTER($RR);
+    $RPADAPTER->loadExcel();
+
+    $arch = $RC->createElement("file");
+    $arch->appendChild($RC->createElement("name", "reporteITRACKER.xlsx"));
+    $arch->appendChild($RC->createElementSecure("data", $RPADAPTER->getFile()));
+
+    return $arch;
 }
 

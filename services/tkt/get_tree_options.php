@@ -49,10 +49,13 @@ function GO($RC) {
 
         if ($topts["object"]) {
             if ($topts["object"]->get_prop("idequipo_destino") && $topts["object"]->get_prop("ruta_destino") == NULL) {
-                $X = $topts["object"]->get_prop("pretext");
-                $dom = new DOMDocument();
-                $dom->loadXML($X);
-                $joined = $RC->append_xml($dom->documentElement);
+                $itform= $topts["object"]->get_prop("itform");
+                if($itform){
+                    $itfdom=$itform->get_inputDOM()->documentElement;
+                }else{
+                    return $RC->createElement("error", "Error en formulario #1");
+                }
+                $joined = $RC->append_xml($itfdom);
                 if ($joined) {
                     $opendata = $RC->createElement("opendata");
                     $opendata->appendChild($joined);
@@ -61,7 +64,7 @@ function GO($RC) {
                     $treeL->appendChild($simi);
                     return $treeL;
                 } else {
-                    return $RC->createElement("error", "imposible unir");
+                    return $RC->createElement("error", "Error en formulario #2");
                 }
             } else {
                 $opendata = $RC->createElement("opendata");

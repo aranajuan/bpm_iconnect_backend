@@ -63,6 +63,7 @@ class DB {
                 error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
+                return 1;
             } else {
                 $this->cReg = mysql_num_rows($this->RS);
                 if ($this->cReg) {
@@ -70,6 +71,7 @@ class DB {
                 } else {
                     $this->noEmpty = 0;
                 }
+                return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
             $this->RS = $this->get_link()->query($ssql);
@@ -80,6 +82,7 @@ class DB {
                 error_log("IT:sql:" . $ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
+                return 1;
             } else {
                 $this->resultarr=$this->RS->fetchAll();
                 $this->cReg =count($this->resultarr);
@@ -87,6 +90,7 @@ class DB {
                     $this->noEmpty = 1;
                 else
                     $this->noEmpty = 0;
+                return 0;
             }
         }
     }

@@ -18,7 +18,7 @@
     
     $rtaOP = $TKT->asign($tou);
     
-    $this->loadValue($tou->get_prop("usr"));
+    $this->loadObjadjId($tou->get_prop("usr"));
     
     if($rtaOP!="ok"){
         $response = array("result" => "error", "msj" => $rtaOP);

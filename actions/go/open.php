@@ -44,7 +44,7 @@ $idmaster = $itf->get_value_arr("idmaster");
 /* abre ticket */
 $rtaOP = $TKT->open();
 
-$this->loadValue($TKT->get_prop("idequipo"));
+$this->loadObjadjId($TKT->get_prop("idequipo"));
 
 if ($rtaOP != "ok") {
     $response["result"] = "error";

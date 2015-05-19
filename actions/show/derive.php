@@ -1,8 +1,8 @@
 <?php
 
-$uas= $obCI->get_object('TEAM', $this->get_prop("valoraccion"));
+$uas= $obCI->get_object('TEAM', $this->get_prop("objadj_id"));
 if($uas){
-    return "Se ha derivado a ".$uas->get_prop("nombre");
+    return array($uas, "Se ha derivado a ".$uas->get_prop("nombre"));
 }else{
-    return "No se puede determinar equipo. Error ".$this->get_prop("valoraccion");
+    return "No se puede determinar equipo. Error ".$this->get_prop("objadj_id");
 }

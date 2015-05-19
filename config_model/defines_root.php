@@ -16,7 +16,6 @@ define("MAIL_HEADER","https://itracker.personal.com.ar/img/head_email.png");
 define("MAIL_FOOTER","https://itracker.personal.com.ar/img/foot_email.png");
 
 define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT");
-define("INSTANCES","TELECOMCCT,AGENTESTP");
 
 // Configuraciones Base
 
@@ -39,9 +38,12 @@ define('DBPASS_ROOT','XtEh5Bu8fdWaBvSv62dKYD7Pp9DYGp8fWT5Gc8a/sI4=');					// PAS
 //txKiP8BpK0LbEpwkumD1RTiSw6W9XgDFr04N7VOC5To=  LOCAL
 //YsUMJpZak1xKmsyotXuBgajNQ1fCkTCe4U5wBuO/0sw=  DWIN
 
+define('USERDATE_READ_TIME','H:i');
+define('USERDATE_READ_MONTH','m-Y');
+define('USERDATE_READ_DATE','d-'.USERDATE_READ_MONTH);
 
 //Parametros y constantes
-define('USERDATE_READ','d-m-Y H:i');
+define('USERDATE_READ',USERDATE_READ_DATE.' '.USERDATE_READ_TIME);
 
 if(DBSERVER_ALL=='mysql'){
     define('DBDATE_READ','Y-m-d H:i:s');

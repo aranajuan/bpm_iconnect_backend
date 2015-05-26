@@ -25,11 +25,23 @@ class TKT_H extends itobject {
 
     /**
      * Dom de detalle
-     * @var DOMDocument
+     * @var itform
      */
-    private $detalleDOM;
+    private $itform;
     private $idaccion;
-    private $valoraccion;
+    private $objadj_id; /* id del objeto anexo <-valoraccion */
+
+    /**
+     * Objeto $objadj_id
+     * @var itobject
+     */
+    private $objadj;
+
+    /**
+     * Texto de $objadj_id
+     * @var string
+     */
+    private $objadj_txt;
     private $estado;    /* estado de la accion */
     private $idteam;    /* equipo que genero el evento */
     private $UA_o;
@@ -39,6 +51,12 @@ class TKT_H extends itobject {
      * @var ACTION 
      */
     private $accion; /* objeto accion */
+    private $idLink;
+
+    function __construct($conn = null) {
+        parent::__construct($conn);
+        $this->idLink=null;
+    }
 
     function load_DB($id) {
         $this->error = FALSE;
@@ -74,18 +92,36 @@ class TKT_H extends itobject {
         $this->FB = $tmpU["FB"];
         $this->UB = $tmpU["UB"];
         $this->idaccion = $tmpU["idaccion"];
-        $this->valoraccion = $tmpU["valoraccion"];
         $this->estado = $tmpU["estado"];
         $this->idtkt = $tmpU["idtkt"];
+        $this->objadj_id = $tmpU["valoraccion"];
         $accion = $this->objsCache->get_object("ACTION", $this->idaccion);
-        $rta = $this->objsCache->get_status("ACTION", $this->idaccion);
+        if ($accion->get_prop('nombre') == "LINK") {
+            $this->idLink = $this->id;
+            return $this->load_DB($this->objadj_id);
+        }
         $this->detalle = $tmpU["detalle"];
-        if($this->detalle!=null && $this->detalle!=""){
-            $this->detalleDOM = new DOMDocument();
-            $this->detalleDOM->loadXML($this->detalle);
+        if ($this->detalle != null && $this->detalle != "") {
+            $this->itform = new itform();
+            if ($this->itform->load_xml($this->detalle) == false) {
+                return "Error al cargar formulario " . $this->id;
+            }
+        } else {
+            $this->itform = null;
         }
         $this->accion = $accion;
+        if ($this->FB != "" && $this->FB != null) {
+            return "eliminado";
+        }
         return "ok";
+    }
+
+    /**
+     * Es un link
+     * @return boolean
+     */
+    public function isLinked() {
+        return $this->idLink != null;
     }
 
     /**
@@ -104,32 +140,26 @@ class TKT_H extends itobject {
         $this->accion = $tmpU;
     }
 
-    /* Elimina registros abiertos */
-
-    private function delete_open() {
-        $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where FB is NULL and idtkt=" . intval($this->accion->getTKT()->get_prop("id"));
-        return $this->dbinstance->query($ssql);
-    }
-
     /* Inserta nuevo registro y carga ID en el objeto
      */
 
     function insert_DB() {
-        if ($this->delete_open()) {
-            return "TKTH_Delete" . $this->dbinstance->details;
-        }
-
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
                 intval($this->accion->get_prop("id")) . ",'" .
-                strToSQL($this->accion->get_prop("value")) . "',now(),'"
+                strToSQL($this->accion->get_prop("objadj_id")) . "',now(),'"
                 . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL," . I_ACTIVE . ");";
 
         if ($this->dbinstance->query($ssql)) {
             return "TKTH_Insert: " . $this->dbinstance->details;
         } else {
             $this->id = $this->dbinstance->get_lastID();
-            $form = $this->accion->getitform()->get_output();
+            $itform = $this->accion->getitform();
+            if ($itform) {
+                $form = $itform->get_output();
+            } else {
+                $form = "";
+            }
             $this->save_files();
             if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
                 return "ok";
@@ -145,19 +175,17 @@ class TKT_H extends itobject {
         }
     }
 
-    /**
-     * Bloquea vista de elementos con acceso restringido
-     * @param int $viewL
-     *
-     */
-    private function lock_view($viewL) {
-        if($this->detalleDOM == null) return;
-        $elements = $this->detalleDOM->getElementsByTagName("element");
-        foreach ($elements as $e) {
-            $vRQ = intval($e->getElementsByTagName("view")->item(0)->nodeValue || 0);
-            if ($vRQ != 0 && $viewL > $vRQ) {
-                $e->getElementsByTagName("value")->item(0)->nodeValue = "****";
-            }
+    private function loadObjadj() {
+        if ($this->objadj_txt != "")
+            return;
+        if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
+            $obCI = OBJECTCACHE::getInstance();
+            $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
+            $this->objadj = $val[0];
+            $this->objadj_txt = $val[1];
+        } else {
+            $this->objadj = null;
+            $this->objadj_txt = $this->get_prop("objadj_id");
         }
     }
 
@@ -171,26 +199,25 @@ class TKT_H extends itobject {
             return null;
         $element = new DOMDocument();
 
-        $elementData= $element->createElement("th");
-        
+        $elementData = $element->createElement("th");
+
         $action = $element->createElement("action");
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
-        $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
-        $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        if (file_exists(INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php")) {
-            $obCI = OBJECTCACHE::getInstance();
-            $val = include INCLUDE_DIR . "/actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
-            $action->appendChild($element->createElement("value", $val));
+        if ($this->isLinked()) {
+            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias") . " - (en TKT " . $this->get_prop("idtkt") . ")"));
         } else {
-            $action->appendChild($element->createElement("value", $this->get_prop("valoraccion")));
+            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
         }
+        $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
+        $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
-        
-        if ($this->get_prop("detalle_xml") != null) {
-            $nodo = $element->importNode($this->get_prop("detalle_xml")->documentElement,true);
+
+        if ($this->get_prop("itform") != null) {
+            $nodo = $element->importNode(
+                    $this->get_prop("itform")->get_outputDOM()->documentElement, true);
             $elementData->appendChild($nodo);
         }
         $files_h = $this->get_files();
@@ -229,7 +256,9 @@ class TKT_H extends itobject {
             return false;
         }
 
-        $this->lock_view($this->view["vista"]);
+        if ($this->itform) {
+            $this->itform->set_view($this->view["vista"]);
+        }
         return true;
     }
 
@@ -300,42 +329,39 @@ class TKT_H extends itobject {
     }
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return $this->id;
             case 'idtkt':
                 return $this->idtkt;
-            case 'TKT':
+            case 'tkt':
                 return $this->TKT;
-            case 'valoraccion':
-                return $this->valoraccion;
+            case 'objadj_id':
+                return $this->objadj_id;
+            case 'objadj_txt':
+                $this->loadObjadj();
+                return $this->objadj_txt;
+            case 'objadj':
+                $this->loadObjadj();
+                return $this->objadj;
             case 'accion':
                 return $this->accion;
-            case 'detalle':
-                if($this->detalleDOM == null) return null;
+            case 'itform':
                 if (!$this->check_access())
                     return null;
-                return $this->detalleDOM->saveXML();
-            case 'detalle_xml':
-                if($this->detalleDOM == null) return null;
-                if (!$this->check_access())
+                if ($this->itform == null)
                     return null;
-                return $this->detalleDOM;
-            case 'UA':
+                return $this->itform;
+            case 'ua':
                 return $this->UA;
-            case 'UA_o':
+            case 'ua_o':
                 return $this->get_UA();
-            case 'UA_o':
-                $ua_o = $this->objsCache->get_object("USER", $this->UA);
-                if ($this->objsCache->get_status("USER", $this->UA) == "ok")
-                    return $ua_o;
-                else
-                    return NULL;
-            case 'UB':
+            case 'ub':
                 return $this->UB;
-            case 'FA':
+            case 'fa':
                 return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
-            case 'FB':
+            case 'fb':
                 if ($this->FB == NULL)
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
@@ -376,7 +402,8 @@ class TKT_H extends itobject {
     }
 
     public function delete_DB() {
-        
+        $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where id=" . intval($this->get_prop("id"));
+        return $this->dbinstance->query($ssql);
     }
 
     public function update_DB() {

@@ -93,7 +93,10 @@ class NOTIFY extends itobject {
         "team->name", //equipo actual
         "id", //id del ticket
         "html_dir", //ruta a it
-        "FA"    //fecha apertura
+        "FA",    //fecha apertura
+        "ua->teamsnames",
+        "tree",
+        "action->alias"
     );
 
     function __construct($conn = null) {
@@ -374,6 +377,24 @@ class NOTIFY extends itobject {
                 else
                     $result = "NULL";
                 break;
+            case "ua->teamsnames":
+                $ut = $this->tkt_final->get_prop("usr_o");
+                if ($ut)
+                    $result = $ut->get_prop("equiposname");
+                else
+                    $result = "";
+                break;
+            case "tree":
+                $tree = $this->tkt_final->get_tree_history();
+                $rta="";
+                foreach($tree as $t){
+                    $rta .= $t["ans"]."/";
+                }
+                return $rta;
+                break;
+            case "action->alias":
+                return $this->accionObj->get_prop("alias");
+                break;
             case "system->name":
                 $sy = $this->tkt_final->get_system();
                 if ($sy)
@@ -469,8 +490,8 @@ class NOTIFY extends itobject {
         
         $this->load_body();
         $this->load_cc_body();
-
-        $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . ")";
+        $actName=$this->get_body_value("action->alias");
+        $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . " - $actName)";
         $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
 
         foreach ($this->too as $t) {

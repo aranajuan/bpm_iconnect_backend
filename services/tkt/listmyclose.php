@@ -1,7 +1,7 @@
 <?php
 
 require_once 'classes/tkt.php';
-
+require_once 'classes/tktlister.php';
 /**
  * Lista
  * @param Rcontroller $RC
@@ -9,25 +9,27 @@ require_once 'classes/tkt.php';
  */
 function GO($RC) {
     $dias = 5;
-    $desde = date(USERDATE_READ, strtotime('-' . $dias . ' day'));
-    $hasta = date(USERDATE_READ, strtotime('+1 day'));
+    $desde = date(DBDATE_WRITE, strtotime('-' . $dias . ' day'));
+    $hasta = date(DBDATE_WRITE, strtotime('+1 day'));
 
-    $filter = array("open" => "closed",
-        "cfrom" => $desde,
-        "cto" => $hasta,
-        "openby" => $RC->get_User()->get_prop("usr")
-        );
+    $Tf = new TKTFILTER();
+    $Tf->set_filter(TKTFILTER::$UA, array($RC->get_User()->get_prop("usr")));
+    $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
+    $Tf->set_filter(TKTFILTER::$DATE_FROM, $desde);
+    $Tf->set_filter(TKTFILTER::$DATE_TO, $hasta);
 
-    $ALL = new TKT();
+    $view = $RC->get_User()->getMyView();
 
-    $equipos = $RC->get_User()->get_prop("equiposobj");
-    if (count($equipos)) {
-        $view = $equipos[0]->get_prop("mytkts_vista");
-    } else {
-        $view = "";
+    $Tl = new TKTLISTER();
+
+    $Tl->loadFilter($Tf);
+
+    if (!$Tl->execute()) {
+        return $RC->createElement("error", "Error al cargar listado. " . $Tf->getError());
     }
 
-    $ALL_v = $ALL->list_fiter($filter);
+    $ALL_v = $Tl->getObjs();
+    
     $response = $RC->createElement("data");
     $response->appendChild($RC->createElement("view", "id,FA,FB=>FC"));
     $listL = $RC->createElement("list");

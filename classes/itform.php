@@ -3,7 +3,7 @@
 /**
  * Formularios xml para datos itracker
  */
-class itform {
+class itform implements XmlPropInterface{
 
     /**
      *
@@ -13,32 +13,43 @@ class itform {
 
     /**
      *
-     * @var SimpleXMLElement
+     * @var DOMDocument
      */
     private $xml_input;
 
     /**
      *
-     * @var SimpleXMLElement
+     * @var DOMDocument
      */
     private $xml_output;
 
+    /**
+     *  Nivel de vista para el get_output
+     * @var int 
+     */
+    private $view_level;
     private $arr_val;
-    
     private $formname;
-    
+
     /**
      * Carga xml y lo parsea
      * @param string $xml
      * @return boolean  se pudo cargar ok
      */
     public function load_xml($xml) {
+        $this->set_view(0);
         $this->xml_input_text = $xml;
         try {
-            $this->xml_input = new SimpleXMLElement($this->xml_input_text);
-            if (!$this->xml_input->element) {
+            $this->xml_input = new DOMDocument();
+            $res = $this->xml_input->loadXML($this->xml_input_text);
+            if (!$res) {
                 return false;
             }
+            $nodeList = $this->xml_input->getElementsByTagName("element");
+            if ($nodeList->length == 0) {
+                return false;
+            }
+            $this->xml_output = clone $this->xml_input;
             return true;
         } catch (Exception $e) {
             $this->xml_input = null;
@@ -49,44 +60,58 @@ class itform {
 
     /**
      * Valida campo
-     * @param string $value
-     * @param SimpleXMLElement $field
+     * @param array $element
      * @return string
      */
-    private function check_values($value, $field) {
-        if ($field->validations == null) {
+    private function check_values($element) {
+        if (trim($element["value"]) != "" && $element["value"] != null) {
+            switch ($element["type"]) {
+                case "date":
+                    if (STRdate_format($element["value"], "d-m-Y", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+                case "month":
+                    if (STRdate_format($element["value"], "m-Y", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+                case "datetime":
+                    if (STRdate_format($element["value"], "d-m-Y H:i", "d-m-Y H:i") == -1)
+                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                    break;
+            }
+        }
+
+        if ($element["validations"] == null || count($element["validations"]) == 0) {
             return "ok";
         }
-        $rta = "";
-        foreach ($field->validations->children() as $v) {
-            $validationV = strip_tags($v->asXML());
-            switch ($v->getName()) {
+        foreach ($element["validations"] as $valName => $valValue) {
+            switch ($valName) {
                 case "numeric":
-                    if ($validationV == "true" && !is_numeric($value) && !(trim($value) == "" || $value == null)) {
-                        return "El campo " . $field->label . " debe ser numerico.";
+                    if ($valValue == "true" && !is_numeric($element["value"]) && !(trim($element["value"]) == "" || $element["value"] == null)) {
+                        return "El campo " . $element["label"] . " debe ser numerico.";
                     }
                     break;
                 case "required":
-                    if ($validationV == "true" && (trim($value) == "" || $value == null)) {
-                        return "El campo " . $field->label . " es obligatorio.";
+                    if ($valValue == "true" && (trim($element["value"]) == "" || $element["value"] == null)) {
+                        return "El campo " . $element["label"] . " es obligatorio.";
                     }
                     break;
                 case "maxlen":
-                    if (strlen($value) > $validationV) {
-                        return "El campo " . $field->label . " es muy largo. Maximo " . $validationV . " caracteres";
+                    if (strlen($element["value"]) > $valValue) {
+                        return "El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres";
                     }
                     break;
                 case "minlen":
-                    if (strlen($value) < $validationV) {
-                        return "El campo " . $field->label . " es muy corto. Minimo " . $validationV . " caracteres";
+                    if (strlen($element["value"]) < $valValue) {
+                        return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
                     }
                     break;
                 case "regex":
-                    $valid = preg_match($validationV, $value, $newstr);
+                    $valid = preg_match($valValue, $element["value"], $newstr);
                     if (!$valid) {
-                        return "El campo " . $field->label . " no cumple el formato solicitado.";
-                    } elseif (is_array($newstr) && $newstr[0] != $value) {
-                        return "El campo " . $field->label . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
+                        return "El campo " . $element["label"] . " no cumple el formato solicitado.";
+                    } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
+                        return "El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
                     }
                     break;
             }
@@ -118,6 +143,27 @@ class itform {
     }
 
     /**
+     * Busca elemento por valor de tag
+     * @param DOMDocument $dom
+     * @param string $tag
+     * @param string $val
+     * @return DOMElement
+     */
+    private function find_field($dom, $tag, $val) {
+        if (!$dom) {
+            return null;
+        }
+        $elements = $dom->getElementsByTagName("element");
+        foreach ($elements as $field) {
+            if (strtolower(trim($field->getElementsByTagName($tag)->item(0)->nodeValue)
+                    ) == strtolower(trim($val))) {
+                return $field;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Carga out valida campos
      * @param array $arr    Valores [id=>,value=>]
      * @param type $formname    nombre del form para id
@@ -125,36 +171,95 @@ class itform {
      */
     public function load_values($arr, $formname = null) {
         $arr = make_arrayobj($arr);
-        $this->arr_val=$arr;
-        $this->formname=$formname;
-        $this->xml_output = clone $this->xml_input;
-        foreach ($this->xml_output->element as $field) {
-            $value = trim($this->find_elementVal($arr, $field->id, $formname));
-            $rta = $this->check_values($value, $field);
+        $this->arr_val = $arr;
+        $this->formname = $formname;
+        $nodelist = $this->xml_output->getElementsByTagName("element");
+        foreach ($nodelist as $field) {
+            $nfield = $this->elementToArray($field);
+            $value = trim($this->find_elementVal($arr, $nfield["id"], $formname));
+            $nfield["value"] = $value;
+            $rta = $this->check_values($nfield);
             if ($rta != "ok") {
                 return $rta;
             }
-            unset($field->validations);
-            $field->addChild("value", xmlEscape($value));
+            $validations = $field->getElementsByTagName("validations")->item(0);
+            $field->appendChild($this->xml_output->createElement("value", xmlEscape($value)));
         }
         return "ok";
     }
 
     /**
-     * Devuelve valor del form
+     * Convierte DOMElement a Array
+     * @param DOMElement $element
+     * @return array   campo
+     */
+    private function elementToArray($element) {
+        $arr = array();
+        
+        $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
+        $label = $element->getElementsByTagName("label");
+        if ($label->length == 0){
+            $arr["label"]=$arr["id"];
+        }else{
+            $arr["label"] =trim($label->item(0)->nodeValue);
+        }
+        $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
+        
+        $arr["type"] =trim($element->getElementsByTagName("type")->item(0)->nodeValue);
+        if($arr["type"]=="select"){
+            $options = $element->getElementsByTagName("option");
+            $arr["valuetxt"]=$arr["value"];
+            foreach($options as $opt){
+                if(trim($opt->getElementsByTagName("value")->item(0)->nodeValue)
+                        ==trim($arr["value"])){
+                  $arr["valuetxt"]=trim($opt->getElementsByTagName("text")->item(0)
+                          ->nodeValue);
+                 }
+            }
+        }
+        
+        $arr["validations"] = array();
+        $validations = $element->getElementsByTagName("validations")->item(0);
+        if ($validations == null || !$validations->hasChildNodes()) {
+            return $arr;
+        } else {
+            foreach ($validations->childNodes as $v) {
+                $arr["validations"][trim($v->nodeName)] = trim($v->nodeValue);
+            }
+            return $arr;
+        }
+    }
+
+    /**
+     * Devuelve valor del form elegido
+     * @param string $id
+     * @parama DOMDocument $dom
+     * @return string
+     */
+    private function get_valueDOM($id, $dom) {
+        $field = $this->find_field($dom, "id", $id);
+        if ($field) {
+            return $field->getElementsByTagName("value")->item(0)->nodeValue;
+        }
+        return null;
+    }
+
+    /**
+     * Devuelve valor del form / sin filtrar
      * @param string $id
      * @return string
      */
     public function get_value($id) {
-        if (!$this->xml_output) {
-            return null;
-        }
-        foreach ($this->xml_output->element as $field) {
-            if (trim($field->id) == trim($id)) {
-                return $field->value;
-            }
-        }
-        return null;
+        return $this->get_valueDOM($id, $this->xml_output);
+    }
+
+    /**
+     * Devuelve valor del form / seguro
+     * @param string $id
+     * @return string
+     */
+    public function get_valueSecure($id) {
+        return $this->get_valueDOM($id, $this->get_outputDOM());
     }
 
     /**
@@ -162,26 +267,8 @@ class itform {
      * @param string $id
      * @return string
      */
-    public function get_value_arr($id){
+    public function get_value_arr($id) {
         return trim($this->find_elementVal($this->arr_val, $id, $this->formname));
-    }
-    
-    /**
-     * Elimina elemento del formulario
-     * @return boolean
-     */
-    public function delete_value($id) {
-        if (!$this->xml_output) {
-            return null;
-        }
-        $i = 0;
-        foreach ($this->xml_output->element as $field) {
-            if ($field->id == $id) {
-                unset($this->xml_output->element[$i]);
-            }
-            $i++;
-        }
-        return null;
     }
 
     /**
@@ -190,49 +277,52 @@ class itform {
      * @return string
      */
     public function getAnddelete($id) {
-        if (!$this->xml_output) {
-            return null;
-        }
-        $i = 0;
-        foreach ($this->xml_output->element as $field) {
-            if ($field->id == $id) {
-                $value = $field->value->asXML();
-                unset($this->xml_output->element[$i]);
-                return $value;
-            }
-            $i++;
+        $field = $this->find_field($this->xml_output, "id", $id);
+        if ($field) {
+            $val = $field->getElementsByTagName("value")->item(0)->nodeValue;
+            $field->parentNode->removeChild($field);
+            return $val;
         }
         return null;
     }
 
     /**
      * Elimina los que tengan notsave
+     * Bloquea vista
      */
-    private function deleteNotSave() {
-        $active = 0;
+    private function prepareOutput() {
         if (!$this->xml_output) {
             return null;
         }
-        $tmp = $this->xml_output;
-        $i = 0;
-        $delete = array();
-        foreach ($this->xml_output->element as $field) {
-            if (trim($field->notsave) == "true") {
-                array_push($delete, $i);
+        $tmp = clone $this->xml_output;
+        $elements = $tmp->getElementsByTagName("element");
+        $active = $elements->length;
+        $domElemsToRemove = array();
+        $domElemsToBlock = array();
+        foreach ($elements as $field) {
+            $nsave = $field->getElementsByTagName("notsave");
+            if ($nsave->length && $nsave->item(0)->nodeValue == "true") {
+                $domElemsToRemove[] = $field;
+                $active--;
             } else {
-                $active++;
+                $viewL = $field->getElementsByTagName("view");
+                if ($viewL->length) {
+                    $vRQ = intval($viewL->item(0)->nodeValue || 0);
+                    if ($vRQ != 0 && $this->view_level > $vRQ) {
+                        $domElemsToBlock[] = $field->getElementsByTagName("value")->item(0);
+                    }
+                }
             }
-            $i++;
         }
-        if ($active == 0) {
+        foreach ($domElemsToRemove as $domElement) {
+            $domElement->parentNode->removeChild($domElement);
+        }
+        foreach ($domElemsToBlock as $domElement) {
+            $domElement->nodeValue = "****";
+        }
+        if ($active < 1) {
             return null;
         }
-        $back = 0;
-        foreach ($delete as $p) {
-            unset($tmp->element[$p - $back]);
-            $back++;
-        }
-
         return $tmp;
     }
 
@@ -241,14 +331,100 @@ class itform {
      * @return string
      */
     public function get_output() {
-        if ($this->xml_output) {
-            $final = $this->deleteNotSave();
-            if ($final) {
-                return $final->asXML();
-            }
-            return "";
+        $opForm = $this->get_outputDOM();
+        if ($opForm) {
+            return $opForm->saveXML();
         }
         return null;
     }
 
+    /**
+     * Devuelve el formulario de salida
+     * @return DOMDocument
+     */
+    public function get_outputDOM() {
+        if ($this->xml_output) {
+            $final = $this->prepareOutput();
+            return $final;
+        }
+        return null;
+    }
+
+    /**
+     * Devuelve el formulario de entrada
+     * @return DOMDocument
+     */
+    public function get_inputDOM() {
+        return $this->xml_input;
+    }
+
+    /**
+     * Setea nivel de vista
+     * @param int $view_level
+     */
+    public function set_view($view_level) {
+        $this->view_level = $view_level;
+    }
+
+     /**
+     * Calcula tipo para reporte
+     * @param array $arr    elementtoarray
+     * @return string   nuevo tipo
+     */
+    private function getReportType($arr){
+        if($arr["type"]=="input"){
+            if(isset($arr["validations"]["numeric"]) &&
+                    $arr["validations"]["numeric"]=="true"){
+                return "number";
+            }
+            return "text";
+        }
+        return $arr["type"];
+    }
+    
+    /**
+     * Genera array con todos los valores de los campos
+     * @return array
+     */
+    private function getArrReport() {
+        $arr = array();
+        $i = 0;
+        $data = $this->get_outputDOM();
+        $els = $data->getElementsByTagName("element");
+        $arrTitles=array();
+        foreach ($els as $el) {
+            $arr[$i] = $this->elementToArray($el);
+            $arr[$i]["type"] = $this->getReportType($arr[$i]);
+            $arr[$i]["title"]=$arr[$i]["label"];
+            if(in_array($arr[$i]["title"], $arrTitles)){
+                $arr[$i]["title"].=$arr[$i]["id"];
+            }
+            array_push($arrTitles, $arr[$i]["title"]);
+            if($arr[$i]["type"]=="select"){
+                $arr[$i]["type"] ="input";
+                $arr[$i]["value"]=$arr[$i]["valuetxt"];  
+            }
+            $i++;
+        }
+        return $arr;
+    }
+
+
+    
+    public function get_prop($property) {
+        $property = strtolower($property);
+        if ($property == "*") {
+            return $this->getArrReport();
+        }
+
+        $rta = $this->get_valueSecure($property);
+        if ($rta) {
+            return $rta;
+        }
+        return "Propiedad invalida.";
+    }
+
+    public function getXML($doc, $props) {
+        return null;
+    }
 }

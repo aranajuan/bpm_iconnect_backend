@@ -35,100 +35,13 @@ class TKT extends TREE {
         array(3, 6, 9)
     );
     private $working;
-    
-    private $tkthActionsLoaded; // lista de acciones cargadas en tkth * | array
 
     /**
-     * Carga tickets aplicando filtros
-     * @param array $filter open - open/close
-     *                              cfrom y cto para close
-     *                      openby - lista de usuarios separado por coma
-     *                      opento - id equipo
-     *                      taken - * / lista usuarios separado por coma 
-     *                      master - seteado y 'null' (sin master) / idmaster
-     *                      origin  - filtro especifico de origen %xxxxx% separado por coma
+     * Accion que se esta ejecutando
+     * @var ACTION
      */
-    public function list_fiter($filter) {
-        $openfilter = "";
-        if ($filter["open"] == "open") {
-            $openfilter = "and UB is null";
-        } elseif ($filter["open"] == "closed" && $filter["cfrom"] != "" && $filter["cto"] != "") {
-            $fecha_d = @STRdate_format($filter["cfrom"], USERDATE_READ, DBDATE_WRITE);
-            $fecha_h = @STRdate_format($filter["cto"], USERDATE_READ, DBDATE_WRITE);
-            $openfilter = "and FB between '" . $fecha_d . "' and '" . $fecha_h . "'";
-        }
-
-        $openbyfilter = "";
-        if ($filter["openby"]) {
-            $arr = explode(",", $filter["openby"]);
-            foreach ($arr as &$a) {
-                $a = "'" . strToSQL($a) . "'";
-            }
-            $openbyfilter = "and UA in (" . implode(",", $arr) . ")";
-        }
-
-        $opentotaken = "";
-        if ($filter["opento"]) {
-            $opentotaken = "and idequipo=" . $filter["opento"];
-            if ($filter["taken"]) {
-                if ($filter["taken"] == "*") {
-                    $opentotaken.=" and u_tom is not null";
-                } else {
-                    $listv = explode(",", $filter["taken"]);
-                    $arr = array();
-                    $null = "";
-                    foreach ($listv as $v) {
-                        if ($v != "null") {
-                            array_push($arr, "'" . $v . "'");
-                        } else {
-                            $null = "u_tom is null";
-                        }
-                    }
-                    if (count($arr)) {
-                        if ($null != "") {
-                            $null = "or " . $null;
-                        }
-                        $opentotaken.=" and ( u_tom in(" . implode(",", $arr) . ") $null ) ";
-                    } else {
-                        $opentotaken.=" and $null ";
-                    }
-                }
-            }
-        }
-
-        $ismaster = "";
-        if (isset($filter["master"])) {
-            if ($filter["master"] == "null") {
-                $ismaster = "and idmaster is null";
-            } else {
-                $ismaster = "and idmaster=" . $filter["master"];
-            }
-        }
-
-        if ($openbyfilter == "" && $opentotaken == "") {
-            return null;
-        }
-
-        $originfilter = "";
-        if ($filter["origin"]) {
-            $originslst = explode(',', $filter["origin"]);
-            $originfilter = " and (";
-            foreach ($originslst as $o) {
-                $originfilter.= " origen like '%" . strToSQL($o) . "%' or";
-            }
-            $originfilter = substr($originfilter, 0, strlen($originfilter) - 2) . ") ";
-        }
-
-        $ssql = "select id from TBL_TICKETS where id is not null " . $originfilter . " " . $openfilter . " " . $openbyfilter . " " . $opentotaken . " " . $ismaster;
-        $this->dbinstance->loadRS($ssql);
-        $i = 0;
-        $list = array();
-        while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i] = $this->objsCache->get_object(get_class(), $idV[0]);
-            $i++;
-        }
-        return $list;
-    }
+    private $ejecutingAction;
+    private $tkthActionsLoaded; // lista de acciones cargadas en tkth * | array
 
     function load_DB($id) {
         start_measure("OBJ:TKT:DB:$id");
@@ -219,6 +132,22 @@ class TKT extends TREE {
     }
 
     /**
+     * Accion ejecutandose
+     * @param ACTION $action
+     */
+    public function setEjecutingAction($action) {
+        $this->ejecutingAction = $action;
+    }
+
+    /**
+     * Accion ejecutandose
+     * @return ACTION
+     */
+    public function getEjecutingAction() {
+        return $this->ejecutingAction;
+    }
+
+    /**
      *  devuelve lista de acciones validas - vector de la db
      * @return array<ACTION>
      */
@@ -289,21 +218,22 @@ class TKT extends TREE {
 
         $this->tkt_hOBJ = array();
         if ($actions == "*") {
-            $this->tkthActionsLoaded="*";
+            $this->tkthActionsLoaded = "*";
             $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . "
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null
                 order by id
             ";
-        }else{
-            $actionsV = explode(",",$actions);
-            $this->tkthActionsLoaded=$actionsV;
-            foreach($actionsV as &$av){
-                $av="'".strToSQL($av)."'";
+        } else {
+            $actions.=",LINK";
+            $actionsV = explode(",", $actions);
+            $this->tkthActionsLoaded = $actionsV;
+            foreach ($actionsV as &$av) {
+                $av = "'" . strToSQL($av) . "'";
             }
-            $actionsT=  implode(",", $actionsV);
+            $actionsT = implode(",", $actionsV);
             $ssql = "
             select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion) 
-            where TH.idtkt=" . intval($this->id) . " and TH.estado = " . I_ACTIVE . " and TA.nombre in (".$actionsT.")
+            where TH.idtkt=" . intval($this->id) . " and TH.UB is null and TA.nombre in (" . $actionsT . ")
                 order by id
             ";
         }
@@ -318,11 +248,11 @@ class TKT extends TREE {
                     $this->tkt_hOBJ[$i] = $THO;
                     $eje = $THO->get_prop('accion')->get_prop("ejecuta");
                     if ($eje === "open") {
-                        $idteam = $THO->get_prop("valoraccion");
+                        $idteam = $THO->get_prop("objadj_id");
                     }
                     $THO->set_idteam($idteam);
                     if ($eje === "derive") {
-                        $idteam = $THO->get_prop("valoraccion");
+                        $idteam = $THO->get_prop("objadj_id");
                     }
                     $i++;
                 }
@@ -341,33 +271,34 @@ class TKT extends TREE {
 
     public function get_status() {
         $TKTHF = $this->get_last_tktH();
-        if ($this->UB)
+        if ($this->UB) {
             $status = "Cerrado";
-        else
-        if ($TKTHF) {
-            if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
-                $status = "Se requiere de tu accion (" . $TKTHF->get_prop("FA") . ")";
-            else {
-                //verificar estado del master
-                if ($this->idmaster) {
-                    $this->load_master();
-                }
-                if ($this->master) {
-                    if ($this->master->get_prop("u_tom"))
-                        $status = "En analisis";
-                    else
-                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                        $status = "Derivado";
-                    else
-                        $status = "Pendiente";
-                } else {
-                    if ($this->u_tom)
-                        $status = "En analisis";
-                    else
-                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                        $status = "Derivado";
-                    else
-                        $status = "Pendiente";
+        } else {
+            if ($TKTHF) {
+                if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
+                    $status = "Se requiere de tu accion (" . $TKTHF->get_prop("FA") . ")";
+                else {
+                    //verificar estado del master
+                    if ($this->idmaster) {
+                        $this->load_master();
+                    }
+                    if ($this->master) {
+                        if ($this->master->get_prop("u_tom"))
+                            $status = "En analisis";
+                        else
+                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                            $status = "Derivado";
+                        else
+                            $status = "Pendiente";
+                    } else {
+                        if ($this->u_tom)
+                            $status = "En analisis";
+                        else
+                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                            $status = "Derivado";
+                        else
+                            $status = "Pendiente";
+                    }
                 }
             }
         }
@@ -379,10 +310,10 @@ class TKT extends TREE {
      * @return \TKT_H|null
      */
     public function get_last_tktH() {
-        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded=="*")
+        if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded == "*")
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and estado = " . I_ACTIVE . " and UB is null order by FA
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null order by FA
         ";
         $this->dbinstance->loadRS($ssql);
         if ($this->dbinstance->noEmpty) {
@@ -391,7 +322,7 @@ class TKT extends TREE {
             if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
                 $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                    $THO->set_idteam($THO->get_prop("objadj_id"));
                 }
                 return $THO;
             }
@@ -405,17 +336,19 @@ class TKT extends TREE {
      * @param String $action    Separados por coma (tienen que estar todas)
      * @return boolean
      */
-    private function isloadedaction($action){
-        if($this->tkthActionsLoaded=="*") return true;
-        if($action=="*") return false;
-        $actionsV = explode(",",$action);
-        foreach($actionsV as $av){
-          if(!in_array($av, $this->tkthActionsLoaded))
+    private function isloadedaction($action) {
+        if ($this->tkthActionsLoaded == "*")
+            return true;
+        if ($action == "*")
+            return false;
+        $actionsV = explode(",", $action);
+        foreach ($actionsV as $av) {
+            if ($this->tkthActionsLoaded == null || !in_array($av, $this->tkthActionsLoaded))
                 return false;
         }
         return true;
     }
-    
+
     /**
      * Devuelve el primer evento / apertura
      * @return \TKT_H|null
@@ -433,7 +366,7 @@ class TKT extends TREE {
             if ($this->objsCache->get_status("TKT_H", $THID[0]) == "ok") {
                 $THO->set_view($this->view);
                 if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("valoraccion"));
+                    $THO->set_idteam($THO->get_prop("objadj_id"));
                 }
                 return $THO;
             }
@@ -447,16 +380,17 @@ class TKT extends TREE {
      * @param String $actions    Separados por coma
      * @return array<TKT_H>
      */
-    function get_tktHObj($actions="*") {
-        if(!$this->isloadedaction($actions)){
+    function get_tktHObj($actions = "*") {
+        if (!$this->isloadedaction($actions)) {
             $this->load_tktH($actions);
             return $this->tkt_hOBJ;
-        }else{
-            if($actions=="*") return $this->tkt_hOBJ;
-            $actionsV=explode(",",$actions);
+        } else {
+            if ($actions == "*")
+                return $this->tkt_hOBJ;
+            $actionsV = explode(",", $actions);
             $THL = array();
-            foreach($this->tkt_hOBJ as $TH){
-                if(in_array($TH->get_prop("action")->get_prop("nombre"),$actionsV)){
+            foreach ($this->tkt_hOBJ as $TH) {
+                if (in_array($TH->get_prop("accion")->get_prop("nombre"), $actionsV)) {
                     array_push($THL, $TH);
                 }
             }
@@ -522,15 +456,21 @@ class TKT extends TREE {
      * Ejecuta accion con valores solicitados
      * @param string $action
      * @param array $values
+     * @param string $objadj_id
      * @return string
      */
-    public function ejecute_action($action, $values = null) {
-        $A = $this->objsCache->get_object("ACTION", $action,true);
+    public function ejecute_action($action, $values = null, $objadj_id = null) {
+        $A = $this->objsCache->get_object("ACTION", $action, true);
         if ($this->objsCache->get_status("ACTION", $action) != "ok") {
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
-        $A->loadFormValues($values);
+        if ($values) {
+            $A->loadFormValues($values);
+        }
+        if ($objadj_id) {
+            $A->loadObjadjId($objadj_id);
+        }
         return $A->ejecute();
     }
 
@@ -636,17 +576,18 @@ class TKT extends TREE {
             return "Ticket_reabrir: " . $this->dbinstance->details;
         $this->UB = NULL;
         $this->FB = NULL;
+
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
+                $c->re_open();
             }
         } elseif ($this->isWorking()) {
             $this->ejecute_action("SET_MASTER");
             $this->clear_childs();
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("REABRIR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") reabierto")));
+                $c->re_open();
             }
         }
         return "ok";
@@ -668,10 +609,11 @@ class TKT extends TREE {
         }
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
+
         if ($this->is_master()) {
             $ch = $this->get_prop("childs");
             foreach ($ch as $c) {
-                $c->ejecute_action("CERRAR", array(array("id" => "comment", "value" => "Master(" . $this->id . ") cerrado")));
+                $c->close();
             }
         }
         return "ok";
@@ -699,12 +641,9 @@ class TKT extends TREE {
         }
 
         if ($this->is_master()) {
-            foreach ($this->childs as $c)
-                $c->ejecute_action("DERIVAR", array(
-                    array("id" => "idteam", "value" => $equipo->get_prop("id")),
-                    array("id" => "comment", "value" => "Master(" . $this->id . ") derivado")
-                        )
-                );
+            foreach ($this->get_prop("childs") as $c) {
+                $c->derive($equipo);
+            }
         }
 
         $this->idequipo = $equipo->get_prop("id");
@@ -732,6 +671,13 @@ class TKT extends TREE {
             return "TKT_priorizar: " . $this->dbinstance->details;
         }
         $this->prioridad = $idP;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->set_priority($idP);
+            }
+        }
+
         return "ok";
     }
 
@@ -741,13 +687,6 @@ class TKT extends TREE {
      */
     function take() {
 
-        if (!$this->is_master())
-            return "No se puede tomar estando anexado a otro tkt, realize esta accion en el master";
-
-        if (!$this->getLogged()->in_team($this->idequipo)) {
-            return "El ticket no esta asignado a tu equipo";
-        }
-
         $ssql = "update TBL_TICKETS set u_tom='" . strToSQL($this->getLogged()->get_prop("usr")) . "', u_asig=NULL where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_tomar: " . $this->dbinstance->details;
@@ -756,6 +695,13 @@ class TKT extends TREE {
         $this->u_tom_o = $this->getLogged();
         $this->u_asig = NULL;
         $this->u_asig_o = NULL;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->take();
+            }
+        }
+
         return "ok";
     }
 
@@ -776,6 +722,13 @@ class TKT extends TREE {
         $this->u_asig = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $tou;
         $this->u_asig_o = $this->getLogged();
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->asign($tou);
+            }
+        }
+
         return "ok";
     }
 
@@ -784,13 +737,7 @@ class TKT extends TREE {
      * @return string rta
      */
     function free() {
-
-        // solo verifica que sea del area. se debe controlar en la accion post que sea supervisor
-        if (!$this->is_master())
-            return "No se puede liberar estando anexado a otro tkt";
         $l = $this->getLogged();
-        if (!$l->in_team($this->get_prop("idequipo")))
-            return "Este tkt no esta asignado a su equipo";
         $ssql = "update TBL_TICKETS set u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")) . "' where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_liberar: " . $this->dbinstance->details;
@@ -799,6 +746,13 @@ class TKT extends TREE {
         $this->u_asig = $l->get_prop("usr");
         $this->u_tom_o = NULL;
         $this->u_asig_o = $l;
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->free();
+            }
+        }
+
         return "ok";
     }
 
@@ -809,15 +763,15 @@ class TKT extends TREE {
     function set_master() {
 
         if ($this->is_master()) {
-            return "El ticket ya es master";
+            return "ok";
         }
 
         $lastMaster = $this->master;
 
         /* elimina el master actual y marca como tomado por el usuario del master */
-        if($lastMaster->get_prop("u_tom")){
-            $utom="'".strToSQL($lastMaster->get_prop("u_tom"))."'";
-        }  else {
+        if ($lastMaster->get_prop("u_tom")) {
+            $utom = "'" . strToSQL($lastMaster->get_prop("u_tom")) . "'";
+        } else {
             $utom = "null";
         }
         $ssql = "update TBL_TICKETS set idmaster=NULL, u_tom=" . $utom . " where id=" . intval($this->id);
@@ -828,7 +782,7 @@ class TKT extends TREE {
         $this->idmaster = NULL;
         $this->master = NULL;
 
-        $lastMaster->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $this->id)));
+        $lastMaster->join($this);
 
         $this->childs = null;
         //reestablece detalles
@@ -842,7 +796,7 @@ class TKT extends TREE {
      * @return string
      */
     function join($master) {
-        $this->load_childs();
+        $childs = $this->get_prop("childs");
         if (trim($master->get_prop("id")) == trim($this->id)) {
             return "No se puede adjuntar al mismo ticket";
         }
@@ -850,10 +804,10 @@ class TKT extends TREE {
         if ($master->get_prop("FB") != NULL)
             return "No se puede adjuntar a este tkt, ya se encuentra cerrado.";
 
-        if ($master->get_prop("idmaster"))
+        if (!$master->is_master())
             return "Este ticket esta anexado al tkt:" . $master->get_prop("idmaster") . ". Debe anexarlo a este.";
 
-        /* Deriva si el master esta en otro equipo */
+        /* ADECUACION EQUIPO */
         if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
             $rta = $this->ejecute_action("DERIVAR", array(
                 array("id" => "idequipo", "value" => $master->get_prop("idequipo")),
@@ -864,6 +818,29 @@ class TKT extends TREE {
             }
         }
 
+        /* ADECUACION USUARIO TOMADO */
+        $utomM = $master->get_prop("u_tom");
+        $utom = $this->get_prop("u_tom");
+        $ul = $this->getLogged()->get_prop("usr");
+
+        if ($utomM == null && $utom != null) {
+            if ($utom == $ul) {
+                $master->ejecute_action("TOMAR");
+            } else {
+                $master->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utom)));
+            }
+        } elseif ($utomM) {
+            if ($utom == null) {
+                if ($utomM == $ul) {
+                    $this->ejecute_action("TOMAR");
+                } else {
+                    $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM)));
+                }
+            } elseif ($utomM != $utom) {
+                return "El master esta tomado por otro usuario";
+            }
+        }
+
         $ssql = "update TBL_TICKETS set idmaster=" . intval($master->get_prop("id")) . " where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_join: " . $this->dbinstance->details;
@@ -871,10 +848,13 @@ class TKT extends TREE {
 
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
+        $this->clear_childs();
 
-        foreach ($this->childs as $c) {
-            $c->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $master->get_prop("id"))));
+        foreach ($childs as $c) {
+            $c->join($master);
         }
+
+
 
         return "ok";
     }
@@ -919,6 +899,7 @@ class TKT extends TREE {
     }
 
     function get_prop($property) {
+        $property = strtolower($property);
         switch ($property) {
             case 'id':
                 return $this->id;
@@ -966,25 +947,31 @@ class TKT extends TREE {
                 return $this->childs;
             case 'origen_json':
                 return json_encode($this->get_tree_history());
+            case 'tipificacion':
+                $treeh = $this->get_tree_history();
+                $tipif = array();
+                foreach ($treeh as $opt) {
+                    array_push($tipif, $opt["ans"]);
+                }
+                return $tipif;
             case 'childsc':
                 return $this->load_childs();
             case 'critic':
                 return $this->get_critic();
             case 'status':
                 $ar = $this->get_status();
-                ;
                 return $ar[1];
-            case 'UA':
+            case 'ua':
                 return $this->UA;
-            case 'UB':
+            case 'ub':
                 return $this->UB;
-            case 'FA':
+            case 'fa':
                 return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
-            case 'FB':
+            case 'fb':
                 if ($this->FB == NULL)
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
-            case 'minFromClose':
+            case 'minfromclose':
                 return DiffBetweenDates($this->get_prop("FB"), "NOW");
             default:
                 return "Propiedad invalida.";

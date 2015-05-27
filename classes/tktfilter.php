@@ -155,9 +155,9 @@ class TKTFILTER extends basicobject {
                     $SSQL.= " and (";
                     for ($i = 0; $i < $c; $i++) {
                         if ($i == 0) {
-                            $SSQL.="TKT.origen like '" . $origins[0] . "'";
+                            $SSQL.="TKT.origen like '" . $origins[$i] . "'";
                         } else {
-                            $SSQL.="or TKT.origen like '" . $origins[0] . "'";
+                            $SSQL.="or TKT.origen like '" . $origins[$i] . "'";
                         }
                     }
                     $SSQL.= ") ";

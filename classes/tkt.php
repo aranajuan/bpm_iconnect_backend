@@ -493,7 +493,10 @@ class TKT extends TREE {
                         $this->u_asig_o = $u;
                     }
                 } else {
-                    $this->ejecute_action("LIBERAR");
+                    $lu=$this->getLogged();
+                    if($lu->in_team($this->get_prop("idequipo"))){
+                        $this->ejecute_action("LIBERAR");
+                    }
                 }
             } else {
                 $this->ejecute_action("LIBERAR");

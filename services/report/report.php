@@ -61,6 +61,11 @@ function GO($RC) {
 
     $RR = new REPORTREQUEST();
     $RR->setTitle($rname);
+    
+    if($Tl->getCount()==0){
+        return $RC->createElement("error", "No hay tickets para mostrar con el filtro seleccionado.");
+    }
+    
     $RR->loadTKTS($Tl->getObjs());
     
     $RR->loadITJson(file_get_contents($filepath));

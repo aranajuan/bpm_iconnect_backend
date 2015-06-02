@@ -81,6 +81,14 @@ class TKTLISTER extends basicobject {
     }
 
     /**
+     * Cantidad de tickets filtrados
+     * @return int
+     */
+    public function getCount(){
+        return count($this->resultobjts);
+    }
+    
+    /**
      * Lista de tickets filtrados
      * @return array<TKT>
      */

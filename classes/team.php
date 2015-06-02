@@ -249,17 +249,13 @@ class TEAM extends itobject {
 
     /**
      * Obtener mienbros del equipo del perfil especificado
-     * @param type $profile
+     * @param int $idprofile
      * @return \USER
      */
-    function get_users($profile = "") {
-        if ($profile != "") {
-            $idprof = get_profileId($profile);
-            if ($idprof == "-1")
-                return array();
-            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and perfil=" . intval($idprof) . " and idsequipos like '%" . intval($this->id) . "%'";
-        }
-        else {
+    function get_users($idprofile = 0) {
+        if ($idprofile != 0) {
+            $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and perfil=" . intval($idprofile) . " and idsequipos like '%" . intval($this->id) . "%'";
+        }else {
             $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and idsequipos like '%" . intval($this->id) . "%'";
         }
         $users = array();

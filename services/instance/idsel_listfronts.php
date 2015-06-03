@@ -6,7 +6,7 @@
  * @return null
  */
 function GO($RC) {
-    $Front = new FRONT($RC->get_Connection());
+    $Front = new Itracker\Front($RC->get_Connection());
     $FF = $Front->list_all();
     $FL=array();
     foreach ($FF as $F){

@@ -1,13 +1,12 @@
 <?php
-require_once 'classes/tkt.php';
 /**
  * Lista
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $TKT = $RC->get_objcache()->get_object("TKT", $RC->get_params("idtkt"));
-    if($RC->get_objcache()->get_status("TKT", $RC->get_params("idtkt"))!="ok"){
+    $TKT = $RC->get_objcache()->get_object("Tkt", $RC->get_params("idtkt"));
+    if($RC->get_objcache()->get_status("Tkt", $RC->get_params("idtkt"))!="ok"){
         return $RC->createElement("error", "Ticket invalido");
     }
     

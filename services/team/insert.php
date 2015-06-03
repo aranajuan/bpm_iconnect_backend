@@ -1,14 +1,12 @@
 <?php
 
-require_once 'classes/team.php';
-
 /**
  * Inserta
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $O = new TEAM($RC->get_Connection());
+    $O = new \Itracker\Team();
     $O->load_VEC($RC->get_params(null));
     $result = $O->insert_DB();
     if ($result === "ok") {

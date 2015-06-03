@@ -1,7 +1,4 @@
 <?php
-require_once 'classes/notify.php';
-require_once 'classes/action.php';
-
 /**
  * Ejecuta accion
  * @param Rcontroller $RC
@@ -12,13 +9,12 @@ function GO($RC) {
     $idtkt = $RC->get_params("idtkt");
     
     if ($idtkt) {
-        $TKT= $RC->get_objcache()->get_object("TKT",$idtkt);
+        $TKT= $RC->get_objcache()->get_object("Tkt",$idtkt);
     }else{
-        $TKT = new TKT();
+        $TKT = new \Itracker\Tkt();
         $TKT->load_VEC(array("origen" => $RC->get_params("path")));
     }
-
-    $A = new ACTION();
+    $A = new Itracker\Action();
     $A->load_DB($RC->get_params("action"));
     $A->setWorking();
     $TKT->setWorking();
@@ -47,7 +43,7 @@ function GO($RC) {
         $A->loadFiles($files);
     }
     
-    $Notif = new NOTIFY();
+    $Notif = new \Itracker\Notify();
     $actionResult = $A->ejecute();
     
     if($actionResult["result"]){

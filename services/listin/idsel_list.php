@@ -1,12 +1,11 @@
 <?php
-require_once 'classes/listin.php';
 /**
  * Lista
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $ALL = new LISTIN($RC->get_Connection());
+    $ALL = new Itracker\Listin($RC->get_Connection());
     $ALL_v = $ALL->list_all();
     $listL=$RC->createElement("list");
     if ($ALL_v) {

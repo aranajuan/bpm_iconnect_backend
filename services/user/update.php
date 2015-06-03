@@ -6,8 +6,8 @@
  * @return null
  */
 function GO($RC) {
-    $Ul = $RC->get_objcache()->get_object("USER", $RC->get_params("usr"));
-    $loadR = $RC->get_objcache()->get_status("USER", $RC->get_params("usr"));
+    $Ul = $RC->get_objcache()->get_object("User", $RC->get_params("usr"));
+    $loadR = $RC->get_objcache()->get_status("User", $RC->get_params("usr"));
     if ($loadR !== "ok") {
         $result = "Usuario invalido";
     } else {

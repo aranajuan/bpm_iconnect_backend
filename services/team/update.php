@@ -1,12 +1,11 @@
 <?php
-require_once   'classes/team.php';
 /**
  * Update
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $O= $RC->get_objcache()->get_object("TEAM",$RC->get_params("id"));
+    $O= $RC->get_objcache()->get_object("Team",$RC->get_params("id"));
     $O->load_VEC($RC->get_params(null));
     $adms = $O->get_prop("adms");
     $newadms=explode(",",$RC->get_params("idsadms"));

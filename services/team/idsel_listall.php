@@ -1,12 +1,11 @@
 <?php
-require_once 'classes/team.php';
 /**
  * Lista
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $ALL = new TEAM($RC->get_Connection());
+    $ALL = new \Itracker\Team();
     $ALL_v = $ALL->list_all();
     $listL=$RC->createElement("list");
     if ($ALL_v) {

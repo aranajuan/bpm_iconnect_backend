@@ -1,7 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -10,8 +7,8 @@ require_once 'classes/tkt.php';
 function GO($RC) {
     $params = $RC->get_params("sel_params");
     $arr=  json_decode($params);
-    $TKT = $RC->get_objcache()->get_object("TKT", $arr->idtkt);
-    if($RC->get_objcache()->get_status("TKT", $arr->idtkt)!="ok"){
+    $TKT = $RC->get_objcache()->get_object("Tkt", $arr->idtkt);
+    if($RC->get_objcache()->get_status("Tkt", $arr->idtkt)!="ok"){
         return $RC->createElement("error","ticket invalido".print_r($arr,true));
     }
     

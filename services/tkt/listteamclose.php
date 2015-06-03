@@ -1,7 +1,5 @@
 <?php
 
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
 /**
  * Lista
  * @param Rcontroller $RC
@@ -23,17 +21,17 @@ function GO($RC) {
         }
         array_push($arrayTeam, $idteam);
     }
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
-    $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
-    $Tf->set_filter(TKTFILTER::$DATE_FROM, $desde);
-    $Tf->set_filter(TKTFILTER::$DATE_TO, $hasta);
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FB);
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, $desde);
+    $Tf->set_filter(Itracker\TktFilter::$DATE_TO, $hasta);
 
     $equipo = $u->get_team_obj($arrayTeam[0]);
     $view = $equipo->get_prop("staffhome_vista");
 
-    $Tf->set_filter(TKTFILTER::$IDMASTER, array('null'));
-    $Tl = new TKTLISTER();
+    $Tf->set_filter(Itracker\TktFilter::$IDMASTER, array('null'));
+    $Tl = new Itracker\TktLister();
 
     $Tl->loadFilter($Tf);
 

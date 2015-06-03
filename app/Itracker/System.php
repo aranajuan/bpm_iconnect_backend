@@ -120,7 +120,7 @@ class System extends ITObject {
      */
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            return "Els sistema ya se encuentra eliminado";
+            return "El sistema ya se encuentra eliminado";
         $ssql = "update TBL_SISTEMAS set estado=1 where id=".intval($this->id);
         if ($this->dbinstance->query($ssql))
             return "<b>Error:</b>" . $this->dbinstance->details;

@@ -2,35 +2,35 @@
 
 /**
  * Inserta
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $Ul = $RC->get_objcache()->get_object("User", $RC->get_params("usr"));
-    $loadR = $RC->get_objcache()->get_status("User", $RC->get_params("usr"));
-    $userD = $RC->createElement("result");
+function GO($Context) {
+    $Ul = $Context->get_objcache()->get_object("User", $Context->get_params("usr"));
+    $loadR = $Context->get_objcache()->get_status("User", $Context->get_params("usr"));
+    $userD = $Context->createElement("result");
     if ($loadR !== "ok") {
         $result = "Usuario invalido";
-        $userD->appendChild($RC->createElement("ejecute", "error"));
-        $userD->appendChild($RC->createElement("msj", $result));
+        $userD->appendChild($Context->createElement("ejecute", "error"));
+        $userD->appendChild($Context->createElement("msj", $result));
     } else {
         $rest = $Ul->change_teams(array());
         if ($rest) {
             $result = $Ul->update_DB();
             if ($result === "ok") {
-                $userD->appendChild($RC->createElement("ejecute", "ok"));
-                $userD->appendChild($RC->createElement("msj", "El usuario aun posee equipos que no administras. Consulte al administrador general para bloquear el acceso."));
+                $userD->appendChild($Context->createElement("ejecute", "ok"));
+                $userD->appendChild($Context->createElement("msj", "El usuario aun posee equipos que no administras. Consulte al administrador general para bloquear el acceso."));
             } else {
-                $userD->appendChild($RC->createElement("ejecute", "error"));
-                $userD->appendChild($RC->createElement("msj", $result));
+                $userD->appendChild($Context->createElement("ejecute", "error"));
+                $userD->appendChild($Context->createElement("msj", $result));
             }
         } else {
             $result = $Ul->delete_DB();
             if ($result === "ok") {
-                $userD->appendChild($RC->createElement("ejecute", "ok"));
+                $userD->appendChild($Context->createElement("ejecute", "ok"));
             } else {
-                $userD->appendChild($RC->createElement("ejecute", "error"));
-                $userD->appendChild($RC->createElement("msj", $result));
+                $userD->appendChild($Context->createElement("ejecute", "error"));
+                $userD->appendChild($Context->createElement("msj", $result));
             }
         }
     }

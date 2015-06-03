@@ -2,22 +2,22 @@
 
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
 
-    $u = $RC->get_User();
+    $u = $Context->get_User();
 
     $dias = 5;
     $desde = date(DBDATE_WRITE, strtotime('-' . $dias . ' day'));
     $hasta = date(DBDATE_WRITE, strtotime('+1 day'));
 
     $arrayTeam = array();
-    $idsteams = explode(",", $RC->get_params("team"));
+    $idsteams = explode(",", $Context->get_params("team"));
     foreach ($idsteams as $idteam) {
         if (!$u->in_team($idteam)) {
-            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
+            return $Context->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
         array_push($arrayTeam, $idteam);
     }
@@ -36,19 +36,19 @@ function GO($RC) {
     $Tl->loadFilter($Tf);
 
     if (!$Tl->execute()) {
-        return $RC->createElement("error", "Error al cargar listado. " . $Tf->getError());
+        return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());
     }
 
     $ALL_v = $Tl->getObjs();
 
 
-    $response = $RC->createElement("data");
-    $response->appendChild($RC->createElement("view", "id,js:show_childs:id:childsc=>Adjuntos,usr_o.nombre=>Usuario,usr_o.equiposname=>Grupo,FA,FB=>FC,u_tom_o.nombre=>Staff"));
-    $listL = $RC->createElement("list");
+    $response = $Context->createElement("data");
+    $response->appendChild($Context->createElement("view", "id,js:show_childs:id:childsc=>Adjuntos,usr_o.nombre=>Usuario,usr_o.equiposname=>Grupo,FA,FB=>FC,u_tom_o.nombre=>Staff"));
+    $listL = $Context->createElement("list");
     $fields = array("id", "usr_o.nombre", "usr_o.equiposname", "FA", "FB", "u_tom_o.nombre", "prioridadtext", "childsc", "origen_json", "equipo.nombre", "status", "critic");
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
-            $listL->appendChild($l->getXML($RC, $fields));
+            $listL->appendChild($l->getXML($Context, $fields));
         }
         $response->appendChild($listL);
         return $response;

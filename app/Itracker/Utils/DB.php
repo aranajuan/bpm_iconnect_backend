@@ -58,10 +58,9 @@ class DB {
             $this->lastSQL = $ssql;
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud."; //mysql_error();
-                error_log("IT:sqlErr:" . mysql_error());
-                error_log("IT:sql:" . $ssql);
-                $this->noEmpty = 0;
+                $this->details = "Error al ejecutar solicitud.";
+                $this->logError(mysql_error()."-".$ssql);
+                 $this->noEmpty = 0;
                 $this->cReg = 0;
                 return 1;
             } else {
@@ -77,9 +76,8 @@ class DB {
             $this->RS = $this->get_link()->query($ssql);
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" . print_r($this->get_link()->errorInfo(),true));
-                error_log("IT:sql:" . $ssql);
+                $this->details = "Error al ejecutar solicitud."; 
+                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
                 return 1;
@@ -106,8 +104,7 @@ class DB {
         if ($this->connection->get_motor() == 'mysql') {
             if (!mysql_query($ssql, $this->get_link())) {
                 $this->details = "Error al ejecutar solicitud."; // mysql_error();
-                error_log("IT:sqlErr:" . mysql_error());
-                error_log("IT:sql:" . $ssql);
+                $this->logError(mysql_error()."-".$ssql);
                 return mysql_error();
             }
             else
@@ -118,8 +115,7 @@ class DB {
             $ssql = mb_convert_encoding($ssql, 'ISO-8859-15', 'UTF-8');
             if (!($this->get_link()->query($ssql))) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                error_log("IT:sqlErr:" .print_r($this->get_link()->errorInfo(),true));
-                error_log("IT:sql:" . $ssql);
+                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {
@@ -160,6 +156,15 @@ class DB {
         } elseif ($this->connection->get_motor() == 'mssql') {
             return $this->lstIDmss;
         }
+    }
+    
+    /**
+     * Log de error SQL
+     * @param String $msj
+     */
+    private function logError($msj){
+        $context = \Itracker\Context::getContext();
+        $context->getLogger()->critical($context->getLogString().__CLASS__."\t".$msj);
     }
 
 }

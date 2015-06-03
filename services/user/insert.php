@@ -2,24 +2,24 @@
 
 /**
  * Inserta
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $Ul = $RC->get_objcache()->get_object("User", $RC->get_params("usr"));
-    $loadR = $RC->get_objcache()->get_status("User", $RC->get_params("usr"));
+function GO($Context) {
+    $Ul = $Context->get_objcache()->get_object("User", $Context->get_params("usr"));
+    $loadR = $Context->get_objcache()->get_status("User", $Context->get_params("usr"));
     /* Verificar estado en la base update o insert */
     if ($loadR === "eliminado") {
         $Ul->hardDelete(); // elimina de la base fisicamente
         $Ul = new USER();
-        $Ul->load_VEC($RC->get_params(null));
-        $Ul->change_teams(explode(",", $RC->get_params("idsequipos")));
+        $Ul->load_VEC($Context->get_params(null));
+        $Ul->change_teams(explode(",", $Context->get_params("idsequipos")));
         $result = $Ul->insert_DB();
     } elseif ($loadR === "ok") {//cargar equipos nuevos y demas datos
         // UPDATE
-        $Ul->load_VEC($RC->get_params(null));
-        $tAdds = explode(",", $RC->get_params("idsequipos"));
-        if ($RC->get_params("idsequipos")!="" && count($tAdds)) {
+        $Ul->load_VEC($Context->get_params(null));
+        $tAdds = explode(",", $Context->get_params("idsequipos"));
+        if ($Context->get_params("idsequipos")!="" && count($tAdds)) {
             $Ul->change_teams($tAdds);
             $result = $Ul->update_DB();
         } else {
@@ -27,10 +27,10 @@ function GO($RC) {
         }
     } else { //errores de falta de creado
         $Ul->hardDelete(); // elimina de la base fisicamente
-        $Ul = new USER($RC->get_Connection());
-        $Ul->load_VEC($RC->get_params(null));
-        $Ul->change_teams(explode(",", $RC->get_params("idsequipos")));
+        $Ul = new USER($Context->get_Connection());
+        $Ul->load_VEC($Context->get_params(null));
+        $Ul->change_teams(explode(",", $Context->get_params("idsequipos")));
         $result = $Ul->insert_DB();
     }
-    return $RC->createElement("result", $result);
+    return $Context->createElement("result", $result);
 }

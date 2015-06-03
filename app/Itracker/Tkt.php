@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-class Tkt extends TreeInterface {
+class Tkt extends Tree {
 
     private $id;    /* id del ticket */
     private $usr;   /* id usuario que reclama */
@@ -44,7 +44,7 @@ class Tkt extends TreeInterface {
             $tmpU = $this->dbinstance->get_vector();
             return $this->load_DV($tmpU);
         }
-
+        
         $this->error = TRUE;
         return "error";
     }

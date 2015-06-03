@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-abstract class TreeInterface extends ITObject {
+abstract class Tree extends ITObject {
 
     private $path;
     private $path_pos;
@@ -354,7 +354,7 @@ abstract class TreeInterface extends ITObject {
                     }
                     return $rta;
                 } else {
-                    if ($actualO->get_prop("idequipo_destino") == null && $actualO->get_prop("ruta_destino") == null) {
+                    if ($actualO->get_prop("equipo_destino") == null) {
                         $rta["error"] = "No hay ruta definida. Error de Arbol";
                         return $rta;
                     } else {

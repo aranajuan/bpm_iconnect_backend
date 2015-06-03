@@ -1,45 +1,45 @@
 <?php
 /**
  * Ejecuta accion
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
 
-    $idtkt = $RC->get_params("idtkt");
+    $idtkt = $Context->get_params("idtkt");
     
     if ($idtkt) {
-        $TKT= $RC->get_objcache()->get_object("Tkt",$idtkt);
+        $TKT= $Context->get_objcache()->get_object("Tkt",$idtkt);
     }else{
         $TKT = new \Itracker\Tkt();
-        $TKT->load_VEC(array("origen" => $RC->get_params("path")));
+        $TKT->load_VEC(array("origen" => $Context->get_params("path")));
     }
     $A = new Itracker\Action();
-    $A->load_DB($RC->get_params("action"));
+    $A->load_DB($Context->get_params("action"));
     $A->setWorking();
     $TKT->setWorking();
     $validation = $A->loadTKT($TKT);
 
     if (!$validation) {
-        return $RC->createElement("error", "No se pudo cargar el ticket");
+        return $Context->createElement("error", "No se pudo cargar el ticket");
     }
     
     $validation = $A->check_valid(); //opciones del arbol - equipo destino - etc en apertura
 
     if ($validation != "ok") {
-        return $RC->createElement("error", "Accion invalida. " . $validation);
+        return $Context->createElement("error", "Accion invalida. " . $validation);
     }
 
-    $form = json_decode($RC->get_params("form"),true);
+    $form = json_decode($Context->get_params("form"),true);
     $validation = $A->loadFormValues($form,"actionform");
 
     
     if ($validation != "ok") {
-        return $RC->createElement("error", "Error en formulario. " . $validation);
+        return $Context->createElement("error", "Error en formulario. " . $validation);
     }
     
-    if($RC->get_params("sendfiles")=="true"){
-        $files = $RC->get_files();
+    if($Context->get_params("sendfiles")=="true"){
+        $files = $Context->get_files();
         $A->loadFiles($files);
     }
     
@@ -50,10 +50,10 @@ function GO($RC) {
         $Notif->load_actionOBJ($A);
         $actionResult["mail"]= $Notif->send();
     }
-    $result= $RC->createElement("data");
+    $result= $Context->createElement("data");
     foreach($actionResult as $k=>$v){
-        $result->appendChild($RC->createElement($k, $v));
+        $result->appendChild($Context->createElement($k, $v));
     }
     return $result;
-    //return $RC->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
+    //return $Context->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
 }

@@ -102,7 +102,7 @@ class Notify extends ITObject {
 
     function __construct($conn = null) {
         parent::__construct($conn);
-        $this->dbroot = new  \Itracker\Utils\DB($this->conn, true);
+        $this->dbroot = new  Utils\DB($this->conn, true);
     }
 
     /**
@@ -122,6 +122,7 @@ class Notify extends ITObject {
             case "is_taken":
                 return ($this->tkt_final->get_prop("u_tom") != null);
             default:
+                $this->getContext()->getLogger()->error("Condicion invalida en mail",array($c));
                 return false;
         }
         return false;
@@ -172,6 +173,7 @@ class Notify extends ITObject {
                     }
                     return $result;
                 default:
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #3",array($name));
                     return "NULL" . MAIL_SPLITER;
             }
         } else {
@@ -239,6 +241,7 @@ class Notify extends ITObject {
                     return $result;
                     break;
                 default:
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #4",array($name));
                     $result = "NULL";
             }
         }
@@ -260,7 +263,9 @@ class Notify extends ITObject {
         
         foreach($matches[0] as $m){
             $mclear = str_replace(array("{","}"), "", $m);
-            $mailR = str_replace($m, $this->get_mail_value($mclear, $too), $mailR);
+            if($mclear!=""){
+                $mailR = str_replace($m, $this->get_mail_value($mclear, $too), $mailR);
+            }
         }
         
         return $mailR;
@@ -337,14 +342,22 @@ class Notify extends ITObject {
         $cc = array_unique($this->cc);
         $i = 0;
         foreach ($too as $tM) {
-            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL))
+            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)){
+                if($tM!="" && $tM!="NULL"){
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #1",array($tM));
+                }
                 array_splice($too, $i, 1);
+            }
             $i++;
         }
         $i = 0;
         foreach ($cc as $tM) {
-            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL))
+            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)){
+                if($tM!="" && $tM!="NULL"){
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #2",array($tM));
+                }
                 array_splice($cc, $i, 1);
+            }
             $i++;
         }
 
@@ -420,6 +433,7 @@ class Notify extends ITObject {
                     $result = "NULL";
                 break;
             default:
+                $this->getContext()->getLogger()->error("Valor invalido en mail",array($name));
                 $result = "NULL";
         }
         if ($result)
@@ -520,7 +534,11 @@ class Notify extends ITObject {
      */
     private function send_mail($to, $subject, $body, $cc, $type, $from) {
         $extras = "From: $from\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
-        return mail($to,$subject,$body,$extras);
+        $rta= mail($to,$subject,$body,$extras);
+        if(!$rta){
+            $this->getContext()->getLogger()->critical("Error en smtp");
+        }
+        return $rta;
     }
 
     public function check_data() {

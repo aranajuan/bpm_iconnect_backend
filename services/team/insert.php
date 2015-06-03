@@ -2,21 +2,21 @@
 
 /**
  * Inserta
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
     $O = new \Itracker\Team();
-    $O->load_VEC($RC->get_params(null));
+    $O->load_VEC($Context->get_params(null));
     $result = $O->insert_DB();
     if ($result === "ok") {
-        $adms=explode(",", $RC->get_params("idsadms"));
+        $adms=explode(",", $Context->get_params("idsadms"));
         foreach ($adms as $usr) {
-            $U = $RC->get_objcache()->get_object("USER",$usr);
-            if($RC->get_objcache()->get_status("USER",$usr)==="ok"){
+            $U = $Context->get_objcache()->get_object("USER",$usr);
+            if($Context->get_objcache()->get_status("USER",$usr)==="ok"){
                 $U->add_adm($O->get_prop("id"));
             }
         }
     }
-    return $RC->createElement("result", $result);
+    return $Context->createElement("result", $result);
 }

@@ -2,18 +2,18 @@
 
 /**
  * Opciones del arbol a mostrar
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
     $TKT = new \Itracker\Tkt();
-    $rta = $TKT->load_VEC(array("origen" => $RC->get_params("path")));
+    $rta = $TKT->load_VEC(array("origen" => $Context->get_params("path")));
 
     if ($rta == "ok") {
         // armar respuesta arbol
-        $treeL = $RC->createElement("tree");
+        $treeL = $Context->createElement("tree");
         /* Respuestas previas */
-        $previous = $RC->createElement("previous");
+        $previous = $Context->createElement("previous");
 
         $topts = $TKT->get_tree_options(); //primero cargar las opciones por si realiza movimiento
         $opts = $TKT->get_tree_history();
@@ -21,26 +21,26 @@ function GO($RC) {
         if ($opts) {
             foreach ($opts as $o) {
                 $ans=$o["ans"];
-                if($RC->get_User()->get_prop("perfil")==1){
+                if($Context->get_User()->get_prop("perfil")==1){
                     $ans.="/".$o["path"];
                 }
-                $option = $previous->appendChild($RC->createElement("OPTION"));
-                $option->appendChild($RC->createElement("question", $o["question"]));
-                $option->appendChild($RC->createElement("ans", $ans));
+                $option = $previous->appendChild($Context->createElement("OPTION"));
+                $option->appendChild($Context->createElement("question", $o["question"]));
+                $option->appendChild($Context->createElement("ans", $ans));
                 $previous->appendChild($option);
             }
         }
-        $previous->appendChild($RC->createElement("back", $topts["back"]));
-        $previous->appendChild($RC->createElement("actual", $RC->get_params("path")));
+        $previous->appendChild($Context->createElement("back", $topts["back"]));
+        $previous->appendChild($Context->createElement("actual", $Context->get_params("path")));
         $treeL->appendChild($previous);
 
         /*
-          $treeL = $RC->createElement("error", print_r($opts, true));
+          $treeL = $Context->createElement("error", print_r($opts, true));
           return $treeL;
          */
 
         if ($topts["error"]) {
-            $treeL = $RC->createElement("error", $topts["error"]);
+            $treeL = $Context->createElement("error", $topts["error"]);
             return $treeL;
         }
 
@@ -50,46 +50,46 @@ function GO($RC) {
                 if($itform){
                     $itfdom=$itform->get_inputDOM()->documentElement;
                 }else{
-                    return $RC->createElement("error", "Error en formulario #1");
+                    return $Context->createElement("error", "Error en formulario #1");
                 }
-                $joined = $RC->append_xml($itfdom);
+                $joined = $Context->append_xml($itfdom);
                 if ($joined) {
-                    $opendata = $RC->createElement("opendata");
+                    $opendata = $Context->createElement("opendata");
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
-                    $simi =$RC->createElement("no_anexar",$topts["object"]->get_prop("no_anexar"));
+                    $simi =$Context->createElement("no_anexar",$topts["object"]->get_prop("no_anexar"));
                     $treeL->appendChild($simi);
                     return $treeL;
                 } else {
-                    return $RC->createElement("error", "Error en formulario #2");
+                    return $Context->createElement("error", "Error en formulario #2");
                 }
             } else {
-                $opendata = $RC->createElement("opendata");
-                $opendata->appendChild($RC->createElement("msj", "No se necesitan datos adicionales. Puedes generar el itracker."));
+                $opendata = $Context->createElement("opendata");
+                $opendata->appendChild($Context->createElement("msj", "No se necesitan datos adicionales. Puedes generar el itracker."));
                 $treeL->appendChild($opendata);
                 return $treeL;
             }
         } else {
 
             /* Pregunta */
-            $question = $RC->createElement("question");
-            $question->appendChild($RC->createElement("title", $topts["title"]));
-            $question->appendChild($RC->createElement("detail", $topts["detail"]));
+            $question = $Context->createElement("question");
+            $question->appendChild($Context->createElement("title", $topts["title"]));
+            $question->appendChild($Context->createElement("detail", $topts["detail"]));
 
             /* Opciones */
-            $options = $RC->createElement("options");
+            $options = $Context->createElement("options");
             foreach ($topts["options"] as $o) {
-                $option = $options->appendChild($RC->createElement("OPTION"));
-                $option->appendChild($RC->createElement("title", $o["title"]));
-                $option->appendChild($RC->createElement("destiny", $o["destiny"]));
-                $option->appendChild($RC->createElement("end", $o["end"]));
+                $option = $options->appendChild($Context->createElement("OPTION"));
+                $option->appendChild($Context->createElement("title", $o["title"]));
+                $option->appendChild($Context->createElement("destiny", $o["destiny"]));
+                $option->appendChild($Context->createElement("end", $o["end"]));
                 $options->appendChild($option);
                 $treeL->appendChild($question);
                 $treeL->appendChild($options);
             }
         }
     } else {
-        $treeL = $RC->createElement("error", $rta);
+        $treeL = $Context->createElement("error", $rta);
     }
     return $treeL;
 }

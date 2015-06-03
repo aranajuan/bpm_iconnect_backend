@@ -1,16 +1,16 @@
 <?php
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $V = $RC->get_User()->list_alldomains();
-    $listL=$RC->createElement("list");
+function GO($Context) {
+    $V = $Context->get_User()->list_alldomains();
+    $listL=$Context->createElement("list");
     if ($V) {
         foreach ($V as $l){
-            $e=$RC->createElement("DOMAIN");
-            $nombre=$RC->createElement("nombre", $l);
+            $e=$Context->createElement("DOMAIN");
+            $nombre=$Context->createElement("nombre", $l);
             $e->appendChild($nombre);
             $listL->appendChild($e);
         }

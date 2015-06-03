@@ -71,7 +71,7 @@ class User extends ITObject {
 
     function __construct($conn = null) {
         parent::__construct($conn);
-        $this->dbroot = new \Itracker\Utils\DB($this->conn, true);
+        $this->dbroot = new Utils\DB($this->conn, true);
     }
 
     /**

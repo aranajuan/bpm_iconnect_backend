@@ -19,7 +19,7 @@ class Front extends ITObject {
     
     function  __construct($conn=null){
         parent::__construct($conn);
-        $this->DBobj = new \Itracker\Utils\DB($this->conn, true);
+        $this->DBobj = new Utils\DB($this->conn, true);
     }
     
     /**
@@ -49,8 +49,7 @@ class Front extends ITObject {
                 return "eliminado";
             return "ok";
         }
-        else
-            $this->error = TRUE;
+        $this->error = TRUE;
         return "error";
     }
 

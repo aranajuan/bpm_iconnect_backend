@@ -5,7 +5,7 @@ namespace Itracker;
 /**
  * Maneja todo el requerimiento del front
  */
-class RController extends \Itracker\Utils\XMLhandler {
+class Context extends Utils\XMLhandler {
 
     /**
      * usuario logueado 
@@ -21,7 +21,7 @@ class RController extends \Itracker\Utils\XMLhandler {
 
     /**
      * administrador de conexiones
-     * @var \Itracker\Utils\ConnectionManager
+     * @var Utils\ConnectionManager
      */
     private $connections; // 
 
@@ -39,10 +39,22 @@ class RController extends \Itracker\Utils\XMLhandler {
     
     private $error;
 
-    public function __construct() {
+    private static $__instance;
+    
+    private function __construct() {
         $this->objCache=  ObjectCache::getInstance();
     }
 
+    /**
+     * 
+     * @return Context
+     */
+    public static function getContext(){
+        if(!static::$__instance){
+            static::$__instance = new static();
+        }
+        return static::$__instance;
+    }
 
     /**
      * Prepara conexiones a db, carga input, valida datos
@@ -56,7 +68,7 @@ class RController extends \Itracker\Utils\XMLhandler {
             return false;
         }
 
-        $this->connections = new \Itracker\Utils\ConnectionManager();
+        $this->connections = new Utils\ConnectionManager();
         if ($this->connections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos.");
             return false;
@@ -210,7 +222,7 @@ class RController extends \Itracker\Utils\XMLhandler {
     
     /**
      * Devuelve conexiones establecidas
-     * @return \Itracker\Utils\ConnectionManager
+     * @return Utils\ConnectionManager
      */
     public function get_Connection(){
         return $this->connections;
@@ -232,6 +244,27 @@ class RController extends \Itracker\Utils\XMLhandler {
         return $this->objCache;
     }
     
+    /**
+     * Devuelve instancia de Logger
+     * @param \KLogger\Psr\Log\LogLevel $level
+     * @return \KLogger\Logger
+     */
+    public function getLogger($level=null){
+        return Utils\LoggerFactory::getLogger($level);
+    }
+    
+    /**
+     * String default para log
+     * @return String
+     */
+    public function getLogString(){
+        if($this->get_User() instanceof User){
+            $u = $this->get_User()->get_prop("usr");
+        }else{
+            $u=$this->getUser();
+        }
+        return $u."\t";
+    }
 }
 
 ?>

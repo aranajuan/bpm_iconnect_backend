@@ -1,11 +1,11 @@
 <?php
 /**
  * Inserta division
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $D= new Itracker\Division($RC->get_Connection());
-    $D->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$D->insert_DB());
+function GO($Context) {
+    $D= new Itracker\Division($Context->get_Connection());
+    $D->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$D->insert_DB());
 }

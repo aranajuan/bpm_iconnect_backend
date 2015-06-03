@@ -1,15 +1,15 @@
 <?php
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $idtkt = $RC->get_params("id");
+function GO($Context) {
+    $idtkt = $Context->get_params("id");
 
-    $TKT = $RC->get_objcache()->get_object("Tkt", $idtkt);
-    if ($RC->get_objcache()->get_status("Tkt", $idtkt) != "ok") {
-        return $RC->createElement("error", "Ticket invalido.#1");
+    $TKT = $Context->get_objcache()->get_object("Tkt", $idtkt);
+    if ($Context->get_objcache()->get_status("Tkt", $idtkt) != "ok") {
+        return $Context->createElement("error", "Ticket invalido.#1");
     }
     $response = new \DOMDocument();
     $responseData = $response->createElement("data");
@@ -38,7 +38,7 @@ function GO($RC) {
         }
     }
     if ($cvalid == 0) {
-        return $RC->createElement("error", "Ticket invalido.#2");
+        return $Context->createElement("error", "Ticket invalido.#2");
     }
 
     $responseData->appendChild($moves);
@@ -55,5 +55,5 @@ function GO($RC) {
     }
     $responseData->appendChild($actions);
     
-    return $RC->append_xml($responseData);
+    return $Context->append_xml($responseData);
 }

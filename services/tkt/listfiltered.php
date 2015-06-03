@@ -1,8 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -21,17 +17,17 @@ function GO($RC) {
     }
     $actions = $RC->get_params("actions");
 
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
-    $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
-    $Tf->set_filter(TKTFILTER::$ORIGINS, explode(',',$RC->get_params("origin")));
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
+    $Tf->set_filter(Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
+    $Tf->set_filter(Itracker\TktFilter::$ORIGINS, explode(',',$RC->get_params("origin")));
 
     $taken = $RC->get_params("taken");
     if ($taken) {
-        $Tf->set_filter(TKTFILTER::$TAKENBY, explode(",", $taken));
+        $Tf->set_filter(Itracker\TktFilter::$TAKENBY, explode(",", $taken));
     }
 
-    $Tl = new TKTLISTER();
+    $Tl = new Itracker\TktLister();
     $Tl->loadFilter($Tf);
     
     if(!$Tl->execute()){
@@ -40,7 +36,7 @@ function GO($RC) {
     
     $ALL_v = $Tl->getObjs();
 
-    $listL = new DOMDocument();
+    $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
     if ($ALL_v) {

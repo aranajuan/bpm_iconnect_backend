@@ -1,7 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
 /**
  * Lista
  * @param Rcontroller $RC
@@ -12,15 +9,15 @@ function GO($RC) {
     $desde = date(DBDATE_WRITE, strtotime('-' . $dias . ' day'));
     $hasta = date(DBDATE_WRITE, strtotime('+1 day'));
 
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$UA, array($RC->get_User()->get_prop("usr")));
-    $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
-    $Tf->set_filter(TKTFILTER::$DATE_FROM, $desde);
-    $Tf->set_filter(TKTFILTER::$DATE_TO, $hasta);
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$UA, array($RC->get_User()->get_prop("usr")));
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FB);
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, $desde);
+    $Tf->set_filter(Itracker\TktFilter::$DATE_TO, $hasta);
 
     $view = $RC->get_User()->getMyView();
 
-    $Tl = new TKTLISTER();
+    $Tl = new Itracker\TktLister();
 
     $Tl->loadFilter($Tf);
 

@@ -42,8 +42,8 @@ function make_arrayobj($arr) {
 
 /**
  * Une XML
- * @param SimpleXMLElement $simplexml_to
- * @param SimpleXMLElement $simplexml_from
+ * @param \SimpleXMLElement $simplexml_to
+ * @param \SimpleXMLElement $simplexml_from
  */
 function append_simplexml(&$simplexml_to, &$simplexml_from) {
     foreach ($simplexml_from->children() as $simplexml_child) {
@@ -269,7 +269,6 @@ function microtime_float() {
 /**
  * se ejecuta al finalizar script */
 function finish() {
-    
 }
 
 class Encrypter {

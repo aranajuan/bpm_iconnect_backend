@@ -1,7 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -10,11 +7,11 @@ require_once 'classes/tkt.php';
 function GO($RC) {
     $idtkt = $RC->get_params("id");
 
-    $TKT = $RC->get_objcache()->get_object("TKT", $idtkt);
-    if ($RC->get_objcache()->get_status("TKT", $idtkt) != "ok") {
+    $TKT = $RC->get_objcache()->get_object("Tkt", $idtkt);
+    if ($RC->get_objcache()->get_status("Tkt", $idtkt) != "ok") {
         return $RC->createElement("error", "Ticket invalido.#1");
     }
-    $response = new DOMDocument();
+    $response = new \DOMDocument();
     $responseData = $response->createElement("data");
     
     $responseData->appendChild($response->createElement("idmaster",$TKT->get_prop("idmaster")));

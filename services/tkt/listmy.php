@@ -1,8 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -10,22 +6,22 @@ require_once 'classes/tktlister.php';
  */
 function GO($RC) {
 
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$UA, array($RC->get_User()->get_prop("usr")));
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$UA, array($RC->get_User()->get_prop("usr")));
 
     if ($RC->get_params("status") == "open") {
-        $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
+        $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
     } elseif ($RC->get_params("status") == "closed") {
-        $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FB);
-        $Tf->set_filter(TKTFILTER::$DATE_FROM, @STRdate_format($RC->get_params("cfrom"), USERDATE_READ, DBDATE_WRITE));
-        $Tf->set_filter(TKTFILTER::$DATE_TO, @STRdate_format($RC->get_params("cto"), USERDATE_READ, DBDATE_WRITE));
+        $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FB);
+        $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($RC->get_params("cfrom"), USERDATE_READ, DBDATE_WRITE));
+        $Tf->set_filter(Itracker\TktFilter::$DATE_TO, @STRdate_format($RC->get_params("cto"), USERDATE_READ, DBDATE_WRITE));
     } else {
         return null;
     }
 
     $view = $RC->get_User()->getMyView();
     
-    $Tl = new TKTLISTER();
+    $Tl = new Itracker\TktLister();
     $Tl->loadFilter($Tf);
 
     if (!$Tl->execute()) {

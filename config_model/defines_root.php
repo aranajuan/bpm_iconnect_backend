@@ -22,8 +22,6 @@ define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT");
 define('BASE_DIR',realpath(dirname(realpath(dirname(__FILE__)).'/../../../')));
 define("IPLOCAL","::1");
 define('ROOT_DIR',BASE_DIR.'/itracker_app');
-//echo ROOT_DIR;
-define('INCLUDE_DIR',ROOT_DIR.""); 
 
 //time zone
 date_default_timezone_set ( 'America/Argentina/Buenos_Aires' );

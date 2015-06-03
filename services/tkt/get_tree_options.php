@@ -1,15 +1,12 @@
 <?php
 
-require_once 'classes/tkt.php';
-require_once 'classes/itform.php';
-
 /**
  * Opciones del arbol a mostrar
  * @param Rcontroller $RC
  * @return null
  */
 function GO($RC) {
-    $TKT = new TKT($RC->get_Connection());
+    $TKT = new \Itracker\Tkt();
     $rta = $TKT->load_VEC(array("origen" => $RC->get_params("path")));
 
     if ($rta == "ok") {

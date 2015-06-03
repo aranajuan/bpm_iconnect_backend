@@ -1,7 +1,5 @@
 <?php
 
-require_once 'classes/action.php';
-
 /**
  * Ejecuta accion
  * @param Rcontroller $RC
@@ -11,8 +9,8 @@ function GO($RC) {
     
     $actionName = $RC->get_params("action");
     
-    $A= $RC->get_objcache()->get_object("ACTION", $actionName);
-    $rta =$RC->get_objcache()->get_status("ACTION", $actionName);
+    $A= $RC->get_objcache()->get_object("Action", $actionName);
+    $rta =$RC->get_objcache()->get_status("Action", $actionName);
     if($rta!="ok"){
         return $RC->createElement("error", "No se pudo cargar la accion.".$rta."-");
     }

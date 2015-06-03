@@ -1,7 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -9,7 +6,7 @@ require_once 'classes/tkt.php';
  */
 function GO($RC) {
 
-    $TKT = new TKT();
+    $TKT = new \Itracker\Tkt();
     $TKT->load_VEC(array("origen" => $RC->get_params("path")));
 
     $topts = $TKT->get_tree_options();
@@ -23,7 +20,7 @@ function GO($RC) {
         return null;
     }
 
-    $listL = new DOMDocument();
+    $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
     $cc=0;

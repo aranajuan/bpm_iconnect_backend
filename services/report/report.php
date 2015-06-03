@@ -1,10 +1,4 @@
 <?php
-
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
-require_once 'classes/report/reportrequest.php';
-require_once 'classes/report/reportexceladapter.php';
-
 /**
  * Lista
  * @param Rcontroller $RC
@@ -14,7 +8,7 @@ function GO($RC) {
 
     $u = $RC->get_User();
     $rname = $RC->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
-    $filepath=INCLUDE_DIR . "/config/reports/".$rname.".json";
+    $filepath=ROOT_DIR . "/config/reports/".$rname.".json";
     if(!file_exists($filepath)){
          return $RC->createElement("error", "No hay reporte disponible para el perfil. $rname");
     }
@@ -27,19 +21,19 @@ function GO($RC) {
         array_push($arrayTeam, $idteam);
     }
 
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$DATE_FROM, @STRdate_format($RC->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($RC->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));
 
-    $Tf->set_filter(TKTFILTER::$DATE_TO, @STRdate_format($RC->get_params("too") . " 23:59", USERDATE_READ, DBDATE_WRITE));
+    $Tf->set_filter(Itracker\TktFilter::$DATE_TO, @STRdate_format($RC->get_params("too") . " 23:59", USERDATE_READ, DBDATE_WRITE));
 
     if($RC->get_params("datefilter") == "apertura"){
-        $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_FA);
+        $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FA);
     }else{
-        $Tf->set_filter(TKTFILTER::$DATE_FILTER, TKTFILTER::$DATE_FILTER_UPDATE);
+        $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_UPDATE);
     }
     
     if ($RC->get_params("filter") == "tratadopor") {
-        $Tf->set_filter(TKTFILTER::$TOUCH_BY_TEAM, $arrayTeam);
+        $Tf->set_filter(Itracker\TktFilter::$TOUCH_BY_TEAM, $arrayTeam);
     } else {
         $users=array();
         foreach ($arrayTeam as $id) {
@@ -48,18 +42,18 @@ function GO($RC) {
                 $users= array_merge($users,makeproparr($t->get_users(),"usr"));
             }
         }
-        $Tf->set_filter(TKTFILTER::$UA, $users);
+        $Tf->set_filter(Itracker\TktFilter::$UA, $users);
     }
 
 
-    $Tl = new TKTLISTER();
+    $Tl = new Itracker\TktLister();
     $Tl->loadFilter($Tf);
     
     if(!$Tl->execute()){
         return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
     }
 
-    $RR = new REPORTREQUEST();
+    $RR = new \Itracker\Report\Request();
     $RR->setTitle($rname);
     
     if($Tl->getCount()==0){
@@ -71,7 +65,7 @@ function GO($RC) {
     $RR->loadITJson(file_get_contents($filepath));
 
     $RR->execute();
-    $RPADAPTER = new REPORTEXCELADAPTER($RR);
+    $RPADAPTER = new \Itracker\Report\ExcelAdapter($RR);
     $RPADAPTER->loadExcel();
 
     $arch = $RC->createElement("file");

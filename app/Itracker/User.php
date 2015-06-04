@@ -799,6 +799,8 @@ class User extends ITObject {
             return "Usuario o contrase&ntilde;a invalidos.2";
 
         switch ($this->dominio) {
+            case "BLOQUEADO":
+                return "Acceso deshabilitado";
             case "ITRACKER":
                 if ($passL != $this->pass) {
                     return "Usuario o contrase&ntilde;a invalidos.";

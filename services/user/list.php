@@ -5,7 +5,7 @@
  * @return null
  */
 function GO($Context) {
-    $USERALL = new USER($Context->get_Connection());
+    $USERALL = new Itracker\User($Context->get_Connection());
     $USERALL_v = $USERALL->list_all();
     $userL=$Context->createElement("list");
     if ($USERALL_v) {

@@ -32,7 +32,7 @@ class ObjectCache {
      */
     private function getITClass($class){
         $rcV = explode("\\",$class);
-        if(count($class)){
+        if(!in_array("Itracker",$rcV)){
             return "\\Itracker\\".$class;
         }
         return $class;

@@ -27,7 +27,7 @@ define("MAIL_SPLITER",",");
 define("MAIL_HEADER","https://itracker.personal.com.ar/img/head_email.png");
 define("MAIL_FOOTER","https://itracker.personal.com.ar/img/foot_email.png");
 
-define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT");
+define("DOMAINS","TELECOM,CCPI,ITRACKER,SHAREPOINT,BLOQUEADO");
 
 // Configuraciones Base
 

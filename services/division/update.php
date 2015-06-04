@@ -1,12 +1,11 @@
 <?php
-require_once   'classes/division.php';
 /**
  * Update
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $D= $RC->get_objcache()->get_object("DIVISION",$RC->get_params("id"));
-    $D->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$D->update_DB());
+function GO($Context) {
+    $D= $Context->get_objcache()->get_object("Division",$Context->get_params("id"));
+    $D->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$D->update_DB());
 }

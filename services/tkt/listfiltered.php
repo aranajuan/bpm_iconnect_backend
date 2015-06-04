@@ -1,46 +1,42 @@
 <?php
-
-require_once 'classes/tkt.php';
-require_once 'classes/tktlister.php';
-
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
 
-    $u = $RC->get_User();
+    $u = $Context->get_User();
     $arrayTeam=array();
-    $idsteams = explode(",", $RC->get_params("team"));
+    $idsteams = explode(",", $Context->get_params("team"));
     foreach ($idsteams as $idteam) {
         if (!$u->in_team($idteam)) {
-            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
+            return $Context->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
         array_push($arrayTeam, $idteam);
     }
-    $actions = $RC->get_params("actions");
+    $actions = $Context->get_params("actions");
 
-    $Tf = new TKTFILTER();
-    $Tf->set_filter(TKTFILTER::$IS_OPEN, "true");
-    $Tf->set_filter(TKTFILTER::$IDSTEAMS, $arrayTeam);
-    $Tf->set_filter(TKTFILTER::$ORIGINS, explode(',',$RC->get_params("origin")));
+    $Tf = new Itracker\TktFilter();
+    $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
+    $Tf->set_filter(Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
+    $Tf->set_filter(Itracker\TktFilter::$ORIGINS, explode(',',$Context->get_params("origin")));
 
-    $taken = $RC->get_params("taken");
+    $taken = $Context->get_params("taken");
     if ($taken) {
-        $Tf->set_filter(TKTFILTER::$TAKENBY, explode(",", $taken));
+        $Tf->set_filter(Itracker\TktFilter::$TAKENBY, explode(",", $taken));
     }
 
-    $Tl = new TKTLISTER();
+    $Tl = new Itracker\TktLister();
     $Tl->loadFilter($Tf);
     
     if(!$Tl->execute()){
-        return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
+        return $Context->createElement("error", "Error al cargar listado. ".$Tf->getError());
     }
     
     $ALL_v = $Tl->getObjs();
 
-    $listL = new DOMDocument();
+    $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
     if ($ALL_v) {
@@ -70,7 +66,7 @@ function GO($RC) {
             }
         }
 
-        $ret = $RC->append_xml($list);
+        $ret = $Context->append_xml($list);
 
         return $ret;
     }

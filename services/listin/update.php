@@ -1,12 +1,11 @@
 <?php
-require_once   'classes/listin.php';
 /**
  * Inserta listines
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $L= $RC->get_objcache()->get_object("LISTIN",$RC->get_params("id"));
-    $L->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$L->update_DB());
+function GO($Context) {
+    $L= $Context->get_objcache()->get_object("Listin",$Context->get_params("id"));
+    $L->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$L->update_DB());
 }

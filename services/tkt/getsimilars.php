@@ -1,21 +1,18 @@
 <?php
-
-require_once 'classes/tkt.php';
-
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
 
-    $TKT = new TKT();
-    $TKT->load_VEC(array("origen" => $RC->get_params("path")));
+    $TKT = new \Itracker\Tkt();
+    $TKT->load_VEC(array("origen" => $Context->get_params("path")));
 
     $topts = $TKT->get_tree_options();
     
     if (!$topts["object"] || $topts["object"]->get_prop("no_anexar")==1) {
-        return $RC->createElement("error", "Accion no valida para esta opcion.");
+        return $Context->createElement("error", "Accion no valida para esta opcion.");
     }
     
     $ALL_v = $TKT->get_similar();
@@ -23,7 +20,7 @@ function GO($RC) {
         return null;
     }
 
-    $listL = new DOMDocument();
+    $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
     $cc=0;
@@ -49,7 +46,7 @@ function GO($RC) {
         if($cc==0){
             return null;
         }
-        $ret = $RC->append_xml($list);
+        $ret = $Context->append_xml($list);
 
         return $ret;
     }

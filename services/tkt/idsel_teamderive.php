@@ -1,27 +1,24 @@
 <?php
-
-require_once 'classes/tkt.php';
-
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $params = $RC->get_params("sel_params");
+function GO($Context) {
+    $params = $Context->get_params("sel_params");
     $arr=  json_decode($params);
-    $TKT = $RC->get_objcache()->get_object("TKT", $arr->idtkt);
-    if($RC->get_objcache()->get_status("TKT", $arr->idtkt)!="ok"){
-        return $RC->createElement("error","ticket invalido".print_r($arr,true));
+    $TKT = $Context->get_objcache()->get_object("Tkt", $arr->idtkt);
+    if($Context->get_objcache()->get_status("Tkt", $arr->idtkt)!="ok"){
+        return $Context->createElement("error","ticket invalido".print_r($arr,true));
     }
     
     $team = $TKT->get_prop("equipo");
     $teams=$team->get_prop('equiposderiva');
-    $listL=$RC->createElement("list");
+    $listL=$Context->createElement("list");
     
     if ($teams) {
         foreach ($teams as $l)
-            $listL->appendChild($l->getXML($RC,array('id','nombre')));
+            $listL->appendChild($l->getXML($Context,array('id','nombre')));
         return $listL;
     }
     

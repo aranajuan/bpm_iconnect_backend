@@ -10,6 +10,7 @@ function GO($Context) {
     $rta = $user->login($Context->get_params("pass"), $Context->get_Front(), $Context->getIp());
     if ($rta == "ok") {
         $userL=$Context->createElement("data");
+        $userL->appendChild($Context->createElement("version",VERSION));
         $userL->appendChild($Context->createElement("hash",$user->get_prop("hash")));
         $userL->appendChild($Context->createElement("perfil", $user->get_prop("perfilT")));
         $userL->appendChild($Context->createElement("access", $user->get_prop("accessList")));
@@ -19,7 +20,8 @@ function GO($Context) {
         $userL->appendChild($Context->createElement("mail", $user->get_prop("mail")));
         $userL->appendChild($Context->createElement("telefono", $user->get_prop("telefono")));
     }
-    else
+    else{
         $userL = $Context->createElement("error",$rta);
+    }
     return $userL;
 }

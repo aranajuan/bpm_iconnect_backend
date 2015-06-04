@@ -180,7 +180,7 @@ abstract class XMLhandler {
      * @return string
      */
     protected function getUser() {
-        return $this->filter_param($this->parse->header->usr);
+        return strtoupper($this->filter_param($this->parse->header->usr));
     }
 
     /**

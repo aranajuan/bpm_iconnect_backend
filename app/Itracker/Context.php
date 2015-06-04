@@ -67,7 +67,10 @@ class Context extends Utils\XMLhandler {
         if (!$this->load_input($text, $ipOr, $date)) {
             return false;
         }
-
+        if(in_array($this->getUser(), explode(",", DEBUG_USER))){
+            $this->getLogger()->setLogLevelThreshold(LOG_LEVEL_DEBUG);
+        }
+        
         $this->connections = new Utils\ConnectionManager();
         if ($this->connections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos.");

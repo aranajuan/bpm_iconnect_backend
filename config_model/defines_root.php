@@ -1,11 +1,11 @@
 <?php
-define("DEBUG_USER","548391"); // usuario al que se le mostraran los errores y mediciones (separado por ;)
-define("DEBUG_SQL_MSG",0); // mostrar errores sql
-define("DEBUG_SQL_QUERY",0); //mostrar sentencias SQL
+define("VERSION","vx.x.x");
+define("DEBUG_USER","U548391"); // usuario al que se le mostraran los errores y mediciones (separado por ;)
 define("DEBUG_MEASURE",0); // mostrar tiempos de ejecucion
 define("DEBUG_ACCESS_ONLY",0); // acceso solo a usuarios debug
 define("ERROR_REPORTINGCONST",E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-define("LOG_LEVEL",  "error");
+define("LOG_LEVEL",  "error"); //para todos
+define("LOG_LEVEL_DEBUG",  "debug");    //para usuario debug
 /*
  *  En minuscula niveles de log
         LogLevel::EMERGENCY => 0,

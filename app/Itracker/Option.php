@@ -37,7 +37,8 @@ class Option extends ITObject {
             if ($this->UB != NULL)
                 return "eliminado";
             return "ok";
-        } else
+        }
+        else
             $this->error = TRUE;
         return "error";
     }
@@ -50,7 +51,7 @@ class Option extends ITObject {
         $this->idequipo_destino = trim($tmpU["idequipo_destino"]);
         $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
         if ($this->pretext != "") {
-            $this->itform = new itform();
+            $this->itform = new ITForm();
             $this->itform->load_xml($this->pretext);
         } else {
             $this->itform = null;
@@ -82,11 +83,13 @@ class Option extends ITObject {
         if ($ideqs == NULL)
             return NULL;
         $ideqsV = explode(";", $ideqs);
-
+        $dest = NULL;
         foreach ($ideqsV as $dest) {
             $destAR = explode("=>", $dest);
-            if ($destAR[0] == "default")
-                return $destAR[1];
+            if ($destAR[0] == "default") {
+                $dest = $destAR[1];
+                break;
+            }
             $parts = explode(":", $destAR[0]);
             $partsEl = explode(",", $parts[1]);
             if ($parts[0] == "USER") {
@@ -96,8 +99,10 @@ class Option extends ITObject {
             }
             if ($parts[0] == "TEAM") {
                 foreach ($partsEl as $idteam) {
-                    if ($usr->in_team($idteam))
-                        return $destAR[1];
+                    if ($usr->in_team($idteam)) {
+                        $dest = $destAR[1];
+                        break;
+                    }
                 }
             }
             if ($parts[0] == "DIVISION") {
@@ -107,12 +112,20 @@ class Option extends ITObject {
                     array_push($direccionesU, $e->get_prop("iddireccion"));
                 }
                 foreach ($partsEl as $iddir) {
-                    if (in_array($iddir, $direccionesU))
-                        return $destAR[1];
+                    if (in_array($iddir, $direccionesU)) {
+                        $dest = $destAR[1];
+                        break;
+                    }
                 }
             }
         }
-        return NULL;
+        $this->objsCache->get_object('Team', $dest);
+        if ($this->objsCache->get_status('Team', $dest) != "ok") {
+            $this->getContext()->getLogger()->error("Error en destino de opcion",
+                    array($this->get_prop("id"),$dest,$usr->get_prop('usr')));
+            return null;
+        }
+        return $dest;
     }
 
     function get_prop($property) {
@@ -128,6 +141,8 @@ class Option extends ITObject {
                 return $this->ruta_destino;
             case 'idequipo_destino':
                 return $this->idequipo_destino;
+            case 'equipo_destino':
+                return $this->equipo_destino($this->getLogged());
             case 'itform':
                 return $this->itform;
             case 'texto_critico':

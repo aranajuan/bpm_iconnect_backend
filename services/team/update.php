@@ -1,14 +1,14 @@
 <?php
 /**
  * Update
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $O= $RC->get_objcache()->get_object("Team",$RC->get_params("id"));
-    $O->load_VEC($RC->get_params(null));
+function GO($Context) {
+    $O= $Context->get_objcache()->get_object("Team",$Context->get_params("id"));
+    $O->load_VEC($Context->get_params(null));
     $adms = $O->get_prop("adms");
-    $newadms=explode(",",$RC->get_params("idsadms"));
+    $newadms=explode(",",$Context->get_params("idsadms"));
     $admsok=array();
     
     foreach($adms as $ua){
@@ -21,12 +21,12 @@ function GO($RC) {
     
     foreach($newadms as $Na){
         if(!in_array($Na, $admsok)){
-            $U= $RC->get_objcache()->get_object("USER",$Na);
-            if($RC->get_objcache()->get_status("USER",$Na)==="ok"){
+            $U= $Context->get_objcache()->get_object("USER",$Na);
+            if($Context->get_objcache()->get_status("USER",$Na)==="ok"){
                 $U->add_adm($O->get_prop("id"));
             }
         }
     }
     
-    return $RC->createElement("result",$O->update_DB());
+    return $Context->createElement("result",$O->update_DB());
 }

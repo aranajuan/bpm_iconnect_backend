@@ -157,6 +157,7 @@ class Team extends ITObject {
         $this->listin = $this->objsCache->get_object("Listin", $this->idlistin);
         if ($this->objsCache->get_status("Listin", $this->idlistin) == "ok")
             return TRUE;
+        $this->getContext()->getLogger()->notice("El equipo tiene un listin invalido",array($this->id,$this->idlistin));
         $this->listin = NULL;
         $this->idlistin = NULL;
         return FALSE;
@@ -172,6 +173,7 @@ class Team extends ITObject {
         $this->direccion = $this->objsCache->get_object("Division", $this->iddireccion);
         if ( $this->objsCache->get_status("Division", $this->iddireccion) == "ok")
             return TRUE;
+        $this->getContext()->getLogger()->notice("El equipo tiene una direccion invalida",array($this->id,$this->iddireccion));
         $this->direccion = NULL;
         return FALSE;
     }

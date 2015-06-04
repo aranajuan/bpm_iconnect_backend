@@ -1,38 +1,38 @@
 <?php
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
 
-    $u = $RC->get_User();
-    $rname = $RC->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
+    $u = $Context->get_User();
+    $rname = $Context->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
     $filepath=ROOT_DIR . "/config/reports/".$rname.".json";
     if(!file_exists($filepath)){
-         return $RC->createElement("error", "No hay reporte disponible para el perfil. $rname");
+         return $Context->createElement("error", "No hay reporte disponible para el perfil. $rname");
     }
     $arrayTeam = array();
-    $idsteams = explode(",", $RC->get_params("team"));
+    $idsteams = explode(",", $Context->get_params("team"));
     foreach ($idsteams as $idteam) {
         if (!$u->in_team($idteam)) {
-            return $RC->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
+            return $Context->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
         array_push($arrayTeam, $idteam);
     }
 
     $Tf = new Itracker\TktFilter();
-    $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($RC->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));
+    $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($Context->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));
 
-    $Tf->set_filter(Itracker\TktFilter::$DATE_TO, @STRdate_format($RC->get_params("too") . " 23:59", USERDATE_READ, DBDATE_WRITE));
+    $Tf->set_filter(Itracker\TktFilter::$DATE_TO, @STRdate_format($Context->get_params("too") . " 23:59", USERDATE_READ, DBDATE_WRITE));
 
-    if($RC->get_params("datefilter") == "apertura"){
+    if($Context->get_params("datefilter") == "apertura"){
         $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FA);
     }else{
         $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_UPDATE);
     }
     
-    if ($RC->get_params("filter") == "tratadopor") {
+    if ($Context->get_params("filter") == "tratadopor") {
         $Tf->set_filter(Itracker\TktFilter::$TOUCH_BY_TEAM, $arrayTeam);
     } else {
         $users=array();
@@ -50,14 +50,14 @@ function GO($RC) {
     $Tl->loadFilter($Tf);
     
     if(!$Tl->execute()){
-        return $RC->createElement("error", "Error al cargar listado. ".$Tf->getError());
+        return $Context->createElement("error", "Error al cargar listado. ".$Tf->getError());
     }
 
     $RR = new \Itracker\Report\Request();
     $RR->setTitle($rname);
     
     if($Tl->getCount()==0){
-        return $RC->createElement("error", "No hay tickets para mostrar con el filtro seleccionado.");
+        return $Context->createElement("error", "No hay tickets para mostrar con el filtro seleccionado.");
     }
     
     $RR->loadTKTS($Tl->getObjs());
@@ -68,9 +68,9 @@ function GO($RC) {
     $RPADAPTER = new \Itracker\Report\ExcelAdapter($RR);
     $RPADAPTER->loadExcel();
 
-    $arch = $RC->createElement("file");
-    $arch->appendChild($RC->createElement("name", "reporteITRACKER.xlsx"));
-    $arch->appendChild($RC->createElementSecure("data", $RPADAPTER->getFile()));
+    $arch = $Context->createElement("file");
+    $arch->appendChild($Context->createElement("name", "reporteITRACKER.xlsx"));
+    $arch->appendChild($Context->createElementSecure("data", $RPADAPTER->getFile()));
 
     return $arch;
 }

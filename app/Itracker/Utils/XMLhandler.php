@@ -38,6 +38,7 @@ abstract class XMLhandler {
 		}
                 exit();
             }
+            $this->getLogger()->notice("Se recibio XML invalido",array($text, $ipOr, $date,$e->getMessage()));
             $this->error = $e->getMessage();
             $this->parse = null;
             $this->input = null;
@@ -131,6 +132,7 @@ abstract class XMLhandler {
     protected function set_error($origin, $msj) {
         $this->error = $msj;
         $this->error_origin = $origin;
+        $this->getLogger()->notice("Error al validar XML",array($origin, $msj));
     }
 
     /**
@@ -167,7 +169,7 @@ abstract class XMLhandler {
 
     /**
      * Devuelve front
-     * @return FRONT
+     * @return \Itracker\Front
      */
     protected function getFrontName() {
         return $this->filter_param($this->parse->header->front);
@@ -178,7 +180,7 @@ abstract class XMLhandler {
      * @return string
      */
     protected function getUser() {
-        return $this->filter_param($this->parse->header->usr);
+        return strtoupper($this->filter_param($this->parse->header->usr));
     }
 
     /**
@@ -193,7 +195,7 @@ abstract class XMLhandler {
 
     /**
      * Agrega Elemento al response
-     * @param DOMElement $EL
+     * @param \DOMElement $EL
      */
     public function append_response($EL) {
         $resNode = $this->get_responseTag();
@@ -202,7 +204,7 @@ abstract class XMLhandler {
 
     /**
      * Devuelve el tag response para escribir respuesta
-     * @return DOMElement Response tag
+     * @return \DOMElement Response tag
      */
     private function get_responseTag() {
         $resNodes = $this->response->getElementsByTagName("response");
@@ -212,7 +214,7 @@ abstract class XMLhandler {
 
     /**
      * Devuelve el dom para crear elementos
-     * @return DOMdocumment
+     * @return \DOMdocumment
      */
     private function get_responseDOM() {
         return $this->response;
@@ -223,20 +225,25 @@ abstract class XMLhandler {
      * @param string $k
      * @param string $v
      * @param boolean $CDATA
-     * @return DOMElement
+     * @return \DOMElement
      */
     public function createElement($k, $v = null, $CDATA = false) {
         if ($v) {
-            return $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v, $CDATA));
+            $domEl = $this->get_responseDOM()->createElement($this->make_param($k), $this->make_param($v, $CDATA));
         } else {
-            return $this->get_responseDOM()->createElement($this->make_param($k));
+            $domEl = $this->get_responseDOM()->createElement($this->make_param($k));
         }
+        if($domEl==null){
+            $this->getLogger()->error("No se puede crear elemento en Dom",array($k,$v,$CDATA));
+        }
+        return $domEl;
     }
 
     /**
      * Crea elemento en dom sin verificar y en base64
      * @param type $k
      * @param type $v
+     * @return \DOMElement
      */
     public function createElementSecure($k, $v){
         if($v==null or $v=='') return null;
@@ -244,19 +251,24 @@ abstract class XMLhandler {
         if($val){
             return $this->get_responseDOM()->createElement($this->make_param($k), $val);
         }
+        $this->getLogger()->error("No se puede crear elemento(64) en Dom",array($k));
         return null;
     }
     
     /**
      * Importa documento
-     * @param DOMdocumment $dom
-     * @return DOMNode
+     * @param \DOMDocument $dom
+     * @return \DOMNode
      */
     public function append_xml($dom) {
         if ($dom == null) {
             return false;
         }
-        return $this->get_responseDOM()->importNode($dom, true);
+        $imported = $this->get_responseDOM()->importNode($dom, true);
+        if($imported==null){
+            $this->getLogger()->error("No se puede importar documento en Dom",array($dom->saveXML()));
+        }
+        return $imported;
     }
 
     /**
@@ -337,6 +349,23 @@ abstract class XMLhandler {
         
     }
     
+    
+     /**
+     * Devuelve instancia de Logger
+     * @param \KLogger\Psr\Log\LogLevel $level
+     * @return \KLogger\Logger
+     */
+    public function getLogger($level=null){
+        return LoggerFactory::getLogger($level);
+    }
+    
+    /**
+     * String default para log
+     * @return String
+     */
+    public function getLogString(){
+        return $this->getUser()."\t";
+    }
 }
 
 ?>

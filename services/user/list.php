@@ -1,16 +1,16 @@
 <?php
 /**
  * Lista usuarios
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $USERALL = new USER($RC->get_Connection());
+function GO($Context) {
+    $USERALL = new Itracker\User($Context->get_Connection());
     $USERALL_v = $USERALL->list_all();
-    $userL=$RC->createElement("list");
+    $userL=$Context->createElement("list");
     if ($USERALL_v) {
         foreach ($USERALL_v as $u)
-            $userL->appendChild($u->getXML($RC,array('usr','dominio','equiposname','mail','telefono','nombre','perfil','perfilT','ubicacion','puesto','fronts','idsequipos')));
+            $userL->appendChild($u->getXML($Context,array('usr','dominio','equiposname','mail','telefono','nombre','perfil','perfilT','ubicacion','puesto','fronts','idsequipos')));
         return $userL;
     }
     return null;

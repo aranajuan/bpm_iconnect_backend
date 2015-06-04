@@ -5,7 +5,7 @@ namespace Itracker;
 /**
  * Maneja todo el requerimiento del front
  */
-class RController extends \Itracker\Utils\XMLhandler {
+class Context extends Utils\XMLhandler {
 
     /**
      * usuario logueado 
@@ -21,7 +21,7 @@ class RController extends \Itracker\Utils\XMLhandler {
 
     /**
      * administrador de conexiones
-     * @var \Itracker\Utils\ConnectionManager
+     * @var Utils\ConnectionManager
      */
     private $connections; // 
 
@@ -39,10 +39,22 @@ class RController extends \Itracker\Utils\XMLhandler {
     
     private $error;
 
-    public function __construct() {
+    private static $__instance;
+    
+    private function __construct() {
         $this->objCache=  ObjectCache::getInstance();
     }
 
+    /**
+     * 
+     * @return Context
+     */
+    public static function getContext(){
+        if(!static::$__instance){
+            static::$__instance = new static();
+        }
+        return static::$__instance;
+    }
 
     /**
      * Prepara conexiones a db, carga input, valida datos
@@ -55,8 +67,11 @@ class RController extends \Itracker\Utils\XMLhandler {
         if (!$this->load_input($text, $ipOr, $date)) {
             return false;
         }
-
-        $this->connections = new \Itracker\Utils\ConnectionManager();
+        if(in_array($this->getUser(), explode(",", DEBUG_USER))){
+            $this->getLogger()->setLogLevelThreshold(LOG_LEVEL_DEBUG);
+        }
+        
+        $this->connections = new Utils\ConnectionManager();
         if ($this->connections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos.");
             return false;
@@ -182,13 +197,25 @@ class RController extends \Itracker\Utils\XMLhandler {
 
     /**
      * Ejecuta GO agrega a response
+     * @return boolean
      */
     private function ejectute_request() {
-        include 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
+        $file = 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
+        if(!file_exists($file)){
+            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($file));
+            $this->error="Error al ejecutar solicitud";
+            return false;
+        }
+        include $file;
         $ret = GO($this);
         if ($ret) {
             $this->append_response($ret);
+        }else{
+            $this->getLogger()->error("No hay respuesta de la ejecucion",array($file));
+            $this->error="Error al ejecutar solicitud";
+            return false;
         }
+        return true;
     }
 
     
@@ -210,7 +237,7 @@ class RController extends \Itracker\Utils\XMLhandler {
     
     /**
      * Devuelve conexiones establecidas
-     * @return \Itracker\Utils\ConnectionManager
+     * @return Utils\ConnectionManager
      */
     public function get_Connection(){
         return $this->connections;

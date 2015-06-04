@@ -25,7 +25,7 @@ class ConnectionManager {
     public function connect_root($motor, $host, $user, $pass, $dbAlias) {
         $this->serverMotor = $motor;
         $this->dbRootAlias = $dbAlias;
-    $lnk = $this->new_link($host, $user, $pass);
+        $lnk = $this->new_link($host, $user, $pass);
         if ($lnk) {
             $this->dbRootlink = $lnk;
             $this->status = "root_ok";
@@ -33,6 +33,9 @@ class ConnectionManager {
         } else {
             $this->dbRootlink = null;
             $this->status = "root_error";
+            LoggerFactory::getLogger()
+                    ->critical("Imposible conectar a DB",
+                            array($motor, $host, $user, $pass));
             return false;
         }
     }
@@ -57,6 +60,9 @@ class ConnectionManager {
         } else {
             $this->dbInstancelink = null;
             $this->status = "instance_error";
+            LoggerFactory::getLogger()
+                    ->critical("Imposible conectar a DB",
+                            array($host, $user, $pass));
             return false;
         }
     }

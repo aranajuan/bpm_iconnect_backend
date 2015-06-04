@@ -6,7 +6,7 @@ abstract class ITObject extends BasicObject implements XMLPropInterface, DBObjec
 
     /**
      * 
-     * @param \Itracker\Utils\XMLhandler $doc
+     * @param Utils\XMLhandler $doc
      * @param array<string> $props
      * @return DOMElement
      */

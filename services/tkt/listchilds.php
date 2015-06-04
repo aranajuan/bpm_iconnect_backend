@@ -1,33 +1,33 @@
 <?php
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $TKT = $RC->get_objcache()->get_object("Tkt", $RC->get_params("idtkt"));
-    if($RC->get_objcache()->get_status("Tkt", $RC->get_params("idtkt"))!="ok"){
-        return $RC->createElement("error", "Ticket invalido");
+function GO($Context) {
+    $TKT = $Context->get_objcache()->get_object("Tkt", $Context->get_params("idtkt"));
+    if($Context->get_objcache()->get_status("Tkt", $Context->get_params("idtkt"))!="ok"){
+        return $Context->createElement("error", "Ticket invalido");
     }
     
-    if(!$RC->get_User()->in_team($TKT->get_prop("idequipo"))){
-        return $RC->createElement("error", "Acceso denegado. El ticket no esta asignado a tu equipo.");
+    if(!$Context->get_User()->in_team($TKT->get_prop("idequipo"))){
+        return $Context->createElement("error", "Acceso denegado. El ticket no esta asignado a tu equipo.");
     }
 
     $ALL_v = $TKT->get_prop("childs");
 
-    $response=$RC->createElement("data");
+    $response=$Context->createElement("data");
     
-    $listL=$RC->createElement("list");
+    $listL=$Context->createElement("list");
     
     $fields=array("id","usr_o.nombre","FA");
     
     if ($ALL_v) {
         foreach ($ALL_v as $l){
-            $listL->appendChild($l->getXML($RC,$fields));
+            $listL->appendChild($l->getXML($Context,$fields));
         }
         $response->appendChild($listL);
         return $response;
     }
-     return $RC->createElement("error", "Ningun anexo");
+     return $Context->createElement("error", "Ningun anexo");
 }

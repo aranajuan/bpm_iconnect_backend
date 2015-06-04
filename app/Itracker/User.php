@@ -71,7 +71,7 @@ class User extends ITObject {
 
     function __construct($conn = null) {
         parent::__construct($conn);
-        $this->dbroot = new \Itracker\Utils\DB($this->conn, true);
+        $this->dbroot = new Utils\DB($this->conn, true);
     }
 
     /**
@@ -799,6 +799,8 @@ class User extends ITObject {
             return "Usuario o contrase&ntilde;a invalidos.2";
 
         switch ($this->dominio) {
+            case "BLOQUEADO":
+                return "Acceso deshabilitado";
             case "ITRACKER":
                 if ($passL != $this->pass) {
                     return "Usuario o contrase&ntilde;a invalidos.";

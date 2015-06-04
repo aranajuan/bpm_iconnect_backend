@@ -2,13 +2,17 @@
 
 namespace Itracker;
 
-class Tkt extends TreeInterface {
+class Tkt extends Tree {
 
     private $id;    /* id del ticket */
     private $usr;   /* id usuario que reclama */
     private $usr_o; /* usuario que reclama */
+    
     private $idequipo;  /* id del equipo asignado */
     private $equipo;    /* equipo asignado */
+    /*Fue cargado el equipo*/
+    private $teamLoaded;
+    
     private $idmaster;  /* id del ticket master */
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
@@ -44,7 +48,7 @@ class Tkt extends TreeInterface {
             $tmpU = $this->dbinstance->get_vector();
             return $this->load_DV($tmpU);
         }
-
+        
         $this->error = TRUE;
         return "error";
     }
@@ -103,6 +107,7 @@ class Tkt extends TreeInterface {
     function load_VEC($tmpU, $fromdb = false) {
         $this->usr = $tmpU["usr"];
         $this->origen = $tmpU["origen"];
+        $this->teamLoaded=false;
         return $this->load_path($this->origen, !$fromdb);
     }
 
@@ -395,8 +400,15 @@ class Tkt extends TreeInterface {
      */
     private function load_team() {
         // si el equipo no existe o no es valido no se puede editar
+        if($this->teamLoaded){
+            return;
+        }
+        $this->teamLoaded=true;
         if (!is_numeric($this->idequipo)) {
             $this->can_edit = 0;
+            if($this->id!=null){
+                $this->getContext()->getLogger()->error("Ticket sin equipo asignado",array($this->id,$this->idequipo));
+            }
             $this->detail_can_edit = "Equipo sin asignar";
             $this->idequipo = NULL;
             $this->equipo = NULL;
@@ -408,11 +420,13 @@ class Tkt extends TreeInterface {
             case "eliminado":
                 $this->can_edit = 0;
                 $this->detail_can_edit = "El equipo asignado ya no existe " . $this->id . " ->" . $this->idequipo;
+                $this->getContext()->getLogger()->error("Ticket en equipo eliminado",array($this->id,$this->idequipo));
                 $this->equipo = $t;
                 break;
             case "error":
                 $this->can_edit = 0;
                 $this->detail_can_edit = "Error al cargar el equipo " . $this->id . "->" . $this->idequipo;
+                $this->getContext()->getLogger()->error("Ticket en equipo con error",array($this->id,$this->idequipo));
                 $this->idequipo = NULL;
                 $this->equipo = NULL;
                 break;
@@ -433,10 +447,14 @@ class Tkt extends TreeInterface {
             if ($this->objsCache->get_status("Tkt", $this->idmaster) == "error" && $this->UB == NULL) {
                 $this->idmaster = NULL;
                 $this->master = NULL;
+                $this->getContext()->getLogger()->warning("Separado ticket por master con error",
+                        array($this->id,$this->idmaster));
                 $this->ejecute_action("SEPARAR");
                 return;
             }
             if (($t->get_prop("idequipo") != $this->get_prop("idequipo") || $t->get_prop("UB")) && $this->UB == NULL) {
+                $this->getContext()->getLogger()->warning("Separado ticket por master en otro equipo",
+                        array($this->id,$this->idmaster));
                 $this->ejecute_action("SEPARAR");
                 return;
             }
@@ -487,16 +505,25 @@ class Tkt extends TreeInterface {
                 } else {
                     $lu=$this->getLogged();
                     if($lu->in_team($this->get_prop("idequipo"))){
+                        $this->getContext()->getLogger()->warning("Ticket liberado usuario fuera del equipo",
+                        array($this->id,$this->$this->u_tom));
                         $this->ejecute_action("LIBERAR");
                     }
                 }
             } else {
+                $this->getContext()->getLogger()->warning("Ticket liberado por error en usurio",
+                        array($this->id,$this->$this->u_tom,$rta));
                 $this->ejecute_action("LIBERAR");
             }
         }
         if ($this->usr) {
             $u = null;
             $u = $this->objsCache->get_object("User", $this->usr);
+            $stat=$this->objsCache->get_status("User", $this->usr);
+            if($stat!="ok"){
+                        $this->getContext()->getLogger()->warning("Ticket con usuario generador invalido",
+                        array($this->id,$this->usr,$stat));    
+            }
             $this->usr_o = $u;
         }
     }

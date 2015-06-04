@@ -44,6 +44,7 @@ class ITForm implements XMLPropInterface{
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
+                Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML",array($xml));
                 return false;
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
@@ -54,6 +55,7 @@ class ITForm implements XMLPropInterface{
             return true;
         } catch (Exception $e) {
             $this->xml_input = null;
+            Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML",array($xml));
             return false;
         }
         return false;

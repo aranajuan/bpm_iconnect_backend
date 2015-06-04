@@ -35,11 +35,6 @@ if ($lstOption->get_prop("idequipo_destino") == NULL && $lstOption->get_prop("ru
     return $response;
 }
 
-/**
- *  revisar master y campos ocultos
- */
-$idmaster = $itf->get_value_arr("idmaster");
-
 
 /* abre ticket */
 $rtaOP = $TKT->open();
@@ -68,6 +63,11 @@ if ($lstOption->get_prop("ruta_destino")) { //no une
 
     return $response; //no une
 }
+
+/**
+ *  revisar master y campos ocultos
+ */
+$idmaster = $itf->get_value_arr("idmaster");
 
 if (is_numeric($idmaster) && $idmaster > 0) {
     $rta = $TKT->ejecute_action("UNIR", array(array("id" => "idmaster", "value" => $idmaster)));

@@ -74,8 +74,10 @@ class Listin extends ITObject {
     private function mail_validate($mails) {
         $mV = explode(MAIL_SPLITER, $mails);
         foreach ($mV as $m) {
-            if (!filter_var(trim($m), FILTER_VALIDATE_EMAIL))
+            if (!filter_var(trim($m), FILTER_VALIDATE_EMAIL)){
+                $this->getContext()->getLogger()->notice("Mail invalido en listin",array($this->id,$m));
                 return false;
+            }
         }
         return true;
     }

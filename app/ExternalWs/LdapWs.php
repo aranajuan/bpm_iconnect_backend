@@ -80,6 +80,7 @@ class LdapWs {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         if(curl_errno($ch)!=0){
+            \Itracker\Utils\LoggerFactory::getLogger()->error("LDAP no responde",array(curl_errno($ch),$requestTS));
             $this->error="Error en comunicacion con WS ".curl_errno($ch);
             return false;
         }
@@ -99,7 +100,9 @@ class LdapWs {
             $this->error = null;
             return $this->check_error();
         } catch (Exception $e) {
-            $this->error = $e->getMessage() . ";" . $data;
+             \Itracker\Utils\LoggerFactory::getLogger()->error("LDAP error analizar respuesta #1",
+                     array($e->getMessage(),$data,$this->error));
+            $this->error = "Error en servicio al validar usuario";
             $this->domResponse = null;
             return false;
         }
@@ -111,6 +114,8 @@ class LdapWs {
      */
     private function check_error() {
         if ($this->domResponse->message->asXML() != null) {
+            \Itracker\Utils\LoggerFactory::getLogger()->error("LDAP error analizar respuesta #2",
+                     array($this->domResponse->asXML()));
             $this->error = "Error WS: " . $this->domResponse->message->asXML();
             return false;
         } 

@@ -1,11 +1,11 @@
 <?php
 /**
  * Inserta listines
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
+function GO($Context) {
     $L= new Itracker\Listin();
-    $L->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$L->insert_DB());
+    $L->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$L->insert_DB());
 }

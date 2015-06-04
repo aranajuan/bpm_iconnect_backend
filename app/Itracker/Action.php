@@ -379,7 +379,11 @@ class Action extends ITObject {
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = $this->objsCache;
-            $file = "/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+            $file = ROOT_DIR."/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+            if(!file_exists($file)){
+                $this->getContext()->getLogger()->critical("Archivo no encontrado",array($file));
+                return array("result"=>"error","details"=>"Error al ejecutar.");
+            }
             $response = include($file);
             if ($response["result"] != "ok") {
                 return $response;

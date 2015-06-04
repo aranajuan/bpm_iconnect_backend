@@ -1,7 +1,7 @@
 <?php
 /**
  * Ejecuta accion
- * @param Context $Context
+ * @param \Itracker\Context $Context
  * @return null
  */
 function GO($Context) {
@@ -10,6 +10,9 @@ function GO($Context) {
     
     if ($idtkt) {
         $TKT= $Context->get_objcache()->get_object("Tkt",$idtkt);
+        if($Context->get_objcache()->get_status("Tkt",$idtkt)!="ok"){
+            return $Context->createElement("error", "No se pudo cargar el ticket");
+        }
     }else{
         $TKT = new \Itracker\Tkt();
         $TKT->load_VEC(array("origen" => $Context->get_params("path")));
@@ -45,15 +48,15 @@ function GO($Context) {
     
     $Notif = new \Itracker\Notify();
     $actionResult = $A->ejecute();
-    
-    if($actionResult["result"]){
+    if($actionResult["result"]=="ok"){
         $Notif->load_actionOBJ($A);
         $actionResult["mail"]= $Notif->send();
+    }else{
+        return $Context->createElement("error",  $actionResult["details"]);
     }
     $result= $Context->createElement("data");
     foreach($actionResult as $k=>$v){
         $result->appendChild($Context->createElement($k, $v));
     }
     return $result;
-    //return $Context->createElement("error", "<pre>".print_r($actionResult,true)."</pre>");
 }

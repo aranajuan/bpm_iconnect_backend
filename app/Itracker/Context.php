@@ -194,13 +194,25 @@ class Context extends Utils\XMLhandler {
 
     /**
      * Ejecuta GO agrega a response
+     * @return boolean
      */
     private function ejectute_request() {
-        include 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
+        $file = 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
+        if(!file_exists($file)){
+            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($file));
+            $this->error="Error al ejecutar solicitud";
+            return false;
+        }
+        include $file;
         $ret = GO($this);
         if ($ret) {
             $this->append_response($ret);
+        }else{
+            $this->getLogger()->error("No hay respuesta de la ejecucion",array($file));
+            $this->error="Error al ejecutar solicitud";
+            return false;
         }
+        return true;
     }
 
     
@@ -244,27 +256,6 @@ class Context extends Utils\XMLhandler {
         return $this->objCache;
     }
     
-    /**
-     * Devuelve instancia de Logger
-     * @param \KLogger\Psr\Log\LogLevel $level
-     * @return \KLogger\Logger
-     */
-    public function getLogger($level=null){
-        return Utils\LoggerFactory::getLogger($level);
-    }
-    
-    /**
-     * String default para log
-     * @return String
-     */
-    public function getLogString(){
-        if($this->get_User() instanceof User){
-            $u = $this->get_User()->get_prop("usr");
-        }else{
-            $u=$this->getUser();
-        }
-        return $u."\t";
-    }
 }
 
 ?>

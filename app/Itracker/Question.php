@@ -64,7 +64,7 @@ class Question extends ITObject {
         $ssql = "select id from TBL_OPCIONES where idpregunta=" . intval($this->id) . " and UB is null";
         $this->dbinstance->loadRS($ssql);
         while ($o = $this->dbinstance->get_vector()) {
-            $this->opciones[$i] = $this->objsCache->get_object("OPTION", $o["id"]);
+            $this->opciones[$i] = $this->objsCache->get_object("Option", $o["id"]);
             $i++;
         }
         return $i;

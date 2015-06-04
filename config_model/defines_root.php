@@ -6,6 +6,17 @@ define("DEBUG_MEASURE",0); // mostrar tiempos de ejecucion
 define("DEBUG_ACCESS_ONLY",0); // acceso solo a usuarios debug
 define("ERROR_REPORTINGCONST",E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 define("LOG_LEVEL",  "error");
+/*
+ *  En minuscula niveles de log
+        LogLevel::EMERGENCY => 0,
+        LogLevel::ALERT     => 1,
+        LogLevel::CRITICAL  => 2,
+        LogLevel::ERROR     => 3,
+        LogLevel::WARNING   => 4,
+        LogLevel::NOTICE    => 5,
+        LogLevel::INFO      => 6,
+        LogLevel::DEBUG     => 7
+ */
 
 define ("MAP_U",""); // mapea a otro usuario EJ: 548391>223547;
 

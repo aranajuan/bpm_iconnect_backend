@@ -51,7 +51,7 @@ class Option extends ITObject {
         $this->idequipo_destino = trim($tmpU["idequipo_destino"]);
         $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
         if ($this->pretext != "") {
-            $this->itform = new itform();
+            $this->itform = new ITForm();
             $this->itform->load_xml($this->pretext);
         } else {
             $this->itform = null;
@@ -121,7 +121,8 @@ class Option extends ITObject {
         }
         $this->objsCache->get_object('Team', $dest);
         if ($this->objsCache->get_status('Team', $dest) != "ok") {
-            $this->getContext()->getLogger()->error("Error en destino de opcion", array($this->get_prop("id"),$dest));
+            $this->getContext()->getLogger()->error("Error en destino de opcion",
+                    array($this->get_prop("id"),$dest,$usr->get_prop('usr')));
             return null;
         }
         return $dest;

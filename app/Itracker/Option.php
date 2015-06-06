@@ -80,8 +80,10 @@ class Option extends ITObject {
      */
     function equipo_destino($usr) {
         $ideqs = $this->get_prop("idequipo_destino");
-        if ($ideqs == NULL)
+        if ($ideqs == NULL){
+            $this->getContext()->getLogger()->error("Opcion sin destino",array($this->id));
             return NULL;
+        }
         $ideqsV = explode(";", $ideqs);
         $dest = NULL;
         foreach ($ideqsV as $dest) {

@@ -210,10 +210,6 @@ class Context extends Utils\XMLhandler {
         $ret = GO($this);
         if ($ret) {
             $this->append_response($ret);
-        }else{
-            $this->getLogger()->error("No hay respuesta de la ejecucion",array($file));
-            $this->error="Error al ejecutar solicitud";
-            return false;
         }
         return true;
     }

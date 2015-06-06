@@ -29,7 +29,7 @@ if ($lstOption->get_prop("no_anexar") == 1) {
     $response["openother"] = 0;
 }
 
-if ($lstOption->get_prop("idequipo_destino") == NULL && $lstOption->get_prop("ruta_destino") == NULL) {
+if ($lstOption->get_prop("idequipo_destino") == NULL) {
     $response["result"] = "error";
     $response["msj"] = "Error, fin de arbol invalido (Sin destino).";
     return $response;

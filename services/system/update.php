@@ -1,12 +1,12 @@
 <?php
-require_once   'classes/system.php';
+
 /**
  * Update
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $O= $RC->get_objcache()->get_object("SYSTEM",$RC->get_params("id"));
-    $O->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$O->update_DB());
+function GO($Context) {
+    $O= $Context->get_objcache()->get_object("System",$Context->get_params("id"));
+    $O->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$O->update_DB());
 }

@@ -1,15 +1,15 @@
 <?php
 /**
  * Lista
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $teams = $RC->get_User()->get_prop("equiposobj");
-    $listL=$RC->createElement("list");
+function GO($Context) {
+    $teams = $Context->get_User()->get_prop("equiposobj");
+    $listL=$Context->createElement("list");
     if ($teams) {
         foreach ($teams as $l)
-            $listL->appendChild($l->getXML($RC,array('id','nombre')));
+            $listL->appendChild($l->getXML($Context,array('id','nombre')));
         return $listL;
     }
     return null;

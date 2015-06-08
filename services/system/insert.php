@@ -1,12 +1,11 @@
 <?php
-require_once   'classes/system.php';
 /**
  * Inserta
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $O= new SYSTEM($RC->get_Connection());
-    $O->load_VEC($RC->get_params(null));
-    return $RC->createElement("result",$O->insert_DB());
+function GO($Context) {
+    $O= new Itracker\System();
+    $O->load_VEC($Context->get_params(null));
+    return $Context->createElement("result",$O->insert_DB());
 }

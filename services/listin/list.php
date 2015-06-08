@@ -1,17 +1,16 @@
 <?php
-require_once 'classes/listin.php';
 /**
  * Lista usuarios
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $LISTINALL = new LISTIN($RC->get_Connection());
+function GO($Context) {
+    $LISTINALL = new Itracker\Listin();
     $LISTINALL_v = $LISTINALL->list_all();
-    $listL=$RC->createElement("list");
+    $listL=$Context->createElement("list");
     if ($LISTINALL_v) {
         foreach ($LISTINALL_v as $l)
-            $listL->appendChild($l->getXML($RC,array('id','nombre','too','cc')));
+            $listL->appendChild($l->getXML($Context,array('id','nombre','too','cc')));
         return $listL;
     }
     return null;

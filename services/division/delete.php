@@ -1,11 +1,10 @@
 <?php
-require_once   'classes/division.php';
 /**
  * Elimina division
- * @param Rcontroller $RC
+ * @param Context $Context
  * @return null
  */
-function GO($RC) {
-    $D= $RC->get_objcache()->get_object("DIVISION",$RC->get_params("id"));
-    return $RC->createElement("result",$D->delete_DB());
+function GO($Context) {
+    $D= $Context->get_objcache()->get_object("Division",$Context->get_params("id"));
+    return $Context->createElement("result",$D->delete_DB());
 }

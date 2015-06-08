@@ -91,6 +91,7 @@ class Tkt extends Tree {
         $this->teamLoaded = false;
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
+        $this->load_users();
         $this->view = $usr->get_view($this);
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;

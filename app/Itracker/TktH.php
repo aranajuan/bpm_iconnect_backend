@@ -270,10 +270,13 @@ class TktH extends ITObject {
             return $this->UA_o;
         }
         $UA = $this->objsCache->get_object("User", $this->UA);
-        if ($this->objsCache->get_status("User", $this->UA) == "ok") {
+        $rta = $this->objsCache->get_status("User", $this->UA);
+        if ($rta == "ok") {
             $this->UA_o = $UA;
             return $this->UA_o;
         }
+        $this->getContext()->getLogger()->warning("Evento de usuario eliminado",
+                array($this->id,$this->idtkt,$this->UA));
         return null;
     }
 

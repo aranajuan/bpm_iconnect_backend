@@ -15,7 +15,10 @@ function GO($Context) {
         }
     }else{
         $TKT = new \Itracker\Tkt();
-        $TKT->load_VEC(array("origen" => $Context->get_params("path")));
+        $lV_rta = $TKT->load_VEC(array("origen" => $Context->get_params("path")));
+        if($lV_rta!="ok"){
+           return $Context->createElement("error", "Tipificacion invalida. ".$lV_rta); 
+        }
     }
     $A = new Itracker\Action();
     $A->load_DB($Context->get_params("action"));
@@ -51,8 +54,6 @@ function GO($Context) {
     if($actionResult["result"]=="ok"){
         $Notif->load_actionOBJ($A);
         $actionResult["mail"]= $Notif->send();
-    }else{
-        return $Context->createElement("error",  $actionResult["details"]);
     }
     $result= $Context->createElement("data");
     foreach($actionResult as $k=>$v){

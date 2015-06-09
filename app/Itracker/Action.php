@@ -382,7 +382,7 @@ class Action extends ITObject {
             $file = ROOT_DIR."/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
             if(!file_exists($file)){
                 $this->getContext()->getLogger()->critical("Archivo no encontrado",array($file));
-                return array("result"=>"error","details"=>"Error al ejecutar.");
+                return array("result"=>"error","msj"=>"Error al ejecutar.");
             }
             $response = include($file);
             if ($response["result"] != "ok") {

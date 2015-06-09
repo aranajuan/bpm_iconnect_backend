@@ -404,7 +404,9 @@ class Tkt extends Tree {
         $this->teamLoaded = true;
         if (!is_numeric($this->idequipo)) {
             $this->can_edit = 0;
-            $this->getContext()->getLogger()->error("Ticket sin equipo asignado", array($this->id, $this->idequipo,$this->get_path()));
+            if($this->id!=null){
+                $this->getContext()->getLogger()->error("Ticket sin equipo asignado", array($this->id, $this->idequipo,$this->get_path()));
+            }
             $this->detail_can_edit = "Equipo sin asignar";
             $this->idequipo = NULL;
             $this->equipo = NULL;

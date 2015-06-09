@@ -901,7 +901,7 @@ class User extends ITObject {
     /**
      * Cierra sesion
      */
-    private function closeSession() {
+    public function closeSession() {
         $ssql = "delete from TBL_SESIONES where usr='" . strToSQL($this->usr) . "'";
         $this->dbroot->query($ssql);
     }

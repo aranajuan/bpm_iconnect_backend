@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itracker>
+    <url>http://10.75.249.62/daas/richclient/Dispatcher</url>
+    <user>cn=z000038,ou=usuariosespeciales,ou=usuarios,o=telecom</user>
+    <pass>ovRBwZCiD+g/1AZU5z8GnMBEJKrSp2ariG+PJa7jiUU=</pass>
+    <timeout>5</timeout>
+</itracker>

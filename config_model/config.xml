@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itracker>
+    <!-- Version de app -->
+    <version>vx.x.x</version>
+    <!-- ip del server -->
+    <serverip>::1</serverip>
+    <!-- Dominios habilitados -->
+    <domains>TELECOM,CCPI,ITRACKER,SHAREPOINT,BLOQUEADO</domains> 
+
+    <debug>
+        <!-- Usuarios para debug separar con , -->
+        <user>U548391</user>
+        <!-- Medir tiempos -->
+        <mesure>false</mesure>
+        <!-- valor para error reporting -->
+        <error_reporting>0</error_reporting>
+        <!-- log level general -->
+        <log_level>debug</log_level>
+        <!-- log level para usuarios debug -->
+        <log_debug>debug</log_debug>
+    </debug>
+    <mail>
+        <!-- servidor smtp -->
+        <smtp>smtpappl02</smtp>
+        <!-- lhabilitar mail -->
+        <enable>true</enable>
+        <!-- Separador de mails -->
+        <splitter>,</splitter>
+        <!-- header y footer para mailing -->
+        <header>https://itracker.personal.com.ar/img/head_email.png</header>
+        <footer>https://itracker.personal.com.ar/img/foot_email.png</footer>
+    </mail>
+    <paths>
+        <!-- subcarpeta para los adjuntos -->
+        <fileupl>adjuntos</fileupl>
+    </paths>
+    <database>
+        <!-- mysql / mssql -->
+        <motor>mysql</motor>
+        <!-- prefijo para anteponer a las tablas -->
+        <prefix></prefix>
+        <!-- odbc para mssql -->
+        <odbc>pwin</odbc>
+        <!-- servidor de datos para root -->
+        <host>localhost</host>
+        <!-- usuario de itracker_root -->
+        <user>root</user>
+        <!-- pass de itracker_root -->
+        <pass>XtEh5Bu8fdWaBvSv62dKYD7Pp9DYGp8fWT5Gc8a/sI4=</pass>
+    </database>
+    <time>
+        <!-- para setear timezone -->
+        <timezone>America/Argentina/Buenos_Aires</timezone>
+        <!-- formatos de letura de fechas para usuarios -->
+        <userread>
+            <time>H:i</time>
+            <month>m-Y</month>
+            <date>d-m-Y</date>
+        </userread>
+        <!-- formatos de letura de fechas pade la base de datos -->
+        <database>
+            <read>Y-m-d H:i:s</read>
+            <write>Y-m-d H:i:s</write>
+        </database>
+    </time>
+    <constants>
+        <!-- constantes de configuracion general, no editar -->
+        <active>0</active>
+        <deleted>1</deleted>
+        <new>-1</new>
+    </constants>
+    <configs>
+        <!-- habilitar cache de objetos -->
+        <objcache>true</objcache>
+        <!-- maximo periodo a reportar en dias -->
+        <reportlimit>390</reportlimit>
+    </configs>
+</itracker>

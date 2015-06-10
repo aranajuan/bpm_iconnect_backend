@@ -239,7 +239,8 @@ class TktFilter extends BasicObject {
         $fo = strtotime($this->get_filter(self::$DATE_FROM));
         $fd = strtotime($this->get_filter(self::$DATE_TO));
         $days = (($fd - $fo) / 86400);
-        return REPORT_DAYSMAX >= $days;
+        return $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit')
+                >= $days;
     }
 
     /**
@@ -247,13 +248,15 @@ class TktFilter extends BasicObject {
      */
     public function makeSQL() {
         $SSQL = $this->joinTables();
-        $SSQL .=" where ";
+        $SSQL .=' where ';
         $sWHERE = $this->makeWhere();
         if (!$sWHERE) {
             $this->ssql= null;
         }
         if (!$this->validDate()) {
-            $this->error = "Rango invalido. Maximo: " . REPORT_DAYSMAX . " dias.";
+            $this->error = 'Rango invalido. Maximo: ' .
+                    $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit') 
+                    . ' dias.';
             $this->ssql= null;
         }
         $SSQL .= $sWHERE;

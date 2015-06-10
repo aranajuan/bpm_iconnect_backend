@@ -77,7 +77,9 @@ class ConnectionManager {
         if ($this->serverMotor == 'mysql') {
             return mysql_connect($host, $user, \Encrypter::decrypt($pass));
         } elseif ($this->serverMotor  == 'mssql') {
-            return  new \PDO("odbc:".DBSERVER_ODBC,$user, \Encrypter::decrypt($pass)); 
+            return  new \PDO('odbc:'. 
+                    GlobalConfig::getInstance()->getString('database/odbc') ,
+                    $user, \Encrypter::decrypt($pass)); 
         }
     }
 

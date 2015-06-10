@@ -70,15 +70,15 @@ class ITForm implements XMLPropInterface{
         if (trim($element["value"]) != "" && $element["value"] != null) {
             switch ($element["type"]) {
                 case "date":
-                    if (STRdate_format($element["value"], "d-m-Y", "d-m-Y H:i") == -1)
+                    if (STRdate_format($element["value"], USERDATE_READ_DATE, USERDATE_READ) == -1)
                         return "El campo " . $element["label"] . " debe ser una fecha.";
                     break;
                 case "month":
-                    if (STRdate_format($element["value"], "m-Y", "d-m-Y H:i") == -1)
+                    if (STRdate_format($element["value"], USERDATE_READ_MONTH, USERDATE_READ) == -1)
                         return "El campo " . $element["label"] . " debe ser una fecha.";
                     break;
                 case "datetime":
-                    if (STRdate_format($element["value"], "d-m-Y H:i", "d-m-Y H:i") == -1)
+                    if (STRdate_format($element["value"], USERDATE_READ, USERDATE_READ) == -1)
                         return "El campo " . $element["label"] . " debe ser una fecha.";
                     break;
             }

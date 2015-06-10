@@ -2,37 +2,6 @@
 
 namespace Itracker;
 
-/**
- * Cuerpos de mails default
- */
-define("MAIL_TO", "
-<html>
-<head></head>
-<body width='100%' bgcolor='#3d3d3d'>
-<table width='100%' cellspacing='0' cellpadding='0' >
-<tr>
-    <td>
-        &nbsp;
-    </td>
-    <td width='750' style='background-color:white;'>
-		<img src='" . MAIL_HEADER . "' style='display:block;' />
-		<div style='margin-left:10px;'>
-		{body}
-		<br/><br/>
-                Por favor no responda este mensaje ya que se trata de un env&iacute;o autom&aacute;tico.
-                <br/><br/>
-                </div>
-		<img src='" . MAIL_FOOTER . "' style='display:block;'/>
-    </td>
-     <td>
-        &nbsp;
-    </td>
-</tr>
-</table>
-</body>
-</html>
-");
-define("MAIL_CC", MAIL_TO);
 //formato en base (condicion)(destino)||(condicion)(destino)
 
 /**
@@ -51,6 +20,10 @@ class Notify extends ITObject {
     private $too; /* array de destinos TO */
     private $cc; /* array de destinos CC */
     private $dbroot;
+    private $mailTO;
+    private $mailCC;
+    
+    private $mailSplitter;
 
     /**
      * Condiciones que seran reemplazadas en el array
@@ -74,7 +47,7 @@ class Notify extends ITObject {
         "client", //generador
         "clients->teams" //equipos del generador y adjuntos
     );
-    
+
     /**
      * Lista de valores complejos
      * @var array<String> 
@@ -94,7 +67,7 @@ class Notify extends ITObject {
         "team->name", //equipo actual
         "id", //id del ticket
         "html_dir", //ruta a it
-        "FA",    //fecha apertura
+        "FA", //fecha apertura
         "ua->teamsnames",
         "tree",
         "action->alias"
@@ -102,7 +75,36 @@ class Notify extends ITObject {
 
     function __construct($conn = null) {
         parent::__construct($conn);
-        $this->dbroot = new  Utils\DB($this->conn, true);
+        $this->mailSplitter=$this->getContext()->get_GlobalConfig()->getString('mail/splitter');
+        $this->mailTO = "
+        <html>
+        <head></head>
+        <body width='100%' bgcolor='#3d3d3d'>
+        <table width='100%' cellspacing='0' cellpadding='0' >
+        <tr>
+            <td>
+                &nbsp;
+            </td>
+            <td width='750' style='background-color:white;'>
+                        <img src='" . $this->getContext()->get_GlobalConfig()->getString('mail/header') . "' style='display:block;' />
+                        <div style='margin-left:10px;'>
+                        {body}
+                        <br/><br/>
+                        Por favor no responda este mensaje ya que se trata de un env&iacute;o autom&aacute;tico.
+                        <br/><br/>
+                        </div>
+                        <img src='" . $this->getContext()->get_GlobalConfig()->getString('mail/footer') . "' style='display:block;'/>
+            </td>
+             <td>
+                &nbsp;
+            </td>
+        </tr>
+        </table>
+        </body>
+        </html>
+        ";
+        $this->mailCC=  $this->mailTO;
+        $this->dbroot = new Utils\DB($this->conn, true);
     }
 
     /**
@@ -122,7 +124,7 @@ class Notify extends ITObject {
             case "is_taken":
                 return ($this->tkt_final->get_prop("u_tom") != null);
             default:
-                $this->getContext()->getLogger()->error("Condicion invalida en mail",array($c));
+                $this->getContext()->getLogger()->error("Condicion invalida en mail", array($c));
                 return false;
         }
         return false;
@@ -137,18 +139,18 @@ class Notify extends ITObject {
     private function get_mail_value($name, $too) {
         $nv = explode("=>", $name);
         if (count($nv) > 1) {
-            if(!in_array($nv[0], self::$MAIL_VALS_COMPLEX))
-                    return "NULL" . MAIL_SPLITER;
+            if (!in_array($nv[0], self::$MAIL_VALS_COMPLEX))
+                return "NULL" . $this->mailSplitter;
             switch ($nv[0]) {
-                 case "event_user":
+                case "event_user":
                     $result = "";
                     $ths = $this->tkt_final->get_tktHObj(strtoupper($nv[1]));
-                    foreach($ths as $th){
+                    foreach ($ths as $th) {
                         $usr = $th->get_prop("UA_o");
-                        if(!$usr){
+                        if (!$usr) {
                             continue;
                         }
-                        $result.=$usr->get_prop("mail") . MAIL_SPLITER;  
+                        $result.=$usr->get_prop("mail") . $this->mailSplitter;
                     }
 
                     return $result;
@@ -157,7 +159,7 @@ class Notify extends ITObject {
                     //buscar equipo, ejecutar funcion de equipo para traer usuarios.
                     $users = $this->tkt_final->get_prop("equipo")->get_users($nv[1]);
                     foreach ($users as $u) {
-                        $result.=$u->get_prop("mail") . MAIL_SPLITER;
+                        $result.=$u->get_prop("mail") . $this->mailSplitter;
                     }
                     return $result;
                 case "client_team_profile":
@@ -167,18 +169,18 @@ class Notify extends ITObject {
                         foreach ($teams as $t) {
                             $users = $t->get_users($nv[1]);
                             foreach ($users as $u) {
-                                $result.=$u->get_prop("mail") . MAIL_SPLITER;
+                                $result.=$u->get_prop("mail") . $this->mailSplitter;
                             }
                         }
                     }
                     return $result;
                 default:
-                    $this->getContext()->getLogger()->error("Destino invalido en mail #3",array($name));
-                    return "NULL" . MAIL_SPLITER;
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #3", array($name));
+                    return "NULL" . $this->mailSplitter;
             }
         } else {
-            if(!in_array($name, self::$MAIL_VALS))
-                    return "NULL" . MAIL_SPLITER;
+            if (!in_array($name, self::$MAIL_VALS))
+                return "NULL" . $this->mailSplitter;
             switch ($name) {
                 case "u_tom":
                     if ($result = $this->tkt_final->get_prop("u_tom_o"))
@@ -214,7 +216,7 @@ class Notify extends ITObject {
                         $this->tkt_final->load_childs();
                         foreach ($this->tkt_final->get_prop("childs") as $tktc)
                             if ($tktc->get_prop("usr_o"))
-                                $result.=MAIL_SPLITER . $tktc->get_prop("usr_o")->get_prop("mail");
+                                $result.=$this->mailSplitter . $tktc->get_prop("usr_o")->get_prop("mail");
                     }
                     break;
                 case "clients->teams":
@@ -234,20 +236,20 @@ class Notify extends ITObject {
                     foreach ($ulist as $u) {
                         if ($u) {
                             foreach ($u->get_prop("equiposobj") as $t) {
-                                $result.=MAIL_SPLITER . $t->get_prop("listinobj")->get_prop($dest);
+                                $result.=$this->mailSplitter . $t->get_prop("listinobj")->get_prop($dest);
                             }
                         }
                     }
                     return $result;
                     break;
                 default:
-                    $this->getContext()->getLogger()->error("Destino invalido en mail #4",array($name));
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #4", array($name));
                     $result = "NULL";
             }
         }
         if ($result)
-            return $result . MAIL_SPLITER;
-        return "NULL". MAIL_SPLITER;
+            return $result . $this->mailSplitter;
+        return "NULL" . $this->mailSplitter;
     }
 
     /**
@@ -258,16 +260,16 @@ class Notify extends ITObject {
      */
     private function remake_mail($mail, $too) {
         $mailR = strtolower($mail);
-        $matches=array();
+        $matches = array();
         preg_match_all("/\\{[^\\}]+\\}/", $mailR, $matches);
-        
-        foreach($matches[0] as $m){
-            $mclear = str_replace(array("{","}"), "", $m);
-            if($mclear!=""){
+
+        foreach ($matches[0] as $m) {
+            $mclear = str_replace(array("{", "}"), "", $m);
+            if ($mclear != "") {
                 $mailR = str_replace($m, $this->get_mail_value($mclear, $too), $mailR);
             }
         }
-        
+
         return $mailR;
     }
 
@@ -297,8 +299,8 @@ class Notify extends ITObject {
         $tooSTR = $this->remake_mail($tooSTR, true);
         $ccSTR = $this->remake_mail($ccSTR, false);
         //separar array y verificar mails validos
-        $too = explode(MAIL_SPLITER, $tooSTR);
-        $cc = explode(MAIL_SPLITER, $ccSTR);
+        $too = explode($this->mailSplitter, $tooSTR);
+        $cc = explode($this->mailSplitter, $ccSTR);
 
         return array($too, $cc);
     }
@@ -342,9 +344,9 @@ class Notify extends ITObject {
         $cc = array_unique($this->cc);
         $i = 0;
         foreach ($too as $tM) {
-            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)){
-                if($tM!="" && $tM!="NULL"){
-                    $this->getContext()->getLogger()->error("Destino invalido en mail #1",array($tM));
+            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)) {
+                if ($tM != "" && $tM != "NULL") {
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #1", array($tM));
                 }
                 array_splice($too, $i, 1);
             }
@@ -352,9 +354,9 @@ class Notify extends ITObject {
         }
         $i = 0;
         foreach ($cc as $tM) {
-            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)){
-                if($tM!="" && $tM!="NULL"){
-                    $this->getContext()->getLogger()->error("Destino invalido en mail #2",array($tM));
+            if (!filter_var(trim($tM), FILTER_VALIDATE_EMAIL)) {
+                if ($tM != "" && $tM != "NULL") {
+                    $this->getContext()->getLogger()->error("Destino invalido en mail #2", array($tM));
                 }
                 array_splice($cc, $i, 1);
             }
@@ -400,9 +402,9 @@ class Notify extends ITObject {
                 break;
             case "tree":
                 $tree = $this->tkt_final->get_tree_history();
-                $rta="";
-                foreach($tree as $t){
-                    $rta .= $t["ans"]."/";
+                $rta = "";
+                foreach ($tree as $t) {
+                    $rta .= $t["ans"] . "/";
                 }
                 return $rta;
                 break;
@@ -433,7 +435,7 @@ class Notify extends ITObject {
                     $result = "NULL";
                 break;
             default:
-                $this->getContext()->getLogger()->error("Valor invalido en mail",array($name));
+                $this->getContext()->getLogger()->error("Valor invalido en mail", array($name));
                 $result = "NULL";
         }
         if ($result)
@@ -488,7 +490,7 @@ class Notify extends ITObject {
      * @return string
      */
     public function send() {
-        if (MAIL_ENABLED == 0) {
+        if (!$this->getContext()->get_GlobalConfig()->getBoolean('mail/enable')) {
             return "Mail desactivado";
         }
 
@@ -502,10 +504,10 @@ class Notify extends ITObject {
         if (count($this->too) == 0 && count($this->cc) == 0) {
             return "No hay destinatarios para esta notificacion";
         }
-        
+
         $this->load_body();
         $this->load_cc_body();
-        $actName=$this->get_body_value("action->alias");
+        $actName = $this->get_body_value("action->alias");
         $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . " - $actName)";
         $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
 
@@ -534,8 +536,8 @@ class Notify extends ITObject {
      */
     private function send_mail($to, $subject, $body, $cc, $type, $from) {
         $extras = "From: $from\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
-        $rta= mail($to,$subject,$body,$extras);
-        if(!$rta){
+        $rta = mail($to, $subject, $body, $extras);
+        if (!$rta) {
             $this->getContext()->getLogger()->critical("Error en smtp");
         }
         return $rta;

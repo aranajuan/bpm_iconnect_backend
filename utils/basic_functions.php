@@ -127,8 +127,14 @@ function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
             }
             return $date->format($format);
         }
+        \Itracker\Utils\LoggerFactory::getLogger()->debug(
+                'No se puede convertir fecha',
+            array('input'=>$str,'orformat'=>$origin,'destformat'=>$format));
         return -1;
     } catch (Exception $e) {
+        \Itracker\Utils\LoggerFactory::getLogger()->debug(
+                'No se puede convertir fecha',
+            array('input'=>$str,'orformat'=>$origin,'destformat'=>$format));
         return -1;
     }
 }

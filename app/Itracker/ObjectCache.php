@@ -48,7 +48,7 @@ class ObjectCache {
     public function get_object($class, $id, $force_update = false) {
         $this->call++;
         $class = $this->getITClass($class);
-        if (!OBJ_CACHE_ENABLED) {
+        if (!Utils\GlobalConfig::getInstance()->getBoolean('configs/objcache')){
             $force_update = true;
         }
 

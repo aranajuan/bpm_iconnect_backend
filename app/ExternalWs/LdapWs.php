@@ -2,8 +2,6 @@
 
 namespace ExternalWs;
 
-require_once 'config/externalws/ldapws.php';
-
 class LdapWs {
 
     /**
@@ -23,6 +21,26 @@ class LdapWs {
     private $error;
 
     /**
+     *
+     * @var \Itracker\Utils\Config 
+     */
+    private $configs;
+    
+    public function __construct() {
+        $path=ROOT_DIR.DIRECTORY_SEPARATOR.'config'.
+                DIRECTORY_SEPARATOR.'externalws'.
+                DIRECTORY_SEPARATOR.'ldapws.xml';
+        try{
+            $this->configs = new \Itracker\Utils\Config($path);
+        }  catch (Exception $e){
+            \Itracker\Utils\LoggerFactory::getLogger()->error(
+                    'Imposible cargar archivo de configuracion',
+                    array('path'=>$path)
+                    );
+        }
+    }
+
+    /**
      * Crea execute y parametros de logueo
      * @return DOMElement
      */
@@ -30,10 +48,12 @@ class LdapWs {
         $this->domRequest = new \DOMDocument('1.0', 'UTF-8');
         $main = $this->domRequest->createElement("execute");
         $attribute = $this->domRequest->createAttribute("authUser");
-        $attribute->value = LDAP_IT_USER;
+        $attribute->value = $this->configs->getString('user');
         $main->appendChild($attribute);
         $attribute = $this->domRequest->createAttribute("authPass");
-        $attribute->value = \Encrypter::decrypt(LDAP_IT_PASS);
+        $attribute->value = \Encrypter::decrypt(
+                $this->configs->getString('pass')
+                );
         $main->appendChild($attribute);
         return $main;
     }
@@ -70,13 +90,14 @@ class LdapWs {
     private function send_request() {
         $requestTS = $this->domRequest->saveXML(null, LIBXML_NOEMPTYTAG);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, LDAP_DIR);
+        curl_setopt($ch, CURLOPT_URL, $this->configs->getString('url'));
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestTS);
         curl_setopt($ch, CURLOPT_POSTREDIR, 3);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, LDAP_TIMEOUT);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,
+                $this->configs->getString('timeout'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
         if(curl_errno($ch)!=0){

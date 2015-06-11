@@ -86,23 +86,28 @@ class Option extends ITObject {
         }
         $ideqsV = explode(";", $ideqs);
         $dest = NULL;
+        $destino=NULL;
         foreach ($ideqsV as $dest) {
+            if($destino){
+                break;
+            }
             $destAR = explode("=>", $dest);
             if ($destAR[0] == "default") {
-                $dest = $destAR[1];
+                $destino = $destAR[1];
                 break;
             }
             $parts = explode(":", $destAR[0]);
             $partsEl = explode(",", $parts[1]);
             if ($parts[0] == "USER") {
                 if (in_array($usr->get_prop("id"), $partsEl)) {
-                    return $destAR[1];
+                    $destino= $destAR[1];
+                    break;
                 }
             }
             if ($parts[0] == "TEAM") {
                 foreach ($partsEl as $idteam) {
                     if ($usr->in_team($idteam)) {
-                        $dest = $destAR[1];
+                        $destino = $destAR[1];
                         break;
                     }
                 }
@@ -115,19 +120,19 @@ class Option extends ITObject {
                 }
                 foreach ($partsEl as $iddir) {
                     if (in_array($iddir, $direccionesU)) {
-                        $dest = $destAR[1];
+                        $destino = $destAR[1];
                         break;
                     }
                 }
             }
         }
-        $this->objsCache->get_object('Team', $dest);
-        if ($this->objsCache->get_status('Team', $dest) != "ok") {
+        $this->objsCache->get_object('Team', $destino);
+        if ($this->objsCache->get_status('Team', $destino) != "ok") {
             $this->getContext()->getLogger()->error("Error en destino de opcion",
-                    array($this->get_prop("id"),$dest,$usr->get_prop('usr')));
+                    array($this->get_prop("id"),$destino,$usr->get_prop('usr')));
             return null;
         }
-        return $dest;
+        return $destino;
     }
 
     function get_prop($property) {

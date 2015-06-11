@@ -30,19 +30,13 @@ class Context extends Utils\XMLhandler {
      * @var Instance
      */
     private $instance;
-    
-    /**
-     *
-     * @var ObjectCache
-     */
-    private $objCache;
-    
+       
     private $error;
 
     private static $__instance;
     
     private function __construct() {
-        $this->objCache=  ObjectCache::getInstance();
+
     }
 
     /**
@@ -67,12 +61,21 @@ class Context extends Utils\XMLhandler {
         if (!$this->load_input($text, $ipOr, $date)) {
             return false;
         }
-        if(in_array($this->getUser(), explode(",", DEBUG_USER))){
-            $this->getLogger()->setLogLevelThreshold(LOG_LEVEL_DEBUG);
+        if(in_array($this->getUser(), 
+                $this->get_GlobalConfig()->getArray('debug/user'))){
+            $this->getLogger()->setLogLevelThreshold(
+                $this->get_GlobalConfig()->getString('debug/log_debug')    
+                    );
         }
         
         $this->connections = new Utils\ConnectionManager();
-        if ($this->connections->connect_root(DBSERVER_ALL, DBHOST_ROOT, DBUSER_ROOT, DBPASS_ROOT, $GLOBALS["tables_root"]) == false) {
+        $config = $this->get_GlobalConfig();
+        if ($this->connections->connect_root(
+                $config->getString('database/motor'), 
+                $config->getString('database/host'), 
+                $config->getString('database/user'), 
+                $config->getString('database/pass'),
+                $GLOBALS["tables_root"]) == false) {
             $this->set_error("conection", "no se puede conectar a la base de datos.");
             return false;
         }
@@ -83,7 +86,7 @@ class Context extends Utils\XMLhandler {
         }
 
         if ($this->connections->connect_instance($this->instance->get_prop("dbhost"), $this->instance->get_prop("dbuser"), $this->instance->get_prop("dbpass"), $this->instance->get_alias()) == false) {
-            $this->set_error("conection", "no se puede conectar a la base de datos de la instancia.");
+            $this->set_error("connection", "no se puede conectar a la base de datos de la instancia.");
             return false;
         }
 
@@ -145,8 +148,8 @@ class Context extends Utils\XMLhandler {
      * @return boolean
      */
     private function load_user() {
-        $U = $this->objCache->get_object("User", $this->getUser());
-        if ($this->objCache->get_status("User", $this->getUser()) != "ok") {
+        $U = $this->get_objcache()->get_object("User", $this->getUser());
+        if ($this->get_objcache()->get_status("User", $this->getUser()) != "ok") {
             $this->error = "Usuario o contrase&ntilde;a invalidos";
             return false;
         }
@@ -170,8 +173,8 @@ class Context extends Utils\XMLhandler {
      * @return boolean
      */
     private function load_instance() {
-        $I = $this->objCache->get_object("Instance", $this->getInstance());
-        if ($this->objCache->get_status("Instance", $this->getInstance()) != "ok") {
+        $I = $this->get_objcache()->get_object("Instance", $this->getInstance());
+        if ($this->get_objcache()->get_status("Instance", $this->getInstance()) != "ok") {
             $this->instance = null;
             return false;
         }
@@ -186,8 +189,8 @@ class Context extends Utils\XMLhandler {
      */
     private function load_front() {
         //validar usuario - front - acceso del usr a funcion
-        $front = $this->objCache->get_object("Front",$this->getFrontName());
-        if ($this->objCache->get_status("Front",$this->getFrontName()) != "ok") {
+        $front = $this->get_objcache()->get_object("Front",$this->getFrontName());
+        if ($this->get_objcache()->get_status("Front",$this->getFrontName()) != "ok") {
             $this->error = "Error en el origen de la solicitud - #6.1";
             return false;
         }
@@ -252,9 +255,16 @@ class Context extends Utils\XMLhandler {
      * @return ObjectCache
      */
     public function get_objcache(){
-        return $this->objCache;
+        return ObjectCache::getInstance();
     }
     
+    /**
+     * 
+     * @return \Itracker\Utils\GlobalConfig
+     */
+    public function get_GlobalConfig(){
+        return \Itracker\Utils\GlobalConfig::getInstance();
+    }
 }
 
 ?>

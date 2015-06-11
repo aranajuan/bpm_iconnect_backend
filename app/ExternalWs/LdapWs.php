@@ -32,7 +32,7 @@ class LdapWs {
                 DIRECTORY_SEPARATOR.'ldapws.xml';
         try{
             $this->configs = new \Itracker\Utils\Config($path);
-        }  catch (Exception $e){
+        }  catch (\Exception $e){
             \Itracker\Utils\LoggerFactory::getLogger()->error(
                     'Imposible cargar archivo de configuracion',
                     array('path'=>$path)
@@ -120,7 +120,7 @@ class LdapWs {
             $this->domResponse = new \SimpleXMLElement($data);
             $this->error = null;
             return $this->check_error();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
              \Itracker\Utils\LoggerFactory::getLogger()->error("LDAP error analizar respuesta #1",
                      array($e->getMessage(),$data,$this->error));
             $this->error = "Error en servicio al validar usuario";

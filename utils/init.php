@@ -17,11 +17,9 @@ function __autoloadIT($classname) {
 
 spl_autoload_register('__autoloadIT');
 
-ini_set('display_errors', '1');
-
 include_once 'basic_functions.php'; // funciones basicas adicionales
 
-include_once 'config/dbtables_root.php'; // tablas root
+include_once 'dbtables_root.php'; // tablas root
 
 include_once 'access.php'; // lista de accesos
 
@@ -30,6 +28,7 @@ ini_set('upload_max_filesize', '100M');
 
 $ContextConf = \Itracker\Context::getContext()->get_GlobalConfig();
 /* Constantes */
+ini_set('display_errors', $ContextConf->getInt('debug/displayerrors'));
 define('I_ACTIVE', $ContextConf->getInt('constants/active'));
 define('I_DELETED', $ContextConf->getInt('constants/deleted'));
 define('I_NEWID',$ContextConf->getInt('constants/new'));

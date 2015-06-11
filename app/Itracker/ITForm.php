@@ -53,7 +53,7 @@ class ITForm implements XMLPropInterface{
             }
             $this->xml_output = clone $this->xml_input;
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->xml_input = null;
             Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML",array($xml));
             return false;

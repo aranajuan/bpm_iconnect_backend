@@ -40,7 +40,7 @@ class Config {
             $this->dom->load($file);
             $this->xpath = new \DOMXPath($this->dom);
             $this->file=$file;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             LoggerFactory::getLogger()->error(
                     'Archivo de configuraciones no seteado',
                     array('path'=>$file,'msg'=> $e->getMessage() ));

@@ -354,12 +354,7 @@ abstract class Tree extends ITObject {
                     }
                     return $rta;
                 } else {
-                    if ($actualO->get_prop("equipo_destino") == null) {
-                        $rta["error"] = "No hay ruta definida. Error de Arbol";
-                        return $rta;
-                    } else {
                         $rta["object"] = $actualO;
-                    }
                 }
                 return $rta;
         }
@@ -367,7 +362,7 @@ abstract class Tree extends ITObject {
 
     /**
      * Devuelve ultima opcion [OPTION]
-     * @return null 
+     * @return Option 
      */
     function get_last() {
         if (isset($this->path_obj[$this->path_max])) {

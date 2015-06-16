@@ -45,12 +45,10 @@ function GO($Context) {
         }
 
         if ($topts["object"]) {
-            if ($topts["object"]->get_prop("idequipo_destino") && $topts["object"]->get_prop("ruta_destino") == NULL) {
+            if ($topts["object"]->get_prop("itform")) {
                 $itform= $topts["object"]->get_prop("itform");
                 if($itform){
                     $itfdom=$itform->get_inputDOM()->documentElement;
-                }else{
-                    return $Context->createElement("error", "Error en formulario #1");
                 }
                 $joined = $Context->append_xml($itfdom);
                 if ($joined) {

@@ -17,6 +17,9 @@ if (!$TKT->is_active()) {
 }
 $lstOption = $TKT->get_last();
 
+$optDest = $lstOption->getDestiny($this->getLogged(),$itf);
+return array("result" => "error", "msj" => "Ejecutado dest");
+
 if ($lstOption == null) {
     $response["result"] = "error";
     $response["msj"] = "No se pudo generar ticket. No se encontro ultima opcion.";

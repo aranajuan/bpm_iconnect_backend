@@ -27,7 +27,7 @@ function GO($Context) {
         }
     } else { //errores de falta de creado
         $Ul->hardDelete(); // elimina de la base fisicamente
-        $Ul = new USER($Context->get_Connection());
+        $Ul = new User($Context->get_Connection());
         $Ul->load_VEC($Context->get_params(null));
         $Ul->change_teams(explode(",", $Context->get_params("idsequipos")));
         $result = $Ul->insert_DB();

@@ -62,13 +62,9 @@ class OptionRules {
                 );
                 return false;
             }
-            If ($cond->length == 0 || $this->checkCondition($cond, $user, $itform)) {
+            
+            If ($cond->length == 0 || $this->checkCondition($cond->item(0), $user, $itform)) {
                 $this->destinyNode = $dest->item(0);
-                Utils\LoggerFactory::getLogger()->debug('Seteado destino', 
-                        array(
-                    'destino' => $this->destinyNode->textContent
-                        )
-                );
                 return true;
             }
         }
@@ -88,7 +84,8 @@ class OptionRules {
      */
     private function checkCondition($condNode, $user, $itform) {
         foreach ($condNode->childNodes as $validation) {
-            switch ($validation->nodeName) {
+            $nname=$validation->nodeName;
+            switch ($nname) {
                 case 'team':
                     $int = false;
                     foreach (explode(',', $validation->nodeValue) as $idt) {
@@ -121,20 +118,20 @@ class OptionRules {
                 case 'itfvalue':
                     $ids = $validation->getElementsByTagName('id');
                     if ($ids->length != 1) {
-                        Utils\LoggerFactory::getLogger()->warning('Regla invalida', array('xml' => $this->fullRule)
+                        Utils\LoggerFactory::getLogger()->warning('Regla invalida sin ID', array('xml' => $this->fullRule)
                         );
                         return false;
                     }
-                    $id = $ids->item(0);
+                    $id = $ids->item(0)->nodeValue;
                     $value = $itform->get_value($id);
                     foreach ($validation->childNodes as $valL2) {
                         if ($valL2->nodeName == 'lessthan') {
-                            if ($valL2->nodeValue >= $value) {
+                            if ($value >= $valL2->nodeValue) {
                                 return false;
                             }
                         }
                         if ($valL2->nodeName == 'morethan') {
-                            if ($valL2->nodeValue <= $value) {
+                            if ($value <= $valL2->nodeValue) {
                                 return false;
                             }
                         }
@@ -144,9 +141,13 @@ class OptionRules {
                             }
                         }
                     }
-                    return true;
+                case '#text': /*Ignora nuevas lineas y comentarios*/
+                    break;
+                    
                 default:
-                    Utils\LoggerFactory::getLogger()->warning('Regla invalida', array('xml' => $this->fullRule)
+                    Utils\LoggerFactory::getLogger()
+                        ->warning('Regla invalida '.$nname,
+                                array('xml' => $this->fullRule)
                     );
             }
         }
@@ -158,8 +159,32 @@ class OptionRules {
      * @param string $val   propiedad del destino
      * @return string
      */
-    public function getDestiny($val) {
+    public function getDestinyVal($val) {
+        if($this->destinyNode==null){
+            return null;
+        }
         
+        $fnd = $this->destinyNode->getElementsByTagName($val);
+        if($fnd->length==1)
+            return $fnd->item(0)->nodeValue;
+        return null;
     }
 
+     /**
+     * Devuelve valor 
+     * @param string $val   propiedad general
+     * @return string
+     */
+    public function getVal($val) {
+        if($this->fullRuleParsed==null){
+            return null;
+        }
+        
+        $fnd = $this->fullRuleParsed->getElementsByTagName($val);
+        if($fnd->length==1)
+            return $fnd->item(0)->nodeValue;
+        return null;
+    }
+
+    
 }

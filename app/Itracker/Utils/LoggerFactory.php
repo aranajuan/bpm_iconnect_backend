@@ -20,7 +20,7 @@ class LoggerFactory{
      */
     public final static function getLogger($level=null){
         if(!static::$logger){
-            if(!$level){ return NULL; }
+            if(!$level){ $level='error'; }
             static::$logger= new \KLogger\Logger(ROOT_DIR."/logs", $level);
         }
         return self::$logger;

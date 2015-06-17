@@ -83,14 +83,17 @@ class Option extends ITObject {
     }
 
     /**
-     * Devuelve OptionRule cargado
+     * Devuelve OptionRule cargado (si user y itform son null devuelve todo)
      * @param User $user
      * @param ITForm $itform
      * @return OptionRules
      */
-    public function getDestiny($user, $itform = null) {
+    public function getDestiny($user=null, $itform = null) {
         if ($this->destRule == null) {
             return null;
+        }
+        if($user==null && $itform==null){
+            return $this->destRule;
         }
         $this->destRule->loadFor($user, $itform);
         return $this->destRule;

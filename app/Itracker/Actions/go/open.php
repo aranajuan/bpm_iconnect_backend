@@ -18,7 +18,7 @@ if (!$TKT->is_active()) {
 $lstOption = $TKT->get_last();
 
 $optDest = $lstOption->getDestiny($this->getLogged(),$itf);
-return array("result" => "error", "msj" => "Ejecutado dest");
+return array("result" => "error", "msj" => $lstOption->get_prop('id'). "-Ejecutado dest team-".$optDest->getDestinyVal('team'));
 
 if ($lstOption == null) {
     $response["result"] = "error";

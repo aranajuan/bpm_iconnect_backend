@@ -55,8 +55,12 @@ function GO($Context) {
                     $opendata = $Context->createElement("opendata");
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
-                    $simi =$Context->createElement("no_anexar",$topts["object"]->get_prop("no_anexar"));
-                    $treeL->appendChild($simi);
+                    $dest = $topts["object"]->getDestiny();
+                    if($dest){
+                        $simi =$Context->createElement("no_anexar",
+                                $dest->getVal('dontjoin'));
+                        $treeL->appendChild($simi);
+                    }
                     return $treeL;
                 } else {
                     return $Context->createElement("error", "Error en formulario #2");

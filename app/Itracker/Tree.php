@@ -127,47 +127,6 @@ abstract class Tree extends ITObject {
     }
 
     /**
-     * Vector de TKTS similares
-     * @return array<Tkt>|null 
-     */
-    public function get_similar() {
-        if (!$this->critico_v) {
-            $this->load_critic();
-        }
-        if (!$this->critico_v) {
-            return NULL;
-        }
-        $criticVC = explode("-", $this->critico);
-        $ssql = "
-            select id,origen from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
-        $this->dbinstance->loadRS($ssql);
-        if (!$this->dbinstance->noEmpty) {
-            return NULL;
-        }
-        $i = 0;
-        $tktV = array();
-        while ($tm = $this->dbinstance->get_vector()) {
-            //verificar textos criticos y comparar con actual
-            $TKTc = new TKT();
-            $TKTc->load_path($tm["origen"], 0);
-            $countC = count(array_intersect($criticVC, explode("-", $TKTc->get_critic())));
-            if ($countC) {
-                $tkt = $this->objsCache->get_object("Tkt", $tm["id"]);
-                if ($this->objsCache->get_status("Tkt", $tm["id"])=="ok") {
-                    $tktV[$i] = $tkt;
-                    $i++;
-                }
-            }
-        }
-
-        if (count($tktV) != 0) {
-            return $tktV;
-        } else {
-            return NULL;
-        }
-    }
-
-    /**
      * Devuelve textos criticos
      * @return  string
      */

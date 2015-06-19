@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Lista
- * @param Context $Context
+ * @param \Itracker\Context $Context
  * @return null
  */
 function GO($Context) {
@@ -9,13 +10,63 @@ function GO($Context) {
     $TKT = new \Itracker\Tkt();
     $TKT->load_VEC(array("origen" => $Context->get_params("path")));
 
-    $topts = $TKT->get_tree_options();
-    
-    if (!$topts["object"] || $topts["object"]->get_prop("no_anexar")==1) {
-        return $Context->createElement("error", "Accion no valida para esta opcion.");
+    if (!$TKT->is_active()) {
+        $response["result"] = "error";
+        $response["msj"] = "Error en tipificacion.";
+        return $response;
     }
-    
-    $ALL_v = $TKT->get_similar();
+
+    $topts = $TKT->get_last();
+
+
+    /**
+     * @var Itracker\ITForm
+     */
+    $itf = NULL;
+    if ($topts->get_prop('itform')) {
+        $itf = $topts->get_prop('itform');
+        $form = json_decode($Context->get_params('form'), true);
+        $rta = $itf->load_values($form, 'actionform');
+        if ($rta != 'ok') {
+            return $Context->createElement("error", $rta);
+        }
+    }
+
+    $dest = $topts->getDestiny($Context->get_User(), $itf);
+
+    if ($dest == NULL) { /* no es fin de arbol */
+        $Context->getLogger()->warning('No hay destino valido', array(
+            'id' => $topts->get_prop('id'),
+            'usr' => $Context->get_User()->get_prop('usr'),
+            'data' => $Context->get_params('form')
+        ));
+        return $Context->createElement("error", "Accion no valida para esta opcion. #1");
+    }
+
+    if ($dest->getVal('dontjoin') == 'true') {
+        return $Context->createElement("error", "Accion no valida para esta opcion. #2");
+    }
+
+    if (!$dest->hasDestiny()) {
+        $Context->getLogger()->warning('No hay destino valido', array(
+            'id' => $topts->get_prop('id'),
+            'usr' => $Context->get_User()->get_prop('usr'),
+            'data' => $Context->get_params('form')
+        ));
+        return $Context->createElement("error", "Error en parametrizacion de tipificacion. #3");
+    }
+
+    if ($dest->getDestinyVal('team') == NULL) {
+        $Context->getLogger()->warning('No hay destino valido <team>', array(
+            'id' => $topts->get_prop('id'),
+            'usr' => $Context->get_User()->get_prop('usr'),
+            'data' => $Context->get_params('form')
+        ));
+        return $Context->createElement("error", "Error en parametrizacion de tipificacion. #3");
+    }
+
+    $ALL_v = $TKT->get_similar($dest->getDestinyVal('process'));
+
     if ($ALL_v == null || count($ALL_v) == 0) {
         return null;
     }
@@ -23,8 +74,8 @@ function GO($Context) {
     $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
-    $cc=0;
-    
+    $cc = 0;
+
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $tkt = $listL->createElement("tkt");
@@ -36,14 +87,14 @@ function GO($Context) {
             if ($fstTH) {
                 $openxml = $fstTH->getXML_H();
                 if ($openxml) {
-                    $nod=$listL->importNode($openxml,true);
+                    $nod = $listL->importNode($openxml, true);
                     $tkt->appendChild($nod);
-                     $list->appendChild($tkt);
-                     $cc++;
+                    $list->appendChild($tkt);
+                    $cc++;
                 }
             }
         }
-        if($cc==0){
+        if ($cc == 0) {
             return null;
         }
         $ret = $Context->append_xml($list);

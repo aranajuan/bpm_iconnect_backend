@@ -155,6 +155,14 @@ class OptionRules {
     }
 
     /**
+     * Devuelve true si tiene un destino cargado
+     * @return boolean
+     */
+    public function hasDestiny(){
+        return $this->destinyNode!=NULL;
+    }
+    
+    /**
      * Devuelve valor 
      * @param string $val   propiedad del destino
      * @return string

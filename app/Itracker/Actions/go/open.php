@@ -10,36 +10,50 @@ $response = array("result" => "", "msj" => "");
 $TKT = $this->getTKT();
 $itf = $this->getitform();
 
+/* VALIDACIONES */
+
 if (!$TKT->is_active()) {
     $response["result"] = "error";
-    $response["msj"] = "Error en tipificacion.";
+    $response["msj"] = "Error en tipificacion. #1";
     return $response;
 }
+
 $lstOption = $TKT->get_last();
 
-$optDest = $lstOption->getDestiny($this->getLogged(),$itf);
-return array("result" => "error", "msj" => $lstOption->get_prop('id'). "-Ejecutado dest team-".$optDest->getDestinyVal('team'));
+$dest = $lstOption->getDestiny($this->getLogged(), $itf);
 
-if ($lstOption == null) {
+if (!$dest->hasDestiny()) {
+    $this->getContext()->getLogger()->warning('No hay destino valido', array(
+        'id' => $lstOption->get_prop('id'),
+        'usr' => $this->getContext()->get_User()->get_prop('usr'),
+        'data' => $this->getContext()->get_params('form')
+    ));
     $response["result"] = "error";
-    $response["msj"] = "No se pudo generar ticket. No se encontro ultima opcion.";
+    $response["msj"] = "Error en tipificacion. #2";
     return $response;
 }
 
-if ($lstOption->get_prop("no_anexar") == 1) {
-    $response["openother"] = 1;
-} else {
-    $response["openother"] = 0;
-}
-
-if ($lstOption->get_prop("idequipo_destino") == NULL) {
+if ($dest->getDestinyVal('team') == NULL) {
+    $this->getContext()->getLogger()->warning('No hay destino valido <team>', array(
+        'id' => $lstOption->get_prop('id'),
+        'usr' => $this->getContext()->get_User()->get_prop('usr'),
+        'data' => $this->getContext()->get_params('form')
+    ));
     $response["result"] = "error";
-    $response["msj"] = "Error, fin de arbol invalido (Sin destino).";
+    $response["msj"] = "Error en tipificacion. #3";
     return $response;
 }
 
-/* abre ticket */
+
+
+/* ABRIR */
 $rtaOP = $TKT->open();
+
+if ($dest->getVal('join') == 'true') {
+    $response["openother"] = 0;
+} else {
+    $response["openother"] = 1;
+}
 
 $this->loadObjadjId($TKT->get_prop("idequipo"));
 

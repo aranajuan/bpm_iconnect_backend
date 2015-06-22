@@ -48,11 +48,6 @@ function GO($Context) {
     }
 
     if (!$dest->hasDestiny()) {
-        $Context->getLogger()->warning('No hay destino valido', array(
-            'id' => $topts->get_prop('id'),
-            'usr' => $Context->get_User()->get_prop('usr'),
-            'data' => $Context->get_params('form')
-        ));
         return $Context->createElement("error", "Error en parametrizacion de tipificacion. #3");
     }
 

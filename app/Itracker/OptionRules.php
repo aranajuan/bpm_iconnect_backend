@@ -69,8 +69,13 @@ class OptionRules {
             }
         }
         $this->destinyNode = null;
+        if($itform){
+            $irfT=$itform->get_output();
+        }else{
+            $irfT='';
+        }
         Utils\LoggerFactory::getLogger()->warning('No hay destino valido', array('xml' => $this->fullRule,
-            'itf' => $itform->get_output()
+            'itf' => $irfT
                 )
         );
         return false;

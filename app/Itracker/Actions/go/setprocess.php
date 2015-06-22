@@ -9,6 +9,8 @@
     $response = array("result" => "", "msj" => "");
     $TKT = $this->getTKT();
     
+    $itf = $this->getitform();
+    
     $proceso = strtoupper($itf->get_value("proceso"));
     
     $rtaOP = $TKT->set_process($proceso);

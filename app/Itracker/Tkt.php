@@ -475,7 +475,10 @@ class Tkt extends Tree {
         }
         $A->loadTKT($this);
         if ($values) {
-            $A->loadFormValues($values);
+            $valid = $A->loadFormValues($values);
+            if($valid!='ok'){
+                return $valid;
+            }
         }
         if ($objadj_id) {
             $A->loadObjadjId($objadj_id);
@@ -560,6 +563,14 @@ class Tkt extends Tree {
         $this->u_asig = NULL;
         $this->usr = $this->getLogged()->get_prop("usr");
         $dest= $this->get_last()->getDestiny();
+        if($dest==null){
+            $this->getContext()->getLogger()->error('Destino no cargado al abrir',
+                    array(
+                        'back'=> print_r(debug_backtrace(),true)
+                    )
+                    );
+            return 'Error al abrir ticket - Destino invalido';
+        }
         $this->idequipo = $dest->getDestinyVal('team');
         $this->teamLoaded = false;
         $this->load_team();

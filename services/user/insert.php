@@ -11,7 +11,7 @@ function GO($Context) {
     /* Verificar estado en la base update o insert */
     if ($loadR === "eliminado") {
         $Ul->hardDelete(); // elimina de la base fisicamente
-        $Ul = new USER();
+        $Ul = new \Itracker\User();
         $Ul->load_VEC($Context->get_params(null));
         $Ul->change_teams(explode(",", $Context->get_params("idsequipos")));
         $result = $Ul->insert_DB();
@@ -27,7 +27,7 @@ function GO($Context) {
         }
     } else { //errores de falta de creado
         $Ul->hardDelete(); // elimina de la base fisicamente
-        $Ul = new USER($Context->get_Connection());
+        $Ul = new \Itracker\User($Context->get_Connection());
         $Ul->load_VEC($Context->get_params(null));
         $Ul->change_teams(explode(",", $Context->get_params("idsequipos")));
         $result = $Ul->insert_DB();

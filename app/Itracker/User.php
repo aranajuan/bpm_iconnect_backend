@@ -117,7 +117,7 @@ class User extends ITObject {
      * @return array
      */
     function list_alldomains() {
-        return explode(",", DOMAINS);
+        return $this->getContext()->get_GlobalConfig()->getArray('domains');
     }
 
     public function load_DB($usr) {
@@ -224,7 +224,8 @@ class User extends ITObject {
         $this->idsequipos = $this->dbteams;
         $this->idsequiposadm = trim($tmpU["idsequiposadm"]);
         $this->equiposLoaded = false;
-        if (in_array($this->usr, explode(";", DEBUG_USER))) {
+        if (in_array($this->usr,  
+                $this->getContext()->get_GlobalConfig()->getArray('debug/user'))){
             $this->debug = 1;
         } else {
             $this->debug = 0;
@@ -510,7 +511,8 @@ class User extends ITObject {
         if ($this->usr == "" || $this->usr == null)
             return "El usuario es obligatorio";
 
-        if (!in_array($this->dominio, explode(",", DOMAINS)))
+        if (!in_array($this->dominio,
+                $this->getContext()->get_GlobalConfig()->getArray('domains')))
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
             return "El campo perfil es obligatorio";

@@ -52,21 +52,23 @@ class Instance extends ITObject {
      * @return array
      */
     public function get_alias() {
+        $prefix = $this->getContext()->get_GlobalConfig()
+                ->getString('database/prefix');
         return array(
-            array("TBL_LISTIN", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."listines"),
-            array("TBL_USUARIOS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."usuarios"),
-            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."sisdir"),
-            array("TBL_SISTEMAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."sistemas"),
-            array("TBL_ACCIONES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."acciones"),
-            array("TBL_PREGUNTAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."preguntas"),
-            array("TBL_OPCIONES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."opciones"),
-            array("TBL_EQUIPOS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."equipos"),
-            array("TBL_DIRECCION", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."direccion"),
-            array("TBL_TICKETS_M_DETALLES", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets_m_detalles"),
-            array("TBL_TICKETS_M", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets_m"),
-            array("TBL_TICKETS", "itracker_".$this->get_prop("nombre")."_tkt.".DBSERVER_PREFIX."tickets"),
-            array("TBL_PERFILES_VISTAS", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."prefiles_vistas"),
-            array("TBL_PERFILES", "itracker_".$this->get_prop("nombre")."_uta.".DBSERVER_PREFIX."perfiles"),
+            array("TBL_LISTIN", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."listines"),
+            array("TBL_USUARIOS", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."usuarios"),
+            array("TBL_SISDIR", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."sisdir"),
+            array("TBL_SISTEMAS", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."sistemas"),
+            array("TBL_ACCIONES", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."acciones"),
+            array("TBL_PREGUNTAS", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."preguntas"),
+            array("TBL_OPCIONES", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."opciones"),
+            array("TBL_EQUIPOS", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."equipos"),
+            array("TBL_DIRECCION", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."direccion"),
+            array("TBL_TICKETS_M_DETALLES", "itracker_".$this->get_prop("nombre")."_tkt.".$prefix."tickets_m_detalles"),
+            array("TBL_TICKETS_M", "itracker_".$this->get_prop("nombre")."_tkt.".$prefix."tickets_m"),
+            array("TBL_TICKETS", "itracker_".$this->get_prop("nombre")."_tkt.".$prefix."tickets"),
+            array("TBL_PERFILES_VISTAS", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."prefiles_vistas"),
+            array("TBL_PERFILES", "itracker_".$this->get_prop("nombre")."_uta.".$prefix."perfiles"),
         );
     }
 
@@ -86,11 +88,13 @@ class Instance extends ITObject {
                 return $this->dbhost;
             case 'dbuser':
                 if($this->dbuser=='' || $this->dbuser==null)
-                    return DBUSER_ROOT;
+                    return $this->getContext()->get_GlobalConfig()
+                ->getString('database/user');
                 return $this->dbuser;
             case 'dbpass':
                 if($this->dbuser=='' || $this->dbuser==null)
-                    return DBPASS_ROOT;
+                    return $this->getContext()->get_GlobalConfig()
+                ->getString('database/pass');
                 return $this->dbpass;
             default:
                 return "Propiedad invalida.";

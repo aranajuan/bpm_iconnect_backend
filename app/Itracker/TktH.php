@@ -154,7 +154,7 @@ class TktH extends ITObject {
             $this->id = $this->dbinstance->get_lastID();
             $itform = $this->accion->getitform();
             if ($itform) {
-                $form = $itform->get_output();
+                $form = $itform->get_outputDOM()->saveXML();
             } else {
                 $form = "";
             }
@@ -213,7 +213,6 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
-
         if ($this->get_prop("itform") != null) {
             $nodo = $element->importNode(
                     $this->get_prop("itform")->get_outputDOM()->documentElement, true);
@@ -254,8 +253,9 @@ class TktH extends ITObject {
         if (!$this->getLogged()->cansee($this->get_UA())) {
             return false;
         }
-
+        
         if ($this->itform) {
+            $this->itform->loadOutput();
             $this->itform->set_view($this->view["vista"]);
         }
         return true;

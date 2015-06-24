@@ -47,7 +47,7 @@ function GO($Context) {
         if ($topts["object"]) {
             if ($topts["object"]->get_prop("itform")) {
                 $itform= $topts["object"]->get_prop("itform");
-                $itfdom=$itform->get_inputDOM()->documentElement;
+                $itfdom=$itform->get_UserInputDOM()->documentElement;
                 $joined = $Context->append_xml($itfdom);
                 if ($joined) {
                     $opendata = $Context->createElement("opendata");

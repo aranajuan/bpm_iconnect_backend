@@ -30,13 +30,12 @@ class ITForm implements XMLPropInterface {
      * @var int 
      */
     private $view_level;
-    
+
     /**
      * Proceso seleccionado para defaults
      * @var string
      */
     private $process;
-    
     private $arr_val;
     private $formname;
 
@@ -81,10 +80,6 @@ class ITForm implements XMLPropInterface {
      * @return string
      */
     private function check_values($element) {
-        if($element['show']=='false'){
-            return 'El campo '.$element['label'].' no puede ser modificado.';
-        }
-        
         if (trim($element["value"]) != "" && $element["value"] != null) {
             switch ($element["type"]) {
                 case "date":
@@ -201,7 +196,18 @@ class ITForm implements XMLPropInterface {
         $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
             $nfield = $this->elementToArray($field);
-            $value = trim($this->find_elementVal($arr, $nfield['id'], $formname));
+            if ($nfield['show'] == 'false') {
+                $value=$this->getDefault($field);
+                if($value==null){
+                     Utils\LoggerFactory::getLogger()->warning(
+                        'Defaults invalido', 
+                             array('xml' => $this->xml_input_text,
+                                 'process'=>$this->process));
+                }
+            }else{
+                $value = 
+                        trim($this->find_elementVal($arr, $nfield['id'], $formname));
+            }
             $nfield['value'] = $value;
             $rta = $this->check_values($nfield);
             if ($rta != "ok") {
@@ -209,62 +215,59 @@ class ITForm implements XMLPropInterface {
             }
             $field->appendChild($this->xml_output->createElement('value', xmlEscape($value)));
         }
-        $rta = $this->loadDefaults(true);
-        if ($rta != "ok") {
-                return $rta;
-            }
         return "ok";
     }
 
     /**
-     * 
-     * @param boolean $validate
+     * Devuelve value default
+     * @param \DOMElement $element
+     */
+    private function getDefault($element) {
+        $nfield = $this->elementToArray($element);
+        $defaults = $element->getElementsByTagName('defaults')->item(0)
+                ->childNodes;
+        foreach ($defaults as $default) {
+            if ($default instanceof \DOMText) {
+                continue;
+            }
+            $processDom = $default->getElementsByTagName('process');
+            $valueDom = $default->getElementsByTagName('value');
+            if ($valueDom->length != 0) {
+                $value =$valueDom->item(0)->nodeValue;
+            }else{
+                Utils\LoggerFactory::getLogger()->warning(
+                                'Defaults invalido en formulario no value', 
+                                array('xml' => $this->xml_input_text));
+            }
+            
+            if ($processDom->length != 0) {
+                if ($processDom->item(0)->nodeValue == $this->process) {
+                        return $value;
+                }
+            } else {
+                return $value;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Carga todos los defaults
      * @return string
      */
-    private function loadDefaults($validate=false){
+    private function loadDefaults() {
         $elements = $this->findFieldsByTag('defaults', '*');
-        foreach($elements as $element){
-            $nfield = $this->elementToArray($element);
-            $defaults =
-                    $element->getElementsByTagName('defaults')->item(0)
-                    ->childNodes;
-            foreach($defaults as $default){
-                $processDom = $default->getElementsByTagName('process');
-                if($processDom->lenght!=0){
-                    if($processDom->item(0)->nodeValue==$this->process){
-                        $valueDom = $default->getElementsByTagName('value');
-                         if($valueDom->lenght!=0){
-                             $nfield['value']=xmlEscape(
-                                                     $valueDom->item(0)
-                                                     ->nodeValue
-                                                     );
-                             if($validate){
-                                $rta = $this->check_values($nfield);
-                                if($rta!='ok'){
-                                    return $rta;
-                                }
-                             }
-                             $element->appendChild(
-                                     $this->xml_output->createElement(
-                                             'value', $nfield['value']
-                                             ));
-                         }else{
-                            Utils\LoggerFactory::getLogger()->warning(
-                              'Defaults invalido en formulario no value',
-                              array('xml'=>$this->xml_input_text));    
-                         }
-                    }
-                }else{
-                    Utils\LoggerFactory::getLogger()->warning(
-                            'Defaults invalido en formulario no process',
-                            array('xml'=>$this->xml_input_text));
-                }
-            }
-        }  
+        foreach ($elements as $element) {
+            $value = $this->getDefault($element);
+            $element->appendChild(
+                    $this->xml_output->createElement(
+                            'value', $value
+            ));
+        }
         return 'ok';
     }
 
-        /**
+    /**
      * Convierte DOMElement a Array
      * @param DOMElement $element
      * @return array   campo
@@ -280,7 +283,7 @@ class ITForm implements XMLPropInterface {
             $arr["label"] = trim($label->item(0)->nodeValue);
         }
         $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
-
+        $arr["show"] = trim($element->getElementsByTagName("show")->item(0)->nodeValue);
         $arr["type"] = trim($element->getElementsByTagName("type")->item(0)->nodeValue);
         if ($arr["type"] == "select") {
             $options = $element->getElementsByTagName("option");
@@ -354,14 +357,13 @@ class ITForm implements XMLPropInterface {
         foreach ($domElemsToRemove as $domElement) {
             $domElement->parentNode->removeChild($domElement);
         }
-        
+
         $domElemsToBlock = $this->findFieldsByTag('view', '*');
         foreach ($domElemsToBlock as $domElement) {
             $vRQ = intval($domElement->nodeValue || 0);
             if ($vRQ != 0 && $this->view_level > $vRQ) {
-                $domElement->nodeValue = "****";    
+                $domElement->nodeValue = "****";
             }
-            
         }
     }
 
@@ -389,14 +391,14 @@ class ITForm implements XMLPropInterface {
      */
     public function get_UserInputDOM() {
         $this->loadOutput();
-        /*Eliminar ocultos*/
+        /* Eliminar ocultos */
         $nshow = $this->findFieldsByTag('show', 'false');
-        foreach($nshow as $tdelete){
+        foreach ($nshow as $tdelete) {
             $tdelete->parentNode->removeChild($tdelete);
         }
-        /*setear defaults*/
+        /* setear defaults */
         $this->loadDefaults();
-        
+
         return $this->xml_output;
     }
 
@@ -407,15 +409,14 @@ class ITForm implements XMLPropInterface {
     public function set_view($view_level) {
         $this->view_level = $view_level;
     }
-    
-     /**
+
+    /**
      * Setea proceso
      * @param int $view_level
      */
     public function set_process($process) {
         $this->process = $process;
     }
-
 
     /**
      * Calcula tipo para reporte
@@ -466,7 +467,7 @@ class ITForm implements XMLPropInterface {
             return $this->getArrReport();
         }
 
-        $rta = $this->get_valueSecure($property);
+        $rta = $this->get_value($property);
         if ($rta) {
             return $rta;
         }

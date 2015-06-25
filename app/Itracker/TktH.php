@@ -160,7 +160,7 @@ class TktH extends ITObject {
                 $form = "";
             }
             $this->save_files();
-            if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
+            if (trim($form) == "") { // accion sin formulario
                 return "ok";
             }
             /* Agregar a tabla detalles */

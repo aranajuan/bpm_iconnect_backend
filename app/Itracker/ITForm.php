@@ -196,7 +196,7 @@ class ITForm implements XMLPropInterface {
         $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
             $nfield = $this->elementToArray($field);
-            if ($nfield['show'] == 'false') {
+            if ($field->getElementsByTagName('defaults')->length) {
                 $value=$this->getDefault($field);
                 if($value==null){
                      Utils\LoggerFactory::getLogger()->warning(
@@ -241,7 +241,7 @@ class ITForm implements XMLPropInterface {
             }
             
             if ($processDom->length != 0) {
-                if ($processDom->item(0)->nodeValue == $this->process) {
+                if(preg_match('/'.$processDom->item(0)->nodeValue.'/', $this->process)) {
                         return $value;
                 }
             } else {
@@ -283,7 +283,6 @@ class ITForm implements XMLPropInterface {
             $arr["label"] = trim($label->item(0)->nodeValue);
         }
         $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
-        $arr["show"] = trim($element->getElementsByTagName("show")->item(0)->nodeValue);
         $arr["type"] = trim($element->getElementsByTagName("type")->item(0)->nodeValue);
         if ($arr["type"] == "select") {
             $options = $element->getElementsByTagName("option");
@@ -391,14 +390,11 @@ class ITForm implements XMLPropInterface {
      */
     public function get_UserInputDOM() {
         $this->loadOutput();
-        /* Eliminar ocultos */
-        $nshow = $this->findFieldsByTag('show', 'false');
+        /* Eliminar defaults */
+        $nshow = $this->findFieldsByTag('defaults', '*');
         foreach ($nshow as $tdelete) {
             $tdelete->parentNode->removeChild($tdelete);
         }
-        /* setear defaults */
-        $this->loadDefaults();
-
         return $this->xml_output;
     }
 

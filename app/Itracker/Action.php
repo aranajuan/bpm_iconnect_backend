@@ -210,9 +210,10 @@ class Action extends ITObject {
         if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
-        if (!$this->formulario || $this->itf == null) {  //no requiere formulario esta accion
+        if ($this->itf == null) {  //no requiere formulario esta accion
             return "ok";
         }
+        $this->itf->set_process($this->TKT->get_prop('proceso'));
         $rta = $this->itf->load_values($values, $formname);
         return $rta;
     }

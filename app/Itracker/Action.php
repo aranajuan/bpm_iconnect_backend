@@ -27,6 +27,7 @@ class Action extends ITObject {
     private $habilita_abierto;  /* abierto */
     private $habilita_equipo;   /* equipo del usuario */
     private $habilita_master;   /* es master */
+    private $habilita_procesos;   /* procesos habilitados */
 
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
@@ -55,18 +56,19 @@ class Action extends ITObject {
      * @var boolean 
      */
     private $working;
-    
+
     /**
      * Hijos a notificar
      * @var array<Tkt>
      */
     private $childsPaste;
-    
+
     /**
      * Se setearon hijos forzadamente
      * @var boolean
      */
     private $childsSeted;
+
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -120,16 +122,43 @@ class Action extends ITObject {
         $i = 0;
         $ret = array();
         while ($actV = $this->dbinstance->get_vector()) {
-            $ret[$i] = $this->objsCache->get_object('Action', $actV["id"]);
-            $i++;
+            $A = $this->objsCache->get_object(get_class(), $actV["id"]);
+            if ($A->check_process($this->TKT->get_prop('proceso'))) {
+                $ret[$i] = $A;
+                $i++;
+            }
         }
         return $ret;
     }
 
+    /**
+     * Verifica que el proceso sea valido
+     * @param $process proceso a verificar | si es null busca en el tkt
+     * @return boolean
+     */
+    private function check_process($process = NULL) {
+        if (!$this->TKT instanceof Tkt) {
+            if ($process == NULL) {
+                return false;
+            } else {
+                $tp = $process;
+            }
+        } else {
+            $tp = $this->TKT->get_prop('proceso');
+        }
+        $pv = explode(',', $this->habilita_procesos);
+        foreach ($pv as $p) {
+            if (preg_match('/'.$p.'/', $tp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function load_DB($id) {
         $idInt = intval($id);
-        $this->childsPaste=null;
-        $this->childsSeted=false;
+        $this->childsPaste = null;
+        $this->childsSeted = false;
         if (is_int($idInt) && $idInt > 0) {
             return $this->loadDB_id($idInt);
         } else {
@@ -222,6 +251,7 @@ class Action extends ITObject {
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
+
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -269,6 +299,7 @@ class Action extends ITObject {
         $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
         $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
         $this->habilita_master = trim($tmpU["habilita_master"]);
+        $this->habilita_procesos = trim($tmpU["habilita_procesos"]);
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
@@ -369,6 +400,10 @@ class Action extends ITObject {
                 return "Esta accion solo se puede aplicar a un ticket no abierto";
         }
 
+        if(!$this->check_process()){
+            return 'Esta accion no se puede ejecutar en el proceso asignado al ticket';
+        }
+        
         return "ok";
     }
 
@@ -380,10 +415,10 @@ class Action extends ITObject {
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = $this->objsCache;
-            $file = ROOT_DIR."/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
-            if(!file_exists($file)){
-                $this->getContext()->getLogger()->critical("Archivo no encontrado",array($file));
-                return array("result"=>"error","msj"=>"Error al ejecutar.");
+            $file = ROOT_DIR . "/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+            if (!file_exists($file)) {
+                $this->getContext()->getLogger()->critical("Archivo no encontrado", array($file));
+                return array("result" => "error", "msj" => "Error al ejecutar.");
             }
             $response = include($file);
             if ($response["result"] != "ok") {
@@ -432,26 +467,25 @@ class Action extends ITObject {
      * Carga tkts para generarles link
      * @param array<Tkt>
      */
-    public function setChilds($childs){
-        $this->childsPaste=$childs;
-        $this->childsSeted=true;
+    public function setChilds($childs) {
+        $this->childsPaste = $childs;
+        $this->childsSeted = true;
     }
-    
+
     /**
      * Devuelve array de hijos del tkt
      * @return array<Tkt>
      */
-    private function getChilds(){
-        if($this->childsSeted){
+    private function getChilds() {
+        if ($this->childsSeted) {
             return $this->childsPaste;
         }
-        if($this->getTKT()){
+        if ($this->getTKT()) {
             return $this->getTKT()->get_prop("childs");
         }
         return null;
     }
-    
-    
+
     /**
      * Pega link a los hijos
      * @param TktH $TH
@@ -462,7 +496,7 @@ class Action extends ITObject {
             $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
         }
     }
-    
+
     /**
      * Devuelve formulario
      * @return itform

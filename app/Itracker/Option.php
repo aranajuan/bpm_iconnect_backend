@@ -12,6 +12,7 @@ class Option extends ITObject {
     private $texto;    /* texto a mostrar en la opcion */
     private $texto_critico;    /* texto utilizado para vincular similares */
     private $destino; /* xml texto con el destino y reglas */
+    private $habilita_perfiles; /* xml texto con el destino y reglas */
 
     /**
      * Reglas de derivacion y apertura
@@ -50,6 +51,7 @@ class Option extends ITObject {
         $this->idpregunta = trim($tmpU["idpregunta"]);
         $this->texto = trim($tmpU["texto"]);
         $this->texto_critico = trim($tmpU["texto_critico"]);
+        $this->habilita_perfiles = trim($tmpU['habilita_perfiles']);
         $this->destino = trim(space_delete($tmpU["destino"], array("\t", "\n", "\0", "\x0B")));
         $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
 
@@ -88,17 +90,34 @@ class Option extends ITObject {
      * @param ITForm $itform
      * @return OptionRules
      */
-    public function getDestiny($user=null, $itform = null) {
+    public function getDestiny($user = null, $itform = null) {
         if ($this->destRule == null) {
             return null;
         }
-        if($user==null && $itform==null){
+        if ($user == null && $itform == null) {
             return $this->destRule;
         }
         $this->destRule->loadFor($user, $itform);
         return $this->destRule;
     }
 
+    /**
+     * Verifica si el perfil puede utilizar la opcion
+     * @param int $idProfile
+     * @return boolean
+     */
+    public function checkProfile($idProfile){
+        if($this->habilita_perfiles=='*'){
+            return true;
+        }
+        $hp = explode(',', $this->habilita_perfiles);
+        if(in_array($idProfile,$hp)){
+            return true;
+        }
+        return false;
+            
+    }
+    
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {

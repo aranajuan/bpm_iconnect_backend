@@ -136,9 +136,9 @@ class Action extends ITObject {
      * @param $process proceso a verificar | si es null busca en el tkt
      * @return boolean
      */
-    private function check_process($process = NULL) {
-        if (!$this->TKT instanceof Tkt) {
-            if ($process == NULL) {
+    private function check_process($process = 'NULL') {
+        if (!($this->TKT instanceof Tkt)) {
+            if ($process == 'NULL') {
                 return false;
             } else {
                 $tp = $process;
@@ -430,6 +430,7 @@ class Action extends ITObject {
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
         }
+        $this->getTKT()->setTHstatus($rta["obj"]);
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
@@ -522,6 +523,8 @@ class Action extends ITObject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
+            case 'estadotkt':
+                return $this->estadotkt;
             case 'objadj_id':
                 return $this->objadj_id;
             case 'habilita_t_propio':

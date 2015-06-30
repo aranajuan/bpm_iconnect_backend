@@ -4,8 +4,7 @@ $T = $obCI->get_object('Team', $this->get_prop("objadj_id"));
 if($T){
     $TT = $obCI->get_object('Tkt', $this->get_prop("idtkt"));;
     if($TT){
-        $sv=$TT->get_status();
-        $status=$sv[1];
+        $status=$TT->get_status();
     }else{
         $status=""; 
     }

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-06-2015 a las 20:18:46
+-- Tiempo de generación: 01-07-2015 a las 15:40:21
 -- Versión del servidor: 5.6.20
 -- Versión de PHP: 5.5.15
 
@@ -19,7 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `itracker_agentes_tkt`
 --
-DROP DATABASE `itracker_agentes_tkt`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_tkt` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_tkt`;
 
@@ -80,7 +79,7 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `proceso`, `idequipo`,
 (26, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
 (27, 'U1AG2', NULL, 'D1-S1-O5-O9-O14-', '', 1, NULL, NULL, NULL, NULL, '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
 (28, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(29, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 'PRO8', 2, 'COM1', NULL, NULL, 356, '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
+(29, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 'PRO8', 2, 'COM1', NULL, NULL, 375, '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
 (30, 'U1AG1', 28, 'D1-S1-O4-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
 (31, 'U1AG1', 37, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
 (32, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
@@ -137,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `tickets_m` (
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=374 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=376 ;
 
 --
 -- Volcado de datos para la tabla `tickets_m`
@@ -516,7 +515,9 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 (370, 31, 19, '368', '2015-06-30 15:12:05', 'COM1', NULL, NULL, 0),
 (371, 32, 19, '368', '2015-06-30 15:12:05', 'COM1', NULL, NULL, 0),
 (372, 38, 19, '368', '2015-06-30 15:12:05', 'COM1', NULL, NULL, 0),
-(373, 29, 20, '', '2015-06-30 15:13:22', 'COM1', NULL, NULL, 0);
+(373, 29, 20, '', '2015-06-30 15:13:22', 'COM1', NULL, NULL, 0),
+(374, 29, 2, '', '2015-07-01 10:24:49', 'COM1', NULL, NULL, 0),
+(375, 29, 6, '', '2015-07-01 10:24:57', 'COM1', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -793,7 +794,9 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 (370, '<?xml version="1.0"?>\n<itform>\n  \n</itform>\n'),
 (371, '<?xml version="1.0"?>\n<itform>\n  \n</itform>\n'),
 (372, '<?xml version="1.0"?>\n<itform>\n  \n</itform>\n'),
-(373, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   <value>PRO8</value></element></itform>\n');
+(373, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   <value>PRO8</value></element></itform>\n'),
+(374, '<?xml version="1.0"?>\n<itform>\n  <element>\n    <label>Comentario</label>\n    <type>inputlong</type>\n    <id>comment</id>\n    <validations>\n      <required>true</required>\n    </validations>\n    <defaults>\n<default>\n<process>PRO4</process>\n<value>comentario default</value>\n</default>\n<default>\n<process>PRO5</process>\n<value>comentario default 5</value>\n</default>\n<default>\n<process>PRO[0-9]</process>\n<value>comentario default para 1</value>\n</default>\n<default>\n<value>sin default</value>\n</default>\n</defaults>\n  <value>comentario default para 1</value></element>\n<element>\n    <label>Comentario2</label>\n    <type>inputlong</type>\n    <id>comment2</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  <value>fghgf</value></element>\n</itform>\n'),
+(375, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>fgh</value></element> </itform>\n');
 
 --
 -- Índices para tablas volcadas
@@ -830,10 +833,9 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=68;
 -- AUTO_INCREMENT de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=374;--
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=376;--
 -- Base de datos: `itracker_agentes_uta`
 --
-DROP DATABASE `itracker_agentes_uta`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_uta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_uta`;
 
@@ -854,6 +856,7 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `formulario` tinyint(1) NOT NULL,
   `form` text,
   `habilita_procesos` varchar(255) NOT NULL,
+  `habilita_estados` varchar(100) NOT NULL,
   `habilita_t_propio` int(11) NOT NULL,
   `habilita_tomado` int(11) NOT NULL,
   `habilita_equipos` varchar(100) NOT NULL DEFAULT '*',
@@ -872,27 +875,27 @@ CREATE TABLE IF NOT EXISTS `acciones` (
 -- Volcado de datos para la tabla `acciones`
 --
 
-INSERT INTO `acciones` (`id`, `nombre`, `alias`, `estadotkt`, `ejecuta`, `tipo`, `formulario`, `form`, `habilita_procesos`, `habilita_t_propio`, `habilita_tomado`, `habilita_equipos`, `habilita_perfiles`, `habilita_a_propio`, `habilita_abierto`, `habilita_equipo`, `habilita_master`, `notificacion_param`, `notificacion_texto`, `descripcion`, `estado`) VALUES
-(1, 'ABRIR', 'ABRIR', 'Pendiente', 'open', 1, 1, NULL, '.*', 0, 2, '*', '5,', 2, 2, 0, 0, '(is_master)(to:{team})', 'Se ha generado un nuevo itracker derivado al area.<br />\nID: {id}<br />\nPuedes verlo en ITRACKER', 'Genera un nuevo ticket', 0),
-(2, 'CERRAR', 'CERRAR', 'Cerrado', 'close', 1, 1, '<itform>\r\n  <element>\r\n    <label>Comentario</label>\r\n    <type>inputlong</type>\r\n    <id>comment</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n    <defaults>\r\n<default>\r\n<process>PRO4</process>\r\n<value>comentario default</value>\r\n</default>\r\n<default>\r\n<process>PRO5</process>\r\n<value>comentario default 5</value>\r\n</default>\r\n<default>\r\n<process>PRO[0-9]</process>\r\n<value>comentario default para 1</value>\r\n</default>\r\n<default>\r\n<value>sin default</value>\r\n</default>\r\n</defaults>\r\n  </element>\r\n<element>\r\n    <label>Comentario2</label>\r\n    <type>inputlong</type>\r\n    <id>comment2</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n  </element>\r\n</itform>', 'PRO[1-9]', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
-(3, 'LIBERAR', 'LIBERAR', NULL, 'free', 2, 0, NULL, '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
-(4, 'DERIVAR', 'DERIVAR', 'derivado', 'derive', 2, 1, '\n<itform> 	<element> 		<label> 			Equipo a derivar 		</label> 		<notsave>true</notsave> 		<type> 			idsel 		</type> 		<id> 			idequipo 		</id> 		<idselparams> 			<class>tkt</class> 			<method>idsel_teamderive</method> 		</idselparams> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element> 	<element> 		<type> 			inputlong 		</type> 	<label>Comentario</label>	<id> 			comment 		</id> 		<comment> 			Commentario 		</comment> 	</element> </itform>', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{team}::cc:{prev_team})', 'Se ha derivado un itracker al area.<br />\nID: {id}<br />\nApertura: {FA}<br />\nPuedes verlo en ITRACKER', 'Asignar el ticket a otro equipo', 0),
-(5, 'TOMAR', 'TOMAR', 'en analisis', 'take', 2, 0, NULL, '.*', 0, 2, '*', '3,4,', 0, 1, 1, 1, '', '', 'Reservar el ticket para su tratamiento', 0),
-(6, 'REABRIR', 'RE ABRIR', 're abierto', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', 1, 0, '*', '3,4,', 0, 2, 1, 0, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
-(7, 'SET_MASTER', 'Set master', NULL, 'setmaster', 1, 0, NULL, '.*', 1, 0, '*', '3,4,', 0, 1, 1, 2, '', '', NULL, 0),
-(8, 'ASIGNAR', 'Asignar', NULL, 'asign', 2, 1, '<itform>\n  <element>\n    <label>Asignar a:</label>\n    <notsave>true</notsave>\n    <type>idsel</type>\n    <id>idusr</id>\n    <idselparams>\n      <class>tkt</class>\n      <method>idsel_userasign</method>\n    </idselparams>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n  <element>\n    <type> 			inputlong 		</type>\n    <label>Comentario</label>\n    <id> 			comment 		</id>\n    <comment> 			Commentario 		</comment>\n  </element>\n</itform>', '.*', 0, 2, '*', '4,', 0, 1, 1, 1, '(always)(to:{u_tom})', 'Se te ha asignado el tkt {id} del sistema {system->name}.<br />\nPuedes verlo en ITRACKER.\n', 'Asignar el ticket a un miembro del equipo', 0),
-(9, 'PRIORIZAR', 'Priorizar', NULL, 'priorice', 3, 1, '<itform> 	<element> 		<label> 			Prioridad: 		</label> 		<notsave>true</notsave> 		<type> 			select 		</type> 		<id> 			prioridad 		</id> 		<option><value>3</value><text>ALTA</text></option> 		<option><value>6</value><text>MEDIA</text></option> 		<option><value>9</value><text>BAJA</text></option> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '.*', 0, 0, '*', '4,', 0, 1, 1, 1, '', '', 'Establece una nueva prioridad al ticket', 0),
-(10, 'UNIR', 'Unir', NULL, 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '.*', 0, 0, '*', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
-(11, 'SEPARAR', 'Separar', NULL, 'unjoin', 1, 0, NULL, '.*', 1, 1, '*', '3,4,', 0, 1, 1, 2, '', '', 'Elimina la relacion al ticket padre', 0),
-(12, 'CERRAR_COMISIONES_PROCEDENTE', 'Cerrar Procedente', 'cerrado', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>1</value>\n      <text>Procedente</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Monto a ajustar</label>\n    <type>input</type>\n    <id>monto</id>\n    <comment>(Punto separador decimal)</comment>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Cantidad de operaciones</label>\n    <type>input</type>\n    <id>qoper</id>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n   <label>Se ajustara en el mes</label>\n    <type>month</type>\n    <id>majust</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones procedente', 0),
-(13, 'CERRAR_COMISIONES_NOPROCE', 'Cerrar No Procedente', 'cerrado', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>2</value>\n      <text>No corresponde</text>\n    </option>\n    <option>\n      <value>3</value>\n      <text>Error de formato</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients},{event_user=>tomar}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones no procedente', 0),
-(14, 'REABRIR_COOR', 'Reabrir', 're abierto', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', 2, 0, '*', '4,', 0, 2, 1, 1, '', '', 'reabrir coordinador', 0),
-(15, 'LIBERAR_COOR', 'Liberar', '', 'free', 2, 0, NULL, '.*', 2, 1, '*', '4,', 0, 1, 1, 1, '', '', 'librerar coordinador', 0),
-(16, 'COMENTARIO_GENERADOR', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', 'PRO1_[1-9],PRO2', 0, 0, '*', '5,', 1, 0, 0, 0, '', '', 'comentario cliente', 0),
-(17, 'COMENTARIO_EQUIPO', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', 0, 0, '*', '3,4,', 2, 0, 1, 0, '', '', 'comentario equipo', 0),
-(18, 'CERRAR_RUTA', 'CERRAR', 'cerrado', 'close', 1, 1, '<itform>\r\n   <element>\r\n      <id>text1</id>\r\n      <type>text</type>\r\n      <text>Descargue el archivo del siguiente link</text>\r\n   </element>\r\n   <element>\r\n      <type>link</type>\r\n      <id>link_archivo</id>\r\n      <label>LINK</label>\r\n      <text>DESCARGAR</text>\r\n	  <validations>\r\n		<required>true</required>\r\n	  </validations>\r\n   </element>\r\n</itform>', '.*', 2, 0, '-1', '-1', 1, 1, 0, 1, '', '', 'Cierra ticket a link', 0),
-(19, 'LINK', 'link', NULL, 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '.*', 0, 0, '*', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0),
-(20, 'SET_PROCESS', 'ESTABLECER PROCESO', NULL, 'setprocess', 1, 1, '<?xml version="1.0" encoding="UTF-8"?><itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   </element></itform>', '.*', 0, 0, '*', '3,4,', 0, 0, 0, 0, '', '', 'Establece proceso del tkt', 0);
+INSERT INTO `acciones` (`id`, `nombre`, `alias`, `estadotkt`, `ejecuta`, `tipo`, `formulario`, `form`, `habilita_procesos`, `habilita_estados`, `habilita_t_propio`, `habilita_tomado`, `habilita_equipos`, `habilita_perfiles`, `habilita_a_propio`, `habilita_abierto`, `habilita_equipo`, `habilita_master`, `notificacion_param`, `notificacion_texto`, `descripcion`, `estado`) VALUES
+(1, 'ABRIR', 'ABRIR', 'Pendiente', 'open', 1, 1, NULL, '.*', '.*', 0, 2, '*', '5,', 2, 2, 0, 0, '(is_master)(to:{team})', 'Se ha generado un nuevo itracker derivado al area.<br />\nID: {id}<br />\nPuedes verlo en ITRACKER', 'Genera un nuevo ticket', 0),
+(2, 'CERRAR', 'CERRAR', 'Cerrado', 'close', 1, 1, '<itform>\r\n  <element>\r\n    <label>Comentario</label>\r\n    <type>inputlong</type>\r\n    <id>comment</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n    <defaults>\r\n<default>\r\n<process>PRO4</process>\r\n<value>comentario default</value>\r\n</default>\r\n<default>\r\n<process>PRO5</process>\r\n<value>comentario default 5</value>\r\n</default>\r\n<default>\r\n<process>PRO[0-9]</process>\r\n<value>comentario default para 1</value>\r\n</default>\r\n<default>\r\n<value>sin default</value>\r\n</default>\r\n</defaults>\r\n  </element>\r\n<element>\r\n    <label>Comentario2</label>\r\n    <type>inputlong</type>\r\n    <id>comment2</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n  </element>\r\n</itform>', 'PRO[1-9]', 'tomado,en.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
+(3, 'LIBERAR', 'LIBERAR', NULL, 'free', 2, 0, NULL, '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
+(4, 'DERIVAR', 'DERIVAR', 'derivado', 'derive', 2, 1, '\n<itform> 	<element> 		<label> 			Equipo a derivar 		</label> 		<notsave>true</notsave> 		<type> 			idsel 		</type> 		<id> 			idequipo 		</id> 		<idselparams> 			<class>tkt</class> 			<method>idsel_teamderive</method> 		</idselparams> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element> 	<element> 		<type> 			inputlong 		</type> 	<label>Comentario</label>	<id> 			comment 		</id> 		<comment> 			Commentario 		</comment> 	</element> </itform>', '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{team}::cc:{prev_team})', 'Se ha derivado un itracker al area.<br />\nID: {id}<br />\nApertura: {FA}<br />\nPuedes verlo en ITRACKER', 'Asignar el ticket a otro equipo', 0),
+(5, 'TOMAR', 'TOMAR', 'en analisis', 'take', 2, 0, NULL, '.*', '.*', 0, 2, '*', '3,4,', 0, 1, 1, 1, '', '', 'Reservar el ticket para su tratamiento', 0),
+(6, 'REABRIR', 'RE ABRIR', 're abierto', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', '.*', 1, 0, '*', '3,4,', 0, 2, 1, 0, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
+(7, 'SET_MASTER', 'Set master', NULL, 'setmaster', 1, 0, NULL, '.*', '.*', 1, 0, '*', '3,4,', 0, 1, 1, 2, '', '', NULL, 0),
+(8, 'ASIGNAR', 'Asignar', NULL, 'asign', 2, 1, '<itform>\n  <element>\n    <label>Asignar a:</label>\n    <notsave>true</notsave>\n    <type>idsel</type>\n    <id>idusr</id>\n    <idselparams>\n      <class>tkt</class>\n      <method>idsel_userasign</method>\n    </idselparams>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n  <element>\n    <type> 			inputlong 		</type>\n    <label>Comentario</label>\n    <id> 			comment 		</id>\n    <comment> 			Commentario 		</comment>\n  </element>\n</itform>', '.*', '.*', 0, 2, '*', '4,', 0, 1, 1, 1, '(always)(to:{u_tom})', 'Se te ha asignado el tkt {id} del sistema {system->name}.<br />\nPuedes verlo en ITRACKER.\n', 'Asignar el ticket a un miembro del equipo', 0),
+(9, 'PRIORIZAR', 'Priorizar', NULL, 'priorice', 3, 1, '<itform> 	<element> 		<label> 			Prioridad: 		</label> 		<notsave>true</notsave> 		<type> 			select 		</type> 		<id> 			prioridad 		</id> 		<option><value>3</value><text>ALTA</text></option> 		<option><value>6</value><text>MEDIA</text></option> 		<option><value>9</value><text>BAJA</text></option> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '.*', '.*', 0, 0, '*', '4,', 0, 1, 1, 1, '', '', 'Establece una nueva prioridad al ticket', 0),
+(10, 'UNIR', 'Unir', NULL, 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '.*', '.*', 0, 0, '*', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
+(11, 'SEPARAR', 'Separar', NULL, 'unjoin', 1, 0, NULL, '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 2, '', '', 'Elimina la relacion al ticket padre', 0),
+(12, 'CERRAR_COMISIONES_PROCEDENTE', 'Cerrar Procedente', 'cerrado', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>1</value>\n      <text>Procedente</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Monto a ajustar</label>\n    <type>input</type>\n    <id>monto</id>\n    <comment>(Punto separador decimal)</comment>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Cantidad de operaciones</label>\n    <type>input</type>\n    <id>qoper</id>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n   <label>Se ajustara en el mes</label>\n    <type>month</type>\n    <id>majust</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones procedente', 0),
+(13, 'CERRAR_COMISIONES_NOPROCE', 'Cerrar No Procedente', 'cerrado', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>2</value>\n      <text>No corresponde</text>\n    </option>\n    <option>\n      <value>3</value>\n      <text>Error de formato</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients},{event_user=>tomar}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones no procedente', 0),
+(14, 'REABRIR_COOR', 'Reabrir', 're abierto', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', '.*', 2, 0, '*', '4,', 0, 2, 1, 1, '', '', 'reabrir coordinador', 0),
+(15, 'LIBERAR_COOR', 'Liberar', '', 'free', 2, 0, NULL, '.*', '.*', 2, 1, '*', '4,', 0, 1, 1, 1, '', '', 'librerar coordinador', 0),
+(16, 'COMENTARIO_GENERADOR', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', 'PRO1_[1-9],PRO2', '.*', 0, 0, '*', '5,', 1, 0, 0, 0, '', '', 'comentario cliente', 0),
+(17, 'COMENTARIO_EQUIPO', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', '.*', 0, 0, '*', '3,4,', 2, 0, 1, 0, '', '', 'comentario equipo', 0),
+(18, 'CERRAR_RUTA', 'CERRAR', 'cerrado', 'close', 1, 1, '<itform>\r\n   <element>\r\n      <id>text1</id>\r\n      <type>text</type>\r\n      <text>Descargue el archivo del siguiente link</text>\r\n   </element>\r\n   <element>\r\n      <type>link</type>\r\n      <id>link_archivo</id>\r\n      <label>LINK</label>\r\n      <text>DESCARGAR</text>\r\n	  <validations>\r\n		<required>true</required>\r\n	  </validations>\r\n   </element>\r\n</itform>', '.*', '.*', 2, 0, '-1', '-1', 1, 1, 0, 1, '', '', 'Cierra ticket a link', 0),
+(19, 'LINK', 'link', NULL, 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '.*', '.*', 0, 0, '*', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0),
+(20, 'SET_PROCESS', 'ESTABLECER PROCESO', NULL, 'setprocess', 1, 1, '<?xml version="1.0" encoding="UTF-8"?><itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   </element></itform>', '.*', '.*', 0, 0, '*', '3,4,', 0, 0, 0, 0, '', '', 'Establece proceso del tkt', 0);
 
 -- --------------------------------------------------------
 
@@ -1392,7 +1395,6 @@ ALTER TABLE `sistemas`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
 -- Base de datos: `itracker_root`
 --
-DROP DATABASE `itracker_root`;
 CREATE DATABASE IF NOT EXISTS `itracker_root` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_root`;
 
@@ -1462,7 +1464,7 @@ CREATE TABLE IF NOT EXISTS `sesiones` (
 --
 
 INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`) VALUES
-('COM1', '10.66.93.46', 1, '365af26bf6ad6a93c67e1480513b4e0763e0c5fc', '2015-06-30 12:27:11'),
+('COM1', '10.66.93.46', 1, 'b3d0a380d23873ba2afc8f1d81f33230b0d79241', '2015-07-01 10:05:10'),
 ('COMGO', '190.175.110.1', 1, 'bdbb102b38ec6e6ceeb0a81c4bb062ab20912fb2', '2014-11-22 20:11:39'),
 ('COMRES', '10.112.0.4', 1, '3e434e01511e4c4fe34f1389468794017a77808a', '2014-12-31 10:27:28'),
 ('FEDE', '10.66.93.46', 1, '5b5ff479ca227827238a3734d4a21770faf2e512', '2014-12-12 12:50:53'),

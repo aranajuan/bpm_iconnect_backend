@@ -15,6 +15,13 @@ class Tkt extends Tree {
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
     private $proceso; /* WF asignado */
+    private $th_statusID;   /* TH de status */
+
+    /**
+     *
+     * @var TktH
+     */
+    private $th_statusOBJ; /* TH de status OBJ */
     private $u_tom; /* id usuario tomado */
     private $u_tom_o;   /* usuario tomado */
     private $u_asig;    /* id usuario asigno */
@@ -91,11 +98,13 @@ class Tkt extends Tree {
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
         $this->proceso = $tmpU["proceso"];
+        $this->th_statusID = $tmpU["idth_status"];
         $this->teamLoaded = false;
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->load_users();
         $this->view = $usr->get_view($this);
+        $this->loadTHstatus();
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
     }
@@ -110,6 +119,63 @@ class Tkt extends Tree {
         $this->usr = $tmpU["usr"];
         $this->origen = $tmpU["origen"];
         return $this->load_path($this->origen, !$fromdb);
+    }
+
+    /**
+     * Carga objeto status
+     */
+    private function loadTHstatus() {
+        if (!is_numeric($this->th_statusID)) {
+            $this->th_statusOBJ = null;
+            return;
+        }
+        $THST = $this->objsCache->get_object('TktH', $this->th_statusID, true);
+        $rta = $this->objsCache->get_status('TktH', $this->th_statusID);
+        if ($rta == 'ok') {
+            $THST->set_view($this->view);
+            $this->th_statusOBJ = $THST;
+        } else {
+            $this->getContext()->getLogger()
+                    ->warning('Eliminando status de tkt', array('IDTKT' => $this->id,
+                        'IDTH' => $this->th_statusID,
+                        'RTA' => $rta
+            ));
+            $this->setTHstatus(null);
+        }
+    }
+
+    /**
+     * Setea th de status
+     * @param TktH  Thdestatus
+     */
+    public function setTHstatus($th) {
+        if ($th instanceof TktH) {
+            if($th->get_prop('accion')->get_prop('estadotkt')==''){
+                return 'ok';
+            }
+            $id = intval($th->get_prop('id'));
+            $ssql = 'update TBL_TICKETS set idth_status=' . $id
+                    . ' where id=' . intval($this->id);
+        } else {
+            $ssql = 'update TBL_TICKETS set idth_status=null
+                where id=' . intval($this->id);
+            $id = null;
+        }
+
+
+        if ($this->dbinstance->query($ssql)) {
+            return 'TKT_setStatus: ' . $this->dbinstance->details;
+        }
+        $this->th_statusID = null;
+        $this->loadTHstatus();
+
+        if ($this->is_master()) {
+            foreach ($this->get_prop("childs") as $c) {
+                $c->setTHstatus($th);
+            }
+        }
+        
+        return 'ok';
     }
 
     /**
@@ -260,47 +326,51 @@ class Tkt extends Tree {
     }
 
     /*
-      retorna el ultimo objeto TktH
-     */
-    /*
      * devuelve el estado del tkt
-     * array(TKTHLAST , TEXTO)
+     * @return  string
      */
 
     public function get_status() {
+
+        if ($this->th_statusOBJ instanceof TktH) {
+            $accion = $this->th_statusOBJ->get_prop('accion');
+            if ($accion instanceof Action) {
+                $estado = trim($accion->get_prop('estadotkt'));
+                if ($estado != '') {
+                    return $estado;
+                }
+            }
+        }
+
         $TKTHF = $this->get_last_tktH();
         if ($this->UB) {
             $status = "Cerrado";
         } else {
             if ($TKTHF) {
-                if ($TKTHF->get_prop("accion")->get_prop("nombre") == "SOLICITUD_INFO")
-                    $status = "Se requiere de tu accion (" . $TKTHF->get_prop("FA") . ")";
-                else {
-                    //verificar estado del master
-                    if ($this->idmaster) {
-                        $this->load_master();
-                    }
-                    if ($this->master) {
-                        if ($this->master->get_prop("u_tom"))
-                            $status = "En analisis";
-                        else
-                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                            $status = "Derivado";
-                        else
-                            $status = "Pendiente";
-                    } else {
-                        if ($this->u_tom)
-                            $status = "En analisis";
-                        else
-                        if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
-                            $status = "Derivado";
-                        else
-                            $status = "Pendiente";
-                    }
+                //verificar estado del master
+                if ($this->idmaster) {
+                    $this->load_master();
+                }
+                if ($this->master) {
+                    if ($this->master->get_prop("u_tom"))
+                        $status = "En analisis";
+                    else
+                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                        $status = "Derivado";
+                    else
+                        $status = "Pendiente";
+                } else {
+                    if ($this->u_tom)
+                        $status = "En analisis";
+                    else
+                    if ($TKTHF->get_prop("accion")->get_prop("ejecuta") == "derive")
+                        $status = "Derivado";
+                    else
+                        $status = "Pendiente";
                 }
             }
         }
-        return array($TKTHF, $status);
+        return $status.'*';
     }
 
     /**
@@ -476,7 +546,7 @@ class Tkt extends Tree {
         $A->loadTKT($this);
         if ($values) {
             $valid = $A->loadFormValues($values);
-            if($valid!='ok'){
+            if ($valid != 'ok') {
                 return $valid;
             }
         }
@@ -562,13 +632,12 @@ class Tkt extends Tree {
         $this->u_tom = NULL;
         $this->u_asig = NULL;
         $this->usr = $this->getLogged()->get_prop("usr");
-        $dest= $this->get_last()->getDestiny();
-        if($dest==null){
-            $this->getContext()->getLogger()->error('Destino no cargado al abrir',
-                    array(
-                        'back'=> print_r(debug_backtrace(),true)
+        $dest = $this->get_last()->getDestiny();
+        if ($dest == null) {
+            $this->getContext()->getLogger()->error('Destino no cargado al abrir', array(
+                'back' => print_r(debug_backtrace(), true)
                     )
-                    );
+            );
             return 'Error al abrir ticket - Destino invalido';
         }
         $this->idequipo = $dest->getDestinyVal('team');
@@ -1051,8 +1120,7 @@ class Tkt extends Tree {
             case 'critic':
                 return $this->get_critic();
             case 'status':
-                $ar = $this->get_status();
-                return $ar[1];
+                return $this->get_status();
             case 'ua':
                 return $this->UA;
             case 'ub':

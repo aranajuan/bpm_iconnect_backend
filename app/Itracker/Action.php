@@ -28,7 +28,8 @@ class Action extends ITObject {
     private $habilita_equipo;   /* equipo del usuario */
     private $habilita_master;   /* es master */
     private $habilita_procesos;   /* procesos habilitados */
-
+    private $habilita_estados; /* estados habilitados regex , */
+    
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
     private $notificacion_texto;    /* Texto para el TO, CC usa texto standar */
@@ -123,36 +124,13 @@ class Action extends ITObject {
         $ret = array();
         while ($actV = $this->dbinstance->get_vector()) {
             $A = $this->objsCache->get_object(get_class(), $actV["id"]);
-            if ($A->check_process($this->TKT->get_prop('proceso'))) {
+            $A->loadTKT($this->getTKT());
+            if ($A->check_valid()=='ok') {
                 $ret[$i] = $A;
                 $i++;
             }
         }
         return $ret;
-    }
-
-    /**
-     * Verifica que el proceso sea valido
-     * @param $process proceso a verificar | si es null busca en el tkt
-     * @return boolean
-     */
-    private function check_process($process = NULL) {
-        if (!$this->TKT instanceof Tkt) {
-            if ($process == NULL) {
-                return false;
-            } else {
-                $tp = $process;
-            }
-        } else {
-            $tp = $this->TKT->get_prop('proceso');
-        }
-        $pv = explode(',', $this->habilita_procesos);
-        foreach ($pv as $p) {
-            if (preg_match('/'.$p.'/', $tp)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public function load_DB($id) {
@@ -300,6 +278,7 @@ class Action extends ITObject {
         $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
         $this->habilita_master = trim($tmpU["habilita_master"]);
         $this->habilita_procesos = trim($tmpU["habilita_procesos"]);
+        $this->habilita_estados = trim($tmpU["habilita_estados"]);
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
@@ -315,7 +294,7 @@ class Action extends ITObject {
         $this->ejecuta = trim($tmpU["ejecuta"]);
         $this->estadotkt = trim($tmpU["estadotkt"]);
         $this->alias = trim($tmpU["alias"]);
-        return "ok";
+        return 'ok';
     }
 
     /**
@@ -338,19 +317,40 @@ class Action extends ITObject {
     }
 
     /**
+     * Verifica que el proceso sea valido
+     * @param $process proceso a verificar | si es null busca en el tkt
+     * @return boolean
+     */
+    private function check_process($process = 'NULL') {
+        if (!($this->TKT instanceof Tkt)) {
+            if ($process == 'NULL') {
+                return false;
+            } else {
+                $tp = $process;
+            }
+        } else {
+            $tp = $this->TKT->get_prop('proceso');
+        }
+        $pv = explode(',', $this->habilita_procesos);
+        return preg_match_array($pv,$tp);
+    }
+    
+    
+    
+    /**
      * Valida accion
      * @param Tkt $TKT
      * @return string
      */
     public function check_valid() {
         $l = $this->getLogged();
-
+               
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
             return "Esta accion no esta disponible para tu perfil";
 
         if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
             return "Esta accion no esta disponible para tu equipo";
-
+        
         if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
@@ -404,6 +404,12 @@ class Action extends ITObject {
             return 'Esta accion no se puede ejecutar en el proceso asignado al ticket';
         }
         
+        if(!preg_match_array(explode(',',$this->habilita_estados),
+                $this->getTKT()->get_prop('status')
+                )){
+           return 'Esta accion no se puede ejecutar en el estado actual del ticket'; 
+                }
+        
         return "ok";
     }
 
@@ -430,6 +436,7 @@ class Action extends ITObject {
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
         }
+        $this->getTKT()->setTHstatus($rta["obj"]);
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
         return $response;
@@ -522,6 +529,8 @@ class Action extends ITObject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
+            case 'estadotkt':
+                return $this->estadotkt;
             case 'objadj_id':
                 return $this->objadj_id;
             case 'habilita_t_propio':

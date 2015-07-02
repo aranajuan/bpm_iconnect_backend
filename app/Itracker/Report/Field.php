@@ -37,9 +37,9 @@ class Field {
             return;
 
         if ($this->getAction() == "TKT") {
-            $propval = $tkt->get_Subprop($this->getProperty());
+            $propval = $tkt->get_Subprop($this->getProperty(),false);
         } else {
-            $propval = $th->get_Subprop($this->getProperty());
+            $propval = $th->get_Subprop($this->getProperty(),false);
         }
 
         $this->setMax_cevents($this->addToValue($propval, $value));

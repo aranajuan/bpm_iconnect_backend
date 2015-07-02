@@ -1,4 +1,5 @@
 <?php
+
 namespace Itracker\Utils;
 
 class ConnectionManager {
@@ -9,10 +10,9 @@ class ConnectionManager {
     private $dbInstanceAlias;
     private $serverMotor;
     private $status;
-
     public static $ROOT = 1;
-    public static $INSTANCE=2;
-    
+    public static $INSTANCE = 2;
+
     /**
      * Conecta a base root
      * @param type $motor
@@ -34,8 +34,7 @@ class ConnectionManager {
             $this->dbRootlink = null;
             $this->status = "root_error";
             LoggerFactory::getLogger()
-                    ->critical("Imposible conectar a DB",
-                            array($motor, $host, $user, $pass));
+                    ->critical("Imposible conectar a DB", array($motor, $host, $user, $pass));
             return false;
         }
     }
@@ -61,8 +60,7 @@ class ConnectionManager {
             $this->dbInstancelink = null;
             $this->status = "instance_error";
             LoggerFactory::getLogger()
-                    ->critical("Imposible conectar a DB",
-                            array($host, $user, $pass));
+                    ->critical("Imposible conectar a DB", array($host, $user, $pass));
             return false;
         }
     }
@@ -76,10 +74,15 @@ class ConnectionManager {
     private function new_link($host, $user, $pass) {
         if ($this->serverMotor == 'mysql') {
             return mysql_connect($host, $user, \Encrypter::decrypt($pass));
-        } elseif ($this->serverMotor  == 'mssql') {
-            return  new \PDO('odbc:'. 
-                    GlobalConfig::getInstance()->getString('database/odbc') ,
-                    $user, \Encrypter::decrypt($pass)); 
+        } elseif ($this->serverMotor == 'mssql') {
+            $pdo = null;
+            try {
+                $pdo = new \PDO('odbc:' .
+                        GlobalConfig::getInstance()->getString('database/odbc'), $user, \Encrypter::decrypt($pass));
+            } catch (\Exception $e) {
+                return null;
+            }
+            return $pdo;
         }
     }
 
@@ -89,9 +92,9 @@ class ConnectionManager {
      * @return type
      */
     public function get_link($db) {
-        if($db==  ConnectionManager::$INSTANCE){
+        if ($db == ConnectionManager::$INSTANCE) {
             return $this->dbInstancelink;
-        }elseif($db==ConnectionManager::$ROOT){
+        } elseif ($db == ConnectionManager::$ROOT) {
             return $this->dbRootlink;
         }
     }
@@ -102,20 +105,21 @@ class ConnectionManager {
      * @return type
      */
     public function get_alias($db) {
-          if($db==ConnectionManager::$INSTANCE){
+        if ($db == ConnectionManager::$INSTANCE) {
             return $this->dbInstanceAlias;
-        }elseif($db==ConnectionManager::$ROOT){
+        } elseif ($db == ConnectionManager::$ROOT) {
             return $this->dbRootAlias;
-        }      
+        }
     }
 
     /**
      * MSSQL/MYSQL
      * @return string
      */
-    public function get_motor(){
+    public function get_motor() {
         return $this->serverMotor;
     }
 
 }
+
 ?>

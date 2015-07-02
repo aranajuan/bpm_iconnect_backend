@@ -1,5 +1,5 @@
 -- phpMyAdmin SQL Dump
--- version 4.2.7.1
+-- version 4.4.3
 -- http://www.phpmyadmin.net
 --
 -- Servidor: 127.0.0.1
@@ -30,7 +30,7 @@ USE `itracker_agentes_tkt`;
 
 DROP TABLE IF EXISTS `tickets`;
 CREATE TABLE IF NOT EXISTS `tickets` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `usr` varchar(15) NOT NULL,
   `idmaster` int(11) DEFAULT NULL,
   `origen` varchar(255) DEFAULT NULL,
@@ -127,7 +127,7 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `proceso`, `idequipo`,
 
 DROP TABLE IF EXISTS `tickets_m`;
 CREATE TABLE IF NOT EXISTS `tickets_m` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `idtkt` int(11) NOT NULL,
   `idaccion` int(11) NOT NULL,
   `valoraccion` varchar(50) NOT NULL,
@@ -806,19 +806,20 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 -- Indices de la tabla `tickets`
 --
 ALTER TABLE `tickets`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `tickets_m_detalles`
 --
 ALTER TABLE `tickets_m_detalles`
- ADD UNIQUE KEY `idtktm` (`idtktm`), ADD KEY `idtktm_2` (`idtktm`);
+  ADD UNIQUE KEY `idtktm` (`idtktm`),
+  ADD KEY `idtktm_2` (`idtktm`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -847,7 +848,7 @@ USE `itracker_agentes_uta`;
 
 DROP TABLE IF EXISTS `acciones`;
 CREATE TABLE IF NOT EXISTS `acciones` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `nombre` varchar(200) NOT NULL,
   `alias` varchar(50) NOT NULL,
   `estadotkt` varchar(50) DEFAULT NULL,
@@ -869,7 +870,7 @@ CREATE TABLE IF NOT EXISTS `acciones` (
   `notificacion_texto` text NOT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
   `estado` int(11) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=232 ;
+) ENGINE=MyISAM AUTO_INCREMENT=232 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `acciones`
@@ -905,11 +906,11 @@ INSERT INTO `acciones` (`id`, `nombre`, `alias`, `estadotkt`, `ejecuta`, `tipo`,
 
 DROP TABLE IF EXISTS `direccion`;
 CREATE TABLE IF NOT EXISTS `direccion` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `linkwi` varchar(255) NOT NULL,
   `estado` int(11) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `direccion`
@@ -926,7 +927,7 @@ INSERT INTO `direccion` (`id`, `nombre`, `linkwi`, `estado`) VALUES
 
 DROP TABLE IF EXISTS `equipos`;
 CREATE TABLE IF NOT EXISTS `equipos` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `t_conformidad` varchar(5) NOT NULL,
   `idlistin` int(11) NOT NULL,
@@ -958,7 +959,7 @@ INSERT INTO `equipos` (`id`, `nombre`, `t_conformidad`, `idlistin`, `iddireccion
 
 DROP TABLE IF EXISTS `listines`;
 CREATE TABLE IF NOT EXISTS `listines` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `too` text,
   `cc` text,
@@ -985,7 +986,7 @@ INSERT INTO `listines` (`id`, `nombre`, `too`, `cc`, `estado`) VALUES
 
 DROP TABLE IF EXISTS `opciones`;
 CREATE TABLE IF NOT EXISTS `opciones` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `idpregunta` int(11) NOT NULL,
   `texto` varchar(255) NOT NULL,
   `texto_critico` varchar(50) DEFAULT NULL,
@@ -997,7 +998,7 @@ CREATE TABLE IF NOT EXISTS `opciones` (
   `FA` date NOT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `FB` date DEFAULT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=70 ;
+) ENGINE=MyISAM AUTO_INCREMENT=70 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `opciones`
@@ -1107,14 +1108,14 @@ INSERT INTO `perfiles` (`id`, `nombre`, `accesos`) VALUES
 
 DROP TABLE IF EXISTS `prefiles_vistas`;
 CREATE TABLE IF NOT EXISTS `prefiles_vistas` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `prioridad` int(11) NOT NULL,
   `perfil` int(50) NOT NULL,
   `relacion` varchar(255) NOT NULL,
   `vista` int(11) NOT NULL,
   `tipos_eventos` varchar(50) NOT NULL,
   `archivo_descarga` tinyint(4) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `prefiles_vistas`
@@ -1136,14 +1137,14 @@ INSERT INTO `prefiles_vistas` (`id`, `prioridad`, `perfil`, `relacion`, `vista`,
 
 DROP TABLE IF EXISTS `preguntas`;
 CREATE TABLE IF NOT EXISTS `preguntas` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `texto` varchar(255) NOT NULL,
   `detalle` longtext,
   `UA` varchar(15) NOT NULL,
   `FA` date NOT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `FB` date DEFAULT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28 ;
+) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `preguntas`
@@ -1185,12 +1186,12 @@ INSERT INTO `preguntas` (`id`, `texto`, `detalle`, `UA`, `FA`, `UB`, `FB`) VALUE
 
 DROP TABLE IF EXISTS `sisdir`;
 CREATE TABLE IF NOT EXISTS `sisdir` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `idsistema` int(11) NOT NULL,
   `iddireccion` int(11) NOT NULL,
   `p_pregunta` int(11) NOT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `sisdir`
@@ -1207,10 +1208,10 @@ INSERT INTO `sisdir` (`id`, `idsistema`, `iddireccion`, `p_pregunta`, `estado`) 
 
 DROP TABLE IF EXISTS `sistemas`;
 CREATE TABLE IF NOT EXISTS `sistemas` (
-`id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
+) ENGINE=MyISAM AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `sistemas`
@@ -1282,67 +1283,73 @@ INSERT INTO `usuarios` (`usr`, `idsequipos`, `idsequiposadm`, `perfil`, `estado`
 -- Indices de la tabla `acciones`
 --
 ALTER TABLE `acciones`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `direccion`
 --
 ALTER TABLE `direccion`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `equipos`
 --
 ALTER TABLE `equipos`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `listines`
 --
 ALTER TABLE `listines`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `opciones`
 --
 ALTER TABLE `opciones`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `perfiles`
 --
 ALTER TABLE `perfiles`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
 
 --
 -- Indices de la tabla `prefiles_vistas`
 --
 ALTER TABLE `prefiles_vistas`
- ADD PRIMARY KEY (`id`), ADD KEY `perfil` (`perfil`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `perfil` (`perfil`);
 
 --
 -- Indices de la tabla `preguntas`
 --
 ALTER TABLE `preguntas`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `sisdir`
 --
 ALTER TABLE `sisdir`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `sistemas`
 --
 ALTER TABLE `sistemas`
- ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
- ADD PRIMARY KEY (`usr`);
+  ADD PRIMARY KEY (`usr`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1352,12 +1359,12 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `acciones`
 --
 ALTER TABLE `acciones`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=232;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=232;
 --
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT de la tabla `equipos`
 --
@@ -1372,27 +1379,27 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 -- AUTO_INCREMENT de la tabla `opciones`
 --
 ALTER TABLE `opciones`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=70;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=70;
 --
 -- AUTO_INCREMENT de la tabla `prefiles_vistas`
 --
 ALTER TABLE `prefiles_vistas`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `preguntas`
 --
 ALTER TABLE `preguntas`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=28;
 --
 -- AUTO_INCREMENT de la tabla `sisdir`
 --
 ALTER TABLE `sisdir`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT de la tabla `sistemas`
 --
 ALTER TABLE `sistemas`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
 -- Base de datos: `itracker_root`
 --
 CREATE DATABASE IF NOT EXISTS `itracker_root` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
@@ -1419,7 +1426,7 @@ CREATE TABLE IF NOT EXISTS `fronts` (
 --
 
 INSERT INTO `fronts` (`id`, `nombre`, `ip`, `confianza`, `instancias`, `estado`) VALUES
-(1, 'DMZ', '::1', 0, 'AGENTES', 0),
+(1, 'DMZ', '127.0.0.1', 0, 'AGENTES', 0),
 (2, 'SHAREPOINT', '::1', 1, 'AGENTES', 0);
 
 -- --------------------------------------------------------
@@ -1544,19 +1551,21 @@ INSERT INTO `usuarios` (`usr`, `dominio`, `pass`, `fronts`, `instancias`) VALUES
 -- Indices de la tabla `fronts`
 --
 ALTER TABLE `fronts`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
 
 --
 -- Indices de la tabla `instancias`
 --
 ALTER TABLE `instancias`
- ADD PRIMARY KEY (`nombre`);
+  ADD PRIMARY KEY (`nombre`);
 
 --
 -- Indices de la tabla `sesiones`
 --
 ALTER TABLE `sesiones`
- ADD PRIMARY KEY (`usr`), ADD UNIQUE KEY `hash_UNIQUE` (`hash`);
+  ADD PRIMARY KEY (`usr`),
+  ADD UNIQUE KEY `hash_UNIQUE` (`hash`);
 
 --
 -- Indices de la tabla `ucontac`

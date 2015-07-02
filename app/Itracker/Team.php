@@ -110,8 +110,8 @@ class Team extends ITObject {
         $this->adms = array();
         $this->idsadmsV = array();
         while ($usr = $this->dbinstance->get_vector()) {
-            $U = $this->objsCache->get_object("USER", $usr["usr"]);
-            if($this->objsCache->get_status("USER", $usr["usr"]) === "ok") {
+            $U = $this->objsCache->get_object("User", $usr["usr"]);
+            if($this->objsCache->get_status("User", $usr["usr"]) === "ok") {
                 if ($U->isadm($this->id)) {
                     array_push($this->adms, $U);
                     array_push($this->idsadmsV, $U->get_prop("usr"));
@@ -251,7 +251,7 @@ class Team extends ITObject {
     /**
      * Obtener mienbros del equipo del perfil especificado
      * @param int $idprofile
-     * @return \USER
+     * @return \User
      */
     function get_users($idprofile = 0) {
         if ($idprofile != 0) {

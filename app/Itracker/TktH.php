@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker;
+
 /**
  * Eventos de tickets
  */
@@ -53,7 +54,7 @@ class TktH extends ITObject {
 
     function __construct($conn = null) {
         parent::__construct($conn);
-        $this->idLink=null;
+        $this->idLink = null;
     }
 
     function load_DB($id) {
@@ -154,12 +155,12 @@ class TktH extends ITObject {
             $this->id = $this->dbinstance->get_lastID();
             $itform = $this->accion->getitform();
             if ($itform) {
-                $form = $itform->get_output();
+                $form = $itform->get_outputDOM()->saveXML();
             } else {
                 $form = "";
             }
             $this->save_files();
-            if (!$this->accion->get_prop("formulario") || trim($form) == "") { // accion sin formulario
+            if (trim($form) == "") { // accion sin formulario
                 return "ok";
             }
             /* Agregar a tabla detalles */
@@ -176,7 +177,7 @@ class TktH extends ITObject {
     private function loadObjadj() {
         if ($this->objadj_txt != "")
             return;
-        $file=ROOT_DIR."/app/Itracker/Actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
+        $file = ROOT_DIR . "/app/Itracker/Actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
         if (file_exists($file)) {
             $obCI = $this->objsCache;
             $val = include $file;
@@ -213,11 +214,18 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
-
         if ($this->get_prop("itform") != null) {
-            $nodo = $element->importNode(
-                    $this->get_prop("itform")->get_outputDOM()->documentElement, true);
-            $elementData->appendChild($nodo);
+            $itfDom = $this->get_prop("itform")->get_outputDOM();
+            if ($itfDom) {
+                $nodo = $element->importNode(
+                        $itfDom->documentElement, true);
+                $elementData->appendChild($nodo);
+            } else {
+                $this->getContext()->getLogger()->notice('itform sin nada visible', array(
+                    'idth' => $this->id
+                        )
+                );
+            }
         }
         $files_h = $this->get_files();
         if ($files_h && count($files_h)) {
@@ -238,6 +246,10 @@ class TktH extends ITObject {
         $this->loadview();
 
         if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
+            if ($this->itform) {
+                $this->itform->loadOutput();
+                $this->itform->set_view(0);
+            }
             return true;
         }
 
@@ -256,6 +268,7 @@ class TktH extends ITObject {
         }
 
         if ($this->itform) {
+            $this->itform->loadOutput();
             $this->itform->set_view($this->view["vista"]);
         }
         return true;
@@ -275,8 +288,7 @@ class TktH extends ITObject {
             $this->UA_o = $UA;
             return $this->UA_o;
         }
-        $this->getContext()->getLogger()->warning("Evento de usuario eliminado",
-                array($this->id,$this->idtkt,$this->UA));
+        $this->getContext()->getLogger()->warning("Evento de usuario eliminado", array($this->id, $this->idtkt, $this->UA));
         return null;
     }
 

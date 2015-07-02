@@ -9,6 +9,7 @@ abstract class Tree extends ITObject {
     private $path_max;
     private $path_obj;
     private $deleted;
+    private $canopen;
     private $critico;
     private $critico_v;
 
@@ -46,7 +47,7 @@ abstract class Tree extends ITObject {
      * @return boolean
      */
     public function is_active() {
-        return !$this->deleted;
+        return $this->canopen;
     }
 
     /**
@@ -74,6 +75,8 @@ abstract class Tree extends ITObject {
     private function load_objects() {
         start_measure("OBJ:TREE:load_objects");
         $this->path_obj = NULL;
+        $perfil = $this->getLogged()->get_prop('perfil');
+        $this->canopen=true;
         for ($i = 0; $i <= $this->path_max; $i++) {
             switch (substr($this->path[$i], 0, 1)) {
                 case "D":
@@ -90,12 +93,18 @@ abstract class Tree extends ITObject {
             }
             $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1));
             $rta = $this->objsCache->get_status($ct, substr($this->path[$i], 1));
+            if($ct=='Option'){
+                if(!$o->checkProfile($perfil)){
+                    $this->canopen=false;
+                }
+            }
             if ($rta != "error") {
                 $this->path_obj[$i] = $o;
             } else {
                 return "Error al cargar un objeto del arbol (id " . $this->path[$i] . " - pos $i - $rta)";
             }
             if ($rta == "eliminado") {
+                $this->canopen=false;
                 $this->deleted = 1;
             }
         }
@@ -124,47 +133,6 @@ abstract class Tree extends ITObject {
             $this->critico = NULL;
         } else
             $this->critico = substr($this->critico, 1);
-    }
-
-    /**
-     * Vector de TKTS similares
-     * @return array<Tkt>|null 
-     */
-    public function get_similar() {
-        if (!$this->critico_v) {
-            $this->load_critic();
-        }
-        if (!$this->critico_v) {
-            return NULL;
-        }
-        $criticVC = explode("-", $this->critico);
-        $ssql = "
-            select id,origen from TBL_TICKETS where idmaster is null and UB is null and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
-        $this->dbinstance->loadRS($ssql);
-        if (!$this->dbinstance->noEmpty) {
-            return NULL;
-        }
-        $i = 0;
-        $tktV = array();
-        while ($tm = $this->dbinstance->get_vector()) {
-            //verificar textos criticos y comparar con actual
-            $TKTc = new TKT();
-            $TKTc->load_path($tm["origen"], 0);
-            $countC = count(array_intersect($criticVC, explode("-", $TKTc->get_critic())));
-            if ($countC) {
-                $tkt = $this->objsCache->get_object("Tkt", $tm["id"]);
-                if ($this->objsCache->get_status("Tkt", $tm["id"])=="ok") {
-                    $tktV[$i] = $tkt;
-                    $i++;
-                }
-            }
-        }
-
-        if (count($tktV) != 0) {
-            return $tktV;
-        } else {
-            return NULL;
-        }
     }
 
     /**
@@ -320,9 +288,13 @@ abstract class Tree extends ITObject {
                     $rta["error"] = "No hay ruta definida. Error de Arbol";
                     return $rta;
                 }
+                $perfil = $this->getLogged()->get_prop('perfil');
                 $opts = $q->get_prop("opcionesobj");
                 $i = 0;
                 foreach ($opts as $opt) {
+                    if(!$opt->checkProfile($perfil)){
+                        continue;
+                    }
                     $rta["options"][$i]["title"] = $opt->get_prop("texto");
                     $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . "-");
                     if ($opt->get_prop("idpregunta_destino")) {
@@ -354,12 +326,7 @@ abstract class Tree extends ITObject {
                     }
                     return $rta;
                 } else {
-                    if ($actualO->get_prop("equipo_destino") == null) {
-                        $rta["error"] = "No hay ruta definida. Error de Arbol";
-                        return $rta;
-                    } else {
                         $rta["object"] = $actualO;
-                    }
                 }
                 return $rta;
         }
@@ -367,7 +334,7 @@ abstract class Tree extends ITObject {
 
     /**
      * Devuelve ultima opcion [OPTION]
-     * @return null 
+     * @return Option 
      */
     function get_last() {
         if (isset($this->path_obj[$this->path_max])) {

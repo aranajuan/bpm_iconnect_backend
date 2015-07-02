@@ -45,22 +45,25 @@ function GO($Context) {
         }
 
         if ($topts["object"]) {
-            if ($topts["object"]->get_prop("idequipo_destino") && $topts["object"]->get_prop("ruta_destino") == NULL) {
+            if ($topts["object"]->get_prop("itform")) {
                 $itform= $topts["object"]->get_prop("itform");
-                if($itform){
-                    $itfdom=$itform->get_inputDOM()->documentElement;
-                }else{
-                    return $Context->createElement("error", "Error en formulario #1");
-                }
+                $itfdom=$itform->get_UserInputDOM()->documentElement;
                 $joined = $Context->append_xml($itfdom);
                 if ($joined) {
                     $opendata = $Context->createElement("opendata");
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
-                    $simi =$Context->createElement("no_anexar",$topts["object"]->get_prop("no_anexar"));
-                    $treeL->appendChild($simi);
+                    $dest = $topts["object"]->getDestiny();
+                    if($dest){
+                        $simi =$Context->createElement("join",
+                                $dest->getVal('join'));
+                        $treeL->appendChild($simi);
+                    }
                     return $treeL;
                 } else {
+                    $Context->getLogger()->error('No se pudo unir el formulario',
+                            array('id'=>$topts["object"]->get_prop("id"),
+                                'itf'=>$itform->get_inputDOM()->saveXML()));
                     return $Context->createElement("error", "Error en formulario #2");
                 }
             } else {

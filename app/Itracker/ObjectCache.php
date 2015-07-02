@@ -94,7 +94,6 @@ class ObjectCache {
      * @return int  Indice insertado
      */
     private function load_object($class, $id) {
-        try {
             $cn = new $class();
             if ($cn) {
                 $resp = $cn->load_DB($id);
@@ -106,9 +105,6 @@ class ObjectCache {
             } else {
                 return 0;
             }
-        } catch (\Exception $e) {
-            return 0;
-        }
     }
 
     /**

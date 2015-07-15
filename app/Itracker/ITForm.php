@@ -26,6 +26,12 @@ class ITForm implements XMLPropInterface {
     private $xml_output;
 
     /**
+     *
+     * @var \DOMXPath
+     */
+    private $xml_output_Xpath;
+
+    /**
      *  Nivel de vista para el get_output
      * @var int 
      */
@@ -72,6 +78,7 @@ class ITForm implements XMLPropInterface {
      */
     public function loadOutput() {
         $this->xml_output = clone $this->xml_input;
+        $this->xml_output_Xpath = new \DOMXPath($this->xml_output);
     }
 
     /**
@@ -109,7 +116,7 @@ class ITForm implements XMLPropInterface {
                     break;
                 case "required":
                     if ($valValue == "true" && (trim($element["value"]) == "" || $element["value"] == null)) {
-                        return "El campo " . $element["label"] . " es obligatorio.";
+                        return "El campo " . $element["label"] . " es obligatorio."; 
                     }
                     break;
                 case "maxlen":
@@ -159,6 +166,33 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Ejecuta busqueda en xpath
+     * @param string $path
+     * @param \DOMNode $relative
+     * @return \DOMNodeList
+     */
+    private function queryEl($path, $relative = null) {
+        if (!$this->xml_output) {
+            return null;
+        }
+        return $this->xml_output_Xpath->query($path, $relative);
+    }
+
+    /**
+     * Ejecuta busqueda en xpath y devuelve priemer elemento
+     * @param string $path
+     * @param mixed $default defecto si no hay elemento
+     * @param \DOMNode $relative
+     * @return string
+     */
+    private function getEl($path,$default=null, $relative = null){
+        $elems = $this->queryEl($path, $relative);
+        if($elems->length){
+            return trim($elems->item(0)->nodeValue);
+        }
+        return $default;
+    }
+    /**
      * Busca elemento por valor de tag
      * @param string $tag
      * @param string $val
@@ -169,9 +203,9 @@ class ITForm implements XMLPropInterface {
             return null;
         }
         $founds = array();
-        $elements = $this->xml_output->getElementsByTagName("element");
+        $elements = $this->queryEl('/itform/element');
         foreach ($elements as $field) {
-            $elemTags = $field->getElementsByTagName($tag);
+            $elemTags = $this->queryEl($tag, $field);
             if ($elemTags->length) {
                 if ($val == '*' || strtolower(trim($elemTags->item(0)->nodeValue)
                         ) == strtolower(trim($val))) {
@@ -193,19 +227,12 @@ class ITForm implements XMLPropInterface {
         $arr = make_arrayobj($arr);
         $this->arr_val = $arr;
         $this->formname = $formname;
-        $nodelist = $this->xml_output->getElementsByTagName('element');
+        $nodelist = $this->queryEl('/itform/element');
         foreach ($nodelist as $field) {
             $nfield = $this->elementToArray($field);
-            if ($field->getElementsByTagName('defaults')->length) {
-                $value=$this->getDefault($field);
-                if($value==null){
-                     Utils\LoggerFactory::getLogger()->warning(
-                        'Defaults invalido', 
-                             array('xml' => $this->xml_input_text,
-                                 'process'=>$this->process));
-                }
-            }else{
-                $value = 
+            $value = $this->getDefault($field);
+            if ($value == null) {
+                 $value =
                         trim($this->find_elementVal($arr, $nfield['id'], $formname));
             }
             $nfield['value'] = $value;
@@ -224,31 +251,38 @@ class ITForm implements XMLPropInterface {
      */
     private function getDefault($element) {
         $nfield = $this->elementToArray($element);
-        $defaults = $element->getElementsByTagName('defaults')->item(0)
-                ->childNodes;
-        foreach ($defaults as $default) {
+        $defaults = $this->queryEl('defaults', $element);
+        if($defaults->length==0){
+            return null;
+        }
+        $defaults_nodes = $defaults->item(0)
+                ->childNodes;        
+                
+        foreach ($defaults_nodes as $default) {
             if ($default instanceof \DOMText) {
                 continue;
             }
-            $processDom = $default->getElementsByTagName('process');
-            $valueDom = $default->getElementsByTagName('value');
+            $processDom = $this->queryEl('process', $default);
+            $valueDom = $this->queryEl('value', $default);
             if ($valueDom->length != 0) {
-                $value =$valueDom->item(0)->nodeValue;
-            }else{
+                $value = $valueDom->item(0)->nodeValue;
+            } else {
                 Utils\LoggerFactory::getLogger()->warning(
-                                'Defaults invalido en formulario no value', 
-                                array('xml' => $this->xml_input_text));
+                        'Defaults invalido en formulario no value', array('xml' => $this->xml_input_text));
             }
-            
+
             if ($processDom->length != 0) {
-                if(preg_match('/'.$processDom->item(0)->nodeValue.'/', $this->process)) {
-                        return $value;
+                if (preg_match('/' . $processDom->item(0)->nodeValue . '/', $this->process)) {
+                    return $value;
                 }
             } else {
                 return $value;
             }
         }
-        return null;
+        Utils\LoggerFactory::getLogger()->warning(
+                        'Defaults invalido', 
+                             array('xml' => $this->xml_input_text,
+                                 'process'=>$this->process));
     }
 
     /**
@@ -274,29 +308,22 @@ class ITForm implements XMLPropInterface {
      */
     private function elementToArray($element) {
         $arr = array();
-
-        $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
-        $label = $element->getElementsByTagName("label");
-        if ($label->length == 0) {
-            $arr["label"] = $arr["id"];
-        } else {
-            $arr["label"] = trim($label->item(0)->nodeValue);
-        }
-        $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
-        $arr["type"] = trim($element->getElementsByTagName("type")->item(0)->nodeValue);
+        $arr["id"] = $this->getEl('id', null,$element);
+        $arr["label"] = $this->getEl('label', $arr["id"],$element);
+        $arr["value"] =$this->getEl('value', null,$element);
+        $arr["type"] = $this->getEl('type', null,$element);
         if ($arr["type"] == "select") {
-            $options = $element->getElementsByTagName("option");
+            $options = $this->queryEl('option', $element);
             $arr["valuetxt"] = $arr["value"];
             foreach ($options as $opt) {
-                if (trim($opt->getElementsByTagName("value")->item(0)->nodeValue) == trim($arr["value"])) {
-                    $arr["valuetxt"] = trim($opt->getElementsByTagName("text")->item(0)
-                            ->nodeValue);
+                if ($this->getEl('value', null,$opt) == trim($arr["value"])) {
+                    $arr["valuetxt"] = $this->getEl('text', null,$opt);
                 }
             }
         }
 
         $arr["validations"] = array();
-        $validations = $element->getElementsByTagName("validations")->item(0);
+        $validations = $this->queryEl('validations', $element)->item(0);
         if ($validations == null || !$validations->hasChildNodes()) {
             return $arr;
         } else {
@@ -315,7 +342,7 @@ class ITForm implements XMLPropInterface {
     public function get_value($id) {
         $field = $this->findFieldsByTag('id', $id);
         if ($field) {
-            return $field[0]->getElementsByTagName("value")->item(0)->nodeValue;
+            return $this->getEl('value', null,$field[0]);
         }
         return null;
     }
@@ -337,7 +364,7 @@ class ITForm implements XMLPropInterface {
     public function getAnddelete($id) {
         $field = $this->findFieldsByTag('id', $id);
         if ($field) {
-            $val = $field[0]->getElementsByTagName("value")->item(0)->nodeValue;
+            $val = $this->getEl('value', null,$field[0]);
             $field[0]->parentNode->removeChild($field[0]);
             return $val;
         }
@@ -438,7 +465,7 @@ class ITForm implements XMLPropInterface {
         $arr = array();
         $i = 0;
         $data = $this->get_outputDOM();
-        $els = $data->getElementsByTagName("element");
+        $els = $this->queryEl('/itform/element');
         $arrTitles = array();
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);

@@ -1,10 +1,11 @@
 <?php
+
 namespace Itracker;
 
 /**
  * Formularios xml para datos itracker
  */
-class ITForm implements XMLPropInterface{
+class ITForm implements XMLPropInterface {
 
     /**
      *
@@ -44,7 +45,7 @@ class ITForm implements XMLPropInterface{
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
-                Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML",array($xml));
+                Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML", array($xml));
                 return false;
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
@@ -55,7 +56,7 @@ class ITForm implements XMLPropInterface{
             return true;
         } catch (\Exception $e) {
             $this->xml_input = null;
-            Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML",array($xml));
+            Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML", array($xml));
             return false;
         }
         return false;
@@ -120,6 +121,21 @@ class ITForm implements XMLPropInterface{
             }
         }
         return "ok";
+    }
+
+    /**
+     * Devuelve hijos inmediatos *** SOLO HOTFIX ****
+     * @param \DOMElement $element
+     * @param type $tagName
+     * @return array
+     */
+    private function getImmediateChildrenByTagName($element, $tagName) {
+        $result = array();
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof \DOMElement && $child->tagName == $tagName) {
+                return $child;
+            }
+        }
     }
 
     /**
@@ -198,29 +214,28 @@ class ITForm implements XMLPropInterface{
      */
     private function elementToArray($element) {
         $arr = array();
-        
+
         $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
         $label = $element->getElementsByTagName("label");
-        if ($label->length == 0){
-            $arr["label"]=$arr["id"];
-        }else{
-            $arr["label"] =trim($label->item(0)->nodeValue);
+        if ($label->length == 0) {
+            $arr["label"] = $arr["id"];
+        } else {
+            $arr["label"] = trim($label->item(0)->nodeValue);
         }
-        $arr["value"] = trim($element->getElementsByTagName("value")->item(0)->nodeValue);
-        
-        $arr["type"] =trim($element->getElementsByTagName("type")->item(0)->nodeValue);
-        if($arr["type"]=="select"){
+        $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
+
+        $arr["type"] = trim($element->getElementsByTagName("type")->item(0)->nodeValue);
+        if ($arr["type"] == "select") {
             $options = $element->getElementsByTagName("option");
-            $arr["valuetxt"]=$arr["value"];
-            foreach($options as $opt){
-                if(trim($opt->getElementsByTagName("value")->item(0)->nodeValue)
-                        ==trim($arr["value"])){
-                  $arr["valuetxt"]=trim($opt->getElementsByTagName("text")->item(0)
-                          ->nodeValue);
-                 }
+            $arr["valuetxt"] = $arr["value"];
+            foreach ($options as $opt) {
+                if (trim($this->getImmediateChildrenByTagName($opt, 'value')->nodeValue) == trim($arr["value"])) {
+                    $arr["valuetxt"] = trim($this->getImmediateChildrenByTagName($opt, 'text')
+                            ->nodeValue);
+                }
             }
         }
-        
+
         $arr["validations"] = array();
         $validations = $element->getElementsByTagName("validations")->item(0);
         if ($validations == null || !$validations->hasChildNodes()) {
@@ -242,7 +257,7 @@ class ITForm implements XMLPropInterface{
     private function get_valueDOM($id, $dom) {
         $field = $this->find_field($dom, "id", $id);
         if ($field) {
-            return $field->getElementsByTagName("value")->item(0)->nodeValue;
+            return $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
         }
         return null;
     }
@@ -282,7 +297,7 @@ class ITForm implements XMLPropInterface{
     public function getAnddelete($id) {
         $field = $this->find_field($this->xml_output, "id", $id);
         if ($field) {
-            $val = $field->getElementsByTagName("value")->item(0)->nodeValue;
+            $val = $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
             $field->parentNode->removeChild($field);
             return $val;
         }
@@ -312,7 +327,7 @@ class ITForm implements XMLPropInterface{
                 if ($viewL->length) {
                     $vRQ = intval($viewL->item(0)->nodeValue || 0);
                     if ($vRQ != 0 && $this->view_level > $vRQ) {
-                        $domElemsToBlock[] = $field->getElementsByTagName("value")->item(0);
+                        $domElemsToBlock[] = $this->getImmediateChildrenByTagName($field, 'value');
                     }
                 }
             }
@@ -369,22 +384,22 @@ class ITForm implements XMLPropInterface{
         $this->view_level = $view_level;
     }
 
-     /**
+    /**
      * Calcula tipo para reporte
      * @param array $arr    elementtoarray
      * @return string   nuevo tipo
      */
-    private function getReportType($arr){
-        if($arr["type"]=="input"){
-            if(isset($arr["validations"]["numeric"]) &&
-                    $arr["validations"]["numeric"]=="true"){
+    private function getReportType($arr) {
+        if ($arr["type"] == "input") {
+            if (isset($arr["validations"]["numeric"]) &&
+                    $arr["validations"]["numeric"] == "true") {
                 return "number";
             }
             return "text";
         }
         return $arr["type"];
     }
-    
+
     /**
      * Genera array con todos los valores de los campos
      * @return array
@@ -394,26 +409,24 @@ class ITForm implements XMLPropInterface{
         $i = 0;
         $data = $this->get_outputDOM();
         $els = $data->getElementsByTagName("element");
-        $arrTitles=array();
+        $arrTitles = array();
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);
             $arr[$i]["type"] = $this->getReportType($arr[$i]);
-            $arr[$i]["title"]=$arr[$i]["label"];
-            if(in_array($arr[$i]["title"], $arrTitles)){
+            $arr[$i]["title"] = $arr[$i]["label"];
+            if (in_array($arr[$i]["title"], $arrTitles)) {
                 $arr[$i]["title"].=$arr[$i]["id"];
             }
             array_push($arrTitles, $arr[$i]["title"]);
-            if($arr[$i]["type"]=="select"){
-                $arr[$i]["type"] ="input";
-                $arr[$i]["value"]=$arr[$i]["valuetxt"];  
+            if ($arr[$i]["type"] == "select") {
+                $arr[$i]["type"] = "input";
+                $arr[$i]["value"] = $arr[$i]["valuetxt"];
             }
             $i++;
         }
         return $arr;
     }
 
-
-    
     public function get_prop($property) {
         $property = strtolower($property);
         if ($property == "*") {
@@ -430,4 +443,5 @@ class ITForm implements XMLPropInterface{
     public function getXML($doc, $props) {
         return null;
     }
+
 }

@@ -255,12 +255,13 @@ abstract class Tree extends ITObject {
      */
     public function get_tree_options() {
         $rta = array();
-        if (!is_array($this->path)) {
+        $usr = $this->getLogged();
+        $usrDirs = $usr->get_divisions();
+        if (!is_array($this->path) || 
+                !objinarray($this->get_division(),$usrDirs)) {
             // primer opcion, se muestran las direcciones
             //limpiar temporales del usuario
             //verificar si el usuario pertenece solo a una direccion se ingresa directamente
-            $usr = $this->getLogged();
-            $usrDirs = $usr->get_divisions();
             if (count($usrDirs) == 1) {
                 $dir = $usrDirs[0]->get_prop("id");
             } else {
@@ -270,12 +271,10 @@ abstract class Tree extends ITObject {
             if ($dir > 0) {
                 $this->load_path("D" . $dir . "-", false);
             } else {
-                $divs = new Division();
-                $divsV = $divs->list_all();
                 $rta["title"] = "Seleccione un area";
                 $rta["back"] = "none";
                 $i = 0;
-                foreach ($divsV as $d) {
+                foreach ($usrDirs as $d) {
                     $rta["options"][$i]["title"] = $d->get_prop("nombre");
                     $rta["options"][$i]["destiny"] = \Encrypter::encrypt("D" . $d->get_prop("id") . "-");
                     $rta["options"][$i]["end"] = false;
@@ -284,7 +283,6 @@ abstract class Tree extends ITObject {
                 return $rta;
             }
         }
-
         $actualPATH = implode("-", $this->path); //ruta actual, para generar destiny
         $rta["actual"] = \Encrypter::encrypt($actualPATH);
         $actualO = $this->get_last();

@@ -8,7 +8,6 @@ if($T){
     }else{
         $status=""; 
     }
-    $proceso = $TT->get_prop('proceso');
     $asignado = " // Asignado a: ".$T->get_prop("nombre")." ($status)";
 }else{
     $asignado= " // Asignado a: Indeterminado - Error ".$this->get_prop("objadj_id");
@@ -20,9 +19,6 @@ if($this->get_prop("UA_o")){
     $userGen="Generado por: Indeterminado - Error ".$this->get_prop("UA");
 }
 
-if($proceso=='' || $proceso==null){
-    $proceso='Ninguno';
-}
 
-return array($T, $userGen.$asignado.'{br}'.'Proceso: '.$proceso);
+return array($T, $userGen.$asignado);
 

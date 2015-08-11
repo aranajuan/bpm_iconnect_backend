@@ -62,22 +62,6 @@ if ($rtaOP != "ok") {
     $this->force_tkth();
 }
 
-/* ESTABLECER PROCESO */
-$process = $dest->getDestinyVal('process');
-if ($process) {
-    $rta = $TKT->ejecute_action('SET_PROCESS',
-            array(array("id" => "proceso", "value" => $process)));
-    if ($rta["result"] != "ok") {
-        $response['msj']='No se pudo asignar al proceso correspondiente';
-        $this->getContext()->getLogger()->warning(
-                'No se pudo asignar al proceso en apertura',
-                array(
-                'rta' => print_r($rta,true),
-                'usr' => $this->getContext()->get_User()->get_prop('usr')
-        ));
-        return $response;
-    }
-}
 
 /* CERRAR A FILE */
 $file = $dest->getDestinyVal('file');

@@ -32,7 +32,7 @@ ini_set('display_errors', $ContextConf->getInt('debug/displayerrors'));
 define('I_ACTIVE', $ContextConf->getInt('constants/active'));
 define('I_DELETED', $ContextConf->getInt('constants/deleted'));
 define('I_NEWID',$ContextConf->getInt('constants/new'));
-ini_set('SMTP',$ContextConf->getInt('mail/smtp'));
+ini_set('SMTP',$ContextConf->getString('mail/smtp'));
 date_default_timezone_set($ContextConf->getString('time/timezone'));
 define('USERDATE_READ_TIME',$ContextConf->getString('time/userread/time'));
 define('USERDATE_READ_MONTH',$ContextConf->getString('time/userread/month'));

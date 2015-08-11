@@ -509,13 +509,13 @@ class Notify extends ITObject {
         $this->load_cc_body();
         $actName = $this->get_body_value("action->alias");
         $subject = "Notificacion Itracker (" . $this->get_body_value("system->name") . " - $actName)";
-        $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, MAIL_TO));
+        $tobody = str_replace("\\n", "", str_replace("{body}", $this->mail_body, $this->mailTO));
 
         foreach ($this->too as $t) {
             $this->send_mail($t, $subject, $tobody, "", "HTML", "itracker@ta.telecom.com.ar");
         }
 
-        $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, MAIL_CC));
+        $cbody = str_replace("\\n", "", str_replace("{body}", $this->cc_body, $this->mailCC));
 
         foreach ($this->cc as $t) {
             $this->send_mail($t, $subject, $cbody, "", "HTML", "itracker@ta.telecom.com.ar");

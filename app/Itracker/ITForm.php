@@ -143,6 +143,21 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Devuelve hijos inmediatos *** SOLO HOTFIX ****
+     * @param \DOMElement $element
+     * @param type $tagName
+     * @return array
+     */
+    private function getImmediateChildrenByTagName($element, $tagName) {
+        $result = array();
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof \DOMElement && $child->tagName == $tagName) {
+                return $child;
+            }
+        }
+    }
+
+    /**
      *  Busca valor en array por id
      * @param array $arr
      * @param string $id
@@ -342,7 +357,11 @@ class ITForm implements XMLPropInterface {
     public function get_value($id) {
         $field = $this->findFieldsByTag('id', $id);
         if ($field) {
+<<<<<<< HEAD
             return $this->getEl('value', null,$field[0]);
+=======
+            return $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
+>>>>>>> master
         }
         return null;
     }
@@ -364,8 +383,13 @@ class ITForm implements XMLPropInterface {
     public function getAnddelete($id) {
         $field = $this->findFieldsByTag('id', $id);
         if ($field) {
+<<<<<<< HEAD
             $val = $this->getEl('value', null,$field[0]);
             $field[0]->parentNode->removeChild($field[0]);
+=======
+            $val = $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
+            $field->parentNode->removeChild($field);
+>>>>>>> master
             return $val;
         }
         return null;
@@ -379,7 +403,6 @@ class ITForm implements XMLPropInterface {
         if (!$this->xml_output) {
             return null;
         }
-        $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');
         foreach ($domElemsToRemove as $domElement) {
             $domElement->parentNode->removeChild($domElement);
         }
@@ -434,14 +457,30 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
-     * Setea proceso
-     * @param int $view_level
-     */
-    public function set_process($process) {
-        $this->process = $process;
-    }
-
-    /**
+<<<<<<< HEAD
+        $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');
+=======
+        $tmp = clone $this->xml_output;
+        $elements = $tmp->getElementsByTagName("element");
+        $active = $elements->length;
+        $domElemsToRemove = array();
+        $domElemsToBlock = array();
+        foreach ($elements as $field) {
+            $nsave = $field->getElementsByTagName("notsave");
+            if ($nsave->length && $nsave->item(0)->nodeValue == "true") {
+                $domElemsToRemove[] = $field;
+                $active--;
+            } else {
+                $viewL = $field->getElementsByTagName("view");
+                if ($viewL->length) {
+                    $vRQ = intval($viewL->item(0)->nodeValue || 0);
+                    if ($vRQ != 0 && $this->view_level > $vRQ) {
+                        $domElemsToBlock[] = $this->getImmediateChildrenByTagName($field, 'value');
+                    }
+                }
+            }
+        }
+>>>>>>> master
      * Calcula tipo para reporte
      * @param array $arr    elementtoarray
      * @return string   nuevo tipo
@@ -465,7 +504,17 @@ class ITForm implements XMLPropInterface {
         $arr = array();
         $i = 0;
         $data = $this->get_outputDOM();
-        $els = $this->queryEl('/itform/element');
+<<<<<<< HEAD
+     * Setea proceso
+     * @param int $view_level
+     */
+    public function set_process($process) {
+        $this->process = $process;
+    }
+
+    /**
+=======
+>>>>>>> master
         $arrTitles = array();
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);
@@ -502,3 +551,8 @@ class ITForm implements XMLPropInterface {
     }
 
 }
+<<<<<<< HEAD
+        $els = $this->queryEl('/itform/element');
+=======
+        $els = $data->getElementsByTagName("element");
+>>>>>>> master

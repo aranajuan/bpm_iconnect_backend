@@ -14,8 +14,6 @@ class Tkt extends Tree {
     private $idmaster;  /* id del ticket master */
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
-    private $proceso; /* WF asignado */
-    private $th_statusID;   /* TH de status */
 
     /**
      *
@@ -97,14 +95,11 @@ class Tkt extends Tree {
         $this->prioridad = $tmpU["prioridad"];
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
-        $this->proceso = $tmpU["proceso"];
-        $this->th_statusID = $tmpU["idth_status"];
         $this->teamLoaded = false;
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->load_users();
         $this->view = $usr->get_view($this);
-        $this->loadTHstatus();
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
     }
@@ -121,62 +116,6 @@ class Tkt extends Tree {
         return $this->load_path($this->origen, !$fromdb);
     }
 
-    /**
-     * Carga objeto status
-     */
-    private function loadTHstatus() {
-        if (!is_numeric($this->th_statusID)) {
-            $this->th_statusOBJ = null;
-            return;
-        }
-        $THST = $this->objsCache->get_object('TktH', $this->th_statusID, true);
-        $rta = $this->objsCache->get_status('TktH', $this->th_statusID);
-        if ($rta == 'ok') {
-            $THST->set_view($this->view);
-            $this->th_statusOBJ = $THST;
-        } else {
-            $this->getContext()->getLogger()
-                    ->warning('Eliminando status de tkt', array('IDTKT' => $this->id,
-                        'IDTH' => $this->th_statusID,
-                        'RTA' => $rta
-            ));
-            $this->setTHstatus(null);
-        }
-    }
-
-    /**
-     * Setea th de status
-     * @param TktH  Thdestatus
-     */
-    public function setTHstatus($th) {
-        if ($th instanceof TktH) {
-            if($th->get_prop('accion')->get_prop('estadotkt')==''){
-                return 'ok';
-            }
-            $id = intval($th->get_prop('id'));
-            $ssql = 'update TBL_TICKETS set idth_status=' . $id
-                    . ' where id=' . intval($this->id);
-        } else {
-            $ssql = 'update TBL_TICKETS set idth_status=null
-                where id=' . intval($this->id);
-            $id = null;
-        }
-
-
-        if ($this->dbinstance->query($ssql)) {
-            return 'TKT_setStatus: ' . $this->dbinstance->details;
-        }
-        $this->th_statusID = null;
-        $this->loadTHstatus();
-
-        if ($this->is_master()) {
-            foreach ($this->get_prop("childs") as $c) {
-                $c->setTHstatus($th);
-            }
-        }
-        
-        return 'ok';
-    }
 
     /**
      * Es master?
@@ -766,31 +705,6 @@ class Tkt extends Tree {
         return "ok";
     }
 
-    /**
-     * Setea el nombre del proceso
-     * @param string $processName
-     * @return string
-     */
-    function set_process($processName) {
-
-        $pn = strtoupper($processName);
-
-        if (!$this->is_master()) {
-            return "No se puede aplicar a tickets unidos a otros";
-        }
-
-        $ssql = "update TBL_TICKETS set proceso='" . strToSQL($pn) . "' where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_cProceso: " . $this->dbinstance->details;
-        }
-        $this->proceso = $pn;
-
-        foreach ($this->get_prop("childs") as $c) {
-            $c->set_process($pn);
-        }
-
-        return "ok";
-    }
 
     /**
      * Toma el ticket para el usuario logueado
@@ -918,10 +832,6 @@ class Tkt extends Tree {
         if (!$master->is_master())
             return "Este ticket esta anexado al tkt:" . $master->get_prop("idmaster") . ". Debe anexarlo a este.";
 
-        if ($master->get_prop('proceso') != $this->get_prop('proceso')) {
-            return "Los tickets estan en diferentes procesos y no se pueden unir.";
-        }
-
         /* ADECUACION EQUIPO */
         if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
             $rta = $this->ejecute_action("DERIVAR", array(
@@ -990,10 +900,9 @@ class Tkt extends Tree {
 
     /**
      * Vector de TKTS similares
-     * @param   string  Process
      * @return array<Tkt>|null 
      */
-    public function get_similar($process = '') {
+    public function get_similar() {
 
         $critico = $this->get_critic();
 
@@ -1004,7 +913,6 @@ class Tkt extends Tree {
         $criticVC = explode("-", $critico);
         $ssql = "
             select id,origen from TBL_TICKETS where idmaster is null and UB is null 
-            and proceso = '" . strToSQL($process) . "'
             and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
         $this->dbinstance->loadRS($ssql);
         if (!$this->dbinstance->noEmpty) {
@@ -1041,10 +949,10 @@ class Tkt extends Tree {
         if (($rta = $this->check_data())) {
             return $rta;
         }
-        $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,proceso,u_tom,u_asig,FA,UA,FB,UB)" .
+        $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)" .
                 "values ('" . strToSQL($this->get_prop("usr")) . "'," .
                 $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_path()) .
-                "',NULL,NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
+                "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
 
 
         if ($this->dbinstance->query($ssql)) {
@@ -1106,8 +1014,6 @@ class Tkt extends Tree {
                 return $this->childs;
             case 'origen_json':
                 return json_encode($this->get_tree_history());
-            case 'proceso':
-                return $this->proceso;
             case 'tipificacion':
                 $treeh = $this->get_tree_history();
                 $tipif = array();

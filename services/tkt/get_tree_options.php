@@ -47,7 +47,7 @@ function GO($Context) {
         if ($topts["object"]) {
             if ($topts["object"]->get_prop("itform")) {
                 $itform= $topts["object"]->get_prop("itform");
-                $itfdom=$itform->get_UserInputDOM()->documentElement;
+                $itfdom=$itform->getInputDom()->documentElement;
                 $joined = $Context->append_xml($itfdom);
                 if ($joined) {
                     $opendata = $Context->createElement("opendata");
@@ -63,7 +63,7 @@ function GO($Context) {
                 } else {
                     $Context->getLogger()->error('No se pudo unir el formulario',
                             array('id'=>$topts["object"]->get_prop("id"),
-                                'itf'=>$itform->get_inputDOM()->saveXML()));
+                                'itf'=>$itform->getInputDom()->saveXML()));
                     return $Context->createElement("error", "Error en formulario #2");
                 }
             } else {

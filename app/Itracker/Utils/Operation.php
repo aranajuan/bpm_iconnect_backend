@@ -26,10 +26,10 @@ class Operation {
      * @var string
      */
     private $operationSolving;
+
     /**
      * Resultado de la operacion
-     * true/false
-     * @var boolean
+     * @var mixed
      */
     private $result;
 
@@ -73,77 +73,155 @@ class Operation {
      * @return mixed
      */
     public function getObject($alias) {
-        if(isset($this->objects[$alias]))
-                return clone $this->objects[$alias];
+        if (isset($this->objects[$alias]))
+            return clone $this->objects[$alias];
     }
 
     public function solve() {
-       $this->operationSolving=$this->operation;
-       $this->remplaceParams();
-       $OperParser = new OperationParser($this->operationSolving);
-       echo "Ecuacion:".$this->operationSolving;
-       echo "Parseada:";
-       $OperParser->print_all();
-       echo "Resultado: false";
-       exit();
+        $this->operationSolving = $this->operation;
+        $this->result=null;
+        $OperParser = new OperationParser($this->operationSolving);
+        if ($OperParser->getError()) {
+            throw new \Exception('Error al en parametrizacion #1');
+        }
+        $this->solveOperation($OperParser);
+    }
+
+    /**
+     * Ejecuta resolucion
+     * @param OperationParser $operation
+     */
+    private function solveOperation($operation) {
+        $Op = $operation->getOpe(0);
+        $asign = null;
+        $offset=0;
+        if ($Op == '=') { //es asignacion
+            $asign = $operation->getArg(0);
+            if ($this->getArgType($asign) != 'var') {
+                LoggerFactory::getLogger()->error('Error solo se puede asignar a variables',
+                        array('Ec' => $this->operation)
+                );
+                $this->error=true;
+                throw new \Exception('Error al en parametrizacion #2');
+            }
+            $offset++;
+        }
+        $this->result=$this->doMath($operation, $offset);
+        echo "resultado :".$this->result;
+    }
+
+    /**
+     * Resuelve operacion matematica
+     * @param OperationParser $operation
+     * @param int $offset
+     * @return mixed
+     */
+    private function doMath($operation,$offset){
+        $a1=$this->argValue($operation, $offset);
+        $a2=$this->argValue($operation, $offset+1);
+        switch ($operation->getOpe($offset)){
+            case "==":
+                return  $a1==$a2; 
+             case "HIG":
+                return  $a1>$a2;    
+            default :
+                LoggerFactory::getLogger()->error('Error operacion desconocida',
+                        array('Ec' => $this->operation)
+                );
+                $this->error=true;
+                throw new \Exception('Error al en parametrizacion #3');    
+        }
+    }
+    
+    /**
+     * Devuelte el valor real
+     * @param OperationParser $operation
+     * @param int $argID
+     * @return mixed
+     */
+    private function argValue($operation,$argID){
+        return $this->remplaceParams(
+                $operation->getArg($argID)
+                );
+    }
+    
+    /**
+     * Devuelte tipo de argumento
+     * @param string $value
+     * @return string var|number|string|unknown
+     */
+    private function getArgType($value) {
+        if (!$value)
+            return 'unknown';
+        $c = $value{0};
+        if ($c == '{')
+            return 'var';
+        if ($c == '\'')
+            return 'string';
+        if (is_numeric($c))
+            return 'number';
+        return 'unknown';
     }
 
     /**
      * Remplaza las variables en los parametros de la operacion
      */
-    private function remplaceParams(){
-        preg_match_all('/\[([^\[]+[\.]+[^\[]+)}/', $this->operationSolving, $matches);
-        foreach($matches[1] as $m){
-            $prop=$m;
-            $value=$this->getAliasValue($prop);
-            $this->operationSolving = 
-                    str_replace('['.$prop.']', $value, $this->operationSolving);
+    private function remplaceParams($arg) {
+        if($this->getArgType($arg)!='var'){
+            return $this->normalize($arg);
         }
-        preg_match_all('/{([^}]+[\.]+[^}]+)}/', $this->operationSolving, $matches);
-        foreach($matches[1] as $m){
-            $prop=$m;
-            $value=$this->getAliasValue($prop);
-            $this->operationSolving = 
-                    str_replace('{'.$prop.'}', $value, $this->operationSolving);
+        preg_match_all('/\[([^\[]+[\.]+[^\[]+)}/', $arg, $matches);
+        foreach ($matches[1] as $m) {
+            $prop = $m;
+            $value = $this->getAliasValue($prop);
+            $arg =
+                    str_replace('[' . $prop . ']', $value, $arg);
         }
+        preg_match_all('/{([^}]+[\.]+[^}]+)}/', $arg, $matches);
+        foreach ($matches[1] as $m) {
+            $prop = $m;
+            $value = $this->getAliasValue($prop);
+            $arg =
+                    str_replace('{' . $prop . '}', $value, $arg);
+        }
+        return $arg;
     }
-    
+
     /**
      * Devuelve el valor de la propiedad
      * @param string $prop
      * @return string
      */
-    private function getAliasValue($prop){
-        $expP = explode('.',$prop);
+    private function getAliasValue($prop) {
+        $expP = explode('.', $prop);
         $alias = array_shift($expP);
         $obj = $this->getObject($alias);
-        if($obj instanceof \Itracker\ITObject){
+        if ($obj instanceof \Itracker\ITObject) {
             return $this->normalize(
-                    $obj->get_Subprop(implode('.',$expP))
-                );
-        }elseif( $obj instanceof Vars){
+                            $obj->get_Subprop(implode('.', $expP))
+            );
+        } elseif ($obj instanceof Vars) {
             return $this->normalize(
-                    $obj->getValue(
-                            '/'.implode('/',$expP)
+                            $obj->getValue(
+                                    '/' . implode('/', $expP)
                             )
-                    );
-        }else{
+            );
+        } else {
             return 'undefined';
         }
-        
     }
 
-     /**
+    /**
      * Normaliza la variable
      * @param string $prop
      * @return string
      */
-    private function normalize($value){
-        if(is_numeric($value)){
+    private function normalize($value) {
+        if (is_numeric($value)) {
             return $value;
         }
-        return '\''.strToJava($value).'\'';
+        return str_replace(array('\\\'','\''),array('\'','') ,$value);
     }
-    
+
 }
 

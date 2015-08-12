@@ -36,13 +36,19 @@ class OperationParser {
      * @var array 
      */
     private $ops;
-    
+
     /**
      * Temporal de operaciones y argumentos
      * @var string
      */
     private $temp;
 
+    /**
+     *
+     * @var boolean
+     */
+    private $error;
+    
     /**
      * String a paresear, modelo JAVA
      * @param string $operation
@@ -54,32 +60,47 @@ class OperationParser {
         $this->args = array();
         $this->ops = array();
         $this->temp = '';
+        $this->error=false;
         $this->parse();
     }
 
-    public function print_all(){
-        echo "------Operaciones:".  print_r($this->ops,true);
+    /**
+     * Funcion debug
+     */
+    public function print_all() {
+        echo "------Operaciones:" . print_r($this->ops, true);
         echo "-----";
-        echo "Argumentos:".  print_r($this->args,true);
+        echo "Argumentos:" . print_r($this->args, true);
+    }
+
+    /**
+     * Devuelve si hay error
+     * @return boolean
+     */
+    public function getError(){
+        return $this->error;
     }
     
-        /**
+    /**
      * Devuelve operando de la posicion
      * @param int $pos
      * @return string
      */
-    public function getArg($pos){
+    public function getArg($pos) {
+        if($this->error)    return null;
         return $this->args[$pos];
     }
-    
+
     /**
      * Devuelve operador de la posicion
      * @param int $pos
      * @return string
      */
-    public function getOpe($pos){
+    public function getOpe($pos) {
+        if($this->error)    return null;
         return $this->ops[$pos];
     }
+
     /**
      * Parsea desde la posicion indicada
      * @param type $i
@@ -96,6 +117,10 @@ class OperationParser {
         } elseif (is_numeric($char)) {
             $this->parse(
                     $this->getNumber($i)
+            );
+        } elseif ($char == '{') {
+            $this->parse(
+                    $this->getVar($i)
             );
         } elseif ($char != ' ') {
             $this->parse(
@@ -143,10 +168,40 @@ class OperationParser {
         if ($i < $this->operationStrLen) {
             return $this->getString($i + 1);
         }
-        echo "forced";
+        $this->error=true;
+        LoggerFactory::getLogger()->error('Error al parsear ecuacion', array('Ec' => $this->operationStr,
+            'Err' => 'String no finalizado'
+                )
+        );
         return $i;
     }
-    
+
+    /**
+     * Parsea var continuo
+     * @param int $i    posicion inicial
+     * @return int  posicion a continuar
+     */
+    private function getVar($i) {
+        $char = $this->operationStr{$i};
+        $this->temp.=$char;
+
+        if ($char == '}') {
+            $this->addTemp('arg');
+            return $i + 1;
+        }
+
+        if ($i < $this->operationStrLen) {
+            return $this->getVar($i + 1);
+        }
+        $this->error=true;
+        LoggerFactory::getLogger()->error('Error al parsear ecuacion', 
+                array('Ec' => $this->operationStr,
+            'Err' => 'Variable no finalizada'
+                )
+        );
+        return $i;
+    }
+
     /**
      * Parsea operacion continuo
      * @param int $i    posicion inicial

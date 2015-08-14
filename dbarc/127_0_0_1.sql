@@ -2,10 +2,10 @@
 -- version 4.4.3
 -- http://www.phpmyadmin.net
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 01-07-2015 a las 15:40:21
--- Versión del servidor: 5.6.20
--- Versión de PHP: 5.5.15
+-- Servidor: localhost
+-- Tiempo de generación: 14-08-2015 a las 22:30:20
+-- Versión del servidor: 5.6.24
+-- Versión de PHP: 5.5.24
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -19,6 +19,7 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `itracker_agentes_tkt`
 --
+DROP DATABASE `itracker_agentes_tkt`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_tkt` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_tkt`;
 
@@ -34,90 +35,89 @@ CREATE TABLE IF NOT EXISTS `tickets` (
   `usr` varchar(15) NOT NULL,
   `idmaster` int(11) DEFAULT NULL,
   `origen` varchar(255) DEFAULT NULL,
-  `proceso` varchar(50) DEFAULT NULL,
   `idequipo` int(11) DEFAULT NULL,
   `u_tom` varchar(20) DEFAULT NULL,
   `u_asig` int(11) DEFAULT NULL,
   `prioridad` smallint(6) DEFAULT NULL,
-  `idth_status` int(11) DEFAULT NULL,
+  `variables` text,
   `FA` datetime NOT NULL,
   `UA` varchar(15) NOT NULL,
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=68 ;
+) ENGINE=MyISAM AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `tickets`
 --
 
-INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `proceso`, `idequipo`, `u_tom`, `u_asig`, `prioridad`, `idth_status`, `FA`, `UA`, `FB`, `UB`) VALUES
-(1, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', '', 1, NULL, NULL, NULL, NULL, '2014-11-23 21:11:04', 'U1AG1', NULL, NULL),
-(2, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:11:55', 'U1AG1', '2014-11-24 14:02:37', 'COM1'),
-(3, 'U1AG1', NULL, 'D1-S1-O5-O9-O15-', '', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:13:17', 'U1AG1', '2014-11-24 14:13:47', 'COM1'),
-(4, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', NULL, NULL, NULL, '2014-11-27 13:18:31', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
-(5, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', '', 1, NULL, NULL, NULL, NULL, '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
-(6, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', NULL, NULL, NULL, '2014-12-10 10:18:29', 'U1AG1', '2015-02-18 14:58:31', 'COM1'),
-(7, 'U1AG1', 10, 'D1-S1-O4-O9-O14-', '', 2, NULL, 0, NULL, NULL, '2014-12-10 10:19:24', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(8, 'U1AG1', 1, 'D1-S1-O3-O7-O13-', '', 1, NULL, NULL, NULL, NULL, '2014-12-12 09:25:49', 'U1AG1', NULL, NULL),
-(10, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 11:55:15', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(9, 'U1AG1', 10, 'D1-S1-O3-O7-O12-', '', 2, 'COM1', NULL, NULL, NULL, '2015-01-15 11:14:31', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(11, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 16:53:07', 'U1AG1', '2015-02-19 15:00:26', 'COM1'),
-(12, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-05 14:53:21', 'U1AG1', '2015-02-09 14:35:57', 'COM1'),
-(13, 'U1AG2', 4, 'D1-S1-O5-O8-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-06 16:41:37', 'U1AG2', '2015-05-07 16:05:41', 'COM1'),
-(14, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:17', 'U1AG1', '2015-02-27 09:03:25', 'COM1'),
-(15, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:54', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
-(16, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:20:16', 'U1AG1', NULL, NULL),
-(17, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:21:33', 'U1AG1', '2015-02-27 10:03:44', 'COM1'),
-(18, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:22:19', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
-(19, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:25:00', 'U1AG1', '2015-02-19 15:01:33', 'COM1'),
-(20, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:28:24', 'U1AG1', '2015-04-27 16:04:11', 'COM1'),
-(21, 'U1AG1', 18, 'D1-S1-O5-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-02-09 16:41:46', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
-(22, 'U1AG1', 16, 'D1-S1-O5-O9-O14-', '', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:42:12', 'U1AG1', NULL, NULL),
-(23, 'U1AG1', 4, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-10 09:53:18', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
-(24, 'U1AG1', 15, 'D1-S1-O5-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-02-10 10:19:12', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
-(25, 'U1AG1', 1, 'D1-S1-O4-O9-O14-', '', 1, NULL, NULL, NULL, NULL, '2015-02-10 10:21:15', 'U1AG1', NULL, NULL),
-(26, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(27, 'U1AG2', NULL, 'D1-S1-O5-O9-O14-', '', 1, NULL, NULL, NULL, NULL, '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
-(28, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(29, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 'PRO8', 2, 'COM1', NULL, NULL, 375, '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
-(30, 'U1AG1', 28, 'D1-S1-O4-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(31, 'U1AG1', 37, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(32, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(33, 'U1AG1', NULL, 'D1-S1-O5-O8-', '', 2, NULL, NULL, NULL, NULL, '2015-03-05 09:49:47', 'U1AG1', NULL, NULL),
-(34, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', '', 2, NULL, NULL, NULL, NULL, '2015-03-12 12:52:41', 'U1AG1', NULL, NULL),
-(35, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:37:11', 'U1AG1', '2015-06-04 11:20:21', 'COM1'),
-(36, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:38:00', 'U1AG1', NULL, NULL),
-(37, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-12 14:38:31', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(38, 'U1AG1', 37, 'D1-S1-O1-', '', 2, 'COM1', NULL, NULL, 368, '2015-03-12 14:39:15', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(39, 'U1AG1', 43, 'D1-S1-O1-', '', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:41:29', 'U1AG1', NULL, NULL),
-(40, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:44:29', 'U1AG1', '2015-03-12 14:44:29', 'U1AG1'),
-(41, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:46:49', 'U1AG1', '2015-03-12 14:46:49', 'U1AG1'),
-(42, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:48:11', 'U1AG1', '2015-03-12 14:48:11', 'U1AG1'),
-(43, 'U1AG2', NULL, 'D1-S1-O4-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:00:59', 'U1AG2', NULL, NULL),
-(44, 'U1AG2', 45, 'D1-S1-O4-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-04-23 15:23:46', 'U1AG2', NULL, NULL),
-(45, 'U1AG2', NULL, 'D1-S1-O5-O9-O14-', '', 2, 'COM1', NULL, NULL, NULL, '2015-04-23 15:25:40', 'U1AG2', NULL, NULL),
-(46, 'U1AG2', NULL, 'D1-S1-O3-O7-O12-', '', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:26:07', 'U1AG2', NULL, NULL),
-(47, 'U1AG2', NULL, 'D1-S1-O4-O9-O14-', '', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:26:54', 'U1AG2', NULL, NULL),
-(48, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:10:19', 'U1AG2', '2015-06-25 14:27:55', 'COM1'),
-(49, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', 0, NULL, NULL, '2015-04-29 14:10:41', 'U1AG2', NULL, NULL),
-(50, 'U1AG2', 49, 'D1-S1-O3-O7-O13-', '', 2, NULL, 0, NULL, NULL, '2015-04-29 14:11:50', 'U1AG2', NULL, NULL),
-(51, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', '', 2, NULL, NULL, NULL, NULL, '2015-04-29 14:12:31', 'U1AG2', NULL, NULL),
-(52, 'U1AG2', 53, 'D1-S1-O3-O7-O13-', '', 2, 'COM1', 0, NULL, NULL, '2015-04-29 14:13:25', 'U1AG2', NULL, NULL),
-(53, 'U1AG2', NULL, 'D1-S1-O3-O6-O10-', '', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:16:00', 'U1AG2', NULL, NULL),
-(54, 'U1AG2', NULL, 'D1-S1-O4-O8-', '', 2, NULL, NULL, NULL, NULL, '2015-04-29 14:16:17', 'U1AG2', NULL, NULL),
-(55, 'U1AG2', NULL, 'D1-S1-O4-O8-', '', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:16:29', 'U1AG2', '2015-06-25 14:10:03', 'COM1'),
-(56, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-06-04 11:59:04', 'U1AG1', '2015-06-04 11:59:04', 'U1AG1'),
-(57, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:12:55', 'U1AG1', '2015-06-22 14:12:55', 'U1AG1'),
-(58, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:19:04', 'U1AG1', '2015-06-22 14:19:04', 'U1AG1'),
-(59, 'U1AG1', NULL, 'D1-S1-O1-', '', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:20:12', 'U1AG1', '2015-06-22 14:20:12', 'U1AG1'),
-(60, 'U1AG1', NULL, 'D1-S1-O1-', 'PRO8', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
-(61, 'U1AG1', NULL, 'D1-S1-O1-', 'PFILE', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:23:45', 'U1AG1', '2015-06-22 14:23:45', 'U1AG1'),
-(62, 'U1AG1', NULL, 'D1-S1-O3-O6-O10-', 'PRO5', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:25:50', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
-(63, 'U1AG1', NULL, 'D1-S1-O5-O8-', 'PRO1', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:27:13', 'U1AG1', '2015-06-25 14:33:41', 'COM1'),
-(64, 'U1AG1', 62, 'D1-S1-O3-O6-O10-', 'PRO2', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:39:10', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
-(65, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 'PRO2_M100', 6, NULL, NULL, NULL, NULL, '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
-(66, 'U1AG1', NULL, 'D1-S1-O3-O6-O11-', 'PRO1_2', 2, NULL, NULL, NULL, NULL, '2015-06-26 11:41:30', 'U1AG1', NULL, NULL),
-(67, 'U1AG1', NULL, 'D1-S1-O1-', 'PFILE', 2, NULL, NULL, NULL, NULL, '2015-06-26 11:49:42', 'U1AG1', '2015-06-26 11:49:42', 'U1AG1');
+INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `u_asig`, `prioridad`, `variables`, `FA`, `UA`, `FB`, `UB`) VALUES
+(1, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', 1, NULL, NULL, NULL, NULL, '2014-11-23 21:11:04', 'U1AG1', NULL, NULL),
+(2, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:11:55', 'U1AG1', '2014-11-24 14:02:37', 'COM1'),
+(3, 'U1AG1', NULL, 'D1-S1-O5-O9-O15-', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:13:17', 'U1AG1', '2014-11-24 14:13:47', 'COM1'),
+(4, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', NULL, NULL, NULL, '2014-11-27 13:18:31', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
+(5, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', 1, NULL, NULL, NULL, NULL, '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
+(6, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', NULL, NULL, NULL, '2014-12-10 10:18:29', 'U1AG1', '2015-02-18 14:58:31', 'COM1'),
+(7, 'U1AG1', 10, 'D1-S1-O4-O9-O14-', 2, NULL, 0, NULL, NULL, '2014-12-10 10:19:24', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(8, 'U1AG1', 1, 'D1-S1-O3-O7-O13-', 1, NULL, NULL, NULL, NULL, '2014-12-12 09:25:49', 'U1AG1', NULL, NULL),
+(10, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 11:55:15', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(9, 'U1AG1', 10, 'D1-S1-O3-O7-O12-', 2, 'COM1', NULL, NULL, NULL, '2015-01-15 11:14:31', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(11, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 16:53:07', 'U1AG1', '2015-02-19 15:00:26', 'COM1'),
+(12, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', 2, 'COM1', NULL, NULL, NULL, '2015-02-05 14:53:21', 'U1AG1', '2015-02-09 14:35:57', 'COM1'),
+(13, 'U1AG2', 4, 'D1-S1-O5-O8-', 2, 'COM1', NULL, NULL, NULL, '2015-02-06 16:41:37', 'U1AG2', '2015-05-07 16:05:41', 'COM1'),
+(14, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:17', 'U1AG1', '2015-02-27 09:03:25', 'COM1'),
+(15, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:54', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
+(16, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:20:16', 'U1AG1', NULL, NULL),
+(17, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:21:33', 'U1AG1', '2015-02-27 10:03:44', 'COM1'),
+(18, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:22:19', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
+(19, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:25:00', 'U1AG1', '2015-02-19 15:01:33', 'COM1'),
+(20, 'U1AG1', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:28:24', 'U1AG1', '2015-04-27 16:04:11', 'COM1'),
+(21, 'U1AG1', 18, 'D1-S1-O5-O9-O14-', 2, NULL, NULL, NULL, NULL, '2015-02-09 16:41:46', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
+(22, 'U1AG1', 16, 'D1-S1-O5-O9-O14-', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:42:12', 'U1AG1', NULL, NULL),
+(23, 'U1AG1', 4, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-10 09:53:18', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
+(24, 'U1AG1', 15, 'D1-S1-O5-O9-O14-', 2, NULL, NULL, NULL, NULL, '2015-02-10 10:19:12', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
+(25, 'U1AG1', 1, 'D1-S1-O4-O9-O14-', 1, NULL, NULL, NULL, NULL, '2015-02-10 10:21:15', 'U1AG1', NULL, NULL),
+(26, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(27, 'U1AG2', NULL, 'D1-S1-O5-O9-O14-', 1, NULL, NULL, NULL, NULL, '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
+(28, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
+(29, 'U1AG1', NULL, 'D1-S1-O4-O9-O14-', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><VariablePrueba2>11</VariablePrueba2><VariablePrueba1>Hoal</VariablePrueba1><status>Usuario Analist Comisiones</status><abierto>1</abierto><seteado>0</seteado></tkt>\n', '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
+(30, 'U1AG1', 28, 'D1-S1-O4-O9-O14-', 2, NULL, NULL, NULL, NULL, '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
+(31, 'U1AG1', 37, 'D1-S1-O4-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(32, 'U1AG1', 37, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(33, 'U1AG1', NULL, 'D1-S1-O5-O8-', 2, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>No es TKT 29</status><seteado>0</seteado></tkt>\n', '2015-03-05 09:49:47', 'U1AG1', NULL, NULL),
+(34, 'U1AG1', NULL, 'D1-S1-O4-O9-O15-', 2, NULL, NULL, NULL, NULL, '2015-03-12 12:52:41', 'U1AG1', NULL, NULL),
+(35, 'U1AG1', NULL, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:37:11', 'U1AG1', '2015-06-04 11:20:21', 'COM1'),
+(36, 'U1AG1', NULL, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:38:00', 'U1AG1', NULL, NULL),
+(37, 'U1AG1', NULL, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:38:31', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(38, 'U1AG1', 37, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:39:15', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(39, 'U1AG1', 43, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:41:29', 'U1AG1', NULL, NULL),
+(40, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:44:29', 'U1AG1', '2015-03-12 14:44:29', 'U1AG1'),
+(41, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:46:49', 'U1AG1', '2015-03-12 14:46:49', 'U1AG1'),
+(42, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:48:11', 'U1AG1', '2015-03-12 14:48:11', 'U1AG1'),
+(43, 'U1AG2', NULL, 'D1-S1-O4-O9-O14-', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:00:59', 'U1AG2', NULL, NULL),
+(44, 'U1AG2', 45, 'D1-S1-O4-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-04-23 15:23:46', 'U1AG2', NULL, NULL),
+(45, 'U1AG2', NULL, 'D1-S1-O5-O9-O14-', 2, 'COM1', NULL, NULL, NULL, '2015-04-23 15:25:40', 'U1AG2', NULL, NULL),
+(46, 'U1AG2', NULL, 'D1-S1-O3-O7-O12-', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:26:07', 'U1AG2', NULL, NULL),
+(47, 'U1AG2', NULL, 'D1-S1-O4-O9-O14-', 2, NULL, NULL, NULL, NULL, '2015-04-23 15:26:54', 'U1AG2', NULL, NULL),
+(48, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:10:19', 'U1AG2', '2015-06-25 14:27:55', 'COM1'),
+(49, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', 2, 'COM1', 0, NULL, NULL, '2015-04-29 14:10:41', 'U1AG2', NULL, NULL),
+(50, 'U1AG2', 49, 'D1-S1-O3-O7-O13-', 2, NULL, 0, NULL, NULL, '2015-04-29 14:11:50', 'U1AG2', NULL, NULL),
+(51, 'U1AG2', NULL, 'D1-S1-O3-O7-O13-', 2, NULL, NULL, NULL, NULL, '2015-04-29 14:12:31', 'U1AG2', NULL, NULL),
+(52, 'U1AG2', 53, 'D1-S1-O3-O7-O13-', 2, 'COM1', 0, NULL, NULL, '2015-04-29 14:13:25', 'U1AG2', NULL, NULL),
+(53, 'U1AG2', NULL, 'D1-S1-O3-O6-O10-', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:16:00', 'U1AG2', NULL, NULL),
+(54, 'U1AG2', NULL, 'D1-S1-O4-O8-', 2, NULL, NULL, NULL, NULL, '2015-04-29 14:16:17', 'U1AG2', NULL, NULL),
+(55, 'U1AG2', NULL, 'D1-S1-O4-O8-', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:16:29', 'U1AG2', '2015-06-25 14:10:03', 'COM1'),
+(56, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-04 11:59:04', 'U1AG1', '2015-06-04 11:59:04', 'U1AG1'),
+(57, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:12:55', 'U1AG1', '2015-06-22 14:12:55', 'U1AG1'),
+(58, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:19:04', 'U1AG1', '2015-06-22 14:19:04', 'U1AG1'),
+(59, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:20:12', 'U1AG1', '2015-06-22 14:20:12', 'U1AG1'),
+(60, 'U1AG1', NULL, 'D1-S1-O1-', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
+(61, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:23:45', 'U1AG1', '2015-06-22 14:23:45', 'U1AG1'),
+(62, 'U1AG1', NULL, 'D1-S1-O3-O6-O10-', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:25:50', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
+(63, 'U1AG1', NULL, 'D1-S1-O5-O8-', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:27:13', 'U1AG1', '2015-06-25 14:33:41', 'COM1'),
+(64, 'U1AG1', 62, 'D1-S1-O3-O6-O10-', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:39:10', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
+(65, 'U1AG1', NULL, 'D1-S1-O3-O7-O13-', 6, NULL, NULL, NULL, NULL, '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
+(66, 'U1AG1', NULL, 'D1-S1-O3-O6-O11-', 2, NULL, NULL, NULL, NULL, '2015-06-26 11:41:30', 'U1AG1', NULL, NULL),
+(67, 'U1AG1', NULL, 'D1-S1-O1-', 2, NULL, NULL, NULL, NULL, '2015-06-26 11:49:42', 'U1AG1', '2015-06-26 11:49:42', 'U1AG1');
 
 -- --------------------------------------------------------
 
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `tickets_m` (
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=376 ;
+) ENGINE=MyISAM AUTO_INCREMENT=381 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `tickets_m`
@@ -517,7 +517,12 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 (372, 38, 19, '368', '2015-06-30 15:12:05', 'COM1', NULL, NULL, 0),
 (373, 29, 20, '', '2015-06-30 15:13:22', 'COM1', NULL, NULL, 0),
 (374, 29, 2, '', '2015-07-01 10:24:49', 'COM1', NULL, NULL, 0),
-(375, 29, 6, '', '2015-07-01 10:24:57', 'COM1', NULL, NULL, 0);
+(375, 29, 6, '', '2015-07-01 10:24:57', 'COM1', NULL, NULL, 0),
+(376, 36, 3, '', '2015-08-11 15:21:47', 'COM1', NULL, NULL, 0),
+(377, 33, 17, '', '2015-08-11 15:31:07', 'COM1', NULL, NULL, 0),
+(378, 33, 17, '', '2015-08-11 15:32:01', 'COM1', NULL, NULL, 0),
+(379, 36, 5, '', '2015-08-11 15:32:39', 'COM1', NULL, NULL, 0),
+(380, 33, 17, '', '2015-08-11 15:54:22', 'COM1', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -796,7 +801,10 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 (372, '<?xml version="1.0"?>\n<itform>\n  \n</itform>\n'),
 (373, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   <value>PRO8</value></element></itform>\n'),
 (374, '<?xml version="1.0"?>\n<itform>\n  <element>\n    <label>Comentario</label>\n    <type>inputlong</type>\n    <id>comment</id>\n    <validations>\n      <required>true</required>\n    </validations>\n    <defaults>\n<default>\n<process>PRO4</process>\n<value>comentario default</value>\n</default>\n<default>\n<process>PRO5</process>\n<value>comentario default 5</value>\n</default>\n<default>\n<process>PRO[0-9]</process>\n<value>comentario default para 1</value>\n</default>\n<default>\n<value>sin default</value>\n</default>\n</defaults>\n  <value>comentario default para 1</value></element>\n<element>\n    <label>Comentario2</label>\n    <type>inputlong</type>\n    <id>comment2</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  <value>fghgf</value></element>\n</itform>\n'),
-(375, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>fgh</value></element> </itform>\n');
+(375, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>fgh</value></element> </itform>\n'),
+(377, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value/></element> </itform>\n'),
+(378, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>asdas</value></element> </itform>\n'),
+(380, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>dfds</value></element> </itform>\n');
 
 --
 -- Índices para tablas volcadas
@@ -829,14 +837,15 @@ ALTER TABLE `tickets_m_detalles`
 -- AUTO_INCREMENT de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=68;
 --
 -- AUTO_INCREMENT de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=376;--
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=381;--
 -- Base de datos: `itracker_agentes_uta`
 --
+DROP DATABASE `itracker_agentes_uta`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_uta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_uta`;
 
@@ -878,7 +887,7 @@ CREATE TABLE IF NOT EXISTS `acciones` (
 
 INSERT INTO `acciones` (`id`, `nombre`, `alias`, `estadotkt`, `ejecuta`, `tipo`, `formulario`, `form`, `habilita_procesos`, `habilita_estados`, `habilita_t_propio`, `habilita_tomado`, `habilita_equipos`, `habilita_perfiles`, `habilita_a_propio`, `habilita_abierto`, `habilita_equipo`, `habilita_master`, `notificacion_param`, `notificacion_texto`, `descripcion`, `estado`) VALUES
 (1, 'ABRIR', 'ABRIR', 'Pendiente', 'open', 1, 1, NULL, '.*', '.*', 0, 2, '*', '5,', 2, 2, 0, 0, '(is_master)(to:{team})', 'Se ha generado un nuevo itracker derivado al area.<br />\nID: {id}<br />\nPuedes verlo en ITRACKER', 'Genera un nuevo ticket', 0),
-(2, 'CERRAR', 'CERRAR', 'Cerrado', 'close', 1, 1, '<itform>\r\n  <element>\r\n    <label>Comentario</label>\r\n    <type>inputlong</type>\r\n    <id>comment</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n    <defaults>\r\n<default>\r\n<process>PRO4</process>\r\n<value>comentario default</value>\r\n</default>\r\n<default>\r\n<process>PRO5</process>\r\n<value>comentario default 5</value>\r\n</default>\r\n<default>\r\n<process>PRO[0-9]</process>\r\n<value>comentario default para 1</value>\r\n</default>\r\n<default>\r\n<value>sin default</value>\r\n</default>\r\n</defaults>\r\n  </element>\r\n<element>\r\n    <label>Comentario2</label>\r\n    <type>inputlong</type>\r\n    <id>comment2</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n  </element>\r\n</itform>', 'PRO[1-9]', 'tomado,en.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
+(2, 'CERRAR', 'CERRAR', 'Cerrado', 'close', 1, 1, '<itform>\n  <element>\n    <label>Comentario</label>\n    <type>inputlong</type>\n    <id>comment</id>\n    <validations>\n      <required>true</required>\n    </validations>\n    <defaults>\n<default>\n<process>PRO4</process>\n<value>comentario default</value>\n</default>\n<default>\n<process>PRO5</process>\n<value>comentario default 5</value>\n</default>\n<default>\n<process>PRO[0-9]</process>\n<value>comentario default para 1</value>\n</default>\n<default>\n<value>sin default</value>\n</default>\n</defaults>\n  </element>\n<element>\n    <label>Comentario2</label>\n    <type>inputlong</type>\n    <id>comment2</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', 'PRO[1-9]', 'tomado,en.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
 (3, 'LIBERAR', 'LIBERAR', NULL, 'free', 2, 0, NULL, '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
 (4, 'DERIVAR', 'DERIVAR', 'derivado', 'derive', 2, 1, '\n<itform> 	<element> 		<label> 			Equipo a derivar 		</label> 		<notsave>true</notsave> 		<type> 			idsel 		</type> 		<id> 			idequipo 		</id> 		<idselparams> 			<class>tkt</class> 			<method>idsel_teamderive</method> 		</idselparams> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element> 	<element> 		<type> 			inputlong 		</type> 	<label>Comentario</label>	<id> 			comment 		</id> 		<comment> 			Commentario 		</comment> 	</element> </itform>', '.*', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{team}::cc:{prev_team})', 'Se ha derivado un itracker al area.<br />\nID: {id}<br />\nApertura: {FA}<br />\nPuedes verlo en ITRACKER', 'Asignar el ticket a otro equipo', 0),
 (5, 'TOMAR', 'TOMAR', 'en analisis', 'take', 2, 0, NULL, '.*', '.*', 0, 2, '*', '3,4,', 0, 1, 1, 1, '', '', 'Reservar el ticket para su tratamiento', 0),
@@ -895,8 +904,7 @@ INSERT INTO `acciones` (`id`, `nombre`, `alias`, `estadotkt`, `ejecuta`, `tipo`,
 (16, 'COMENTARIO_GENERADOR', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', 'PRO1_[1-9],PRO2', '.*', 0, 0, '*', '5,', 1, 0, 0, 0, '', '', 'comentario cliente', 0),
 (17, 'COMENTARIO_EQUIPO', 'COMENTARIO', NULL, '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '.*', '.*', 0, 0, '*', '3,4,', 2, 0, 1, 0, '', '', 'comentario equipo', 0),
 (18, 'CERRAR_RUTA', 'CERRAR', 'cerrado', 'close', 1, 1, '<itform>\r\n   <element>\r\n      <id>text1</id>\r\n      <type>text</type>\r\n      <text>Descargue el archivo del siguiente link</text>\r\n   </element>\r\n   <element>\r\n      <type>link</type>\r\n      <id>link_archivo</id>\r\n      <label>LINK</label>\r\n      <text>DESCARGAR</text>\r\n	  <validations>\r\n		<required>true</required>\r\n	  </validations>\r\n   </element>\r\n</itform>', '.*', '.*', 2, 0, '-1', '-1', 1, 1, 0, 1, '', '', 'Cierra ticket a link', 0),
-(19, 'LINK', 'link', NULL, 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '.*', '.*', 0, 0, '*', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0),
-(20, 'SET_PROCESS', 'ESTABLECER PROCESO', NULL, 'setprocess', 1, 1, '<?xml version="1.0" encoding="UTF-8"?><itform>   <element>      <label>Proceso</label>      <type>input</type>      <id>proceso</id>      <validations>         <required>true</required>      </validations>   </element></itform>', '.*', '.*', 0, 0, '*', '3,4,', 0, 0, 0, 0, '', '', 'Establece proceso del tkt', 0);
+(19, 'LINK', 'link', NULL, 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '.*', '.*', 0, 0, '*', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0);
 
 -- --------------------------------------------------------
 
@@ -937,7 +945,7 @@ CREATE TABLE IF NOT EXISTS `equipos` (
   `mytkts_vista` text,
   `staffhome_vista` text,
   `estado` int(11) NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `equipos`
@@ -964,7 +972,7 @@ CREATE TABLE IF NOT EXISTS `listines` (
   `too` text,
   `cc` text,
   `estado` text NOT NULL
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `listines`
@@ -1369,12 +1377,12 @@ ALTER TABLE `direccion`
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `listines`
 --
 ALTER TABLE `listines`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `opciones`
 --
@@ -1402,6 +1410,7 @@ ALTER TABLE `sistemas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
 -- Base de datos: `itracker_root`
 --
+DROP DATABASE `itracker_root`;
 CREATE DATABASE IF NOT EXISTS `itracker_root` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_root`;
 
@@ -1471,7 +1480,7 @@ CREATE TABLE IF NOT EXISTS `sesiones` (
 --
 
 INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`) VALUES
-('COM1', '10.66.93.46', 1, 'b3d0a380d23873ba2afc8f1d81f33230b0d79241', '2015-07-01 10:05:10'),
+('COM1', '127.0.0.1', 1, '815cab6bf8ce5546fda4f88bc740dc7a8437d5af', '2015-08-14 09:37:52'),
 ('COMGO', '190.175.110.1', 1, 'bdbb102b38ec6e6ceeb0a81c4bb062ab20912fb2', '2014-11-22 20:11:39'),
 ('COMRES', '10.112.0.4', 1, '3e434e01511e4c4fe34f1389468794017a77808a', '2014-12-31 10:27:28'),
 ('FEDE', '10.66.93.46', 1, '5b5ff479ca227827238a3734d4a21770faf2e512', '2014-12-12 12:50:53'),
@@ -1571,13 +1580,13 @@ ALTER TABLE `sesiones`
 -- Indices de la tabla `ucontac`
 --
 ALTER TABLE `ucontac`
- ADD PRIMARY KEY (`usr`);
+  ADD PRIMARY KEY (`usr`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
- ADD PRIMARY KEY (`usr`);
+  ADD PRIMARY KEY (`usr`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

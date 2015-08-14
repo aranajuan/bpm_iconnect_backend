@@ -15,11 +15,6 @@ class Tkt extends Tree {
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
 
-    /**
-     *
-     * @var TktH
-     */
-    private $th_statusOBJ; /* TH de status OBJ */
     private $u_tom; /* id usuario tomado */
     private $u_tom_o;   /* usuario tomado */
     private $u_asig;    /* id usuario asigno */
@@ -36,6 +31,13 @@ class Tkt extends Tree {
     private $view;  /* vista para el usuario */
     private $working;
 
+    private $variables;
+    /**
+     * Variables de ticket
+     * @var \Itracker\Utils\Vars
+     */
+    private $vars;
+    
     /**
      * Accion que se esta ejecutando
      * @var Action
@@ -96,6 +98,20 @@ class Tkt extends Tree {
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
         $this->teamLoaded = false;
+        $this->variables = $tmpU["variables"];
+        if($this->variables!=''){
+            $this->vars=new \Itracker\Utils\Vars();
+            $this->vars->setRootTag('tkt');
+            if($this->vars->loadXML($this->variables)==false){
+                $this->getContext()->getLogger()->error('Variables invalidas en tkt',
+                        array('id'=>$this->id,'vars'=>$this->variables));
+                return 'Error al cargar tkt.[Vars Error]';
+            }
+        }else{
+            $this->vars=new Utils\Vars();
+            $this->vars->setRootTag('tkt');
+            $this->vars->clean();
+        }
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->load_users();
@@ -103,7 +119,7 @@ class Tkt extends Tree {
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
     }
-
+   
     /**
      * Carga ruta
      * @param type $tmpU
@@ -264,23 +280,41 @@ class Tkt extends Tree {
         return $i;
     }
 
+    /**
+     * Devuelve variables del ticket
+     * @return \Itracker\Utils\Vars
+     */
+    public function getVars(){
+        return clone $this->vars;
+    }
+    
+    /**
+     * Setea variables de ticket
+     * @param \Itracker\Utils\Vars $vars
+     * @return string se pudo guardar
+     */
+    public function setVars($vars){
+        if(! ($vars instanceof Utils\Vars)){
+            return 'Parametro invalido setVars #1';
+        }
+        $ssql = "update TBL_TICKETS set variables='".  strToSQL($vars->getXml()->saveXML())."' where id=" . intval($this->id);
+        if ($this->dbinstance->query($ssql))
+            return "Ticket_vars: " . $this->dbinstance->details;
+        $this->vars=$vars;
+        return 'ok';
+    }
+
+
     /*
      * devuelve el estado del tkt
      * @return  string
      */
-
     public function get_status() {
-
-        if ($this->th_statusOBJ instanceof TktH) {
-            $accion = $this->th_statusOBJ->get_prop('accion');
-            if ($accion instanceof Action) {
-                $estado = trim($accion->get_prop('estadotkt'));
-                if ($estado != '') {
-                    return $estado;
-                }
-            }
+        $varStat=$this->vars->getValue('status');
+        if($varStat){
+            return $varStat;
         }
-
+        
         $TKTHF = $this->get_last_tktH();
         if ($this->UB) {
             $status = "Cerrado";

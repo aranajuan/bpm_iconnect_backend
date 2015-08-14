@@ -23,7 +23,7 @@ class Config {
         }
 
         $this->vars = new Vars();
-
+        $this->vars->setRootTag('itracker');
         if ($this->vars->loadFile($file) == false) {
             LoggerFactory::getLogger()->error(
                     'Archivo de configuraciones no seteado', array('path' => $file, 'msg' => $e->getMessage()));
@@ -83,7 +83,7 @@ class Config {
      * @throws \DOMException
      */
     private function getNodeValue($path) {
-        $val = $this->vars->getValue('/itracker/'.$path);
+        $val = $this->vars->getValue($path);
         return $val;
     }
 

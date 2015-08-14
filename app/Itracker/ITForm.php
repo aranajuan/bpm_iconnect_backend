@@ -441,8 +441,16 @@ class ITForm implements XMLPropInterface {
         return "Propiedad invalida.";
     }
 
-    public function getXML($doc, $props) {
-        return null;
+    public function getXML() {
+        return $this->getInputDom();
+    }
+
+    public function get_Subprop($p, $hideError = false) {
+        $this->get_prop($p);
+    }
+
+    public function set_prop($property, $value) {
+        $this->set_value($property, $value);
     }
 
 }

@@ -8,7 +8,7 @@ namespace Itracker\Utils;
  * 
  * @author juan
  */
-class Vars {
+class Vars implements \Itracker\XMLPropInterface {
 
     /**
      *  Xml de la base
@@ -35,6 +35,19 @@ class Vars {
     private $vars;
 
     /**
+     * Tag root
+     * @var string
+     */
+    private $rootTag;
+
+    public function __construct($rootag=null) {
+        if($rootag){
+            $this->clean();
+            $this->setRootTag($rootag);
+        }
+    }
+    
+    /**
      *  Carga variables desde archivo
      * @param string $path
      * @return boolean
@@ -58,7 +71,7 @@ class Vars {
 
         $this->dom = clone $this->dom_init;
 
-        return  $this->loadVars();
+        return $this->loadVars();
     }
 
     /**
@@ -116,6 +129,14 @@ class Vars {
     }
 
     /**
+     * Set tag root
+     * @param string $tag
+     */
+    public function setRootTag($tag) {
+        $this->rootTag = $tag;
+    }
+
+    /**
      *  Carga valores de variables
      * @return boolean  se pudo cargar
      */
@@ -149,6 +170,8 @@ class Vars {
      * @return mixed
      */
     public function getValue($varName) {
+        $varName = str_replace('.', '/', $varName);
+        $varName = '/' . $this->rootTag . '/' . $varName;
         if (!isset($this->vars[$varName])) {
             return null;
         }
@@ -162,6 +185,8 @@ class Vars {
      * @param mixed $value  | null para eliminar
      */
     public function setValue($varName, $value) {
+        $varName = str_replace('.', '/', $varName);
+        $varName = '/' . $this->rootTag . '/' . $varName;
         $this->vars[$varName] = $value;
     }
 
@@ -169,54 +194,60 @@ class Vars {
      * Genera documento con las variables modificadas
      * @return \DOMDocument
      */
-    public function getXml(){
+    public function getXml() {
         $this->dom = new \DOMDocument();
-        foreach($this->vars as $k=>$v){ 
+        foreach ($this->vars as $k => $v) {
             $this->createElement($k, $v);
         }
         return $this->dom;
-
     }
-    
+
     /**
      * Agrega elemento a dom
      * @param string $path
      * @param mixed $v
      */
-    private function createElement($path,$v){
-        $pathV=explode('/',$path);
-        $pos = count($pathV)-1;
+    private function createElement($path, $v) {
+        $pathV = explode('/', $path);
+        $pos = count($pathV) - 1;
         $i = 0;
-        $dompos=$this->dom;
-        foreach($pathV as $p){
-            if($i == $pos){
+        $dompos = $this->dom;
+        foreach ($pathV as $p) {
+            if ($i == $pos) {
                 $nnode = $this->dom->createElement($p, $v);
                 $dompos->appendChild($nnode);
                 return;
             }
-            
-            if($i==0 && $p=='' ){
+
+            if ($i == 0 && $p == '') {
                 $i++;
                 continue;
             }
-            
+
             $els = $dompos->getElementsByTagName($p);
-            
-            if($els->length==0){
+
+            if ($els->length == 0) {
                 $nnode = $this->dom->createElement($p);
                 $dompos->appendChild($nnode);
-                $dompos=$nnode;
-            }else{
-                $dompos=$els->item(0);
+                $dompos = $nnode;
+            } else {
+                $dompos = $els->item(0);
             }
-            
+
             $i++;
         }
-        
     }
-    /* TODO:
-     * get out
-     * integrar con configs
-     * 
-     */
+
+    public function get_prop($property) {
+        return $this->getValue($property);
+    }
+
+    public function set_prop($property, $value) {
+        return $this->setValue($property, $value);
+    }
+
+    public function get_Subprop($p,$hideError=false){
+        return $this->getValue($p);
+    }
+    
 }

@@ -54,6 +54,8 @@ class Operation {
      */
     public function operate($operation) {
         $this->operation = $operation;
+        $this->solve();
+        return $this->error;
     }
 
     /**
@@ -74,12 +76,12 @@ class Operation {
      */
     public function getObject($alias) {
         if (isset($this->objects[$alias]))
-            return clone $this->objects[$alias];
+            return $this->objects[$alias];
     }
 
-    public function solve() {
+    private function solve() {
         $this->operationSolving = $this->operation;
-        $this->result=null;
+        $this->result = null;
         $OperParser = new OperationParser($this->operationSolving);
         if ($OperParser->getError()) {
             throw new \Exception('Error al en parametrizacion #1');
@@ -94,20 +96,21 @@ class Operation {
     private function solveOperation($operation) {
         $Op = $operation->getOpe(0);
         $asign = null;
-        $offset=0;
+        $offset = 0;
         if ($Op == '=') { //es asignacion
             $asign = $operation->getArg(0);
             if ($this->getArgType($asign) != 'var') {
-                LoggerFactory::getLogger()->error('Error solo se puede asignar a variables',
-                        array('Ec' => $this->operation)
+                LoggerFactory::getLogger()->error('Error solo se puede asignar a variables', array('Ec' => $this->operation)
                 );
-                $this->error=true;
+                $this->error = true;
                 throw new \Exception('Error al en parametrizacion #2');
             }
             $offset++;
         }
-        $this->result=$this->doMath($operation, $offset);
-        echo "resultado :".$this->result;
+        $this->result = $this->doMath($operation, $offset);
+        if ($asign) {
+            $this->asignValue($asign, $this->result);
+        }
     }
 
     /**
@@ -116,35 +119,40 @@ class Operation {
      * @param int $offset
      * @return mixed
      */
-    private function doMath($operation,$offset){
-        $a1=$this->argValue($operation, $offset);
-        $a2=$this->argValue($operation, $offset+1);
-        switch ($operation->getOpe($offset)){
+    private function doMath($operation, $offset) {
+        $a1 = $this->argValue($operation, $offset);
+        $a2 = $this->argValue($operation, $offset + 1);
+        switch ($operation->getOpe($offset)) {
+            case null:
+                return $a1;
             case "==":
-                return  $a1==$a2; 
-             case "HIG":
-                return  $a1>$a2;    
+                return $a1 == $a2;
+            case "!=":
+                return $a1 != $a2;
+            case ".":
+                return $a1 . $a2;
+            case "HIG":
+                return $a1 > $a2;
             default :
-                LoggerFactory::getLogger()->error('Error operacion desconocida',
-                        array('Ec' => $this->operation)
+                LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
                 );
-                $this->error=true;
-                throw new \Exception('Error al en parametrizacion #3');    
+                $this->error = true;
+                throw new \Exception('Error al en parametrizacion #3');
         }
     }
-    
+
     /**
      * Devuelte el valor real
      * @param OperationParser $operation
      * @param int $argID
      * @return mixed
      */
-    private function argValue($operation,$argID){
+    private function argValue($operation, $argID) {
         return $this->remplaceParams(
-                $operation->getArg($argID)
-                );
+                        $operation->getArg($argID)
+        );
     }
-    
+
     /**
      * Devuelte tipo de argumento
      * @param string $value
@@ -165,26 +173,42 @@ class Operation {
 
     /**
      * Remplaza las variables en los parametros de la operacion
+     * @param   string  $arg    variable
+     * @param boolean $full llaves y corchetes
+     * @return string resultado
      */
-    private function remplaceParams($arg) {
-        if($this->getArgType($arg)!='var'){
+    private function remplaceParams($arg, $full = true) {
+        if ($this->getArgType($arg) != 'var') {
             return $this->normalize($arg);
         }
-        preg_match_all('/\[([^\[]+[\.]+[^\[]+)}/', $arg, $matches);
+        preg_match_all('/\\[([^\[]+[\.]+[^\[]+)\\]/', $arg, $matches);
         foreach ($matches[1] as $m) {
             $prop = $m;
             $value = $this->getAliasValue($prop);
-            $arg =
-                    str_replace('[' . $prop . ']', $value, $arg);
+            $arg = str_replace('[' . $prop . ']', $value, $arg);
+        }
+        if ($full == false) {
+            return str_replace(array('{', '}'), '', $arg);
         }
         preg_match_all('/{([^}]+[\.]+[^}]+)}/', $arg, $matches);
         foreach ($matches[1] as $m) {
             $prop = $m;
             $value = $this->getAliasValue($prop);
-            $arg =
-                    str_replace('{' . $prop . '}', $value, $arg);
+            $arg = str_replace('{' . $prop . '}', $value, $arg);
         }
         return $arg;
+    }
+
+    /**
+     * Separa el alias en objeto->propiedad
+     * @param string $alias
+     * @return array [obj],[string prop]
+     */
+    private function getArrayAlias($alias) {
+        $expP = explode('.', $alias);
+        $aliasObj = array_shift($expP);
+        $obj = $this->getObject($aliasObj);
+        return array($obj, implode('.', $expP));
     }
 
     /**
@@ -193,18 +217,11 @@ class Operation {
      * @return string
      */
     private function getAliasValue($prop) {
-        $expP = explode('.', $prop);
-        $alias = array_shift($expP);
-        $obj = $this->getObject($alias);
-        if ($obj instanceof \Itracker\ITObject) {
+        $arr = $this->getArrayAlias($prop);
+        $obj = $arr[0];
+        if ($obj instanceof \Itracker\XMLPropInterface) {
             return $this->normalize(
-                            $obj->get_Subprop(implode('.', $expP))
-            );
-        } elseif ($obj instanceof Vars) {
-            return $this->normalize(
-                            $obj->getValue(
-                                    '/' . implode('/', $expP)
-                            )
+                            $obj->get_Subprop($arr[1])
             );
         } else {
             return 'undefined';
@@ -220,8 +237,31 @@ class Operation {
         if (is_numeric($value)) {
             return $value;
         }
-        return str_replace(array('\\\'','\''),array('\'','') ,$value);
+        return str_replace(array('\\\'', '\''), array('\'', ''), $value);
+    }
+
+    /**
+     * 
+     * @param type $prop
+     * @param type $value
+     * @throws \Exception
+     */
+    private function asignValue($prop, $value) {
+        $propR = $this->remplaceParams($prop, false);
+        $arr = $this->getArrayAlias($propR);
+        $obj = $arr[0];
+        if ($obj instanceof \Itracker\XMLPropInterface) {
+            try {
+                $obj->set_prop($arr[1], $value);
+            } catch (\Exception $e) {
+                LoggerFactory::getLogger()->error('Error al setear variable en objeto ', 
+                        array($prop,$propR, get_class($obj), $value));
+                throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
+            }
+        } else {
+            LoggerFactory::getLogger()->error('Error al setear variable en objeto invalido', array($prop,$propR, get_class($obj), $value));
+            throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
+        }
     }
 
 }
-

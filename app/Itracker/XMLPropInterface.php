@@ -6,12 +6,8 @@ namespace Itracker;
  */
 interface XMLPropInterface {
 
-    /**
-     * @param DOMdocument $doc Documento para crear elementos
-     * @param array parametros de get_prop
-     * @return DOMNode Objeto en XML
-     */
-    public function getXML($doc, $props);
+
+    public function getXML();
 
     /**
      * Devuelve propiedad solicitada
@@ -22,6 +18,20 @@ interface XMLPropInterface {
      */
     public function get_prop($property);
 
+        /**
+     * Busca propiedad, dos niveles
+     * @param string $p
+     * @param boolean $hideError ocultarPropnull
+     * @return string
+     */
+    public function get_Subprop($p,$hideError=false);
+    
+    /**
+     * Setea propiedad a valor
+     * @param string $property
+     * @param mixed $value
+     */
+    public function set_prop($property,$value);
 
 }
 

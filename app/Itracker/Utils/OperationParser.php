@@ -212,6 +212,7 @@ class OperationParser {
         if ($char == '\'' ||
                 is_numeric($char) ||
                 $char == ' ' ||
+                $char == '{' ||
                 $i == $this->operationStrLen) {
             $this->addTemp('ops');
             return $i;

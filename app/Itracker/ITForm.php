@@ -446,7 +446,7 @@ class ITForm implements XMLPropInterface {
     }
 
     public function get_Subprop($p, $hideError = false) {
-        $this->get_prop($p);
+        return $this->get_prop($p);
     }
 
     public function set_prop($property, $value) {

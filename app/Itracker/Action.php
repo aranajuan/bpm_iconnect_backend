@@ -13,7 +13,6 @@ class Action extends ITObject {
     private $tipo;  /* tipo de accion, agrupador // ver perfiles */
     private $formulario;    /* requiere formulario o es de ejecucion directa */
     private $ejecuta;
-    private $estadotkt;
     private $alias;
 
     /*
@@ -257,7 +256,12 @@ class Action extends ITObject {
         if($rta!='ok'){
             return $rta;
         }
-        return $this->getScriptResponse()->get_prop('result');
+        $rta = $this->getScriptResponse()->get_prop('result');
+        if($rta==''){
+            return 'Error:: Codigo invalido #1';
+        }
+        $this->itf=$this->ITScript->getObject('ITFORM');
+        return $rta;
     }
     
     /**
@@ -335,7 +339,6 @@ class Action extends ITObject {
             $this->itf = null;
         }
         $this->ejecuta = trim($tmpU["ejecuta"]);
-        $this->estadotkt = trim($tmpU["estadotkt"]);
         $this->alias = trim($tmpU["alias"]);
         return 'ok';
     }
@@ -448,9 +451,11 @@ class Action extends ITObject {
             if ($response["result"] != "ok") {
                 return $response;
             }
+            $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
             $rta = $this->addTKT_H();
             $this->pasteTKTH($rta["obj"]);
         } else {
+            $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
         }
@@ -546,8 +551,6 @@ class Action extends ITObject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
-            case 'estadotkt':
-                return $this->estadotkt;
             case 'objadj_id':
                 return $this->objadj_id;
             case 'habilita_t_propio':

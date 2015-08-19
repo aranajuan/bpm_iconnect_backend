@@ -6,8 +6,8 @@
  * @return array    $response=array("result"=>"","msj"=>"");
  */
 $response = array("result" => "", "msj" => "");
-$itf = $this->getitform();
-$idth = $itf->get_value("idth");
+
+$idth = $this->getScriptResponse()->get_prop('id');
 $this->setChilds(null);
 if(is_numeric($idth)){
     $this->loadObjadjId($idth);

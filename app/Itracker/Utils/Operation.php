@@ -54,7 +54,11 @@ class Operation {
      */
     public function operate($operation) {
         $this->operation = $operation;
-        $this->solve();
+        try{
+            $this->solve();
+        }  catch (\Exception $e){
+            $this->error=true;
+        }
         return $this->error;
     }
 
@@ -131,8 +135,28 @@ class Operation {
                 return $a1 != $a2;
             case ".":
                 return $a1 . $a2;
-            case "HIG":
+            case ">":
                 return $a1 > $a2;
+            case ">=":
+                return $a1 >= $a2;
+            case "<":
+                return $a1 < $a2;
+            case "<=":
+                return $a1 <= $a2;
+            case "+":
+                return $a1 + $a2;
+            case "-":
+                return $a1 - $a2;
+            case "/":
+                return $a1 / $a2;
+            case "*":
+                return $a1 * $a2;
+            case "&&":
+                return $a1 && $a2;  
+            case "||":
+                return $a1 || $a2; 
+            case "in":
+                return count(array_intersect(explode(',',$a1), explode(',',$a2)))>0;
             default :
                 LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
                 );
@@ -241,9 +265,9 @@ class Operation {
     }
 
     /**
-     * 
-     * @param type $prop
-     * @param type $value
+     * Asigna valor al objeto
+     * @param string $prop
+     * @param string $value
      * @throws \Exception
      */
     private function asignValue($prop, $value) {

@@ -40,6 +40,18 @@ class Action extends ITObject {
     private $forceEveRta; // respuesta de evento forzado
 
     /**
+     * Script preejecute
+     * @var string
+     */
+    private $script;
+    
+    /**
+     * Script
+     * @var Utils\ITScript
+     */
+    private $ITScript;
+    
+    /**
      *
      * @var ITForm
      */
@@ -155,6 +167,7 @@ class Action extends ITObject {
             if ($to) {
                 //cambia el form por el de la opcion
                 $this->itf = $to->get_prop("itform");
+                $this->script.=PHP_EOL.$to->get_prop("script");
                 return true;
             }
             return false;
@@ -220,9 +233,41 @@ class Action extends ITObject {
             return "ok";
         }
         $rta = $this->itf->load_values($values, $formname);
-        return $rta;
+        if($rta!='ok'){
+            return $rta;
+        }
+        return $this->ejecuteScript();
     }
 
+    /**
+     * Devuelve resultado del script
+     * @return string
+     */
+    private function ejecuteScript(){
+        $this->ITScript= new Utils\ITScript();
+        $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
+        $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
+        $this->ITScript->addObject('TKT', $this->getTKT());
+        $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
+        $this->ITScript->addObject('USR', $this->getContext()->get_User());
+        $this->ITScript->addObject('ITFORM', $this->getitform());
+        
+        $this->ITScript->loadScript($this->script);
+        $rta = $this->ITScript->ejecute();
+        if($rta!='ok'){
+            return $rta;
+        }
+        return $this->getScriptResponse()->get_prop('result');
+    }
+    
+    /**
+     * Devuelve response
+     * @return Utils\Vars
+     */
+    public function getScriptResponse(){
+        return $this->ITScript->getObject('RESPONSE');
+    }
+    
     /*
      * Cargar desde la base el id especificado
      * @param int $id     /
@@ -279,6 +324,7 @@ class Action extends ITObject {
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
+        $this->script = trim($tmpU["script"]);
         $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
         if ($this->form != "") {
             $this->itf = new ITForm();

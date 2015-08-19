@@ -214,7 +214,8 @@ class Vars implements \Itracker\XMLPropInterface {
         $dompos = $this->dom;
         foreach ($pathV as $p) {
             if ($i == $pos) {
-                $nnode = $this->dom->createElement($p, $v);
+                $nnode = $this->dom->createElement($p,
+                        trim(xmlEscape(strip_tags($v))));
                 $dompos->appendChild($nnode);
                 return;
             }

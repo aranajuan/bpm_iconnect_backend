@@ -15,32 +15,69 @@ class ITScript extends Operation {
      * @var array
      */
     private $scriptArray;
+    
+    /**
+     * Nivel de la linea en ejecucion
+     * @var int 
+     */
     private $lineLevel;
+    
+    /**
+     * Tag al que se requiere mover [string tag,level]
+     * @var string
+     */
     private $moveTOTag;
+    
+    /**
+     * Cantidad de lineas del script
+     * @var int
+     */
     private $scriptLen;
     
+    /**
+     * Carga script
+     * @param string $script
+     */
     public function loadScript($script) {
         $this->script = $script;
         $this->scriptToArray();
     }
 
+    /**
+     * Parsea script en lineas
+     */
     private function scriptToArray() {
         $this->scriptArray = explode(PHP_EOL, $this->script);
     }
 
-    public function ejecute($line) {
+    /**
+     * Ejecuta el script desde la linea indicada
+     * @param int $line
+     * @return string   resultado del script
+     */
+    public function ejecute($line=0) {
         $this->moveTOTag=null;
         $this->lineLevel=0;
         $this->scriptLen=count($this->scriptArray);
         return $this->ejecuteLine($line);
     }
 
+    /**
+     * Ejecuta linea de script
+     * @param int $line linea ejecutando
+     * @param string $prev  origen de ejecucion
+     * @return string   resultado de la linea
+     */
     private function ejecuteLine($line,$prev=null) {
         
         if($line>=$this->scriptLen){
-            return 'Finalizado OK';
+            return 'ok';
         }
         $lineStr = trim($this->scriptArray[$line]);
+        
+         if ($lineStr == 'return') {
+             return 'ok';             
+         }
         
         if ($lineStr == '') {
             return $this->ejecuteLine($line + 1,'empty');
@@ -90,6 +127,8 @@ class ITScript extends Operation {
                return $this->ejecuteLine($line + 1,'moving');
             }
         }
-        return "Error desconocido | $line | $lineStr | $prev";
+        LoggerFactory::getLogger()->error('Error en script',
+                array('script'=>$this->script,'linea'=>"$line | $lineStr | $prev"));
+        return 'Script::Error desconocido';
     }
 }

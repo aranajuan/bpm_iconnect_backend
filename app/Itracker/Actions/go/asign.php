@@ -8,9 +8,7 @@
     $response = array("result" => "", "msj" => "");
     $TKT = $this->getTKT();
     
-    $itf = $this->getitform();
-    
-    $idusr = $itf->get_value("idusr");
+    $idusr = $this->getScriptResponse()->get_prop('id');
     $tou = $obCI->get_object('User', $idusr);
     if($obCI->get_status('User', $idusr)!="ok"){
         return array("result" => "error", "msj" => "Erro al cargar usuario.");

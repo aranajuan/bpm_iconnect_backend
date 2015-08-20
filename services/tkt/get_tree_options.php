@@ -20,9 +20,9 @@ function GO($Context) {
 
         if ($opts) {
             foreach ($opts as $o) {
-                $ans=$o["ans"];
-                if($Context->get_User()->get_prop("perfil")==1){
-                    $ans.="/".$o["path"];
+                $ans = $o["ans"];
+                if ($Context->get_User()->get_prop("perfil") == 1) {
+                    $ans.="/" . $o["path"];
                 }
                 $option = $previous->appendChild($Context->createElement("OPTION"));
                 $option->appendChild($Context->createElement("question", $o["question"]));
@@ -44,26 +44,23 @@ function GO($Context) {
             return $treeL;
         }
 
-        if ($topts["object"]) {
+        if ($topts["object"] && $topts["object"] instanceof Itracker\Option) {
             if ($topts["object"]->get_prop("itform")) {
-                $itform= $topts["object"]->get_prop("itform");
-                $itfdom=$itform->getInputDom()->documentElement;
+                $itform = $topts["object"]->get_prop("itform");
+                $itfdom = $itform->getInputDom()->documentElement;
                 $joined = $Context->append_xml($itfdom);
                 if ($joined) {
                     $opendata = $Context->createElement("opendata");
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
-                    $dest = $topts["object"]->getDestiny();
-                    if($dest){
-                        $simi =$Context->createElement("join",
-                                $dest->getVal('join'));
+                    if ($topts["object"]->get_prop("unir")) {
+                        $simi = $Context->createElement("join",'true');
                         $treeL->appendChild($simi);
                     }
                     return $treeL;
                 } else {
-                    $Context->getLogger()->error('No se pudo unir el formulario',
-                            array('id'=>$topts["object"]->get_prop("id"),
-                                'itf'=>$itform->getInputDom()->saveXML()));
+                    $Context->getLogger()->error('No se pudo unir el formulario', array('id' => $topts["object"]->get_prop("id"),
+                        'itf' => $itform->getInputDom()->saveXML()));
                     return $Context->createElement("error", "Error en formulario #2");
                 }
             } else {

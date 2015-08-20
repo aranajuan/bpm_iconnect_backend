@@ -156,7 +156,13 @@ class Operation {
             case "||":
                 return $a1 || $a2; 
             case "in":
-                return count(array_intersect(explode(',',$a1), explode(',',$a2)))>0;
+                if(!is_array($a1)){
+                    $a1=explode(',',$a1);
+                }
+                if(!is_array($a2)){
+                    $a2=explode(',',$a2);
+                }
+                return count(array_intersect($a1, $a2))>0;
             default :
                 LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
                 );
@@ -188,11 +194,9 @@ class Operation {
         $c = $value{0};
         if ($c == '{')
             return 'var';
-        if ($c == '\'')
-            return 'string';
         if (is_numeric($c))
             return 'number';
-        return 'unknown';
+        return 'string';
     }
 
     /**
@@ -218,7 +222,7 @@ class Operation {
         foreach ($matches[1] as $m) {
             $prop = $m;
             $value = $this->getAliasValue($prop);
-            $arg = str_replace('{' . $prop . '}', $value, $arg);
+            return $value;
         }
         return $arg;
     }
@@ -254,14 +258,11 @@ class Operation {
 
     /**
      * Normaliza la variable
-     * @param string $prop
+     * @param string $value
      * @return string
      */
     private function normalize($value) {
-        if (is_numeric($value)) {
-            return $value;
-        }
-        return str_replace(array('\\\'', '\''), array('\'', ''), $value);
+        return $value;
     }
 
     /**

@@ -50,6 +50,11 @@ class OperationParser {
     private $error;
     
     /**
+     * @var boolean
+     */
+    private $strStarted;
+    
+    /**
      * String a paresear, modelo JAVA
      * @param string $operation
      */
@@ -57,6 +62,7 @@ class OperationParser {
         $this->operationStr = $operation;
         $this->operationStrLen = strlen($this->operationStr);
         $this->jumper = false;
+        $this->strStarted=false;
         $this->args = array();
         $this->ops = array();
         $this->temp = '';
@@ -141,6 +147,8 @@ class OperationParser {
         } else {
             array_push($this->ops, $this->temp);
         }
+        $this->jumper=false;
+        $this->strStarted=false;
         $this->temp = '';
     }
 
@@ -151,13 +159,17 @@ class OperationParser {
      */
     private function getString($i) {
         $char = $this->operationStr{$i};
-        $this->temp.=$char;
 
-        if ($char == '\'' && $this->temp != '\'' && !$this->jumper) {
+        if($char == '\'' && !$this->strStarted){
+            $this->strStarted=true;
+            return $this->getString($i + 1);
+        }
+        
+        if ($char == '\'' && $this->strStarted && !$this->jumper) {
             $this->addTemp('arg');
             return $i + 1;
         }
-
+        $this->temp.=$char;
         if ($char == '\\') {
             $this->jumper = true;
         } else {

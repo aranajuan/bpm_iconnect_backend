@@ -15,9 +15,9 @@ if ($Context->get_GlobalConfig()->getString('database/motor') == 'mssql')
 
 $RQ = trim(file_get_contents('php://input'));
 
-
 $Context->request($RQ, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_TIME']);
 $RP = $Context->get_response();
+$Context->getLogger()->debug('RQ',array('RQ'=>$RQ,'RS'=>$RP));
 echo $RP;
 exit();
 

@@ -262,8 +262,6 @@ class ITForm implements XMLPropInterface {
             $id=trim(str_replace($prefix, '', $a['id']));
             if(isset($this->formArray[$id])){
                 $this->formArray[$id]['value'] = $a['value'];
-            }else{
-                return 'Formulario invalido '.$id. ' no es un dato solicitado';
             }
         }
         return $this->loadValtoXML();

@@ -283,6 +283,11 @@ class Tkt extends Tree {
      * @return \Itracker\Utils\Vars
      */
     public function getVars(){
+        if(!$this->vars){
+            $this->vars=new Utils\Vars();
+            $this->vars->setRootTag('tkt');
+            $this->vars->clean();
+        }
         return clone $this->vars;
     }
     
@@ -308,9 +313,9 @@ class Tkt extends Tree {
      * @return  string
      */
     public function get_status() {
-        $varStat=$this->vars->getValue('status');
-        if($varStat){
-            return $varStat;
+        
+        if($this->getVars()->getValue('status')){
+            return $this->vars->getValue('status');
         }
         
         $TKTHF = $this->get_last_tktH();
@@ -596,22 +601,15 @@ class Tkt extends Tree {
 
     /**
      *  Inserta nuevo registro y carga ID en el objeto
+     * @param int   id del equipo destino
      * @return string result
      */
-    function open() {
+    function open($idequipo) {
         $this->id = I_NEWID;
         $this->u_tom = NULL;
         $this->u_asig = NULL;
         $this->usr = $this->getLogged()->get_prop("usr");
-        $dest = $this->get_last()->getDestiny();
-        if ($dest == null) {
-            $this->getContext()->getLogger()->error('Destino no cargado al abrir', array(
-                'back' => print_r(debug_backtrace(), true)
-                    )
-            );
-            return 'Error al abrir ticket - Destino invalido';
-        }
-        $this->idequipo = $dest->getDestinyVal('team');
+        $this->idequipo = $idequipo;
         $this->teamLoaded = false;
         $this->load_team();
         return $this->insert_DB();

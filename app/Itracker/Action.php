@@ -154,124 +154,6 @@ class Action extends ITObject {
         }
     }
 
-    /**
-     * Carga ticket para ejecutar accion o consultar
-     * @param Tkt $TKT
-     * @return  boolean se pudo cargar
-     */
-    public function loadTKT($TKT) {
-        $this->TKT = $TKT;
-        if ($this->nombre == "ABRIR") {
-            $to = $TKT->get_last();
-            if ($to) {
-                //cambia el form por el de la opcion
-                $this->itf = $to->get_prop("itform");
-                $this->script.=PHP_EOL.$to->get_prop("script");
-                return true;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Carga Archivos
-     * @param array $files 
-     */
-    public function loadFiles($files) {
-        $this->files = $files;
-    }
-
-    /**
-     * Devuelve Archivos
-     * @return array $files 
-     */
-    public function getFiles() {
-        return $this->files;
-    }
-
-    /**
-     * Devuelve ticket cargado
-     * @return TKT
-     */
-    public function getTKT() {
-        return $this->TKT;
-    }
-
-    /**
-     * Setea como ticket en trabajo
-     */
-    public function setWorking() {
-        $this->working = true;
-    }
-
-    /**
-     *  Elimina seteo de ticket en trabajo
-     */
-    public function unsetWorking() {
-        $this->working = false;
-    }
-
-    /**
-     * Ticket llamado para trabajarlo
-     * @return boolean
-     */
-    public function isWorking() {
-        return $this->working;
-    }
-
-    /**
-     * Carga valores de formulario y valida con itform
-     * @param array $values
-     */
-    public function loadFormValues($values, $formname = null) {
-        if ($this->TKT == null) {
-            return "Error ticket sin cargar";
-        }
-        if ($this->itf == null) {  //no requiere formulario esta accion
-            return "ok";
-        }
-        $rta = $this->itf->load_values($values, $formname);
-        if($rta!='ok'){
-            return $rta;
-        }
-        return $this->ejecuteScript();
-    }
-
-    /**
-     * Devuelve resultado del script
-     * @return string
-     */
-    private function ejecuteScript(){
-        $this->ITScript= new Utils\ITScript();
-        $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
-        $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
-        $this->ITScript->addObject('TKT', $this->getTKT());
-        $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
-        $this->ITScript->addObject('USR', $this->getContext()->get_User());
-        $this->ITScript->addObject('ITFORM', $this->getitform());
-        
-        $this->ITScript->loadScript($this->script);
-        $rta = $this->ITScript->ejecute();
-        if($rta!='ok'){
-            return $rta;
-        }
-        $rta = $this->getScriptResponse()->get_prop('result');
-        if($rta==''){
-            return 'Error:: Codigo invalido #1';
-        }
-        $this->itf=$this->ITScript->getObject('ITFORM');
-        return $rta;
-    }
-    
-    /**
-     * Devuelve response
-     * @return Utils\Vars
-     */
-    public function getScriptResponse(){
-        return $this->ITScript->getObject('RESPONSE');
-    }
-    
     /*
      * Cargar desde la base el id especificado
      * @param int $id     /
@@ -434,11 +316,133 @@ class Action extends ITObject {
         return "ok";
     }
 
+        /**
+     * Carga ticket para ejecutar accion o consultar
+     * @param Tkt $TKT
+     * @return  boolean se pudo cargar
+     */
+    public function loadTKT($TKT) {
+        $this->TKT = $TKT;
+        if ($this->nombre == "ABRIR") {
+            $to = $TKT->get_last();
+            if ($to) {
+                //cambia el form por el de la opcion
+                $this->itf = $to->get_prop("itform");
+                $this->script.=PHP_EOL.$to->get_prop("script");
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Carga Archivos
+     * @param array $files 
+     */
+    public function loadFiles($files) {
+        $this->files = $files;
+    }
+
+    /**
+     * Devuelve Archivos
+     * @return array $files 
+     */
+    public function getFiles() {
+        return $this->files;
+    }
+
+    /**
+     * Devuelve ticket cargado
+     * @return TKT
+     */
+    public function getTKT() {
+        return $this->TKT;
+    }
+
+    /**
+     * Setea como ticket en trabajo
+     */
+    public function setWorking() {
+        $this->working = true;
+    }
+
+    /**
+     *  Elimina seteo de ticket en trabajo
+     */
+    public function unsetWorking() {
+        $this->working = false;
+    }
+
+    /**
+     * Ticket llamado para trabajarlo
+     * @return boolean
+     */
+    public function isWorking() {
+        return $this->working;
+    }
+
+    /**
+     * Carga valores de formulario y valida con itform
+     * @param array $values
+     */
+    public function loadFormValues($values, $formname = null) {
+        if ($this->TKT == null) {
+            return "Error ticket sin cargar";
+        }
+        if ($this->itf == null) {  //no requiere formulario esta accion
+            return "ok";
+        }
+        $rta = $this->itf->load_values($values, $formname);
+        return $rta;
+    }
+
+    /**
+     * Devuelve resultado del script
+     * @return string
+     */
+    private function ejecuteScript(){
+        $this->ITScript= new Utils\ITScript();
+        $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
+        $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
+        $this->ITScript->addObject('TKT', $this->getTKT());
+        $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
+        $this->ITScript->addObject('USR', $this->getContext()->get_User());
+        if($this->getitform()){
+            $this->ITScript->addObject('ITFORM', $this->getitform());
+        }
+        
+        $this->ITScript->loadScript($this->script);
+        $rta = $this->ITScript->ejecute();
+        if($rta!='ok'){
+            return $rta;
+        }
+        $rta = $this->getScriptResponse()->get_prop('result');
+        if($rta==''){
+            return 'Error:: Codigo invalido #1';
+        }
+        $this->itf=$this->ITScript->getObject('ITFORM');
+        return $rta;
+    }
+    
+    /**
+     * Devuelve response
+     * @return Utils\Vars
+     */
+    public function getScriptResponse(){
+        return $this->ITScript->getObject('RESPONSE');
+    }
+    
+    
     /**
      * Ejecuta accion
      * @return array resultado
      */
     public function ejecute() {
+        $rta = $this->ejecuteScript();
+        if($rta!='ok'){
+            return $rta;
+        }
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = $this->objsCache;
@@ -451,11 +455,9 @@ class Action extends ITObject {
             if ($response["result"] != "ok") {
                 return $response;
             }
-            $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
             $rta = $this->addTKT_H();
             $this->pasteTKTH($rta["obj"]);
         } else {
-            $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
         }
@@ -484,6 +486,7 @@ class Action extends ITObject {
         if ($this->forceEveRta) {
             return $this->forceEveRta;
         }
+        $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
         $tktH = new TktH();
         $tktH->load_VEC($this);
         $rta["status"] = $tktH->insert_DB();

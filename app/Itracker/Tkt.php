@@ -88,18 +88,8 @@ class Tkt extends Tree {
      */
     private function load_DV($tmpU) {
         $this->id = $tmpU["id"];
-        $this->FA = $tmpU["FA"];
-        $this->UA = $tmpU["UA"];
-        $this->FB = $tmpU["FB"];
-        $this->UB = $tmpU["UB"];
-        $this->u_tom = $tmpU["u_tom"];
-        $this->u_asig = $tmpU["u_asig"];
-        $this->prioridad = $tmpU["prioridad"];
-        $this->idmaster = $tmpU["idmaster"];
-        $this->idequipo = $tmpU["idequipo"];
-        $this->teamLoaded = false;
-        $this->variables = $tmpU["variables"];
-        if($this->variables!=''){
+        $this->variables = trim($tmpU["variables"]);
+        if($this->variables!='' && $this->variables!='<?xml version="1.0"?>'){
             $this->vars=new \Itracker\Utils\Vars();
             $this->vars->setRootTag('tkt');
             if($this->vars->loadXML($this->variables)==false){
@@ -112,6 +102,16 @@ class Tkt extends Tree {
             $this->vars->setRootTag('tkt');
             $this->vars->clean();
         }
+        $this->FA = $tmpU["FA"];
+        $this->UA = $tmpU["UA"];
+        $this->FB = $tmpU["FB"];
+        $this->UB = $tmpU["UB"];
+        $this->u_tom = $tmpU["u_tom"];
+        $this->u_asig = $tmpU["u_asig"];
+        $this->prioridad = $tmpU["prioridad"];
+        $this->idmaster = $tmpU["idmaster"];
+        $this->idequipo = $tmpU["idequipo"];
+        $this->teamLoaded = false;
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->load_users();
@@ -203,10 +203,8 @@ class Tkt extends Tree {
         if ($this->dbinstance->noEmpty) {
             while ($tc = $this->dbinstance->get_vector()) {
                 $TKT = $this->objsCache->get_object("Tkt", $tc["id"]);
-                if ($this->objsCache->get_status("Tkt", $tc["id"]) === "ok") {
                     $this->childs[$i] = $TKT;
                     $i++;
-                }
             }
             return $i;
         }

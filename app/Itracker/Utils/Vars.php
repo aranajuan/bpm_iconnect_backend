@@ -40,13 +40,13 @@ class Vars implements \Itracker\XMLPropInterface {
      */
     private $rootTag;
 
-    public function __construct($rootag=null) {
-        if($rootag){
+    public function __construct($rootag = null) {
+        if ($rootag) {
             $this->clean();
             $this->setRootTag($rootag);
         }
     }
-    
+
     /**
      *  Carga variables desde archivo
      * @param string $path
@@ -151,7 +151,7 @@ class Vars implements \Itracker\XMLPropInterface {
             if ($v->nodeType == XML_TEXT_NODE || $v->nodeType == XML_COMMENT_NODE) {
                 continue;
             }
-            if ($v->childNodes->length > 1) {
+            if ($this->hasChildren($v)) {
                 if ($this->loadVars($v) == false) {
                     return false;
                 }
@@ -162,6 +162,21 @@ class Vars implements \Itracker\XMLPropInterface {
             }
         }
         return true;
+    }
+
+    /**
+     * Evalua si hay hijos reales
+     * @param \DOMElement $p
+     * @return boolean  Hay hijos
+     */
+    private function hasChildren($p) {
+        if ($p->hasChildNodes()) {
+            foreach ($p->childNodes as $c) {
+                if ($c->nodeType == XML_ELEMENT_NODE)
+                    return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -214,8 +229,7 @@ class Vars implements \Itracker\XMLPropInterface {
         $dompos = $this->dom;
         foreach ($pathV as $p) {
             if ($i == $pos) {
-                $nnode = $this->dom->createElement($p,
-                        trim(xmlEscape(strip_tags($v))));
+                $nnode = $this->dom->createElement($p, trim(xmlEscape(strip_tags($v))));
                 $dompos->appendChild($nnode);
                 return;
             }
@@ -247,8 +261,8 @@ class Vars implements \Itracker\XMLPropInterface {
         return $this->setValue($property, $value);
     }
 
-    public function get_Subprop($p,$hideError=false){
+    public function get_Subprop($p, $hideError = false) {
         return $this->getValue($p);
     }
-    
+
 }

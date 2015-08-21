@@ -77,7 +77,7 @@ if(!$lstOption->get_prop('unir')){
     return $response;
 }
 
-$idmaster = $itf->get_prop("idmaster");
+$idmaster = $itf->getExtravalue('idmaster');
 
 if (is_numeric($idmaster) && $idmaster > 0) {
     $rta = $TKT->ejecute_action("UNIR", array(array("id" => "idmaster",
@@ -85,7 +85,7 @@ if (is_numeric($idmaster) && $idmaster > 0) {
     if ($rta["result"] != "ok") {
         $response["result"] = "ok";
         $response["type"] = "tkt";
-        $response["msj"] = "No se pudo unir al master." . $rta["msj"];
+        $response["msj"] = "No se pudo unir al master." . $rta["msj"]."-".$rta["result"];
     }
 }
 return $response;

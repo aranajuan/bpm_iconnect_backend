@@ -42,7 +42,19 @@ class ITForm implements XMLPropInterface {
      * @var array
      */
     private $formArray;
+    
+     /**
+     * Array con datos fuera del form solicitado
+     * @var array
+     */
+    private $formArrayExt;
 
+    /**
+     * Cantidad de elementos que se deben guardar
+     * @var int
+     */
+    private $elSaveCount;
+    
     /**
      * Carga xml y lo parsea
      * @param string $xml
@@ -111,6 +123,7 @@ class ITForm implements XMLPropInterface {
     private function loadXMLFormArray() {
         $this->formArray = array();
         $els = $this->xml_output->getElementsByTagName("element");
+        $this->elSaveCount=0;
         foreach ($els as $el) {
             $arr = $this->elementToArray($el);
             if (isset($this->formArray[trim($arr['id'])])) {
@@ -122,6 +135,9 @@ class ITForm implements XMLPropInterface {
                 return false;
             }
             $this->formArray[trim($arr['id'])] = $arr;
+            if($arr['notsave']!='true'){
+                $this->elSaveCount++;
+            }
         }
         return true;
     }
@@ -142,6 +158,7 @@ class ITForm implements XMLPropInterface {
             $arr["label"] = trim($label);
         }
         $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
+        $arr["notsave"] = trim($this->getImmediateChildrenByTagName($element, 'notsave')->nodeValue);
         $this->arr_val[$arr["id"]] = $arr["value"];
         $arr["type"] = trim($this->getImmediateChildrenByTagName($element, 'type')->nodeValue);
         if ($arr["type"] == "select") {
@@ -262,6 +279,8 @@ class ITForm implements XMLPropInterface {
             $id=trim(str_replace($prefix, '', $a['id']));
             if(isset($this->formArray[$id])){
                 $this->formArray[$id]['value'] = $a['value'];
+            }else{
+                $this->formArrayExt[$id]['value']=$a['value'];
             }
         }
         return $this->loadValtoXML();
@@ -275,6 +294,18 @@ class ITForm implements XMLPropInterface {
     private function get_value($id) {
         if (isset($this->formArray[$id]['value'])) {
             return $this->formArray[$id]['value'];
+        }
+        return null;
+    }
+    
+    /**
+     * Devuelve valor del form no solicitado en el XML
+     * @param string $id
+     * @return string
+     */
+    public function getExtravalue($id) {
+        if (isset($this->formArrayExt[$id]['value'])) {
+            return $this->formArrayExt[$id]['value'];
         }
         return null;
     }
@@ -426,6 +457,14 @@ class ITForm implements XMLPropInterface {
         return $arr;
     }
 
+    /**
+     * Devuelve cantidad de elementos a guardar
+     * @return int
+     */
+    public function getSaveElCount(){
+        return $this->elSaveCount;
+    }
+    
     public function get_prop($property) {
         $property = strtolower($property);
         if ($property == "*") {

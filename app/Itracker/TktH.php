@@ -154,7 +154,7 @@ class TktH extends ITObject {
         } else {
             $this->id = $this->dbinstance->get_lastID();
             $itform = $this->accion->getitform();
-            if ($itform) {
+            if ($itform && $itform->getSaveElCount()) {
                 $form = $itform->getSaveDom()->saveXML();
             } else {
                 $form = "";

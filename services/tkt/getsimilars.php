@@ -19,19 +19,6 @@ function GO($Context) {
     $topts = $TKT->get_last();
 
 
-    /**
-     * @var Itracker\ITForm
-     */
-    $itf = NULL;
-    if ($topts->get_prop('itform')) {
-        $itf = $topts->get_prop('itform');
-        $form = json_decode($Context->get_params('form'), true);
-        $rta = $itf->load_values($form, 'actionform');
-        if ($rta != 'ok') {
-            return $Context->createElement("error", $rta);
-        }
-    }
-
     if (!$topts->get_prop('unir')) {
         return $Context->createElement("error", "Accion no valida para esta opcion. #2");
     }

@@ -515,15 +515,24 @@ class Tkt extends Tree {
      * @return string
      */
     public function ejecute_action($action, $values = null, $objadj_id = null) {
+        $this->getContext()->getLogger()->info('Ejecutando',array(
+            'accion'=>$action,
+            'values'=>print_r($values,true),
+            'objID'=>$objadj_id
+        ));
         $A = $this->objsCache->get_object("Action", $action, true);
         if ($this->objsCache->get_status("Action", $action) != "ok") {
+            $this->getContext()->getLogger()->error('Error al cargar accion',array(
+            'accion'=>$action,
+
+             ));
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
         if ($values) {
             $valid = $A->loadFormValues($values);
             if ($valid != 'ok') {
-                return $valid;
+                return array('result'=>$valid);
             }
         }
         if ($objadj_id) {

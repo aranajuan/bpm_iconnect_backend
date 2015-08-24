@@ -1020,6 +1020,8 @@ class Tkt extends Tree {
             case 'usr_o':
                 $this->load_users();
                 return $this->usr_o;
+            case 'vars':
+                return $this->getVars();
             case 'idequipo':
                 $this->load_team();
                 return $this->idequipo;

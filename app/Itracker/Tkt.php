@@ -949,10 +949,10 @@ class Tkt extends Tree {
             return null;
         }
 
-        $criticVC = explode("-", $critico);
+        $criticVC = explode(",", $critico);
         $ssql = "
             select id,origen from TBL_TICKETS where idmaster is null and UB is null 
-            and origen like 'D%-S" . intval($this->get_system()->get_prop("id")) . "-%'"; // todos los tkts del sistema abiertos
+            and origen like 'D%,S" . intval($this->get_system()->get_prop("id")) . ",%'"; // todos los tkts del sistema abiertos
         $this->dbinstance->loadRS($ssql);
         if (!$this->dbinstance->noEmpty) {
             return NULL;
@@ -963,7 +963,7 @@ class Tkt extends Tree {
             //verificar textos criticos y comparar con actual
             $TKTc = new TKT();
             $TKTc->load_path($tm["origen"], 0);
-            $countC = count(array_intersect($criticVC, explode("-", $TKTc->get_critic())));
+            $countC = count(array_intersect($criticVC, explode(",", $TKTc->get_critic())));
             if ($countC) {
                 $tkt = $this->objsCache->get_object("Tkt", $tm["id"]);
                 if ($this->objsCache->get_status("Tkt", $tm["id"]) == "ok") {
@@ -1036,6 +1036,8 @@ class Tkt extends Tree {
                 return $this->master;
             case 'origen':
                 return trim($this->origen);
+            case 'origenpath':
+                return $this->get_path();
             case 'u_tom':
                 $this->load_users();
                 return $this->u_tom;

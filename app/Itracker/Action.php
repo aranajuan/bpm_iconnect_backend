@@ -403,6 +403,11 @@ class Action extends ITObject {
      */
     private function ejecuteScript(){
         $this->ITScript= new Utils\ITScript();
+        $const = new Utils\Vars('CONST');
+        $const->setValue('date', date(USERDATE_READ_DATE));
+        $const->setValue('time', date(USERDATE_READ_TIME));
+        $const->setValue('datetime', date(USERDATE_READ));
+        $this->ITScript->addObject('CONSTANT', $const);
         $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
         $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
         $this->ITScript->addObject('TKT', $this->getTKT());

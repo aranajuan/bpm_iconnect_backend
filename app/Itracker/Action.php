@@ -441,8 +441,7 @@ class Action extends ITObject {
     public function ejecute() {
         $rta = $this->ejecuteScript();
         if($rta!='ok'){
-            $response["result"]=$rta;
-            return  $response;
+            return array('result' => 'error', 'msj' => $rta);
         }
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {

@@ -307,6 +307,16 @@ class Tkt extends Tree {
         return 'ok';
     }
 
+    /**
+     * Estado largo
+     * @return string
+     */
+    public function get_LargeStatus() {
+        if($this->getVars()->getValue('largestatus')){
+            return $this->vars->getValue('largestatus');
+        }
+        return '';
+    }
 
     /*
      * devuelve el estado del tkt

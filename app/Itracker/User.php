@@ -943,6 +943,9 @@ class User extends ITObject {
                 return $this->hash;
             case 'dominio':
                 return $this->dominio;
+            case 'iddirecciones':
+                $arr = $this->get_divisions();
+                return implode(',',makeproparr($arr,'id'));
             case 'idsequipos':
                 $this->load_teams();
                 return $this->idsequipos;

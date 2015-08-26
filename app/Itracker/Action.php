@@ -328,7 +328,7 @@ class Action extends ITObject {
             if ($to) {
                 //cambia el form por el de la opcion
                 $this->itf = $to->get_prop("itform");
-                $this->script.=PHP_EOL.$to->get_prop("destino");
+                $this->script.=PHP_EOL.$TKT->getScriptText();
                 return true;
             }
             return false;

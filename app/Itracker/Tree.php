@@ -334,6 +334,20 @@ abstract class Tree extends ITObject {
     }
 
     /**
+     * Devuelve script de todas las opciones
+     * @return string
+     */
+    public function getScriptText(){
+        $sctmp='';
+        foreach($this->path_obj as $o){
+            if($o instanceof Option){
+                $sctmp.=PHP_EOL.$o->get_prop('destino');
+            }
+        }
+        return $sctmp;
+    }
+    
+    /**
      * Devuelve ultima opcion [OPTION]
      * @return Option 
      */

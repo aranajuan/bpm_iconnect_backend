@@ -48,12 +48,12 @@ class OperationParser {
      * @var boolean
      */
     private $error;
-    
+
     /**
      * @var boolean
      */
     private $strStarted;
-    
+
     /**
      * String a paresear, modelo JAVA
      * @param string $operation
@@ -62,11 +62,11 @@ class OperationParser {
         $this->operationStr = $operation;
         $this->operationStrLen = strlen($this->operationStr);
         $this->jumper = false;
-        $this->strStarted=false;
+        $this->strStarted = false;
         $this->args = array();
         $this->ops = array();
         $this->temp = '';
-        $this->error=false;
+        $this->error = false;
         $this->parse();
     }
 
@@ -83,17 +83,18 @@ class OperationParser {
      * Devuelve si hay error
      * @return boolean
      */
-    public function getError(){
+    public function getError() {
         return $this->error;
     }
-    
+
     /**
      * Devuelve operando de la posicion
      * @param int $pos
      * @return string
      */
     public function getArg($pos) {
-        if($this->error)    return null;
+        if ($this->error)
+            return null;
         return $this->args[$pos];
     }
 
@@ -103,7 +104,8 @@ class OperationParser {
      * @return string
      */
     public function getOpe($pos) {
-        if($this->error)    return null;
+        if ($this->error)
+            return null;
         return $this->ops[$pos];
     }
 
@@ -145,10 +147,20 @@ class OperationParser {
         if ($type == 'arg') {
             array_push($this->args, $this->temp);
         } else {
-            array_push($this->ops, $this->temp);
+            if ($this->temp == '+=') {
+                array_push($this->ops, '=');
+                array_push($this->ops, '+');
+                array_push($this->args, $this->args[0]);
+            } elseif ($this->temp == '.=') {
+                array_push($this->ops, '=');
+                array_push($this->ops, '.');
+                array_push($this->args, $this->args[0]);
+            }else{
+                array_push($this->ops, $this->temp);
+            }
         }
-        $this->jumper=false;
-        $this->strStarted=false;
+        $this->jumper = false;
+        $this->strStarted = false;
         $this->temp = '';
     }
 
@@ -160,11 +172,11 @@ class OperationParser {
     private function getString($i) {
         $char = $this->operationStr{$i};
 
-        if($char == '\'' && !$this->strStarted){
-            $this->strStarted=true;
+        if ($char == '\'' && !$this->strStarted) {
+            $this->strStarted = true;
             return $this->getString($i + 1);
         }
-        
+
         if ($char == '\'' && $this->strStarted && !$this->jumper) {
             $this->addTemp('arg');
             return $i + 1;
@@ -180,7 +192,7 @@ class OperationParser {
         if ($i < $this->operationStrLen) {
             return $this->getString($i + 1);
         }
-        $this->error=true;
+        $this->error = true;
         LoggerFactory::getLogger()->error('Error al parsear ecuacion', array('Ec' => $this->operationStr,
             'Err' => 'String no finalizado'
                 )
@@ -205,9 +217,8 @@ class OperationParser {
         if ($i < $this->operationStrLen) {
             return $this->getVar($i + 1);
         }
-        $this->error=true;
-        LoggerFactory::getLogger()->error('Error al parsear ecuacion', 
-                array('Ec' => $this->operationStr,
+        $this->error = true;
+        LoggerFactory::getLogger()->error('Error al parsear ecuacion', array('Ec' => $this->operationStr,
             'Err' => 'Variable no finalizada'
                 )
         );

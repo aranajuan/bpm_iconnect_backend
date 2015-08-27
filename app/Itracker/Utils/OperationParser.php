@@ -155,6 +155,10 @@ class OperationParser {
                 array_push($this->ops, '=');
                 array_push($this->ops, '.');
                 array_push($this->args, $this->args[0]);
+            }elseif ($this->temp == '-=') {
+                array_push($this->ops, '=');
+                array_push($this->ops, '-');
+                array_push($this->args, $this->args[0]);
             }else{
                 array_push($this->ops, $this->temp);
             }

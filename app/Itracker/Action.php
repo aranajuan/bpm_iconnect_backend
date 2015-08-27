@@ -24,9 +24,11 @@ class Action extends ITObject {
     private $habilita_equipos;   /* equipo habilitados para esta accion */
     private $habilita_a_propio; /* abierto por el usuario */
     private $habilita_abierto;  /* abierto */
-    private $habilita_equipo;   /* equipo del usuario */
+    private $habilita_equipo;   /* equipo del TKT */
+    private $habilita_equipos_usr;   /* equipo del usuario */
     private $habilita_master;   /* es master */
     private $habilita_estados; /* estados habilitados regex , */
+    private $habilita_filtroacciones;   /* actionfilter habilitados regex , */
     
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
@@ -201,12 +203,14 @@ class Action extends ITObject {
         $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
         $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
         $this->habilita_equipos = trim($tmpU["habilita_equipos"]);
+        $this->habilita_equipos_usr = trim($tmpU["habilita_equipos_usr"]);
         $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
         $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
         $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
         $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
         $this->habilita_master = trim($tmpU["habilita_master"]);
         $this->habilita_estados = trim($tmpU["habilita_estados"]);
+        $this->habilita_filtroacciones = trim($tmpU["habilita_filtroacciones"]);
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
@@ -310,9 +314,20 @@ class Action extends ITObject {
         if(!preg_match_array(explode(',',$this->habilita_estados),
                 $this->getTKT()->get_prop('status')
                 )){
-           return 'Esta accion no se puede ejecutar en el estado actual del ticket'; 
+           return 'Esta accion no se puede ejecutar en el estado actual del ticket #1'.$this->getTKT()->get_prop('status'); 
                 }
-        
+        $tvars = $this->getTKT()->getVars();
+        if(!preg_match_array(explode(',',$this->habilita_filtroacciones),
+                $tvars->get_prop('actionfilter')
+                )){
+           return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
+                }        
+        if($this->habilita_equipos_usr != '*' &&
+                count(array_intersect(explode(',',$l->get_prop('idsequipos')), 
+                explode(',',$this->habilita_equipos_usr)))==0){
+            return 'Esta accion no esta habilitada a tu equipo';
+                }
+                
         return "ok";
     }
 

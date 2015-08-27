@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 20-08-2015 a las 21:54:16
+-- Tiempo de generación: 27-08-2015 a las 20:24:36
 -- Versión del servidor: 5.6.24
 -- Versión de PHP: 5.5.24
 
@@ -19,7 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `itracker_agentes_tkt`
 --
-DROP DATABASE `itracker_agentes_tkt`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_tkt` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_tkt`;
 
@@ -44,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `tickets` (
   `UA` varchar(15) NOT NULL,
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL
-) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=76 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `tickets`
@@ -123,7 +122,9 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 (70, 'U1AG1', NULL, 'D1-S1-O4-O8-', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:47:26', 'U1AG1', NULL, NULL),
 (71, 'U1AG1', NULL, 'D1-S1-O4-O8-', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:49:12', 'U1AG1', NULL, NULL),
 (72, 'U1AG1', NULL, 'D1-S1-O4-O8-', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:49:47', 'U1AG1', NULL, NULL),
-(73, 'U1AG1', NULL, 'D1-S1-O4-O8-', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL);
+(73, 'U1AG1', NULL, 'D1-S1-O4-O8-', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL),
+(74, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-27 10:58:31', 'U1AG1', NULL, NULL),
+(75, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-27 11:01:57', 'U1AG1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -142,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `tickets_m` (
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM AUTO_INCREMENT=404 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=406 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `tickets_m`
@@ -551,7 +552,9 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 (400, 70, 1, '1', '2015-08-20 16:47:26', 'U1AG1', NULL, NULL, 0),
 (401, 71, 1, '1', '2015-08-20 16:49:12', 'U1AG1', NULL, NULL, 0),
 (402, 72, 1, '1', '2015-08-20 16:49:47', 'U1AG1', NULL, NULL, 0),
-(403, 73, 1, '1', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL, 0);
+(403, 73, 1, '1', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL, 0),
+(404, 74, 1, '1', '2015-08-27 10:58:31', 'U1AG1', NULL, NULL, 0),
+(405, 75, 1, '1', '2015-08-27 11:01:57', 'U1AG1', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -851,7 +854,9 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 (401, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U888888</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>aa</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
 (402, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U999999</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdf</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n');
 INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
-(403, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U999999</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdf</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n');
+(403, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U999999</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdf</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(404, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>234</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U123123</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>asd</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(405, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>235</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U123123</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value/></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n');
 
 --
 -- Índices para tablas volcadas
@@ -884,15 +889,14 @@ ALTER TABLE `tickets_m_detalles`
 -- AUTO_INCREMENT de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=76;
 --
 -- AUTO_INCREMENT de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=404;--
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=406;--
 -- Base de datos: `itracker_agentes_uta`
 --
-DROP DATABASE `itracker_agentes_uta`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_uta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_uta`;
 
@@ -904,53 +908,55 @@ USE `itracker_agentes_uta`;
 
 DROP TABLE IF EXISTS `acciones`;
 CREATE TABLE IF NOT EXISTS `acciones` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `alias` varchar(50) NOT NULL,
-  `ejecuta` varchar(50) NOT NULL,
-  `tipo` int(11) NOT NULL,
-  `formulario` tinyint(1) NOT NULL,
-  `form` text,
-  `script` text NOT NULL,
-  `habilita_estados` varchar(100) NOT NULL,
-  `habilita_t_propio` int(11) NOT NULL,
-  `habilita_tomado` int(11) NOT NULL,
-  `habilita_equipos` varchar(100) NOT NULL DEFAULT '*',
-  `habilita_perfiles` varchar(100) NOT NULL,
-  `habilita_a_propio` int(11) NOT NULL,
-  `habilita_abierto` int(11) NOT NULL,
-  `habilita_equipo` int(11) NOT NULL,
-  `habilita_master` int(11) NOT NULL,
-  `notificacion_param` varchar(255) NOT NULL,
-  `notificacion_texto` text NOT NULL,
-  `descripcion` varchar(255) DEFAULT NULL,
-  `estado` int(11) NOT NULL
+  `id` int(11) NOT NULL COMMENT 'identificador',
+  `nombre` varchar(200) NOT NULL COMMENT 'nombre de la accion',
+  `alias` varchar(50) NOT NULL COMMENT 'nombre a mostrar a usuarios',
+  `ejecuta` varchar(50) NOT NULL COMMENT 'condigo que ejecutara',
+  `tipo` int(11) NOT NULL COMMENT 'tipo para nivel de acceso',
+  `formulario` tinyint(1) NOT NULL COMMENT 'tiene o no formulario para completar por el usuario',
+  `form` text COMMENT 'itform para usuario',
+  `script` text NOT NULL COMMENT 'itscript a ejecutar',
+  `habilita_estados` varchar(100) NOT NULL COMMENT 'estados permitidos, regex separados por ,',
+  `habilita_filtroacciones` varchar(100) NOT NULL COMMENT 'regex para filtro por TKTVAR',
+  `habilita_t_propio` int(11) NOT NULL COMMENT 'debe estar tomado por el usuario logueado',
+  `habilita_tomado` int(11) NOT NULL COMMENT 'debe estar tomado por alguien',
+  `habilita_equipos` varchar(100) NOT NULL DEFAULT '*' COMMENT 'equipo donde esta el ticket',
+  `habilita_equipos_usr` varchar(50) NOT NULL COMMENT 'Equipos que ven la accion',
+  `habilita_perfiles` varchar(100) NOT NULL COMMENT 'perfiles habilitados separados por ,',
+  `habilita_a_propio` int(11) NOT NULL COMMENT 'debe estar abierto por el usuario logueado',
+  `habilita_abierto` int(11) NOT NULL COMMENT 'debe estar abierto',
+  `habilita_equipo` int(11) NOT NULL COMMENT 'debe estar en equipo del usuario',
+  `habilita_master` int(11) NOT NULL COMMENT 'debe ser master',
+  `notificacion_param` varchar(255) NOT NULL COMMENT 'parametrizacion de notificacion',
+  `notificacion_texto` text NOT NULL COMMENT 'texto a notificar',
+  `descripcion` varchar(255) DEFAULT NULL COMMENT 'descripcion',
+  `estado` int(11) NOT NULL COMMENT 'activo o no'
 ) ENGINE=MyISAM AUTO_INCREMENT=232 DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `acciones`
 --
 
-INSERT INTO `acciones` (`id`, `nombre`, `alias`, `ejecuta`, `tipo`, `formulario`, `form`, `script`, `habilita_estados`, `habilita_t_propio`, `habilita_tomado`, `habilita_equipos`, `habilita_perfiles`, `habilita_a_propio`, `habilita_abierto`, `habilita_equipo`, `habilita_master`, `notificacion_param`, `notificacion_texto`, `descripcion`, `estado`) VALUES
-(1, 'ABRIR', 'ABRIR', 'open', 1, 1, NULL, '{RESPONSE.result}= ''ok''\n{TKTVAR.status}=''Pendiente''', '.*', 0, 2, '*', '5,', 2, 2, 0, 0, '(is_master)(to:{team})', 'Se ha generado un nuevo itracker derivado al area.<br />\nID: {id}<br />\nPuedes verlo en ITRACKER', 'Genera un nuevo ticket', 0),
-(2, 'CERRAR', 'CERRAR', 'close', 1, 1, '<itform>\n  <element>\n    <label>Comentario</label>\n    <type>inputlong</type>\n    <id>comment</id>\n    <validations>\n      <required>true</required>\n    </validations>\n    <defaults>\n<default>\n<process>PRO4</process>\n<value>comentario default</value>\n</default>\n<default>\n<process>PRO5</process>\n<value>comentario default 5</value>\n</default>\n<default>\n<process>PRO[0-9]</process>\n<value>comentario default para 1</value>\n</default>\n<default>\n<value>sin default</value>\n</default>\n</defaults>\n  </element>\n<element>\n    <label>Comentario2</label>\n    <type>inputlong</type>\n    <id>comment2</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', 'tomado,en.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
-(3, 'LIBERAR', 'LIBERAR', 'free', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Pendiente''', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
-(4, 'DERIVAR', 'DERIVAR', 'derive', 2, 1, '<itform> 	<element> 		<label> 			Equipo a derivar 		</label> 		<notsave>true</notsave> 		<type> 			idsel 		</type> 		<id> 			idequipo 		</id> 		<idselparams> 			<class>tkt</class> 			<method>idsel_teamderive</method> 		</idselparams> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element> 	<element> 		<type> 			inputlong 		</type> 	<label>Comentario</label>	<id> 			comment 		</id> 		<comment> 			Commentario 		</comment> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idequipo}\r\n{TKTVAR.status}=''Derivado''', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{team}::cc:{prev_team})', 'Se ha derivado un itracker al area.<br />\nID: {id}<br />\nApertura: {FA}<br />\nPuedes verlo en ITRACKER', 'Asignar el ticket a otro equipo', 0),
-(5, 'TOMAR', 'TOMAR', 'take', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Tomado''', '.*', 0, 2, '*', '3,4,', 0, 1, 1, 1, '', '', 'Reservar el ticket para su tratamiento', 0),
-(6, 'REABRIR', 'RE ABRIR', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Reclamado''', '.*', 1, 0, '*', '3,4,', 0, 2, 1, 0, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
-(7, 'SET_MASTER', 'Set master', 'setmaster', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', 1, 0, '*', '3,4,', 0, 1, 1, 2, '', '', NULL, 0),
-(8, 'ASIGNAR', 'Asignar', 'asign', 2, 1, '<itform>\n  <element>\n    <label>Asignar a:</label>\n    <notsave>true</notsave>\n    <type>idsel</type>\n    <id>idusr</id>\n    <idselparams>\n      <class>tkt</class>\n      <method>idsel_userasign</method>\n    </idselparams>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n  <element>\n    <type> 			inputlong 		</type>\n    <label>Comentario</label>\n    <id> 			comment 		</id>\n    <comment> 			Commentario 		</comment>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idusr}\r\n{TKTVAR.status}=''En tratamiento''', '.*', 0, 2, '*', '4,', 0, 1, 1, 1, '(always)(to:{u_tom})', 'Se te ha asignado el tkt {id} del sistema {system->name}.<br />\nPuedes verlo en ITRACKER.\n', 'Asignar el ticket a un miembro del equipo', 0),
-(9, 'PRIORIZAR', 'Priorizar', 'priorice', 3, 1, '<itform> 	<element> 		<label> 			Prioridad: 		</label> 		<notsave>true</notsave> 		<type> 			select 		</type> 		<id> 			prioridad 		</id> 		<option><value>3</value><text>ALTA</text></option> 		<option><value>6</value><text>MEDIA</text></option> 		<option><value>9</value><text>BAJA</text></option> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.prioridad}', '.*', 0, 0, '*', '4,', 0, 1, 1, 1, '', '', 'Establece una nueva prioridad al ticket', 0),
-(10, 'UNIR', 'Unir', 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idmaster}', '.*', 0, 0, '*', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
-(11, 'SEPARAR', 'Separar', 'unjoin', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 2, '', '', 'Elimina la relacion al ticket padre', 0),
-(12, 'CERRAR_COMISIONES_PROCEDENTE', 'Cerrar Procedente', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>1</value>\n      <text>Procedente</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Monto a ajustar</label>\n    <type>input</type>\n    <id>monto</id>\n    <comment>(Punto separador decimal)</comment>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Cantidad de operaciones</label>\n    <type>input</type>\n    <id>qoper</id>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n   <label>Se ajustara en el mes</label>\n    <type>month</type>\n    <id>majust</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones procedente', 0),
-(13, 'CERRAR_COMISIONES_NOPROCE', 'Cerrar No Procedente', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>2</value>\n      <text>No corresponde</text>\n    </option>\n    <option>\n      <value>3</value>\n      <text>Error de formato</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', 1, 1, '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients},{event_user=>tomar}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones no procedente', 0),
-(14, 'REABRIR_COOR', 'Reabrir', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Re abierto''', '.*', 2, 0, '*', '4,', 0, 2, 1, 1, '', '', 'reabrir coordinador', 0),
-(15, 'LIBERAR_COOR', 'Liberar', 'free', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''En tratamiento''', '.*', 2, 1, '*', '4,', 0, 1, 1, 1, '', '', 'librerar coordinador', 0),
-(16, 'COMENTARIO_GENERADOR', 'COMENTARIO', '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''', '.*', 0, 0, '*', '5,', 1, 0, 0, 0, '', '', 'comentario cliente', 0),
-(17, 'COMENTARIO_EQUIPO', 'COMENTARIO', '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\n{TKTVAR.status}=''comentado>!!''', '.*', 0, 0, '*', '3,4,', 2, 0, 1, 0, '', '', 'comentario equipo', 0),
-(18, 'CERRAR_RUTA', 'CERRAR', 'close', 1, 1, '<itform>\r\n   <element>\r\n      <id>text1</id>\r\n      <type>text</type>\r\n      <text>Descargue el archivo del siguiente link</text>\r\n   </element>\r\n   <element>\r\n      <type>link</type>\r\n      <id>link_archivo</id>\r\n      <label>LINK</label>\r\n      <text>DESCARGAR</text>\r\n	  <validations>\r\n		<required>true</required>\r\n	  </validations>\r\n   </element>\r\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', 2, 0, '-1', '-1', 1, 1, 0, 1, '', '', 'Cierra ticket a link', 0),
-(19, 'LINK', 'link', 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '{RESPONSE.result}=''ok''', '.*', 0, 0, '*', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0);
+INSERT INTO `acciones` (`id`, `nombre`, `alias`, `ejecuta`, `tipo`, `formulario`, `form`, `script`, `habilita_estados`, `habilita_filtroacciones`, `habilita_t_propio`, `habilita_tomado`, `habilita_equipos`, `habilita_equipos_usr`, `habilita_perfiles`, `habilita_a_propio`, `habilita_abierto`, `habilita_equipo`, `habilita_master`, `notificacion_param`, `notificacion_texto`, `descripcion`, `estado`) VALUES
+(1, 'ABRIR', 'ABRIR', 'open', 1, 1, NULL, '{RESPONSE.result}= ''ok''\r\n{TKTVAR.status}=''PEN ''\r\n{TKTVAR.status}.=''Pendiente''', '.*', '.*', 0, 2, '*', '1,3', '5,', 2, 2, 0, 0, '(is_master)(to:{team})', 'Se ha generado un nuevo itracker derivado al area.<br />\nID: {id}<br />\nPuedes verlo en ITRACKER', 'Genera un nuevo ticket', 0),
+(2, 'CERRAR', 'CERRAR', 'close', 1, 1, '<itform>\n  <element>\n    <label>Comentario</label>\n    <type>inputlong</type>\n    <id>comment</id>\n    <validations>\n      <required>true</required>\n    </validations>\n    <defaults>\n<default>\n<process>PRO4</process>\n<value>comentario default</value>\n</default>\n<default>\n<process>PRO5</process>\n<value>comentario default 5</value>\n</default>\n<default>\n<process>PRO[0-9]</process>\n<value>comentario default para 1</value>\n</default>\n<default>\n<value>sin default</value>\n</default>\n</defaults>\n  </element>\n<element>\n    <label>Comentario2</label>\n    <type>inputlong</type>\n    <id>comment2</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', 'tomado,en.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 1, '', '', 'Indicar que el ticket esta solucionado', 0),
+(3, 'LIBERAR', 'LIBERAR', 'free', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Pendiente''', '.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 1, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
+(4, 'DERIVAR', 'DERIVAR', 'derive', 2, 1, '<itform> 	<element> 		<label> 			Equipo a derivar 		</label> 		<notsave>true</notsave> 		<type> 			idsel 		</type> 		<id> 			idequipo 		</id> 		<idselparams> 			<class>tkt</class> 			<method>idsel_teamderive</method> 		</idselparams> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element> 	<element> 		<type> 			inputlong 		</type> 	<label>Comentario</label>	<id> 			comment 		</id> 		<comment> 			Commentario 		</comment> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idequipo}\r\n{TKTVAR.status}=''Derivado''', '.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 1, '(always)(to:{team}::cc:{prev_team})', 'Se ha derivado un itracker al area.<br />\nID: {id}<br />\nApertura: {FA}<br />\nPuedes verlo en ITRACKER', 'Asignar el ticket a otro equipo', 0),
+(5, 'TOMAR', 'TOMAR', 'take', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Tomado''', '.*', '.*', 0, 2, '*', '', '3,4,', 0, 1, 1, 1, '', '', 'Reservar el ticket para su tratamiento', 0),
+(6, 'REABRIR', 'RE ABRIR', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Reclamado''', '.*', '.*', 1, 0, '*', '', '3,4,', 0, 2, 1, 0, '', '', 'Libera el ticket para que lo pueda tomar otro usuario.', 0),
+(7, 'SET_MASTER', 'Set master', 'setmaster', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', '.*', 1, 0, '*', '', '3,4,', 0, 1, 1, 2, '', '', NULL, 0),
+(8, 'ASIGNAR', 'Asignar', 'asign', 2, 1, '<itform>\n  <element>\n    <label>Asignar a:</label>\n    <notsave>true</notsave>\n    <type>idsel</type>\n    <id>idusr</id>\n    <idselparams>\n      <class>tkt</class>\n      <method>idsel_userasign</method>\n    </idselparams>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n  <element>\n    <type> 			inputlong 		</type>\n    <label>Comentario</label>\n    <id> 			comment 		</id>\n    <comment> 			Commentario 		</comment>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idusr}\r\n{TKTVAR.status}=''En tratamiento''', '.*', '.*', 0, 2, '*', '', '4,', 0, 1, 1, 1, '(always)(to:{u_tom})', 'Se te ha asignado el tkt {id} del sistema {system->name}.<br />\nPuedes verlo en ITRACKER.\n', 'Asignar el ticket a un miembro del equipo', 0),
+(9, 'PRIORIZAR', 'Priorizar', 'priorice', 3, 1, '<itform> 	<element> 		<label> 			Prioridad: 		</label> 		<notsave>true</notsave> 		<type> 			select 		</type> 		<id> 			prioridad 		</id> 		<option><value>3</value><text>ALTA</text></option> 		<option><value>6</value><text>MEDIA</text></option> 		<option><value>9</value><text>BAJA</text></option> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.prioridad}', '.*', '.*', 0, 0, '*', '', '4,', 0, 1, 1, 1, '', '', 'Establece una nueva prioridad al ticket', 0),
+(10, 'UNIR', 'Unir', 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idmaster}', '.*', '.*', 0, 0, '*', '', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
+(11, 'SEPARAR', 'Separar', 'unjoin', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', '.*', 1, 1, '*', '', '3,4,', 0, 1, 1, 2, '', '', 'Elimina la relacion al ticket padre', 0),
+(12, 'CERRAR_COMISIONES_PROCEDENTE', 'Cerrar Procedente', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>1</value>\n      <text>Procedente</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Monto a ajustar</label>\n    <type>input</type>\n    <id>monto</id>\n    <comment>(Punto separador decimal)</comment>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Cantidad de operaciones</label>\n    <type>input</type>\n    <id>qoper</id>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n   <label>Se ajustara en el mes</label>\n    <type>month</type>\n    <id>majust</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', '.*', 1, 1, '*', '', '3,4,', 0, 1, 1, 1, '(always)(to:{clients}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones procedente', 0),
+(13, 'CERRAR_COMISIONES_NOPROCE', 'Cerrar No Procedente', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>2</value>\n      <text>No corresponde</text>\n    </option>\n    <option>\n      <value>3</value>\n      <text>Error de formato</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', '.*', 1, 1, '*', '', '3,4,', 0, 1, 1, 1, '(always)(to:{clients},{event_user=>tomar}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones no procedente', 0),
+(14, 'REABRIR_COOR', 'Reabrir', 'reopen', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Re abierto''', '.*', '.*', 2, 0, '*', '', '4,', 0, 2, 1, 1, '', '', 'reabrir coordinador', 0),
+(15, 'LIBERAR_COOR', 'Liberar', 'free', 2, 0, NULL, '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''En tratamiento''', '.*', '.*', 2, 1, '*', '', '4,', 0, 1, 1, 1, '', '', 'librerar coordinador', 0),
+(16, 'COMENTARIO_GENERADOR', 'COMENTARIO', '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''', '.*', '.*', 0, 0, '*', '', '5,', 1, 0, 0, 0, '', '', 'comentario cliente', 0),
+(17, 'COMENTARIO_EQUIPO', 'COMENTARIO', '', 1, 1, '<itform> 	<element> 		<label> 			Comentario 		</label> 		<type> 			inputlong 		</type> 		<id> 			comment 		</id> 		<validations> 			<required>true</required> 		</validations> 	</element> </itform>', '{RESPONSE.result}=''ok''\n{TKTVAR.status}=''comentado>!!''', '.*', '.*', 0, 0, '*', '', '3,4,', 2, 0, 1, 0, '', '', 'comentario equipo', 0),
+(18, 'CERRAR_RUTA', 'CERRAR', 'close', 1, 1, '<itform>\r\n   <element>\r\n      <id>text1</id>\r\n      <type>text</type>\r\n      <text>Descargue el archivo del siguiente link</text>\r\n   </element>\r\n   <element>\r\n      <type>link</type>\r\n      <id>link_archivo</id>\r\n      <label>LINK</label>\r\n      <text>DESCARGAR</text>\r\n	  <validations>\r\n		<required>true</required>\r\n	  </validations>\r\n   </element>\r\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', '.*', 2, 0, '-1', '', '-1', 1, 1, 0, 1, '', '', 'Cierra ticket a link', 0),
+(19, 'LINK', 'link', 'link', 0, 1, '<itform>\r\n  <element>\r\n    <type>input</type>\r\n    <id>idth</id>\r\n    <validations>\r\n      <required>true</required>\r\n	<numeric>true</numeric>\r\n    </validations>\r\n    <notsave>true</notsave>\r\n  </element>\r\n</itform>', '{RESPONSE.result}=''ok''', '.*', '.*', 0, 0, '*', '', '0', 0, 0, 0, 0, '', '', 'Link a otro evento', 0);
 
 -- --------------------------------------------------------
 
@@ -1414,7 +1420,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `acciones`
 --
 ALTER TABLE `acciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=232;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'identificador',AUTO_INCREMENT=232;
 --
 -- AUTO_INCREMENT de la tabla `direccion`
 --
@@ -1457,7 +1463,6 @@ ALTER TABLE `sistemas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
 -- Base de datos: `itracker_root`
 --
-DROP DATABASE `itracker_root`;
 CREATE DATABASE IF NOT EXISTS `itracker_root` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_root`;
 
@@ -1532,7 +1537,7 @@ INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`) VALUES
 ('COMRES', '10.112.0.4', 1, '3e434e01511e4c4fe34f1389468794017a77808a', '2014-12-31 10:27:28'),
 ('FEDE', '10.66.93.46', 1, '5b5ff479ca227827238a3734d4a21770faf2e512', '2014-12-12 12:50:53'),
 ('FULLADM', '127.0.0.1', 1, '1ee2fefa390207ce676101645f0e5fe8a6127e23', '2015-08-20 10:04:00'),
-('U1AG1', '127.0.0.1', 1, 'dd17485e8d59ff970dcd114f6237c3b39d27199d', '2015-08-20 15:19:03'),
+('U1AG1', '127.0.0.1', 1, '52dc459b6b7bf15501c24813104b2c427713f06e', '2015-08-27 10:57:26'),
 ('U1AG2', '10.66.93.46', 1, 'f4f42277139f18857eb4a5ef6cb353364cd8d4ac', '2015-06-17 14:27:46'),
 ('U2AG1', '190.175.110.1', 1, '5775975f47bf6c399180e57f7cac0f282f1add12', '2014-11-22 19:23:27');
 

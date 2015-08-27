@@ -101,7 +101,7 @@ class TktH extends ITObject {
         }
         $this->detalle = $tmpU["detalle"];
         if ($this->detalle != null && $this->detalle != "") {
-            $this->itform = new itform();
+            $this->itform = new ITForm();
             if ($this->itform->load_xml($this->detalle) == false) {
                 return "Error al cargar formulario " . $this->id;
             }

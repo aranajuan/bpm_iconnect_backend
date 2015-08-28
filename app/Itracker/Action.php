@@ -29,7 +29,7 @@ class Action extends ITObject {
     private $habilita_master;   /* es master */
     private $habilita_estados; /* estados habilitados regex , */
     private $habilita_filtroacciones;   /* actionfilter habilitados regex , */
-    
+
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
     private $notificacion_texto;    /* Texto para el TO, CC usa texto standar */
@@ -45,13 +45,13 @@ class Action extends ITObject {
      * @var string
      */
     private $script;
-    
+
     /**
      * Script
      * @var Utils\ITScript
      */
     private $ITScript;
-    
+
     /**
      *
      * @var ITForm
@@ -137,7 +137,7 @@ class Action extends ITObject {
         while ($actV = $this->dbinstance->get_vector()) {
             $A = $this->objsCache->get_object(get_class(), $actV["id"]);
             $A->loadTKT($this->getTKT());
-            if ($A->check_valid()=='ok') {
+            if ($A->check_valid() == 'ok') {
                 $ret[$i] = $A;
                 $i++;
             }
@@ -255,13 +255,13 @@ class Action extends ITObject {
      */
     public function check_valid() {
         $l = $this->getLogged();
-               
+
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
             return "Esta accion no esta disponible para tu perfil";
 
         if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
             return "Esta accion no esta disponible para tu equipo";
-        
+
         if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
                 return "Esta accion no se puede aplicar a un ticket de tu equipo";
@@ -311,27 +311,24 @@ class Action extends ITObject {
                 return "Esta accion solo se puede aplicar a un ticket no abierto";
         }
 
-        if(!preg_match_array(explode(',',$this->habilita_estados),
-                $this->getTKT()->get_prop('status')
-                )){
-           return 'Esta accion no se puede ejecutar en el estado actual del ticket #1'.$this->getTKT()->get_prop('status'); 
-                }
+        if (!preg_match_array(explode(',', $this->habilita_estados), $this->getTKT()->get_prop('status')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #1' . $this->getTKT()->get_prop('status');
+        }
         $tvars = $this->getTKT()->getVars();
-        if(!preg_match_array(explode(',',$this->habilita_filtroacciones),
-                $tvars->get_prop('actionfilter')
-                )){
-           return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
-                }        
-        if($this->habilita_equipos_usr != '*' &&
-                count(array_intersect(explode(',',$l->get_prop('idsequipos')), 
-                explode(',',$this->habilita_equipos_usr)))==0){
+        if (!preg_match_array(explode(',', $this->habilita_filtroacciones), $tvars->get_prop('actionfilter')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
+        }
+        if ($this->habilita_equipos_usr != '*' &&
+                count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {
             return 'Esta accion no esta habilitada a tu equipo';
-                }
-                
+        }
+
         return "ok";
     }
 
-        /**
+    /**
      * Carga ticket para ejecutar accion o consultar
      * @param Tkt $TKT
      * @return  boolean se pudo cargar
@@ -343,7 +340,7 @@ class Action extends ITObject {
             if ($to) {
                 //cambia el form por el de la opcion
                 $this->itf = $to->get_prop("itform");
-                $this->script.=PHP_EOL.$TKT->getScriptText();
+                $this->script.=PHP_EOL . $TKT->getScriptText();
                 return true;
             }
             return false;
@@ -416,8 +413,8 @@ class Action extends ITObject {
      * Devuelve resultado del script
      * @return string
      */
-    private function ejecuteScript(){
-        $this->ITScript= new Utils\ITScript();
+    private function ejecuteScript() {
+        $this->ITScript = new Utils\ITScript();
         $const = new Utils\Vars('CONST');
         $const->setValue('date', date(USERDATE_READ_DATE));
         $const->setValue('time', date(USERDATE_READ_TIME));
@@ -428,39 +425,38 @@ class Action extends ITObject {
         $this->ITScript->addObject('TKT', $this->getTKT());
         $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
         $this->ITScript->addObject('USR', $this->getContext()->get_User());
-        if($this->getitform()){
+        if ($this->getitform()) {
             $this->ITScript->addObject('ITFORM', $this->getitform());
         }
-        
+
         $this->ITScript->loadScript($this->script);
         $rta = $this->ITScript->ejecute();
-        if($rta!='ok'){
+        if ($rta != 'ok') {
             return $rta;
         }
         $rta = $this->getScriptResponse()->get_prop('result');
-        if($rta==''){
+        if ($rta == '') {
             return 'Error:: Codigo invalido #1';
         }
-        $this->itf=$this->ITScript->getObject('ITFORM');
+        $this->itf = $this->ITScript->getObject('ITFORM');
         return $rta;
     }
-    
+
     /**
      * Devuelve response
      * @return Utils\Vars
      */
-    public function getScriptResponse(){
+    public function getScriptResponse() {
         return $this->ITScript->getObject('RESPONSE');
     }
-    
-    
+
     /**
      * Ejecuta accion
      * @return array resultado
      */
     public function ejecute() {
         $rta = $this->ejecuteScript();
-        if($rta!='ok'){
+        if ($rta != 'ok') {
             return array('result' => 'error', 'msj' => $rta);
         }
         $this->getTKT()->setEjecutingAction($this);
@@ -483,7 +479,37 @@ class Action extends ITObject {
         }
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
+        $response['postactions'] = $this->postAction();
         return $response;
+    }
+
+    /**
+     * Ejecuta accion posterior si existe en ITScript
+     * post_action, post_action_form(en json), post_action_id
+     * @return string
+     */
+    private function postAction() {
+        $rtaSave = 'ok';
+        $ItResponse = $this->getScriptResponse();
+        $postAction = $ItResponse->get_prop('post_action');
+        if ($postAction != '') {
+            $rta = $this->getTKT()->ejecute_action($postAction, json_decode($ItResponse->get_prop('post_action_form'), true), $ItResponse->get_prop('post_action_id'));
+            if (!is_array($rta)) {
+                $rtaSave = $rta;
+            } else {
+                $rtaSave = $rta['result'];
+            }
+        }
+        if ($rtaSave == 'ok') {
+            return 'ok';
+        } else {
+            $this->getContext()->getLogger()->error('Error en postaccion', array('nombre' => $postAction,
+                'form' => $ItResponse->get_prop('post_action_form'),
+                'idadj' => $ItResponse->get_prop('post_action_id'),
+                'rta' => print_r($rta, true)
+            ));
+            return $rtaSave;
+        }
     }
 
     /**

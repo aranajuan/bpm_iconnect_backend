@@ -155,11 +155,11 @@ class OperationParser {
                 array_push($this->ops, '=');
                 array_push($this->ops, '.');
                 array_push($this->args, $this->args[0]);
-            }elseif ($this->temp == '-=') {
+            } elseif ($this->temp == '-=') {
                 array_push($this->ops, '=');
                 array_push($this->ops, '-');
                 array_push($this->args, $this->args[0]);
-            }else{
+            } else {
                 array_push($this->ops, $this->temp);
             }
         }
@@ -181,16 +181,20 @@ class OperationParser {
             return $this->getString($i + 1);
         }
 
-        if ($char == '\'' && $this->strStarted && !$this->jumper) {
-            $this->addTemp('arg');
-            return $i + 1;
-        }
-        $this->temp.=$char;
-        if ($char == '\\') {
-            $this->jumper = true;
-        } else {
+        if ($this->jumper) {
             $this->jumper = false;
-        }
+            $this->temp.=$char;
+        } else {
+            if ($char == '\'' && $this->strStarted) {
+                $this->addTemp('arg');
+                return $i + 1;
+            }
+            if ($char == '\\') {
+                $this->jumper = true;
+            }else{
+                $this->temp.=$char;
+            }
+        } 
 
 
         if ($i < $this->operationStrLen) {

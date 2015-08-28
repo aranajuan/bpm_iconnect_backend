@@ -497,7 +497,7 @@ class Action extends ITObject {
             if (!is_array($rta)) {
                 $rtaSave = $rta;
             } else {
-                $rtaSave = $rta['result'];
+                $rtaSave = $rta['result'].'-'.$rta['msj'];
             }
         }
         if ($rtaSave == 'ok') {

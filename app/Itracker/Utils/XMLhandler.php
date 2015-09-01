@@ -13,6 +13,12 @@ abstract class XMLhandler {
     private $usr;
 
     /**
+     * Log de acceso
+     * @var array
+     */
+    private $logAccessArray;
+    
+    /**
      * Carga texto del xml
      * @param String $text
      * @param String $ipOr
@@ -22,6 +28,7 @@ abstract class XMLhandler {
     protected function load_input($text, $ipOr, $date) {
         $this->response = new \DOMDocument('1.0', 'UTF-8'); // prepara respuesta XML
         $this->prepare_response();
+        $this->logAccessArray=array();
         $this->error = null;
         $this->input = $text;
         $this->ip = $ipOr;
@@ -57,6 +64,18 @@ abstract class XMLhandler {
     }
 
     /**
+     * Agrega al access log
+     * @param string $tag
+     * @param string $value
+     */
+    private function add_accessLog($tag,$value){
+        if($value instanceof \SimpleXMLElement){
+            $value = (string)$value;
+        }
+        $this->logAccessArray[$tag]= $value;
+    }
+    
+    /**
      * Prepara respuesta XML
      */
     private function prepare_response() {
@@ -77,10 +96,13 @@ abstract class XMLhandler {
     private function validXML_request() {
 
         /* Validacion header */
+        $this->add_accessLog('front_ip', $this->ip);
         if (filter_var($this->ip, FILTER_VALIDATE_IP) == false) { //ip del front
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #1");
             return false;
         }
+        
+        $this->add_accessLog('date_rq',date(USERDATE_READ.':s', $this->date));
         if ($this->date == null || $this->date == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #2");
             return false;
@@ -90,21 +112,25 @@ abstract class XMLhandler {
             return false;
         }
 
+        $this->add_accessLog('usr', $this->parse->header->usr);
         if (!isset($this->parse->header->usr) || $this->parse->header->usr == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #3.1");
             return false;
         }
 
+        $this->add_accessLog('instance', $this->parse->header->instance);
         if (!isset($this->parse->header->instance) || $this->parse->header->instance == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #6.3");
             return false;
         }
 
+        $this->add_accessLog('usr_ip', $this->parse->header->ip);
         if (filter_var($this->parse->header->ip, FILTER_VALIDATE_IP) == false) { //ip del usuario
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #4");
             return false;
         }
 
+        $this->add_accessLog('front_name', $this->parse->header->front);
         if ($this->parse->header->front == null || $this->parse->header->front == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #6");
             return false;
@@ -117,11 +143,13 @@ abstract class XMLhandler {
             return false;
         }
 
+        $this->add_accessLog('rq_class', $this->parse->request->class);
         if ($this->parse->request->class == null || $this->parse->request->class == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #8");
             return false;
         }
 
+        $this->add_accessLog('rq_method',$this->parse->request->method);
         if ($this->parse->request->method == null || $this->parse->request->method == "") {
             $this->set_error("xml_validation", "Error en el origen de la solicitud - #9");
             return false;
@@ -133,6 +161,7 @@ abstract class XMLhandler {
     protected function set_error($origin, $msj) {
         $this->error = $msj;
         $this->error_origin = $origin;
+        $this->add_accessLog('error',$origin.'::'.$msj);
         $this->getLogger()->notice("Error al validar XML",array($origin, $msj));
     }
 
@@ -278,6 +307,8 @@ abstract class XMLhandler {
      */
     public function get_response() {
         $this->add_error_response();
+        $this->add_accessLog('date_resp', date(USERDATE_READ.':s'));
+        LoggerFactory::getAccessLogger()->write(json_encode($this->logAccessArray).','.PHP_EOL);
         return $this->response->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 

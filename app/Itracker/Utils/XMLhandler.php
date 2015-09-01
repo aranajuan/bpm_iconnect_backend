@@ -381,8 +381,19 @@ abstract class XMLhandler {
         
     }
     
-    
-     /**
+    /**
+     * Devuelve cantidad de archivos adjuntos
+     * @return int
+     */
+    public function get_files_count(){
+        if($this->parse->request->files){
+           return count($this->parse->request->files->children());
+        }
+        return 0;
+    }
+
+
+    /**
      * Devuelve instancia de Logger
      * @param \KLogger\Psr\Log\LogLevel $level
      * @return \KLogger\Logger

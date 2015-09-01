@@ -42,8 +42,8 @@ class ITForm implements XMLPropInterface {
      * @var array
      */
     private $formArray;
-    
-     /**
+
+    /**
      * Array con datos fuera del form solicitado
      * @var array
      */
@@ -54,7 +54,7 @@ class ITForm implements XMLPropInterface {
      * @var int
      */
     private $elSaveCount;
-    
+
     /**
      * Carga xml y lo parsea
      * @param string $xml
@@ -123,7 +123,7 @@ class ITForm implements XMLPropInterface {
     private function loadXMLFormArray() {
         $this->formArray = array();
         $els = $this->xml_output->getElementsByTagName("element");
-        $this->elSaveCount=0;
+        $this->elSaveCount = 0;
         foreach ($els as $el) {
             $arr = $this->elementToArray($el);
             if (isset($this->formArray[trim($arr['id'])])) {
@@ -135,7 +135,7 @@ class ITForm implements XMLPropInterface {
                 return false;
             }
             $this->formArray[trim($arr['id'])] = $arr;
-            if($arr['notsave']!='true'){
+            if ($arr['notsave'] != 'true') {
                 $this->elSaveCount++;
             }
         }
@@ -209,6 +209,11 @@ class ITForm implements XMLPropInterface {
         if ($element["validations"] == null || count($element["validations"]) == 0) {
             return "ok";
         }
+
+        if ($element["type"] == "fileupl") {
+            $element["value"] = Context::getContext()->get_files_count();
+        }
+
         foreach ($element["validations"] as $valName => $valValue) {
             switch ($valName) {
                 case "numeric":
@@ -229,6 +234,16 @@ class ITForm implements XMLPropInterface {
                 case "minlen":
                     if (strlen($element["value"]) < $valValue) {
                         return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
+                    }
+                    break;
+                case "max":
+                    if ($element["value"] > $valValue) {
+                        return "El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue;
+                    }
+                    break;
+                case "min":
+                    if ($element["value"] < $valValue) {
+                        return "El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue;
                     }
                     break;
                 case "regex":
@@ -276,11 +291,11 @@ class ITForm implements XMLPropInterface {
             $prefix = $formname . '_';
         }
         foreach ($arr as $a) {
-            $id=trim(str_replace($prefix, '', $a['id']));
-            if(isset($this->formArray[$id])){
+            $id = trim(str_replace($prefix, '', $a['id']));
+            if (isset($this->formArray[$id])) {
                 $this->formArray[$id]['value'] = $a['value'];
-            }else{
-                $this->formArrayExt[$id]['value']=$a['value'];
+            } else {
+                $this->formArrayExt[$id]['value'] = $a['value'];
             }
         }
         return $this->loadValtoXML();
@@ -297,7 +312,7 @@ class ITForm implements XMLPropInterface {
         }
         return null;
     }
-    
+
     /**
      * Devuelve valor del form no solicitado en el XML
      * @param string $id
@@ -461,10 +476,10 @@ class ITForm implements XMLPropInterface {
      * Devuelve cantidad de elementos a guardar
      * @return int
      */
-    public function getSaveElCount(){
+    public function getSaveElCount() {
         return $this->elSaveCount;
     }
-    
+
     public function get_prop($property) {
         $property = strtolower($property);
         if ($property == "*") {

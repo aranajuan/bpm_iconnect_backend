@@ -452,7 +452,7 @@ class ITForm implements XMLPropInterface {
     private function getArrReport() {
         $arr = array();
         $i = 0;
-        $data = $this->get_outputDOM();
+        $data = $this->getViewDom();
         $els = $data->getElementsByTagName("element");
         $arrTitles = array();
         foreach ($els as $el) {

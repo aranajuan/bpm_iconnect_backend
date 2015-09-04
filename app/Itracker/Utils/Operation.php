@@ -54,10 +54,10 @@ class Operation {
      */
     public function operate($operation) {
         $this->operation = $operation;
-        try{
+        try {
             $this->solve();
-        }  catch (\Exception $e){
-            $this->error=true;
+        } catch (\Exception $e) {
+            $this->error = true;
         }
         return $this->error;
     }
@@ -124,11 +124,24 @@ class Operation {
      * @return mixed
      */
     private function doMath($operation, $offset) {
-        $a1 = $this->argValue($operation, $offset);
+        try {
+            $a1 = $this->argValue($operation, $offset);
+            $a1set = true;
+        } catch (\Exception $e) {
+            $a1set = false;
+        }
         $a2 = $this->argValue($operation, $offset + 1);
         switch ($operation->getOpe($offset)) {
             case null:
                 return $a1;
+            case "isset":
+                return $a1set;
+            case "!isset":
+                return !$a1set;
+            case "empty":
+                return ($a1set==false || $a1=='');    
+            case "!empty":
+                return ($a1set==true && $a1!=''); 
             case "==":
                 return $a1 == $a2;
             case "!=":
@@ -152,17 +165,22 @@ class Operation {
             case "*":
                 return $a1 * $a2;
             case "&&":
-                return $a1 && $a2;  
+                return $a1 && $a2;
             case "||":
-                return $a1 || $a2; 
+                return $a1 || $a2;
+            case "get":
+                if (!is_array($a1)) {
+                    $a1 = explode(',', $a1);
+                }
+                return $a1[$a2];
             case "in":
-                if(!is_array($a1)){
-                    $a1=explode(',',$a1);
+                if (!is_array($a1)) {
+                    $a1 = explode(',', $a1);
                 }
-                if(!is_array($a2)){
-                    $a2=explode(',',$a2);
+                if (!is_array($a2)) {
+                    $a2 = explode(',', $a2);
                 }
-                return count(array_intersect($a1, $a2))>0;
+                return count(array_intersect($a1, $a2)) > 0;
             default :
                 LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
                 );
@@ -279,12 +297,11 @@ class Operation {
             try {
                 $obj->set_prop($arr[1], $value);
             } catch (\Exception $e) {
-                LoggerFactory::getLogger()->error('Error al setear variable en objeto ', 
-                        array($prop,$propR, get_class($obj), $value));
+                LoggerFactory::getLogger()->error('Error al setear variable en objeto ', array($prop, $propR, get_class($obj), $value));
                 throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
             }
         } else {
-            LoggerFactory::getLogger()->error('Error al setear variable en objeto invalido', array($prop,$propR, get_class($obj), $value));
+            LoggerFactory::getLogger()->error('Error al setear variable en objeto invalido', array($prop, $propR, get_class($obj), $value));
             throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
         }
     }

@@ -182,13 +182,19 @@ class Vars implements \Itracker\XMLPropInterface {
     /**
      *  Devuelve valor de la variable
      * @param string $varName
+     * @param boolean $exception lanzar error
      * @return mixed
+     * @throws \Exception
      */
-    public function getValue($varName) {
+    public function getValue($varName,$exception=false) {
         $varName = str_replace('.', '/', $varName);
         $varName = '/' . $this->rootTag . '/' . $varName;
         if (!isset($this->vars[$varName])) {
-            return null;
+            if($exception){
+                throw new \Exception('Variable no seteada-'.$varName);
+            }else{
+                return null;
+            }
         }
 
         return $this->vars[$varName];
@@ -262,7 +268,7 @@ class Vars implements \Itracker\XMLPropInterface {
     }
 
     public function get_Subprop($p, $hideError = false) {
-        return $this->getValue($p);
+        return $this->getValue($p,!$hideError);
     }
 
 }

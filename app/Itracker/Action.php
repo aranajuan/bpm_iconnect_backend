@@ -419,6 +419,12 @@ class Action extends ITObject {
         $const->setValue('date', date(USERDATE_READ_DATE));
         $const->setValue('time', date(USERDATE_READ_TIME));
         $const->setValue('datetime', date(USERDATE_READ));
+        $globals = new Utils\Vars();
+        $grta = $globals->loadFile(ROOT_DIR.'/config/itscript/globals.xml');
+        if($grta){
+            $globals->setRootTag('ITglobal');
+            $this->ITScript->addObject('GLOBALS', $globals);
+        }
         $this->ITScript->addObject('CONSTANT', $const);
         $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
         $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));

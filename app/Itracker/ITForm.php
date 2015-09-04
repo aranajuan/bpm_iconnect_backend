@@ -151,11 +151,11 @@ class ITForm implements XMLPropInterface {
         $arr = array();
 
         $arr["id"] = $this->getImmediateChildrenByTagName($element, 'id')->nodeValue;
-        $label = $this->getImmediateChildrenByTagName($element, 'label')->nodeValue;
-        if ($label != '') {
+        $label = trim($this->getImmediateChildrenByTagName($element, 'label')->nodeValue);
+        if ($label == '') {
             $arr["label"] = $arr["id"];
         } else {
-            $arr["label"] = trim($label);
+            $arr["label"] = $label;
         }
         $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
         $arr["notsave"] = trim($this->getImmediateChildrenByTagName($element, 'notsave')->nodeValue);

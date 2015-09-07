@@ -8,9 +8,7 @@
     $response = array("result" => "", "msj" => "");
     $TKT = $this->getTKT();
     
-    $itf = $this->getitform();
-    
-    $prioridad = $itf->get_value("prioridad");
+    $prioridad = $this->getScriptResponse()->get_prop('id');
 
     $rtaOP = $TKT->set_priority($prioridad);
        

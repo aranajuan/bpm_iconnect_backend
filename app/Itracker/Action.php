@@ -13,7 +13,6 @@ class Action extends ITObject {
     private $tipo;  /* tipo de accion, agrupador // ver perfiles */
     private $formulario;    /* requiere formulario o es de ejecucion directa */
     private $ejecuta;
-    private $estadotkt;
     private $alias;
 
     /*
@@ -25,11 +24,12 @@ class Action extends ITObject {
     private $habilita_equipos;   /* equipo habilitados para esta accion */
     private $habilita_a_propio; /* abierto por el usuario */
     private $habilita_abierto;  /* abierto */
-    private $habilita_equipo;   /* equipo del usuario */
+    private $habilita_equipo;   /* equipo del TKT */
+    private $habilita_equipos_usr;   /* equipo del usuario */
     private $habilita_master;   /* es master */
-    private $habilita_procesos;   /* procesos habilitados */
     private $habilita_estados; /* estados habilitados regex , */
-    
+    private $habilita_filtroacciones;   /* actionfilter habilitados regex , */
+
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
     private $notificacion_texto;    /* Texto para el TO, CC usa texto standar */
@@ -39,6 +39,18 @@ class Action extends ITObject {
     private $files; /* archivos */
     private $objadj_id; //id del objeto adjunto
     private $forceEveRta; // respuesta de evento forzado
+
+    /**
+     * Script preejecute
+     * @var string
+     */
+    private $script;
+
+    /**
+     * Script
+     * @var Utils\ITScript
+     */
+    private $ITScript;
 
     /**
      *
@@ -125,7 +137,7 @@ class Action extends ITObject {
         while ($actV = $this->dbinstance->get_vector()) {
             $A = $this->objsCache->get_object(get_class(), $actV["id"]);
             $A->loadTKT($this->getTKT());
-            if ($A->check_valid()=='ok') {
+            if ($A->check_valid() == 'ok') {
                 $ret[$i] = $A;
                 $i++;
             }
@@ -144,6 +156,178 @@ class Action extends ITObject {
         }
     }
 
+    /*
+     * Cargar desde la base el id especificado
+     * @param int $id     /
+     */
+
+    private function loadDB_id($id) {
+        $this->error = FALSE;
+        $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
+            $rta = $this->load_DV($tmpU);
+            if ($this->estado == I_DELETED)
+                return "eliminado";
+            return $rta;
+        } else
+            $this->error = TRUE;
+        return "error";
+    }
+
+    /**
+     * Cargar accion con el nombre especificado
+     * @param String $name
+     */
+    private function loadDB_name($name) {
+        $this->error = FALSE;
+        $this->dbinstance->loadRS("select * from TBL_ACCIONES where nombre='" . strToSQL(strtoupper($name)) . "'");
+        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
+            $tmpU = $this->dbinstance->get_vector();
+            $rta = $this->load_DV($tmpU);
+            if ($this->estado == I_DELETED)
+                return "eliminado";
+            return $rta;
+        } else
+            $this->error = TRUE;
+        return "error";
+    }
+
+    /**
+     * Carga de vector a propiedades
+     * @param type $tmpU { nombre,linkwi }
+     */
+    function load_VEC($tmpU) {
+        $this->tipo = trim($tmpU["tipo"]);
+        $this->formulario = trim($tmpU["formulario"]);
+        $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
+        $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
+        $this->habilita_equipos = trim($tmpU["habilita_equipos"]);
+        $this->habilita_equipos_usr = trim($tmpU["habilita_equipos_usr"]);
+        $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
+        $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
+        $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
+        $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
+        $this->habilita_master = trim($tmpU["habilita_master"]);
+        $this->habilita_estados = trim($tmpU["habilita_estados"]);
+        $this->habilita_filtroacciones = trim($tmpU["habilita_filtroacciones"]);
+        $this->notificacion_param = trim($tmpU["notificacion_param"]);
+        $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
+        $this->descripcion = trim($tmpU["descripcion"]);
+        $this->script = trim($tmpU["script"]);
+        $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
+        if ($this->form != "") {
+            $this->itf = new ITForm();
+            if ($this->itf->load_xml($this->form) == false) {
+                return "Error al cargar formulario de la tipificacion.";
+            }
+        } else {
+            $this->itf = null;
+        }
+        $this->ejecuta = trim($tmpU["ejecuta"]);
+        $this->alias = trim($tmpU["alias"]);
+        return 'ok';
+    }
+
+    /**
+     * Carga de base de datos a propiedades
+     * @param type $tmpU
+     */
+    private function load_DV($tmpU) {
+        $this->id = $tmpU["id"];
+        $this->estado = $tmpU["estado"];
+        $this->nombre = $tmpU["nombre"];
+        return $this->load_VEC($tmpU);
+    }
+
+    /**
+     * Carga id de objeto para TKTH
+     * @param string $objadj_id
+     */
+    public function loadObjadjId($objadj_id) {
+        $this->objadj_id = $objadj_id;
+    }
+
+    /**
+     * Valida accion
+     * @param Tkt $TKT
+     * @return string
+     */
+    public function check_valid() {
+        $l = $this->getLogged();
+
+        if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
+            return "Esta accion no esta disponible para tu perfil";
+
+        if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
+            return "Esta accion no esta disponible para tu equipo";
+
+        if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
+            if ($this->habilita_equipo == 2)
+                return "Esta accion no se puede aplicar a un ticket de tu equipo";
+        }else { // en otro equipo
+            if ($this->habilita_equipo == 1)
+                return "Esta accion no se puede aplicar a un ticket de otro equipo" . $this->TKT->get_prop("idequipo") . "//";
+        }
+
+        if ($this->TKT->get_prop("idmaster")) { //no es master
+            $utom = $this->TKT->get_prop("master")->get_prop("u_tom");
+            if ($this->habilita_master == 1)
+                return "Esta accion solo se puede utilizar en un ticket master";
+        }else { // es master
+            if ($this->habilita_master == 2)
+                return "Esta accion solo se puede utilizar en un ticket adjunto a otro";
+            $utom = $this->TKT->get_prop("u_tom");
+        }
+
+        if ($utom) { //esta tomado
+            if ($this->habilita_tomado == 2)
+                return "Esta accion no se puede aplicar a un ticket tomado";
+            if ($l->get_prop("usr") == $utom) { // tomado por el usuario
+                if ($this->habilita_t_propio == 2)
+                    return "Esta accion no se puede aplicar a un tomado por vos";
+            }else { // tomado por otro
+                if ($this->habilita_t_propio == 1)
+                    return "Esta accion no se puede aplicar a un tomado por otro";
+            }
+        } else {
+            if ($this->habilita_tomado == 1)
+                return "Esta accion no se puede aplicar a un ticket sin tomar";
+        }
+
+        if ($l->get_prop("usr") == $this->TKT->get_prop("usr")) { //abierto por el usuario
+            if ($this->habilita_a_propio == 2)
+                return "Esta accion no se puede aplicar a un ticket generado por vos";
+        }else { // abierto por otro
+            if ($this->habilita_a_propio == 1)
+                return "Esta accion no se puede aplicar a un ticket generado por otro";
+        }
+
+        if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL) { // cerrado - no abierto
+            if ($this->habilita_abierto == 1)
+                return "Esta accion solo se puede aplicar a un ticket abierto";
+        }else { // abierto
+            if ($this->habilita_abierto == 2)
+                return "Esta accion solo se puede aplicar a un ticket no abierto";
+        }
+
+        if (!preg_match_array(explode(',', $this->habilita_estados), $this->getTKT()->get_prop('status')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #1' . $this->getTKT()->get_prop('status');
+        }
+        $tvars = $this->getTKT()->getVars();
+        if (!preg_match_array(explode(',', $this->habilita_filtroacciones), $tvars->get_prop('actionfilter')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
+        }
+        if ($this->habilita_equipos_usr != '*' &&
+                count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {
+            return 'Esta accion no esta habilitada a tu equipo';
+        }
+
+        return "ok";
+    }
+
     /**
      * Carga ticket para ejecutar accion o consultar
      * @param Tkt $TKT
@@ -156,6 +340,7 @@ class Action extends ITObject {
             if ($to) {
                 //cambia el form por el de la opcion
                 $this->itf = $to->get_prop("itform");
+                $this->script.=PHP_EOL . $TKT->getScriptText();
                 return true;
             }
             return false;
@@ -220,197 +405,55 @@ class Action extends ITObject {
         if ($this->itf == null) {  //no requiere formulario esta accion
             return "ok";
         }
-        $this->itf->set_process($this->TKT->get_prop('proceso'));
         $rta = $this->itf->load_values($values, $formname);
         return $rta;
     }
 
-    /*
-     * Cargar desde la base el id especificado
-     * @param int $id     /
-     */
-
-    private function loadDB_id($id) {
-        $this->error = FALSE;
-        $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
-        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
-            $tmpU = $this->dbinstance->get_vector();
-            $rta = $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return $rta;
-        } else
-            $this->error = TRUE;
-        return "error";
-    }
-
     /**
-     * Cargar accion con el nombre especificado
-     * @param String $name
-     */
-    private function loadDB_name($name) {
-        $this->error = FALSE;
-        $this->dbinstance->loadRS("select * from TBL_ACCIONES where nombre='" . strToSQL(strtoupper($name)) . "'");
-        if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
-            $tmpU = $this->dbinstance->get_vector();
-            $rta = $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return $rta;
-        } else
-            $this->error = TRUE;
-        return "error";
-    }
-
-    /**
-     * Carga de vector a propiedades
-     * @param type $tmpU { nombre,linkwi }
-     */
-    function load_VEC($tmpU) {
-        $this->tipo = trim($tmpU["tipo"]);
-        $this->formulario = trim($tmpU["formulario"]);
-        $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
-        $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
-        $this->habilita_equipos = trim($tmpU["habilita_equipos"]);
-        $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
-        $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
-        $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
-        $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
-        $this->habilita_master = trim($tmpU["habilita_master"]);
-        $this->habilita_procesos = trim($tmpU["habilita_procesos"]);
-        $this->habilita_estados = trim($tmpU["habilita_estados"]);
-        $this->notificacion_param = trim($tmpU["notificacion_param"]);
-        $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
-        $this->descripcion = trim($tmpU["descripcion"]);
-        $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
-        if ($this->form != "") {
-            $this->itf = new ITForm();
-            if ($this->itf->load_xml($this->form) == false) {
-                return "Error al cargar formulario de la tipificacion.";
-            }
-        } else {
-            $this->itf = null;
-        }
-        $this->ejecuta = trim($tmpU["ejecuta"]);
-        $this->estadotkt = trim($tmpU["estadotkt"]);
-        $this->alias = trim($tmpU["alias"]);
-        return 'ok';
-    }
-
-    /**
-     * Carga de base de datos a propiedades
-     * @param type $tmpU
-     */
-    private function load_DV($tmpU) {
-        $this->id = $tmpU["id"];
-        $this->estado = $tmpU["estado"];
-        $this->nombre = $tmpU["nombre"];
-        return $this->load_VEC($tmpU);
-    }
-
-    /**
-     * Carga id de objeto para TKTH
-     * @param string $objadj_id
-     */
-    public function loadObjadjId($objadj_id) {
-        $this->objadj_id = $objadj_id;
-    }
-
-    /**
-     * Verifica que el proceso sea valido
-     * @param $process proceso a verificar | si es null busca en el tkt
-     * @return boolean
-     */
-    private function check_process($process = 'NULL') {
-        if (!($this->TKT instanceof Tkt)) {
-            if ($process == 'NULL') {
-                return false;
-            } else {
-                $tp = $process;
-            }
-        } else {
-            $tp = $this->TKT->get_prop('proceso');
-        }
-        $pv = explode(',', $this->habilita_procesos);
-        return preg_match_array($pv,$tp);
-    }
-    
-    
-    
-    /**
-     * Valida accion
-     * @param Tkt $TKT
+     * Devuelve resultado del script
      * @return string
      */
-    public function check_valid() {
-        $l = $this->getLogged();
-               
-        if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
-            return "Esta accion no esta disponible para tu perfil";
-
-        if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
-            return "Esta accion no esta disponible para tu equipo";
-        
-        if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
-            if ($this->habilita_equipo == 2)
-                return "Esta accion no se puede aplicar a un ticket de tu equipo";
-        }else { // en otro equipo
-            if ($this->habilita_equipo == 1)
-                return "Esta accion no se puede aplicar a un ticket de otro equipo" . $this->TKT->get_prop("idequipo") . "//";
+    private function ejecuteScript() {
+        $this->ITScript = new Utils\ITScript();
+        $const = new Utils\Vars('CONST');
+        $const->setValue('date', date(USERDATE_READ_DATE));
+        $const->setValue('time', date(USERDATE_READ_TIME));
+        $const->setValue('datetime', date(USERDATE_READ));
+        $globals = new Utils\Vars();
+        $grta = $globals->loadFile(ROOT_DIR.'/config/itscript/globals.xml');
+        if($grta){
+            $globals->setRootTag('ITglobal');
+            $this->ITScript->addObject('GLOBALS', $globals);
+        }
+        $this->ITScript->addObject('CONSTANT', $const);
+        $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
+        $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
+        $this->ITScript->addObject('TKT', $this->getTKT());
+        $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
+        $this->ITScript->addObject('USR', $this->getContext()->get_User());
+        if ($this->getitform()) {
+            $this->ITScript->addObject('ITFORM', $this->getitform());
         }
 
-        if ($this->TKT->get_prop("idmaster")) { //no es master
-            $utom = $this->TKT->get_prop("master")->get_prop("u_tom");
-            if ($this->habilita_master == 1)
-                return "Esta accion solo se puede utilizar en un ticket master";
-        }else { // es master
-            if ($this->habilita_master == 2)
-                return "Esta accion solo se puede utilizar en un ticket adjunto a otro";
-            $utom = $this->TKT->get_prop("u_tom");
+        $this->ITScript->loadScript($this->script);
+        $rta = $this->ITScript->ejecute();
+        if ($rta != 'ok') {
+            return $rta;
         }
+        $rta = $this->getScriptResponse()->get_prop('result');
+        if ($rta == '') {
+            return 'Error:: Codigo invalido #1';
+        }
+        $this->itf = $this->ITScript->getObject('ITFORM');
+        return $rta;
+    }
 
-        if ($utom) { //esta tomado
-            if ($this->habilita_tomado == 2)
-                return "Esta accion no se puede aplicar a un ticket tomado";
-            if ($l->get_prop("usr") == $utom) { // tomado por el usuario
-                if ($this->habilita_t_propio == 2)
-                    return "Esta accion no se puede aplicar a un tomado por vos";
-            }else { // tomado por otro
-                if ($this->habilita_t_propio == 1)
-                    return "Esta accion no se puede aplicar a un tomado por otro";
-            }
-        } else {
-            if ($this->habilita_tomado == 1)
-                return "Esta accion no se puede aplicar a un ticket sin tomar";
-        }
-
-        if ($l->get_prop("usr") == $this->TKT->get_prop("usr")) { //abierto por el usuario
-            if ($this->habilita_a_propio == 2)
-                return "Esta accion no se puede aplicar a un ticket generado por vos";
-        }else { // abierto por otro
-            if ($this->habilita_a_propio == 1)
-                return "Esta accion no se puede aplicar a un ticket generado por otro";
-        }
-
-        if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL) { // cerrado - no abierto
-            if ($this->habilita_abierto == 1)
-                return "Esta accion solo se puede aplicar a un ticket abierto";
-        }else { // abierto
-            if ($this->habilita_abierto == 2)
-                return "Esta accion solo se puede aplicar a un ticket no abierto";
-        }
-
-        if(!$this->check_process()){
-            return 'Esta accion no se puede ejecutar en el proceso asignado al ticket';
-        }
-        
-        if(!preg_match_array(explode(',',$this->habilita_estados),
-                $this->getTKT()->get_prop('status')
-                )){
-           return 'Esta accion no se puede ejecutar en el estado actual del ticket'; 
-                }
-        
-        return "ok";
+    /**
+     * Devuelve response
+     * @return Utils\Vars
+     */
+    public function getScriptResponse() {
+        return $this->ITScript->getObject('RESPONSE');
     }
 
     /**
@@ -418,6 +461,10 @@ class Action extends ITObject {
      * @return array resultado
      */
     public function ejecute() {
+        $rta = $this->ejecuteScript();
+        if ($rta != 'ok') {
+            return array('result' => 'error', 'msj' => $rta);
+        }
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = $this->objsCache;
@@ -436,10 +483,39 @@ class Action extends ITObject {
             $response["result"] = "ok";
             $rta = $this->addTKT_H();
         }
-        $this->getTKT()->setTHstatus($rta["obj"]);
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
+        $response['postactions'] = $this->postAction();
         return $response;
+    }
+
+    /**
+     * Ejecuta accion posterior si existe en ITScript
+     * post_action, post_action_form(en json), post_action_id
+     * @return string
+     */
+    private function postAction() {
+        $rtaSave = 'ok';
+        $ItResponse = $this->getScriptResponse();
+        $postAction = $ItResponse->get_prop('post_action');
+        if ($postAction != '') {
+            $rta = $this->getTKT()->ejecute_action($postAction, json_decode($ItResponse->get_prop('post_action_form'), true), $ItResponse->get_prop('post_action_id'));
+            if (!is_array($rta)) {
+                $rtaSave = $rta;
+            } else {
+                $rtaSave = $rta['result'].'-'.$rta['msj'];
+            }
+        }
+        if ($rtaSave == 'ok') {
+            return 'ok';
+        } else {
+            $this->getContext()->getLogger()->error('Error en postaccion', array('nombre' => $postAction,
+                'form' => $ItResponse->get_prop('post_action_form'),
+                'idadj' => $ItResponse->get_prop('post_action_id'),
+                'rta' => print_r($rta, true)
+            ));
+            return $rtaSave;
+        }
     }
 
     /**
@@ -462,6 +538,7 @@ class Action extends ITObject {
         if ($this->forceEveRta) {
             return $this->forceEveRta;
         }
+        $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
         $tktH = new TktH();
         $tktH->load_VEC($this);
         $rta["status"] = $tktH->insert_DB();
@@ -529,8 +606,6 @@ class Action extends ITObject {
                 return $this->itf;
             case 'formulario':
                 return $this->formulario;
-            case 'estadotkt':
-                return $this->estadotkt;
             case 'objadj_id':
                 return $this->objadj_id;
             case 'habilita_t_propio':

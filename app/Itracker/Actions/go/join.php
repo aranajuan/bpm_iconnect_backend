@@ -8,9 +8,7 @@
 $response = array("result" => "", "msj" => "");
 $TKT = $this->getTKT();
 
-$itf = $this->getitform();
-
-$idmaster = $itf->get_value("idmaster");
+$idmaster = $this->getScriptResponse()->get_prop('id');
 $master = $obCI->get_object('Tkt', $idmaster);
 if ($obCI->get_status('Tkt', $idmaster) != "ok") {
     return array("result" => "error", "msj" => "Erro al cargar tkt.");

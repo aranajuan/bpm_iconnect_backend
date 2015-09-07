@@ -5,49 +5,33 @@ namespace Itracker\Utils;
 class Config {
 
     /**
-     *
-     * @var \DOMDocument
+     *  Variables cargadas
+     * @var Vars
      */
-    private $dom;
+    protected $vars;
 
-    /**
-     *
-     * @var \DOMXPath
-     */
-    private $xpath;
-
-    /**
-     *Ruta del archivo
-     * @var String
-     */
-    private $file;
     /**
      * 
      * @param String $file  path to config
      * @throws Exception
      */
     public function __construct($file) {
-        $this->dom = new \DOMDocument();
-        if(!is_readable($file)){
+        if (!is_readable($file)) {
             LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado (no encontrado)',
-                    array('path'=>$file));
-            $this->dom=null;
-            $this->xpath=null;
+                    'Archivo de configuraciones no seteado (no encontrado)', array('path' => $file));
             throw new \Exception('No se pudo cargar archivo de configuraciones');
         }
-        try {
-            $this->dom->load($file);
-            $this->xpath = new \DOMXPath($this->dom);
-            $this->file=$file;
-        } catch (\Exception $e) {
+
+        $this->vars = new Vars();
+        $this->vars->setRootTag('itracker');
+        if ($this->vars->loadFile($file) == false) {
             LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado',
-                    array('path'=>$file,'msg'=> $e->getMessage() ));
-            $this->dom=null;
-            $this->xpath=null;
+                    'Archivo de configuraciones no seteado', array('path' => $file, 'msg' => $e->getMessage()));
+            $this->dom = null;
+            $this->xpath = null;
             throw new \Exception('No se pudo cargar archivo de configuraciones');
         }
+        
     }
 
     /**
@@ -82,14 +66,14 @@ class Config {
     public function getString($path) {
         return $this->getNodeValue($path);
     }
-    
+
     /**
      * Devuelve configuracion
      * @param String $path
      * @return Array
      */
     public function getArray($path) {
-        return explode(',',$this->getNodeValue($path));
+        return explode(',', $this->getNodeValue($path));
     }
 
     /**
@@ -99,17 +83,8 @@ class Config {
      * @throws \DOMException
      */
     private function getNodeValue($path) {
-        if($this->xpath==null){
-            throw new \DOMException('Archivo de configuracion no cargado');
-        }
-        $Elements = $this->xpath->query('//itracker/' . $path);
-        if ($Elements->length != 1) {
-            LoggerFactory::getLogger()->error(
-                    'Error en archivo de configuracion', 
-                    array('xpath' => $path,'file'=>$this->file));
-            throw new \DOMException('Archivo de configuracion invalido');
-        }
-        return $Elements->item(0)->nodeValue;
+        $val = $this->vars->getValue($path);
+        return $val;
     }
 
 }

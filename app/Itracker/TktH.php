@@ -101,7 +101,7 @@ class TktH extends ITObject {
         }
         $this->detalle = $tmpU["detalle"];
         if ($this->detalle != null && $this->detalle != "") {
-            $this->itform = new itform();
+            $this->itform = new ITForm();
             if ($this->itform->load_xml($this->detalle) == false) {
                 return "Error al cargar formulario " . $this->id;
             }
@@ -154,8 +154,8 @@ class TktH extends ITObject {
         } else {
             $this->id = $this->dbinstance->get_lastID();
             $itform = $this->accion->getitform();
-            if ($itform) {
-                $form = $itform->get_outputDOM()->saveXML();
+            if ($itform && $itform->getSaveElCount()) {
+                $form = $itform->getSaveDom()->saveXML();
             } else {
                 $form = "";
             }
@@ -215,7 +215,7 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
         if ($this->get_prop("itform") != null) {
-            $itfDom = $this->get_prop("itform")->get_outputDOM();
+            $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
                 $nodo = $element->importNode(
                         $itfDom->documentElement, true);
@@ -247,7 +247,6 @@ class TktH extends ITObject {
 
         if ($this->get_prop("UA") == $this->getLogged()->get_prop("usr")) {
             if ($this->itform) {
-                $this->itform->loadOutput();
                 $this->itform->set_view(0);
             }
             return true;
@@ -268,7 +267,6 @@ class TktH extends ITObject {
         }
 
         if ($this->itform) {
-            $this->itform->loadOutput();
             $this->itform->set_view($this->view["vista"]);
         }
         return true;

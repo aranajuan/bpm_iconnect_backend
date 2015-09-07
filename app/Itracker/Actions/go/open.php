@@ -2,13 +2,14 @@
 
 /**
  * 
- * @param ACTION $this
+ * @param Itracker\Action $this
  * @return array    $response=array("result"=>"","msj"=>"");
  */
 $response = array("result" => "", "msj" => "");
 
 $TKT = $this->getTKT();
 $itf = $this->getitform();
+$destiny = $this->getScriptResponse();
 
 /* VALIDACIONES */
 
@@ -20,31 +21,23 @@ if (!$TKT->is_active()) {
 
 $lstOption = $TKT->get_last();
 
-$dest = $lstOption->getDestiny($this->getLogged(), $itf);
-
-if (!$dest->hasDestiny()) {
-    $response["result"] = "error";
-    $response["msj"] = "Error en tipificacion. #2";
-    return $response;
-}
-
-if ($dest->getDestinyVal('team') == NULL) {
-    $this->getContext()->getLogger()->warning('No hay destino valido <team>', array(
+if (!is_numeric($destiny->get_prop('id'))) {
+    $this->getContext()->getLogger()->warning('No hay destino valido id en script', array(
         'id' => $lstOption->get_prop('id'),
         'usr' => $this->getContext()->get_User()->get_prop('usr'),
         'data' => $this->getContext()->get_params('form')
     ));
     $response["result"] = "error";
-    $response["msj"] = "Error en tipificacion. #3";
+    $response["msj"] = "Error en tipificacion. #2";
     return $response;
 }
 
 
 
 /* ABRIR */
-$rtaOP = $TKT->open();
+$rtaOP = $TKT->open($destiny->get_prop('id'));
 
-if ($dest->getVal('join') == 'true') {
+if ($lstOption->get_prop('unir')) {
     $response["openother"] = 0;
 } else {
     $response["openother"] = 1;
@@ -62,25 +55,8 @@ if ($rtaOP != "ok") {
     $this->force_tkth();
 }
 
-/* ESTABLECER PROCESO */
-$process = $dest->getDestinyVal('process');
-if ($process) {
-    $rta = $TKT->ejecute_action('SET_PROCESS',
-            array(array("id" => "proceso", "value" => $process)));
-    if ($rta["result"] != "ok") {
-        $response['msj']='No se pudo asignar al proceso correspondiente';
-        $this->getContext()->getLogger()->warning(
-                'No se pudo asignar al proceso en apertura',
-                array(
-                'rta' => print_r($rta,true),
-                'usr' => $this->getContext()->get_User()->get_prop('usr')
-        ));
-        return $response;
-    }
-}
-
 /* CERRAR A FILE */
-$file = $dest->getDestinyVal('file');
+$file = $destiny->get_prop('file');
 if ($file) { //no une
     $response["type"] = "file";
     $response["file"] = $file;
@@ -97,12 +73,11 @@ if ($file) { //no une
 
 
 /* UNIR */
-$join = $dest->getVal('join');
-if($join!='true'){
+if(!$lstOption->get_prop('unir')){
     return $response;
 }
 
-$idmaster = $itf->get_value_arr("idmaster");
+$idmaster = $itf->getExtravalue('idmaster');
 
 if (is_numeric($idmaster) && $idmaster > 0) {
     $rta = $TKT->ejecute_action("UNIR", array(array("id" => "idmaster",
@@ -110,7 +85,7 @@ if (is_numeric($idmaster) && $idmaster > 0) {
     if ($rta["result"] != "ok") {
         $response["result"] = "ok";
         $response["type"] = "tkt";
-        $response["msj"] = "No se pudo unir al master." . $rta["msj"];
+        $response["msj"] = "No se pudo unir al master." . $rta["msj"]."-".$rta["result"];
     }
 }
 return $response;

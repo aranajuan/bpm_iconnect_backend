@@ -2,6 +2,9 @@
 
 namespace Itracker;
 
+/**
+ * Arbol de opciones y movimientos
+ */
 abstract class Tree extends ITObject {
 
     private $path;
@@ -13,13 +16,12 @@ abstract class Tree extends ITObject {
     private $critico;
     private $critico_v;
 
-    /*
+    /**
      *  Carga arbol y Verifica formato
-     * @param    $path    formato:  'rut:iddireccion-idsistema-idopcion1-idopcion2-....
+     * @param    $path    formato:  'rut:iddireccion,idsistema,idopcion1,idopcion2-....
      * @param    $crypt  esta encriptado    
      * @return   string
      */
-
     protected function load_path($path, $crypt = 0) {
         $this->path_pos = 0;
         $this->path_obj = NULL;
@@ -30,7 +32,7 @@ abstract class Tree extends ITObject {
         if ($crypt) {
             $path = \Encrypter::decrypt($path);
         }
-        $this->path = explode("-", $path);
+        $this->path = explode(",", $path);
         return $this->check_valid();
     }
 
@@ -39,7 +41,7 @@ abstract class Tree extends ITObject {
      * @return string path
      */
     protected function get_path() {
-        return implode("-", $this->path);
+        return implode(",", $this->path);
     }
 
     /**
@@ -58,7 +60,7 @@ abstract class Tree extends ITObject {
         $this->path_max = count($this->path) - 2;
         for ($i = 0; $i < $this->path_max; $i++) {
             if (!is_numeric(substr($this->path[$i], 1))) {
-                $tmp = implode("-", $this->path);
+                $tmp = implode(",", $this->path);
                 $this->path = NULL;
                 $this->path_max = 0;
                 return "Arbol invalido ('$tmp')";
@@ -76,7 +78,7 @@ abstract class Tree extends ITObject {
         start_measure("OBJ:TREE:load_objects");
         $this->path_obj = NULL;
         $perfil = $this->getLogged()->get_prop('perfil');
-        $this->canopen=true;
+        $this->canopen = true;
         for ($i = 0; $i <= $this->path_max; $i++) {
             switch (substr($this->path[$i], 0, 1)) {
                 case "D":
@@ -93,9 +95,9 @@ abstract class Tree extends ITObject {
             }
             $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1));
             $rta = $this->objsCache->get_status($ct, substr($this->path[$i], 1));
-            if($ct=='Option'){
-                if(!$o->checkProfile($perfil)){
-                    $this->canopen=false;
+            if ($ct == 'Option') {
+                if (!$o->checkProfile($perfil)) {
+                    $this->canopen = false;
                 }
             }
             if ($rta != "error") {
@@ -104,7 +106,7 @@ abstract class Tree extends ITObject {
                 return "Error al cargar un objeto del arbol (id " . $this->path[$i] . " - pos $i - $rta)";
             }
             if ($rta == "eliminado") {
-                $this->canopen=false;
+                $this->canopen = false;
                 $this->deleted = 1;
             }
         }
@@ -124,14 +126,15 @@ abstract class Tree extends ITObject {
         foreach ($this->path_obj as $o) {
             $critico = $o->get_prop("texto_critico");
             if ($critico != "Propiedad invalida." && $critico != NULL) {
-                $this->critico.="-" . $critico;
+                $this->critico.="," . $critico;
                 $this->critico_v[$i] = $o;
                 $i++;
             }
         }
         if ($this->critico == "") {
             $this->critico = NULL;
-        } else
+        }
+        else
             $this->critico = substr($this->critico, 1);
     }
 
@@ -187,19 +190,19 @@ abstract class Tree extends ITObject {
                     case 0:
                         $rta[$i]["question"] = "Canal";
                         $rta[$i]["ans"] = $this->get_division()->get_prop("nombre");
-                        $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id") . "-";
+                        $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id") . ",";
                         break;
                     case 1:
                         $rta[$i]["question"] = "Tipo";
                         $rta[$i]["ans"] = $this->get_system()->get_prop("nombre");
-                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . "-";
+                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . ",";
                         break;
                     default:
                         $o = $this->path_obj[$i];
                         $q = $this->objsCache->get_object("Question", $o->get_prop("idpregunta"));
                         $rta[$i]["question"] = $q->get_prop("texto");
                         $rta[$i]["ans"] = $o->get_prop("texto");
-                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . "-";
+                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . ",";
                         break;
                 }
             }
@@ -225,8 +228,8 @@ abstract class Tree extends ITObject {
         $rta = array();
         $usr = $this->getLogged();
         $usrDirs = $usr->get_divisions();
-        if (!is_array($this->path) || 
-                !objinarray($this->get_division(),$usrDirs)) {
+        if (!is_array($this->path) ||
+                !objinarray($this->get_division(), $usrDirs)) {
             // primer opcion, se muestran las direcciones
             //limpiar temporales del usuario
             //verificar si el usuario pertenece solo a una direccion se ingresa directamente
@@ -237,21 +240,21 @@ abstract class Tree extends ITObject {
             }
             //$dir=-1;
             if ($dir > 0) {
-                $this->load_path("D" . $dir . "-", false);
+                $this->load_path("D" . $dir . ",", false);
             } else {
                 $rta["title"] = "Seleccione un area";
                 $rta["back"] = "none";
                 $i = 0;
                 foreach ($usrDirs as $d) {
                     $rta["options"][$i]["title"] = $d->get_prop("nombre");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt("D" . $d->get_prop("id") . "-");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt("D" . $d->get_prop("id") . ",");
                     $rta["options"][$i]["end"] = false;
                     $i++;
                 }
                 return $rta;
             }
         }
-        $actualPATH = implode("-", $this->path); //ruta actual, para generar destiny
+        $actualPATH = implode(",", $this->path); //ruta actual, para generar destiny
         $rta["actual"] = \Encrypter::encrypt($actualPATH);
         $actualO = $this->get_last();
         $backPATH = Array();
@@ -259,7 +262,7 @@ abstract class Tree extends ITObject {
             $backPATH[$i] = $this->path[$i];
         }
         if (count($backPATH)) {
-            $rta["back"] = \Encrypter::encrypt(implode("-", $backPATH) . "-");
+            $rta["back"] = \Encrypter::encrypt(implode(",", $backPATH) . ",");
         } else {
             $rta["back"] = "";
         }
@@ -271,7 +274,7 @@ abstract class Tree extends ITObject {
                 $i = 0;
                 foreach ($ss as $s) {
                     $rta["options"][$i]["title"] = $s->get_prop("nombre");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "S" . $s->get_prop("id") . "-");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "S" . $s->get_prop("id") . ",");
                     $rta["options"][$i]["end"] = false;
                     $i++;
                 }
@@ -290,11 +293,11 @@ abstract class Tree extends ITObject {
                 $opts = $q->get_prop("opcionesobj");
                 $i = 0;
                 foreach ($opts as $opt) {
-                    if(!$opt->checkProfile($perfil)){
+                    if (!$opt->checkProfile($perfil)) {
                         continue;
                     }
                     $rta["options"][$i]["title"] = $opt->get_prop("texto");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . "-");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
                     if ($opt->get_prop("idpregunta_destino")) {
                         $rta["options"][$i]["end"] = false;
                     } else {
@@ -314,7 +317,7 @@ abstract class Tree extends ITObject {
                     $i = 0;
                     foreach ($opts as $opt) {
                         $rta["options"][$i]["title"] = $opt->get_prop("texto");
-                        $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . "-");
+                        $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
                         if ($opt->get_prop("idpregunta_destino")) {
                             $rta["options"][$i]["end"] = false;
                         } else {
@@ -324,12 +327,26 @@ abstract class Tree extends ITObject {
                     }
                     return $rta;
                 } else {
-                        $rta["object"] = $actualO;
+                    $rta["object"] = $actualO;
                 }
                 return $rta;
         }
     }
 
+    /**
+     * Devuelve script de todas las opciones
+     * @return string
+     */
+    public function getScriptText(){
+        $sctmp='';
+        foreach($this->path_obj as $o){
+            if($o instanceof Option){
+                $sctmp.=PHP_EOL.$o->get_prop('destino');
+            }
+        }
+        return $sctmp;
+    }
+    
     /**
      * Devuelve ultima opcion [OPTION]
      * @return Option 

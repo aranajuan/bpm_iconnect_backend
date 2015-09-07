@@ -221,6 +221,18 @@ function strToSQL($txt) {
 }
 
 /**
+ * convierte una cadena para pasarla como parametro a una funcion js
+ */
+function strToJava($txt) {
+    $tmp = str_replace("\\", "\\\\", $txt);
+    $tmp = str_replace("\"", "&quot;", $tmp);
+    $tmp = str_replace("'", "\\'", $tmp);
+    $tmp = str_replace("\n", "\\n", $tmp);
+    $tmp = str_replace("\r", "", $tmp);
+    return $tmp;
+}
+
+/**
  * Bloquea mensajes de error y lo pone en una variable global
  */
 $fatal_error_handler_MSJ = "";

@@ -12,13 +12,13 @@ class Option extends ITObject {
     private $texto;    /* texto a mostrar en la opcion */
     private $texto_critico;    /* texto utilizado para vincular similares */
     private $destino; /* xml texto con el destino y reglas */
-    private $habilita_perfiles; /* xml texto con el destino y reglas */
 
     /**
-     * Reglas de derivacion y apertura
-     * @var OptionRules 
+     * Permitir unir
+     * @var boolean 
      */
-    private $destRule;
+    private $unir;
+    private $habilita_perfiles; /* xml texto con el destino y reglas */
     private $pretext; /* contiene el formulario que sera solicitado antes de generar el reclamo */
 
     /**
@@ -38,12 +38,13 @@ class Option extends ITObject {
         $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $this->load_DV($tmpU);
+            $rta = $this->load_DV($tmpU);
             if ($this->UB != NULL)
                 return "eliminado";
-            return "ok";
-        } else
+            return $rta;
+        } else {
             $this->error = TRUE;
+        }
         return "error";
     }
 
@@ -54,21 +55,24 @@ class Option extends ITObject {
         $this->habilita_perfiles = trim($tmpU['habilita_perfiles']);
         $this->destino = trim(space_delete($tmpU["destino"], array("\t", "\n", "\0", "\x0B")));
         $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
+        $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
 
-        if ($this->destino != "") {
-            $this->destRule = new OptionRules($this->destino);
-            if ($this->pretext != "") {
-                $this->itform = new ITForm();
-                $this->itform->load_xml($this->pretext);
-            } else {
-                $this->itform = null;
-            }
+        $this->unir = trim($tmpU['unir']);
+        if ($this->destino == '' && ($this->pretext != '' || $this->idpregunta_destino == '')) {
+            $this->getContext()->getLogger()->error('Error en opcion sin destino', array('id' => $this->id));
+            return 'Error en el arbol de derivaciones. #1';
+        }
+
+        if ($this->pretext != '') {
+            $this->itform = new ITForm();
+            $this->itform->load_xml($this->pretext);
         } else {
-            $this->destRule = null;
+            $this->itform = null;
         }
 
 
-        $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
+
+        return 'ok';
     }
 
     /**
@@ -81,24 +85,7 @@ class Option extends ITObject {
         $this->FA = $tmpU["FA"];
         $this->UB = $tmpU["UB"];
         $this->FB = $tmpU["FB"];
-        $this->load_VEC($tmpU);
-    }
-
-    /**
-     * Devuelve OptionRule cargado (si user y itform son null devuelve todo)
-     * @param User $user
-     * @param ITForm $itform
-     * @return OptionRules
-     */
-    public function getDestiny($user = null, $itform = null) {
-        if ($this->destRule == null) {
-            return null;
-        }
-        if ($user == null && $itform == null) {
-            return $this->destRule;
-        }
-        $this->destRule->loadFor($user, $itform);
-        return $this->destRule;
+        return $this->load_VEC($tmpU);
     }
 
     /**
@@ -106,18 +93,17 @@ class Option extends ITObject {
      * @param int $idProfile
      * @return boolean
      */
-    public function checkProfile($idProfile){
-        if($this->habilita_perfiles=='*'){
+    public function checkProfile($idProfile) {
+        if ($this->habilita_perfiles == '*') {
             return true;
         }
         $hp = explode(',', $this->habilita_perfiles);
-        if(in_array($idProfile,$hp)){
+        if (in_array($idProfile, $hp)) {
             return true;
         }
         return false;
-            
     }
-    
+
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {
@@ -129,6 +115,10 @@ class Option extends ITObject {
                 return $this->texto;
             case 'itform':
                 return $this->itform;
+            case 'unir':
+                return $this->unir;
+            case 'destino':
+                return $this->destino;
             case 'texto_critico':
                 return $this->texto_critico;
             case 'idpregunta_destino':

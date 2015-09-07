@@ -15,6 +15,7 @@ function GO($Context) {
     $responseData = $response->createElement("data");
     
     $responseData->appendChild($response->createElement("idmaster",$TKT->get_prop("idmaster")));
+    $responseData->appendChild($response->createElement("largestatus",$TKT->get_LargeStatus()));
     
     $opts = $TKT->get_tree_history();
     $tree = $response->createElement("tree");

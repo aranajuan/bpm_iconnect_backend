@@ -30,8 +30,30 @@ class ITForm implements XMLPropInterface {
      * @var int 
      */
     private $view_level;
-    private $arr_val;
-    private $formname;
+
+    /**
+     * Se puede guardar
+     * @var boolean 
+     */
+    private $okToSave;
+
+    /**
+     * Array con el formulario
+     * @var array
+     */
+    private $formArray;
+
+    /**
+     * Array con datos fuera del form solicitado
+     * @var array
+     */
+    private $formArrayExt;
+
+    /**
+     * Cantidad de elementos que se deben guardar
+     * @var int
+     */
+    private $elSaveCount;
 
     /**
      * Carga xml y lo parsea
@@ -52,14 +74,113 @@ class ITForm implements XMLPropInterface {
             if ($nodeList->length == 0) {
                 return false;
             }
-            $this->xml_output = clone $this->xml_input;
-            return true;
+            $this->loadOutput();
+            return $this->loadXMLFormArray();
         } catch (\Exception $e) {
             $this->xml_input = null;
             Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML", array($xml));
             return false;
         }
         return false;
+    }
+
+    /**
+     * Clona xml input a output
+     */
+    private function loadOutput() {
+        $this->okToSave = false;
+        $this->xml_output = clone $this->xml_input;
+    }
+
+    /**
+     * Devuelve hijos inmediatos
+     * @param \DOMElement $element
+     * @param type $tagName
+     * @return \DOMElement|array
+     */
+    private function getImmediateChildrenByTagName($element, $tagName, $single = true) {
+        $result = array();
+        foreach ($element->childNodes as $child) {
+            if ($child instanceof \DOMElement && $child->tagName == $tagName) {
+                if ($single) {
+                    return $child;
+                } else {
+                    array_push($result, $child);
+                }
+            }
+        }
+        if ($single) {
+            return new \DOMElement('empty');
+        } else {
+            return $result;
+        }
+    }
+
+    /**
+     * Pasa el XML del formulario al array
+     * @return boolean
+     */
+    private function loadXMLFormArray() {
+        $this->formArray = array();
+        $els = $this->xml_output->getElementsByTagName("element");
+        $this->elSaveCount = 0;
+        foreach ($els as $el) {
+            $arr = $this->elementToArray($el);
+            if (isset($this->formArray[trim($arr['id'])])) {
+                $this->xml_output = null;
+                $this->formArray = null;
+                Utils\LoggerFactory::getLogger()->error("Id duplicado en itform", array('xml' => $this->xml_input_text,
+                    'id' => $arr['id'])
+                );
+                return false;
+            }
+            $this->formArray[trim($arr['id'])] = $arr;
+            if ($arr['notsave'] != 'true') {
+                $this->elSaveCount++;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Convierte DOMElement a Array y guarda en arr_val
+     * @param DOMElement $element
+     * @return array   campo
+     */
+    private function elementToArray($element) {
+        $arr = array();
+
+        $arr["id"] = $this->getImmediateChildrenByTagName($element, 'id')->nodeValue;
+        $label = trim($this->getImmediateChildrenByTagName($element, 'label')->nodeValue);
+        if ($label == '') {
+            $arr["label"] = $arr["id"];
+        } else {
+            $arr["label"] = $label;
+        }
+        $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
+        $arr["notsave"] = trim($this->getImmediateChildrenByTagName($element, 'notsave')->nodeValue);
+        $this->arr_val[$arr["id"]] = $arr["value"];
+        $arr["type"] = trim($this->getImmediateChildrenByTagName($element, 'type')->nodeValue);
+        if ($arr["type"] == "select") {
+            $options = $this->getImmediateChildrenByTagName($element, 'option', false);
+            $arr["valuetxt"] = $arr["value"];
+            foreach ($options as $opt) {
+                if (trim($this->getImmediateChildrenByTagName($opt, 'value')->nodeValue) == trim($arr["value"])) {
+                    $arr["valuetxt"] = trim($this->getImmediateChildrenByTagName($opt, 'text')->nodeValue);
+                }
+            }
+        }
+
+        $arr["validations"] = array();
+        $validations = $this->getImmediateChildrenByTagName($element, 'validations');
+        if ($validations == null || !$validations->hasChildNodes()) {
+            return $arr;
+        } else {
+            foreach ($validations->childNodes as $v) {
+                $arr["validations"][trim($v->nodeName)] = trim($v->nodeValue);
+            }
+            return $arr;
+        }
     }
 
     /**
@@ -88,6 +209,11 @@ class ITForm implements XMLPropInterface {
         if ($element["validations"] == null || count($element["validations"]) == 0) {
             return "ok";
         }
+
+        if ($element["type"] == "fileupl") {
+            $element["value"] = Context::getContext()->get_files_count();
+        }
+
         foreach ($element["validations"] as $valName => $valValue) {
             switch ($valName) {
                 case "numeric":
@@ -110,6 +236,16 @@ class ITForm implements XMLPropInterface {
                         return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
                     }
                     break;
+                case "max":
+                    if ($element["value"] > $valValue) {
+                        return "El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue;
+                    }
+                    break;
+                case "min":
+                    if ($element["value"] < $valValue) {
+                        return "El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue;
+                    }
+                    break;
                 case "regex":
                     $valid = preg_match($valValue, $element["value"], $newstr);
                     if (!$valid) {
@@ -124,256 +260,80 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
-     * Devuelve hijos inmediatos *** SOLO HOTFIX ****
-     * @param \DOMElement $element
-     * @param type $tagName
-     * @return array
-     */
-    private function getImmediateChildrenByTagName($element, $tagName) {
-        $result = array();
-        foreach ($element->childNodes as $child) {
-            if ($child instanceof \DOMElement && $child->tagName == $tagName) {
-                return $child;
-            }
-        }
-    }
-
-    /**
-     *  Busca valor en array por id
-     * @param array $arr
-     * @param string $id
-     * @return string|null
-     */
-    private function find_elementVal($arr, $id, $formname) {
-        if ($id == null) {
-            return null;
-        }
-        if ($formname) {
-            $nid = $formname . "_" . trim($id);
-        } else {
-            $nid = $id;
-        }
-        foreach ($arr as $a) {
-            if (trim($a["id"]) == trim($nid)) {
-                return $a["value"];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Busca elemento por valor de tag
-     * @param \DOMDocument $dom
-     * @param string $tag
-     * @param string $val
-     * @return DOMElement
-     */
-    private function find_field($dom, $tag, $val) {
-        if (!$dom) {
-            return null;
-        }
-        $elements = $dom->getElementsByTagName("element");
-        foreach ($elements as $field) {
-            if (strtolower(trim($field->getElementsByTagName($tag)->item(0)->nodeValue)
-                    ) == strtolower(trim($val))) {
-                return $field;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Carga out valida campos
-     * @param array $arr    Valores [id=>,value=>]
-     * @param type $formname    nombre del form para id
+     * Carga valores de arr_val a XML de formulario
      * @return string
      */
-    public function load_values($arr, $formname = null) {
-        $arr = make_arrayobj($arr);
-        $this->arr_val = $arr;
-        $this->formname = $formname;
-        $nodelist = $this->xml_output->getElementsByTagName("element");
+    private function loadValtoXML() {
+        $this->loadOutput();
+        $this->okToSave = false;
+        $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
-            $nfield = $this->elementToArray($field);
-            $value = trim($this->find_elementVal($arr, $nfield["id"], $formname));
-            $nfield["value"] = $value;
-            $rta = $this->check_values($nfield);
+            $id = trim($this->getImmediateChildrenByTagName($field, 'id')->nodeValue);
+            $rta = $this->check_values($this->formArray[$id]);
             if ($rta != "ok") {
                 return $rta;
             }
-            $validations = $field->getElementsByTagName("validations")->item(0);
-            $field->appendChild($this->xml_output->createElement("value", xmlEscape($value)));
+            $field->appendChild($this->xml_output->createElement('value', xmlEscape($this->formArray[$id]['value'])));
         }
+        $this->okToSave = true;
         return "ok";
     }
 
     /**
-     * Convierte DOMElement a Array
-     * @param DOMElement $element
-     * @return array   campo
+     * Carga array desde form
+     * @param array $arr    Valores [id=>,value=>]
+     * @param type $formname    nombre del form para id
      */
-    private function elementToArray($element) {
-        $arr = array();
-
-        $arr["id"] = $element->getElementsByTagName("id")->item(0)->nodeValue;
-        $label = $element->getElementsByTagName("label");
-        if ($label->length == 0) {
-            $arr["label"] = $arr["id"];
-        } else {
-            $arr["label"] = trim($label->item(0)->nodeValue);
+    public function load_values($arr, $formname = null) {
+        $arr = make_arrayobj($arr);
+        $prefix = '';
+        if ($formname) {
+            $prefix = $formname . '_';
         }
-        $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
-
-        $arr["type"] = trim($element->getElementsByTagName("type")->item(0)->nodeValue);
-        if ($arr["type"] == "select") {
-            $options = $element->getElementsByTagName("option");
-            $arr["valuetxt"] = $arr["value"];
-            foreach ($options as $opt) {
-                if (trim($this->getImmediateChildrenByTagName($opt, 'value')->nodeValue) == trim($arr["value"])) {
-                    $arr["valuetxt"] = trim($this->getImmediateChildrenByTagName($opt, 'text')
-                            ->nodeValue);
-                }
+        foreach ($arr as $a) {
+            $id = trim(str_replace($prefix, '', $a['id']));
+            if (isset($this->formArray[$id])) {
+                $this->formArray[$id]['value'] = $a['value'];
+            } else {
+                $this->formArrayExt[$id]['value'] = $a['value'];
             }
         }
-
-        $arr["validations"] = array();
-        $validations = $element->getElementsByTagName("validations")->item(0);
-        if ($validations == null || !$validations->hasChildNodes()) {
-            return $arr;
-        } else {
-            foreach ($validations->childNodes as $v) {
-                $arr["validations"][trim($v->nodeName)] = trim($v->nodeValue);
-            }
-            return $arr;
-        }
+        return $this->loadValtoXML();
     }
 
     /**
      * Devuelve valor del form elegido
      * @param string $id
-     * @parama \DOMDocument $dom
      * @return string
      */
-    private function get_valueDOM($id, $dom) {
-        $field = $this->find_field($dom, "id", $id);
-        if ($field) {
-            return $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
+    private function get_value($id) {
+        if (isset($this->formArray[$id]['value'])) {
+            return $this->formArray[$id]['value'];
         }
         return null;
     }
 
     /**
-     * Devuelve valor del form / sin filtrar
+     * Devuelve valor del form no solicitado en el XML
      * @param string $id
      * @return string
      */
-    public function get_value($id) {
-        return $this->get_valueDOM($id, $this->xml_output);
-    }
-
-    /**
-     * Devuelve valor del form / seguro
-     * @param string $id
-     * @return string
-     */
-    public function get_valueSecure($id) {
-        return $this->get_valueDOM($id, $this->get_outputDOM());
-    }
-
-    /**
-     * Devuelve valor del array de valores ingresado (aunque no este en form)
-     * @param string $id
-     * @return string
-     */
-    public function get_value_arr($id) {
-        return trim($this->find_elementVal($this->arr_val, $id, $this->formname));
-    }
-
-    /**
-     * Devuelve valor del form y lo elimina
-     * @param string $id
-     * @return string
-     */
-    public function getAnddelete($id) {
-        $field = $this->find_field($this->xml_output, "id", $id);
-        if ($field) {
-            $val = $this->getImmediateChildrenByTagName($field, 'value')->nodeValue;
-            $field->parentNode->removeChild($field);
-            return $val;
+    public function getExtravalue($id) {
+        if (isset($this->formArrayExt[$id]['value'])) {
+            return $this->formArrayExt[$id]['value'];
         }
         return null;
     }
 
     /**
-     * Elimina los que tengan notsave
-     * Bloquea vista
+     * Setea valor a elemento
+     * @param string $id
+     * @param string $value
+     * @return string resultado
      */
-    private function prepareOutput() {
-        if (!$this->xml_output) {
-            return null;
-        }
-        $tmp = clone $this->xml_output;
-        $elements = $tmp->getElementsByTagName("element");
-        $active = $elements->length;
-        $domElemsToRemove = array();
-        $domElemsToBlock = array();
-        foreach ($elements as $field) {
-            $nsave = $field->getElementsByTagName("notsave");
-            if ($nsave->length && $nsave->item(0)->nodeValue == "true") {
-                $domElemsToRemove[] = $field;
-                $active--;
-            } else {
-                $viewL = $field->getElementsByTagName("view");
-                if ($viewL->length) {
-                    $vRQ = intval($viewL->item(0)->nodeValue || 0);
-                    if ($vRQ != 0 && $this->view_level > $vRQ) {
-                        $domElemsToBlock[] = $this->getImmediateChildrenByTagName($field, 'value');
-                    }
-                }
-            }
-        }
-        foreach ($domElemsToRemove as $domElement) {
-            $domElement->parentNode->removeChild($domElement);
-        }
-        foreach ($domElemsToBlock as $domElement) {
-            $domElement->nodeValue = "****";
-        }
-        if ($active < 1) {
-            return null;
-        }
-        return $tmp;
-    }
-
-    /**
-     * Devuelve el formulario de salida
-     * @return string
-     */
-    public function get_output() {
-        $opForm = $this->get_outputDOM();
-        if ($opForm) {
-            return $opForm->saveXML();
-        }
-        return null;
-    }
-
-    /**
-     * Devuelve el formulario de salida
-     * @return \DOMDocument
-     */
-    public function get_outputDOM() {
-        if ($this->xml_output) {
-            $final = $this->prepareOutput();
-            return $final;
-        }
-        return null;
-    }
-
-    /**
-     * Devuelve el formulario de entrada
-     * @return \DOMDocument
-     */
-    public function get_inputDOM() {
-        return $this->xml_input;
+    public function set_value($id, $value) {
+        $this->formArray[$id]['value'] = $value;
+        return $this->loadValtoXML();
     }
 
     /**
@@ -382,6 +342,69 @@ class ITForm implements XMLPropInterface {
      */
     public function set_view($view_level) {
         $this->view_level = $view_level;
+    }
+
+    /**
+     * Devuelve domdocument para guardar
+     * @return \DOMDocument
+     */
+    public function getSaveDom() {
+        if (!$this->okToSave) {
+            return null;
+        }
+        $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');
+        foreach ($domElemsToRemove as $domElement) {
+            $domElement->parentNode->removeChild($domElement);
+        }
+        return $this->xml_output;
+    }
+
+    /**
+     * Devuelve array para reporte
+     * @return array
+     */
+    public function getReportArr() {
+        $arr_ret = array();
+        $arrTitles = array();
+        foreach ($this->formArray as $fa) {
+            $nar = $fa;
+            $nar["type"] = $this->getReportType($fa);
+            $nar["title"] = $nar["label"];
+            if (in_array($nar["title"], $arrTitles)) {
+                $nar["title"].=$nar["id"];
+            }
+            array_push($arrTitles, $nar[$i]["title"]);
+            if ($nar["type"] == "select") {
+                $nar["type"] = "input";
+                $nar["value"] = $nar["valuetxt"];
+            }
+            array_push($arr_ret, $nar);
+        }
+        return $arr_ret;
+    }
+
+    /**
+     * Devuelve Dom para que el usuario complete
+     * @return \DOMDocument
+     */
+    public function getInputDom() {
+        return clone $this->xml_input;
+    }
+
+    /**
+     * Para vista detalle
+     * @return \DOMDocument
+     */
+    public function getViewDom() {
+        $this->loadOutput();
+        $domElemsToBlock = $this->findFieldsByTag('view', '*');
+        foreach ($domElemsToBlock as $domElement) {
+            $vRQ = intval($domElement->nodeValue || 0);
+            if ($vRQ != 0 && $this->view_level > $vRQ) {
+                $domElement->nodeValue = "****";
+            }
+        }
+        return $this->xml_output;
     }
 
     /**
@@ -401,13 +424,35 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Busca elemento por valor de tag
+     * @param string $tag
+     * @param string $val
+     * @return array<DOMElement>
+     */
+    private function findFieldsByTag($tag, $val) {
+        if (!$this->xml_output) {
+            return null;
+        }
+        $founds = array();
+        $elements = $this->xml_output->getElementsByTagName("element");
+        foreach ($elements as $field) {
+            $elem = $this->getImmediateChildrenByTagName($field, $tag);
+            if ($val == '*' || strtolower(trim($elem->nodeValue)
+                    ) == strtolower(trim($val))) {
+                $founds[] = $field;
+            }
+        }
+        return $founds;
+    }
+
+    /**
      * Genera array con todos los valores de los campos
      * @return array
      */
     private function getArrReport() {
         $arr = array();
         $i = 0;
-        $data = $this->get_outputDOM();
+        $data = $this->getViewDom();
         $els = $data->getElementsByTagName("element");
         $arrTitles = array();
         foreach ($els as $el) {
@@ -427,21 +472,37 @@ class ITForm implements XMLPropInterface {
         return $arr;
     }
 
+    /**
+     * Devuelve cantidad de elementos a guardar
+     * @return int
+     */
+    public function getSaveElCount() {
+        return $this->elSaveCount;
+    }
+
     public function get_prop($property) {
         $property = strtolower($property);
         if ($property == "*") {
             return $this->getArrReport();
         }
 
-        $rta = $this->get_valueSecure($property);
+        $rta = $this->get_value($property);
         if ($rta) {
             return $rta;
         }
         return "Propiedad invalida.";
     }
 
-    public function getXML($doc, $props) {
-        return null;
+    public function getXML() {
+        return $this->getInputDom();
+    }
+
+    public function get_Subprop($p, $hideError = false) {
+        return $this->get_prop($p);
+    }
+
+    public function set_prop($property, $value) {
+        $this->set_value($property, $value);
     }
 
 }

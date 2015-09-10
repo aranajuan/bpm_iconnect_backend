@@ -1,6 +1,24 @@
 <?php
 
 /**
+ * Verifica si alguna expresion regular matchea el str
+ * @param array<string> $regexArray
+ * @param string $str
+ * @return boolean
+ */
+function preg_match_array($regexArray, $str) {
+    foreach ($regexArray as $p) {
+        $trimP = trim($p);
+        if ($trimP != '') {
+            if (preg_match('/' . $trimP . '/', $str)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
  * Convierte a un array de int
  * @param array $arr
  * @return array<int>
@@ -128,13 +146,11 @@ function STRdate_format($str, $origin = USERDATE_READ, $format = DBDATE_WRITE) {
             return $date->format($format);
         }
         \Itracker\Utils\LoggerFactory::getLogger()->debug(
-                'No se puede convertir fecha',
-            array('input'=>$str,'orformat'=>$origin,'destformat'=>$format));
+                'No se puede convertir fecha', array('input' => $str, 'orformat' => $origin, 'destformat' => $format));
         return -1;
     } catch (Exception $e) {
         \Itracker\Utils\LoggerFactory::getLogger()->debug(
-                'No se puede convertir fecha',
-            array('input'=>$str,'orformat'=>$origin,'destformat'=>$format));
+                'No se puede convertir fecha', array('input' => $str, 'orformat' => $origin, 'destformat' => $format));
         return -1;
     }
 }
@@ -201,6 +217,18 @@ function strToSQL($txt) {
     $tmp = str_replace("'", "''", $txt);
     $tmp = str_replace("\\", "\\\\", $tmp);
     $tmp = str_replace("TBL_", "TBL _", $tmp);
+    return $tmp;
+}
+
+/**
+ * convierte una cadena para pasarla como parametro a una funcion js
+ */
+function strToJava($txt) {
+    $tmp = str_replace("\\", "\\\\", $txt);
+    $tmp = str_replace("\"", "&quot;", $tmp);
+    $tmp = str_replace("'", "\\'", $tmp);
+    $tmp = str_replace("\n", "\\n", $tmp);
+    $tmp = str_replace("\r", "", $tmp);
     return $tmp;
 }
 
@@ -275,6 +303,7 @@ function microtime_float() {
 /**
  * se ejecuta al finalizar script */
 function finish() {
+    
 }
 
 class Encrypter {

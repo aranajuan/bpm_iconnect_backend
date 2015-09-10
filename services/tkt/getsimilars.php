@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Lista
- * @param Context $Context
+ * @param \Itracker\Context $Context
  * @return null
  */
 function GO($Context) {
@@ -9,13 +10,21 @@ function GO($Context) {
     $TKT = new \Itracker\Tkt();
     $TKT->load_VEC(array("origen" => $Context->get_params("path")));
 
-    $topts = $TKT->get_tree_options();
-    
-    if (!$topts["object"] || $topts["object"]->get_prop("no_anexar")==1) {
-        return $Context->createElement("error", "Accion no valida para esta opcion.");
+    if (!$TKT->is_active()) {
+        $response["result"] = "error";
+        $response["msj"] = "Error en tipificacion.";
+        return $response;
     }
-    
+
+    $topts = $TKT->get_last();
+
+
+    if (!$topts->get_prop('unir')) {
+        return $Context->createElement("error", "Accion no valida para esta opcion. #2");
+    }
+
     $ALL_v = $TKT->get_similar();
+
     if ($ALL_v == null || count($ALL_v) == 0) {
         return null;
     }
@@ -23,8 +32,8 @@ function GO($Context) {
     $listL = new \DOMDocument();
     $list = $listL->createElement("list");
 
-    $cc=0;
-    
+    $cc = 0;
+
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $tkt = $listL->createElement("tkt");
@@ -36,14 +45,14 @@ function GO($Context) {
             if ($fstTH) {
                 $openxml = $fstTH->getXML_H();
                 if ($openxml) {
-                    $nod=$listL->importNode($openxml,true);
+                    $nod = $listL->importNode($openxml, true);
                     $tkt->appendChild($nod);
-                     $list->appendChild($tkt);
-                     $cc++;
+                    $list->appendChild($tkt);
+                    $cc++;
                 }
             }
         }
-        if($cc==0){
+        if ($cc == 0) {
             return null;
         }
         $ret = $Context->append_xml($list);

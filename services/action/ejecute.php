@@ -38,8 +38,6 @@ function GO($Context) {
 
     $form = json_decode($Context->get_params("form"),true);
     $validation = $A->loadFormValues($form,"actionform");
-
-    
     if ($validation != "ok") {
         return $Context->createElement("error", "Error en formulario. " . $validation);
     }

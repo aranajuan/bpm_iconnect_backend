@@ -13,7 +13,6 @@ class Action extends ITObject {
     private $tipo;  /* tipo de accion, agrupador // ver perfiles */
     private $formulario;    /* requiere formulario o es de ejecucion directa */
     private $ejecuta;
-    private $estadotkt;
     private $alias;
 
     /*
@@ -25,8 +24,11 @@ class Action extends ITObject {
     private $habilita_equipos;   /* equipo habilitados para esta accion */
     private $habilita_a_propio; /* abierto por el usuario */
     private $habilita_abierto;  /* abierto */
-    private $habilita_equipo;   /* equipo del usuario */
+    private $habilita_equipo;   /* equipo del TKT */
+    private $habilita_equipos_usr;   /* equipo del usuario */
     private $habilita_master;   /* es master */
+    private $habilita_estados; /* estados habilitados regex , */
+    private $habilita_filtroacciones;   /* actionfilter habilitados regex , */
 
     /* notificaciones */
     private $notificacion_param;    /* Usuarios a notificar ver notify */
@@ -37,6 +39,18 @@ class Action extends ITObject {
     private $files; /* archivos */
     private $objadj_id; //id del objeto adjunto
     private $forceEveRta; // respuesta de evento forzado
+
+    /**
+     * Script preejecute
+     * @var string
+     */
+    private $script;
+
+    /**
+     * Script
+     * @var Utils\ITScript
+     */
+    private $ITScript;
 
     /**
      *
@@ -55,18 +69,19 @@ class Action extends ITObject {
      * @var boolean 
      */
     private $working;
-    
+
     /**
      * Hijos a notificar
      * @var array<Tkt>
      */
     private $childsPaste;
-    
+
     /**
      * Se setearon hijos forzadamente
      * @var boolean
      */
     private $childsSeted;
+
     /**
      * Filtra acciones segun filtros en array - devuelve array de objetos
      * @return array acciones validas
@@ -120,16 +135,20 @@ class Action extends ITObject {
         $i = 0;
         $ret = array();
         while ($actV = $this->dbinstance->get_vector()) {
-            $ret[$i] = $this->objsCache->get_object('Action', $actV["id"]);
-            $i++;
+            $A = $this->objsCache->get_object(get_class(), $actV["id"]);
+            $A->loadTKT($this->getTKT());
+            if ($A->check_valid() == 'ok') {
+                $ret[$i] = $A;
+                $i++;
+            }
         }
         return $ret;
     }
 
     public function load_DB($id) {
         $idInt = intval($id);
-        $this->childsPaste=null;
-        $this->childsSeted=false;
+        $this->childsPaste = null;
+        $this->childsSeted = false;
         if (is_int($idInt) && $idInt > 0) {
             return $this->loadDB_id($idInt);
         } else {
@@ -137,90 +156,11 @@ class Action extends ITObject {
         }
     }
 
-    /**
-     * Carga ticket para ejecutar accion o consultar
-     * @param Tkt $TKT
-     * @return  boolean se pudo cargar
-     */
-    public function loadTKT($TKT) {
-        $this->TKT = $TKT;
-        if ($this->nombre == "ABRIR") {
-            $to = $TKT->get_last();
-            if ($to) {
-                //cambia el form por el de la opcion
-                $this->itf = $to->get_prop("itform");
-                return true;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Carga Archivos
-     * @param array $files 
-     */
-    public function loadFiles($files) {
-        $this->files = $files;
-    }
-
-    /**
-     * Devuelve Archivos
-     * @return array $files 
-     */
-    public function getFiles() {
-        return $this->files;
-    }
-
-    /**
-     * Devuelve ticket cargado
-     * @return TKT
-     */
-    public function getTKT() {
-        return $this->TKT;
-    }
-
-    /**
-     * Setea como ticket en trabajo
-     */
-    public function setWorking() {
-        $this->working = true;
-    }
-
-    /**
-     *  Elimina seteo de ticket en trabajo
-     */
-    public function unsetWorking() {
-        $this->working = false;
-    }
-
-    /**
-     * Ticket llamado para trabajarlo
-     * @return boolean
-     */
-    public function isWorking() {
-        return $this->working;
-    }
-
-    /**
-     * Carga valores de formulario y valida con itform
-     * @param array $values
-     */
-    public function loadFormValues($values, $formname = null) {
-        if ($this->TKT == null) {
-            return "Error ticket sin cargar";
-        }
-        if (!$this->formulario || $this->itf == null) {  //no requiere formulario esta accion
-            return "ok";
-        }
-        $rta = $this->itf->load_values($values, $formname);
-        return $rta;
-    }
-
     /*
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
+
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -263,14 +203,18 @@ class Action extends ITObject {
         $this->habilita_t_propio = trim($tmpU["habilita_t_propio"]);
         $this->habilita_tomado = trim($tmpU["habilita_tomado"]);
         $this->habilita_equipos = trim($tmpU["habilita_equipos"]);
+        $this->habilita_equipos_usr = trim($tmpU["habilita_equipos_usr"]);
         $this->habilita_perfiles = trim($tmpU["habilita_perfiles"]);
         $this->habilita_a_propio = trim($tmpU["habilita_a_propio"]);
         $this->habilita_abierto = trim($tmpU["habilita_abierto"]);
         $this->habilita_equipo = trim($tmpU["habilita_equipo"]);
         $this->habilita_master = trim($tmpU["habilita_master"]);
+        $this->habilita_estados = trim($tmpU["habilita_estados"]);
+        $this->habilita_filtroacciones = trim($tmpU["habilita_filtroacciones"]);
         $this->notificacion_param = trim($tmpU["notificacion_param"]);
         $this->notificacion_texto = trim($tmpU["notificacion_texto"]);
         $this->descripcion = trim($tmpU["descripcion"]);
+        $this->script = trim($tmpU["script"]);
         $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
         if ($this->form != "") {
             $this->itf = new ITForm();
@@ -281,9 +225,8 @@ class Action extends ITObject {
             $this->itf = null;
         }
         $this->ejecuta = trim($tmpU["ejecuta"]);
-        $this->estadotkt = trim($tmpU["estadotkt"]);
         $this->alias = trim($tmpU["alias"]);
-        return "ok";
+        return 'ok';
     }
 
     /**
@@ -368,7 +311,149 @@ class Action extends ITObject {
                 return "Esta accion solo se puede aplicar a un ticket no abierto";
         }
 
+        if (!preg_match_array(explode(',', $this->habilita_estados), $this->getTKT()->get_prop('status')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #1' . $this->getTKT()->get_prop('status');
+        }
+        $tvars = $this->getTKT()->getVars();
+        if (!preg_match_array(explode(',', $this->habilita_filtroacciones), $tvars->get_prop('actionfilter')
+                )) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
+        }
+        if ($this->habilita_equipos_usr != '*' &&
+                count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {
+            return 'Esta accion no esta habilitada a tu equipo';
+        }
+
         return "ok";
+    }
+
+    /**
+     * Carga ticket para ejecutar accion o consultar
+     * @param Tkt $TKT
+     * @return  boolean se pudo cargar
+     */
+    public function loadTKT($TKT) {
+        $this->TKT = $TKT;
+        if ($this->nombre == "ABRIR") {
+            $to = $TKT->get_last();
+            if ($to) {
+                //cambia el form por el de la opcion
+                $this->itf = $to->get_prop("itform");
+                $this->script.=PHP_EOL . $TKT->getScriptText();
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Carga Archivos
+     * @param array $files 
+     */
+    public function loadFiles($files) {
+        $this->files = $files;
+    }
+
+    /**
+     * Devuelve Archivos
+     * @return array $files 
+     */
+    public function getFiles() {
+        return $this->files;
+    }
+
+    /**
+     * Devuelve ticket cargado
+     * @return TKT
+     */
+    public function getTKT() {
+        return $this->TKT;
+    }
+
+    /**
+     * Setea como ticket en trabajo
+     */
+    public function setWorking() {
+        $this->working = true;
+    }
+
+    /**
+     *  Elimina seteo de ticket en trabajo
+     */
+    public function unsetWorking() {
+        $this->working = false;
+    }
+
+    /**
+     * Ticket llamado para trabajarlo
+     * @return boolean
+     */
+    public function isWorking() {
+        return $this->working;
+    }
+
+    /**
+     * Carga valores de formulario y valida con itform
+     * @param array $values
+     */
+    public function loadFormValues($values, $formname = null) {
+        if ($this->TKT == null) {
+            return "Error ticket sin cargar";
+        }
+        if ($this->itf == null) {  //no requiere formulario esta accion
+            return "ok";
+        }
+        $rta = $this->itf->load_values($values, $formname);
+        return $rta;
+    }
+
+    /**
+     * Devuelve resultado del script
+     * @return string
+     */
+    private function ejecuteScript() {
+        $this->ITScript = new Utils\ITScript();
+        $const = new Utils\Vars('CONST');
+        $const->setValue('date', date(USERDATE_READ_DATE));
+        $const->setValue('time', date(USERDATE_READ_TIME));
+        $const->setValue('datetime', date(USERDATE_READ));
+        $globals = new Utils\Vars();
+        $grta = $globals->loadFile(ROOT_DIR.'/config/itscript/globals.xml');
+        if($grta){
+            $globals->setRootTag('ITglobal');
+            $this->ITScript->addObject('GLOBALS', $globals);
+        }
+        $this->ITScript->addObject('CONSTANT', $const);
+        $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
+        $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
+        $this->ITScript->addObject('TKT', $this->getTKT());
+        $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
+        $this->ITScript->addObject('USR', $this->getContext()->get_User());
+        if ($this->getitform()) {
+            $this->ITScript->addObject('ITFORM', $this->getitform());
+        }
+
+        $this->ITScript->loadScript($this->script);
+        $rta = $this->ITScript->ejecute();
+        if ($rta != 'ok') {
+            return $rta;
+        }
+        $rta = $this->getScriptResponse()->get_prop('result');
+        if ($rta == '') {
+            return 'Error:: Codigo invalido #1';
+        }
+        $this->itf = $this->ITScript->getObject('ITFORM');
+        return $rta;
+    }
+
+    /**
+     * Devuelve response
+     * @return Utils\Vars
+     */
+    public function getScriptResponse() {
+        return $this->ITScript->getObject('RESPONSE');
     }
 
     /**
@@ -376,13 +461,17 @@ class Action extends ITObject {
      * @return array resultado
      */
     public function ejecute() {
+        $rta = $this->ejecuteScript();
+        if ($rta != 'ok') {
+            return array('result' => 'error', 'msj' => $rta);
+        }
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
             $obCI = $this->objsCache;
-            $file = ROOT_DIR."/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
-            if(!file_exists($file)){
-                $this->getContext()->getLogger()->critical("Archivo no encontrado",array($file));
-                return array("result"=>"error","msj"=>"Error al ejecutar.");
+            $file = ROOT_DIR . "/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
+            if (!file_exists($file)) {
+                $this->getContext()->getLogger()->critical("Archivo no encontrado", array($file));
+                return array("result" => "error", "msj" => "Error al ejecutar.");
             }
             $response = include($file);
             if ($response["result"] != "ok") {
@@ -396,7 +485,39 @@ class Action extends ITObject {
         }
         $response["tkth"] = $rta["status"];
         $response["sendfiles"] = $response["tkth"];
+        $response['postactions'] = $this->postAction();
         return $response;
+    }
+
+    /**
+     * Ejecuta accion posterior si existe en ITScript
+     * post_action, post_action_form(en json), post_action_id
+     * @return string
+     */
+    private function postAction() {
+        $rtaSave = 'ok';
+        $ItResponse = $this->getScriptResponse();
+        $postAction = $ItResponse->get_prop('post_action');
+        if ($postAction != '') {
+            $rta = $this->getTKT()->ejecute_action($postAction, json_decode($ItResponse->get_prop('post_action_form'), true), $ItResponse->get_prop('post_action_id'));
+            if (!is_array($rta)) {
+                $valid=$rta;
+                $rtaSave = $rta;
+            } else {
+                $valid = $rta['result'];
+                $rtaSave = $rta['result'].'-'.$rta['msj'];
+            }
+        }
+        if ($valid == 'ok') {
+            return 'ok';
+        } else {
+            $this->getContext()->getLogger()->error('Error en postaccion', array('nombre' => $postAction,
+                'form' => $ItResponse->get_prop('post_action_form'),
+                'idadj' => $ItResponse->get_prop('post_action_id'),
+                'rta' => print_r($rta, true)
+            ));
+            return $rtaSave;
+        }
     }
 
     /**
@@ -419,6 +540,7 @@ class Action extends ITObject {
         if ($this->forceEveRta) {
             return $this->forceEveRta;
         }
+        $this->getTKT()->setVars($this->ITScript->getObject('TKTVAR'));
         $tktH = new TktH();
         $tktH->load_VEC($this);
         $rta["status"] = $tktH->insert_DB();
@@ -431,26 +553,25 @@ class Action extends ITObject {
      * Carga tkts para generarles link
      * @param array<Tkt>
      */
-    public function setChilds($childs){
-        $this->childsPaste=$childs;
-        $this->childsSeted=true;
+    public function setChilds($childs) {
+        $this->childsPaste = $childs;
+        $this->childsSeted = true;
     }
-    
+
     /**
      * Devuelve array de hijos del tkt
      * @return array<Tkt>
      */
-    private function getChilds(){
-        if($this->childsSeted){
+    private function getChilds() {
+        if ($this->childsSeted) {
             return $this->childsPaste;
         }
-        if($this->getTKT()){
+        if ($this->getTKT()) {
             return $this->getTKT()->get_prop("childs");
         }
         return null;
     }
-    
-    
+
     /**
      * Pega link a los hijos
      * @param TktH $TH
@@ -461,7 +582,7 @@ class Action extends ITObject {
             $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
         }
     }
-    
+
     /**
      * Devuelve formulario
      * @return itform

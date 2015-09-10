@@ -21,7 +21,7 @@ function GO($Context) {
         return $Context->createElement("error", "No se pudo cargar formulario");
     }
     
-    $ret = $Context->append_xml($form->get_inputDOM()->documentElement);
+    $ret = $Context->append_xml($form->getInputDom()->documentElement);
     
     return $ret;
     

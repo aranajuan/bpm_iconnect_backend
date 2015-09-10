@@ -11,8 +11,14 @@ class Option extends ITObject {
     private $idpregunta; /* id de la pregunta a la cual pertenece */
     private $texto;    /* texto a mostrar en la opcion */
     private $texto_critico;    /* texto utilizado para vincular similares */
-    private $ruta_destino; /* ruta a la cual se derivara en caso de elegir esta opcion */
-    private $idequipo_destino; /* equipo al cual se derivara el caso (si hay una ruta de destino sera en la no conformidad) */
+    private $destino; /* xml texto con el destino y reglas */
+
+    /**
+     * Permitir unir
+     * @var boolean 
+     */
+    private $unir;
+    private $habilita_perfiles; /* xml texto con el destino y reglas */
     private $pretext; /* contiene el formulario que sera solicitado antes de generar el reclamo */
 
     /**
@@ -21,7 +27,6 @@ class Option extends ITObject {
      */
     private $itform; /* formulario cargado ITFORM */
     private $idpregunta_destino; /* indica el camino a seguir por el arbol si no es ultima opcion */
-    private $no_anexar; /* si ofrece al usuario anexarlo a otro ticket o no ignorando el texto critico */
     private $UA; /* usuario creador */
     private $FA; /* fecha creacion */
     private $UB; /* usuario que elimino la opcion */
@@ -33,13 +38,13 @@ class Option extends ITObject {
         $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $this->load_DV($tmpU);
+            $rta = $this->load_DV($tmpU);
             if ($this->UB != NULL)
                 return "eliminado";
-            return "ok";
-        }
-        else
+            return $rta;
+        } else {
             $this->error = TRUE;
+        }
         return "error";
     }
 
@@ -47,17 +52,27 @@ class Option extends ITObject {
         $this->idpregunta = trim($tmpU["idpregunta"]);
         $this->texto = trim($tmpU["texto"]);
         $this->texto_critico = trim($tmpU["texto_critico"]);
-        $this->ruta_destino = trim($tmpU["ruta_destino"]);
-        $this->idequipo_destino = trim($tmpU["idequipo_destino"]);
+        $this->habilita_perfiles = trim($tmpU['habilita_perfiles']);
+        $this->destino = trim(space_delete($tmpU["destino"], array("\t", "\n", "\0", "\x0B")));
         $this->pretext = trim(space_delete($tmpU["pretext"], array("\t", "\n", "\0", "\x0B")));
-        if ($this->pretext != "") {
+        $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
+
+        $this->unir = trim($tmpU['unir']);
+        if ($this->destino == '' && ($this->pretext != '' || $this->idpregunta_destino == '')) {
+            $this->getContext()->getLogger()->error('Error en opcion sin destino', array('id' => $this->id));
+            return 'Error en el arbol de derivaciones. #1';
+        }
+
+        if ($this->pretext != '') {
             $this->itform = new ITForm();
             $this->itform->load_xml($this->pretext);
         } else {
             $this->itform = null;
         }
-        $this->idpregunta_destino = trim($tmpU["idpregunta_destino"]);
-        $this->no_anexar = trim($tmpU["no_anexar"]);
+
+
+
+        return 'ok';
     }
 
     /**
@@ -70,69 +85,23 @@ class Option extends ITObject {
         $this->FA = $tmpU["FA"];
         $this->UB = $tmpU["UB"];
         $this->FB = $tmpU["FB"];
-        $this->load_VEC($tmpU);
+        return $this->load_VEC($tmpU);
     }
 
     /**
-     * devuelve equipo asignado
-     * @param User $usr 
-     * 
+     * Verifica si el perfil puede utilizar la opcion
+     * @param int $idProfile
+     * @return boolean
      */
-    function equipo_destino($usr) {
-        $ideqs = $this->get_prop("idequipo_destino");
-        if ($ideqs == NULL){
-            $this->getContext()->getLogger()->error("Opcion sin destino",array($this->id));
-            return NULL;
+    public function checkProfile($idProfile) {
+        if ($this->habilita_perfiles == '*') {
+            return true;
         }
-        $ideqsV = explode(";", $ideqs);
-        $dest = NULL;
-        $destino=NULL;
-        foreach ($ideqsV as $dest) {
-            if($destino){
-                break;
-            }
-            $destAR = explode("=>", $dest);
-            if ($destAR[0] == "default") {
-                $destino = $destAR[1];
-                break;
-            }
-            $parts = explode(":", $destAR[0]);
-            $partsEl = explode(",", $parts[1]);
-            if ($parts[0] == "USER") {
-                if (in_array($usr->get_prop("id"), $partsEl)) {
-                    $destino= $destAR[1];
-                    break;
-                }
-            }
-            if ($parts[0] == "TEAM") {
-                foreach ($partsEl as $idteam) {
-                    if ($usr->in_team($idteam)) {
-                        $destino = $destAR[1];
-                        break;
-                    }
-                }
-            }
-            if ($parts[0] == "DIVISION") {
-                $equipos = $usr->get_prop("equiposobj");
-                $direccionesU = array();
-                foreach ($equipos as $e) {
-                    array_push($direccionesU, $e->get_prop("iddireccion"));
-                }
-                foreach ($partsEl as $iddir) {
-                    if (in_array($iddir, $direccionesU)) {
-                        $destino = $destAR[1];
-                        break;
-                    }
-                }
-            }
+        $hp = explode(',', $this->habilita_perfiles);
+        if (in_array($idProfile, $hp)) {
+            return true;
         }
-        $this->objsCache->get_object('Team', $destino);
-        if ($this->objsCache->get_status('Team', $destino) != "ok") {
-            $this->getContext()->getLogger()->error("Error en destino de opcion",
-                    array($this->get_prop("id"),$destino,$usr->get_prop('usr')));
-            return null;
-        }
-        return $destino;
+        return false;
     }
 
     function get_prop($property) {
@@ -144,20 +113,16 @@ class Option extends ITObject {
                 return $this->idpregunta;
             case 'texto':
                 return $this->texto;
-            case 'ruta_destino':
-                return $this->ruta_destino;
-            case 'idequipo_destino':
-                return $this->idequipo_destino;
-            case 'equipo_destino':
-                return $this->equipo_destino($this->getLogged());
             case 'itform':
                 return $this->itform;
+            case 'unir':
+                return $this->unir;
+            case 'destino':
+                return $this->destino;
             case 'texto_critico':
                 return $this->texto_critico;
             case 'idpregunta_destino':
                 return $this->idpregunta_destino;
-            case 'no_anexar':
-                return $this->no_anexar;
             default:
                 return "Propiedad invalida.";
         }

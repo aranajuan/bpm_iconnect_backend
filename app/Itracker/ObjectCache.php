@@ -94,10 +94,16 @@ class ObjectCache {
      * @return int  Indice insertado
      */
     private function load_object($class, $id) {
-        try {
             $cn = new $class();
             if ($cn) {
                 $resp = $cn->load_DB($id);
+                if($resp!='ok'){
+                    \Itracker\Utils\LoggerFactory::getLogger()->warning('Error al cargar objeto',array(
+                        'class'=>$class,
+                        'id'=>$id,
+                        'rta'=>$resp
+                    ));
+                }
                 $this->last++;
                 $this->itobjects[$this->last] = $cn;
                 $this->status[$this->last] = $resp;
@@ -106,9 +112,6 @@ class ObjectCache {
             } else {
                 return 0;
             }
-        } catch (\Exception $e) {
-            return 0;
-        }
     }
 
     /**

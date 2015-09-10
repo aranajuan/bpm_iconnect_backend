@@ -79,7 +79,7 @@ class Notify extends ITObject {
         $this->mailTO = "
         <html>
         <head></head>
-        <body width='100%' bgcolor='#3d3d3d'>
+        <body width='100%'>
         <table width='100%' cellspacing='0' cellpadding='0' >
         <tr>
             <td>

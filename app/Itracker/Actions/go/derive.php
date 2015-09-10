@@ -7,12 +7,10 @@
 $response = array("result" => "", "msj" => "");
 $TKT = $this->getTKT();
 
-$itf = $this->getitform();
-
-$idequipo = $itf->get_value("idequipo");
+$idequipo = $this->getScriptResponse()->get_prop('id');
 $td = $obCI->get_object('Team', $idequipo);
 if ($obCI->get_status('Team', $idequipo) != "ok") {
-    return array("result" => "error", "msj" => "Erro al cargar equipo.");
+    return array("result" => "error", "msj" => "Error al cargar equipo. #1.$idequipo");
 }
 
 $rtaOP = $TKT->derive($td);

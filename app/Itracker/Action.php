@@ -495,7 +495,7 @@ class Action extends ITObject {
      * @return string
      */
     private function postAction() {
-        $rtaSave = 'ok';
+        $valid = 'ok';
         $ItResponse = $this->getScriptResponse();
         $postAction = $ItResponse->get_prop('post_action');
         if ($postAction != '') {

@@ -495,18 +495,20 @@ class Action extends ITObject {
      * @return string
      */
     private function postAction() {
-        $rtaSave = 'ok';
+        $valid = 'ok';
         $ItResponse = $this->getScriptResponse();
         $postAction = $ItResponse->get_prop('post_action');
         if ($postAction != '') {
             $rta = $this->getTKT()->ejecute_action($postAction, json_decode($ItResponse->get_prop('post_action_form'), true), $ItResponse->get_prop('post_action_id'));
             if (!is_array($rta)) {
+                $valid=$rta;
                 $rtaSave = $rta;
             } else {
+                $valid = $rta['result'];
                 $rtaSave = $rta['result'].'-'.$rta['msj'];
             }
         }
-        if ($rtaSave == 'ok') {
+        if ($valid == 'ok') {
             return 'ok';
         } else {
             $this->getContext()->getLogger()->error('Error en postaccion', array('nombre' => $postAction,

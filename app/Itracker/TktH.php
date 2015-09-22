@@ -139,9 +139,46 @@ class TktH extends ITObject {
         $this->accion = $tmpU;
     }
 
+    /**
+     * Devuelve formulario para actualizar
+     * @return ITForm
+     */
+    public function getUpdateForm(){
+        $this->loadview();
+        if($this->accion->get_prop('ejecuta')=='open'){
+            //formulario de apertura
+            if($this->TKT){
+               $itf = $this->TKT->get_last()->get_prop('itform');
+            }
+            return null;
+        }
+        $itf = $this->accion->get_prop('itf');
+        if($itf instanceof ITForm){
+            $itf->load_values($this->get_prop('itform')->getFormArray());
+        }
+        return $itf;
+    }
+    
+    /**
+     * Devuelve TktH que lo actualiza o null si no existe
+     * @return TktH|null
+     */
+    public function getThUpdate(){
+        $this->loadview();
+        $events = $this->TKT->get_tktHObj();
+        foreach($events as $e){
+                if($e->get_prop('accion')
+                        ->get_prop('ejecuta')=='update'
+                    && $e->get_prop('objadj_id')==$this->id
+                        ){
+                    return $e;
+                        }
+            }
+        return null;
+    }
+    
     /* Inserta nuevo registro y carga ID en el objeto
      */
-
     function insert_DB() {
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .

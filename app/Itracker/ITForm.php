@@ -141,6 +141,14 @@ class ITForm implements XMLPropInterface {
         }
         return true;
     }
+    
+    /**
+     * Devuelve array del input
+     * @return array XML con values en array
+     */
+    public function getFormArray(){
+        return $this->formArray;
+    }
 
     /**
      * Convierte DOMElement a Array y guarda en arr_val

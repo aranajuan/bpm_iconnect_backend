@@ -30,6 +30,15 @@ function GO($Context) {
         return $Context->createElement("error", "No se pudo cargar el ticket");
     }
     
+    $idth = $Context->get_params("idth");
+    if($idth){
+        $TH= $Context->get_objcache()->get_object("TktH",$idth);
+        if($Context->get_objcache()->get_status("TktH",$idth)!="ok"){
+            return $Context->createElement("error", "No se pudo cargar el evento $idth");
+        }
+        $A->loadTH($TH);
+    }
+    
     $validation = $A->check_valid(); //opciones del arbol - equipo destino - etc en apertura
 
     if ($validation != "ok") {

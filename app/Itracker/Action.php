@@ -355,10 +355,6 @@ class Action extends ITObject {
             return 'Esta accion no esta habilitada a tu equipo';
         }
 
-        $rta = $this->loadItform();
-        if($rta != 'ok'){
-            return $rta;
-        }
         return "ok";
     }
 
@@ -452,7 +448,7 @@ class Action extends ITObject {
         if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
-        if ($this->itf == null) {  //no requiere formulario esta accion
+        if ($this->get_prop('itf') == null) {  //no requiere formulario esta accion
             return "ok";
         }
         $rta = $this->itf->load_values($values, $formname);
@@ -638,7 +634,10 @@ class Action extends ITObject {
      * @return itform
      */
     public function getitform() {
-        $this->loadItform();
+        $rta = $this->loadItform();
+        if($rta != 'ok'){
+            echo $rta;
+        }
         return $this->itf;
     }
 
@@ -656,7 +655,7 @@ class Action extends ITObject {
             case 'tipo':
                 return $this->tipo;
             case 'itf':
-                return $this->itf;
+                return $this->getitform();
             case 'formulario':
                 return $this->formulario;
             case 'objadj_id':

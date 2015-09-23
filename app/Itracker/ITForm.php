@@ -151,6 +151,20 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Devuelve array del input
+     * @return array XML con values en array con indice numerico
+     */
+    public function getFormArrayLoad(){
+        $tmp=array();
+        $i=0;
+        foreach($this->formArray as $el){
+            $tmp[$i]=$el;
+            $i++;
+        }
+        return $tmp;
+    }
+    
+    /**
      * Convierte DOMElement a Array y guarda en arr_val
      * @param DOMElement $element
      * @return array   campo
@@ -273,18 +287,23 @@ class ITForm implements XMLPropInterface {
      */
     private function loadValtoXML() {
         $this->loadOutput();
-        $this->okToSave = false;
+        $this->okToSave = true;
+        $error = "ok";
         $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
             $id = trim($this->getImmediateChildrenByTagName($field, 'id')->nodeValue);
             $rta = $this->check_values($this->formArray[$id]);
             if ($rta != "ok") {
-                return $rta;
+                $this->okToSave = false;
+                $error= $rta;
+            }
+            $list = $this->getImmediateChildrenByTagName($field, 'value',false);
+            if(count($list)){
+                $field->removeChild($list[0]);
             }
             $field->appendChild($this->xml_output->createElement('value', xmlEscape($this->formArray[$id]['value'])));
         }
-        $this->okToSave = true;
-        return "ok";
+        return $error;
     }
 
     /**
@@ -298,8 +317,14 @@ class ITForm implements XMLPropInterface {
         if ($formname) {
             $prefix = $formname . '_';
         }
+        foreach($this->formArray as &$el){
+            $el['value']='';
+        }
         foreach ($arr as $a) {
             $id = trim(str_replace($prefix, '', $a['id']));
+            if(is_array($a['value'])){
+                throw new \Exception('Error de value es array '.$id);
+            }
             if (isset($this->formArray[$id])) {
                 $this->formArray[$id]['value'] = $a['value'];
             } else {
@@ -353,11 +378,19 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Clona out en in
+     */
+    public function setOutToIn(){     
+        $this->xml_input = clone $this->xml_output;
+    }
+    
+    /**
      * Devuelve domdocument para guardar
      * @return \DOMDocument
      */
     public function getSaveDom() {
         if (!$this->okToSave) {
+            throw new \Exception("NO OK");
             return null;
         }
         $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');

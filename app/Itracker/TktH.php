@@ -143,42 +143,48 @@ class TktH extends ITObject {
      * Devuelve formulario para actualizar
      * @return ITForm
      */
-    public function getUpdateForm(){
-        $this->loadview();
-        if($this->accion->get_prop('ejecuta')=='open'){
+    public function getUpdateForm() {
+        $this->loadTKT();
+        if ($this->accion->get_prop('ejecuta') == 'open') {
             //formulario de apertura
-            if($this->TKT){
-               $itf = $this->TKT->get_last()->get_prop('itform');
+            if ($this->TKT) {
+                $lst = $this->TKT->get_last();
+                if(!$lst){
+                    echo 'Error, no hay opcion';
+                    return NULL;
+                }
+                $itf = $lst->get_prop('itform');
             }
-            return null;
+        }else{
+            $itf = $this->accion->get_prop('itf');
         }
-        $itf = $this->accion->get_prop('itf');
-        if($itf instanceof ITForm){
-            $itf->load_values($this->get_prop('itform')->getFormArray());
+        if ($itf instanceof ITForm) {
+            $itf->load_values($this->get_prop('itform')->getFormArrayLoad());
+            $itf->setOutToIn();
         }
         return $itf;
     }
-    
+
     /**
      * Devuelve TktH que lo actualiza o null si no existe
      * @return TktH|null
      */
-    public function getThUpdate(){
-        $this->loadview();
+    public function getThUpdate() {
+        $this->loadTKT();
         $events = $this->TKT->get_tktHObj();
-        foreach($events as $e){
-                if($e->get_prop('accion')
-                        ->get_prop('ejecuta')=='update'
-                    && $e->get_prop('objadj_id')==$this->id
-                        ){
-                    return $e;
-                        }
+        foreach ($events as $e) {
+            if ($e->get_prop('accion')
+                            ->get_prop('ejecuta') == 'update' && $e->get_prop('objadj_id') == $this->id
+            ) {
+                return $e;
             }
+        }
         return null;
     }
-    
+
     /* Inserta nuevo registro y carga ID en el objeto
      */
+
     function insert_DB() {
         $ssql = "insert into TBL_TICKETS_M(idtkt,idaccion,valoraccion,FA,UA,FB,UB,estado)
              values (" . intval($this->accion->getTKT()->get_prop("id")) . "," .
@@ -249,6 +255,7 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
+        $action->appendChild($element->createElement("isupdated", $this->getThUpdate() != null));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
         if ($this->get_prop("itform") != null) {
@@ -420,19 +427,31 @@ class TktH extends ITObject {
     }
 
     /**
+     * Carga ticket
+     * @return string
+     */
+    private function loadTKT() {
+        if ($this->TKT == null) {
+            $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop('idtkt'));
+            $rta = $this->objsCache->get_status("Tkt", $this->get_prop('idtkt'));
+            if($rta != 'ok'){
+                $this->TKT = null;
+            }
+            return 'ok';
+        }
+        return 'ok';
+    }
+
+    /**
      * Carga ticket y vista si es necesario
      */
     private function loadview() {
         if ($this->view == null) {
-            if ($this->TKT == null) {
-                $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop("idtkt"));
-                if ($this->objsCache->get_status("Tkt", $this->get_prop("idtkt")) != "ok") {
-                    echo "error TKT" . $this->get_prop("idtkt");
-                    $this->view = null;
-                }
+            if ($this->loadTKT()=='ok') {
                 $this->view = $this->TKT->get_prop("view");
-            } else {
-                $this->view = $this->TKT->get_prop("view");
+            }else{
+               echo "error TKT" . $this->get_prop("idtkt");
+               $this->view = null; 
             }
         }
     }

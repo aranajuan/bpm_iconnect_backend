@@ -166,7 +166,6 @@ class Action extends ITObject {
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
-
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -255,6 +254,9 @@ class Action extends ITObject {
                 return 'Error acceso denegado #1';
                     }
             $this->itf = $this->TH->getUpdateForm();
+            if($this->itf==null){
+                return 'Error al cargar formulario';
+            }
             return 'ok';
         }
         
@@ -636,7 +638,7 @@ class Action extends ITObject {
     public function getitform() {
         $rta = $this->loadItform();
         if($rta != 'ok'){
-            echo $rta;
+            return null;
         }
         return $this->itf;
     }

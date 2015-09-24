@@ -8,11 +8,10 @@
 $TH = $this->getTH();
 if($TH instanceof \Itracker\TktH){
     $THA_name = $TH->get_prop('accion')->get_prop('nombre');
-    $ActName = $this->get_prop('nombre');
-    preg_match('/^UPDATE_(.*)/', $ActName, $matches);
+    $ActName = explode('-',$this->get_prop('nombre'));
     
-    if($matches[1]!=$THA_name){
-       $response = array("result" => "error", "msj" => 'No se puede actualizar ('.$THA_name.'->'.$ActName.')'.$matches[1]); 
+    if($ActName[1]!='UPDATE' ||  $ActName[0]!=$THA_name){
+       $response = array("result" => "error", "msj" => 'No se puede actualizar ('.$THA_name.'->'.$this->get_prop('nombre').')'); 
     }
     
     if($TH->getThUpdate()){

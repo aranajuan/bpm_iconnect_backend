@@ -145,18 +145,26 @@ class TktH extends ITObject {
      */
     public function getUpdateForm() {
         $this->loadTKT();
-        if ($this->accion->get_prop('ejecuta') == 'open') {
+        //si es update buscar form master y cargar datos del update
+        $THmaster = $this;
+        while ($THmaster->get_prop('accion')->get_prop('ejecuta') == 'update') {
+            $THmaster = $THmaster->get_prop('objadj');
+        }
+        $actOr = $THmaster->get_prop('accion');
+
+        if ($actOr->get_prop('ejecuta') == 'open') {
             //formulario de apertura
+
             if ($this->TKT) {
                 $lst = $this->TKT->get_last();
-                if(!$lst){
+                if (!$lst) {
                     echo 'Error, no hay opcion';
                     return NULL;
                 }
                 $itf = $lst->get_prop('itform');
             }
-        }else{
-            $itf = $this->accion->get_prop('itf');
+        } else {
+            $itf = $actOr->get_prop('itf');
         }
         if ($itf instanceof ITForm) {
             $itf->load_values($this->get_prop('itform')->getFormArrayLoad());
@@ -255,7 +263,12 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
-        $action->appendChild($element->createElement("isupdated", $this->getThUpdate() != null));
+        if ($this->getThUpdate() != null) {
+            $isupdate = "true";
+        } else {
+            $isupdate = "false";
+        }
+        $action->appendChild($element->createElement("isupdated", $isupdate));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
         if ($this->get_prop("itform") != null) {
@@ -434,7 +447,7 @@ class TktH extends ITObject {
         if ($this->TKT == null) {
             $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop('idtkt'));
             $rta = $this->objsCache->get_status("Tkt", $this->get_prop('idtkt'));
-            if($rta != 'ok'){
+            if ($rta != 'ok') {
                 $this->TKT = null;
             }
             return 'ok';
@@ -447,11 +460,11 @@ class TktH extends ITObject {
      */
     private function loadview() {
         if ($this->view == null) {
-            if ($this->loadTKT()=='ok') {
+            if ($this->loadTKT() == 'ok') {
                 $this->view = $this->TKT->get_prop("view");
-            }else{
-               echo "error TKT" . $this->get_prop("idtkt");
-               $this->view = null; 
+            } else {
+                echo "error TKT" . $this->get_prop("idtkt");
+                $this->view = null;
             }
         }
     }

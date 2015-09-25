@@ -56,12 +56,25 @@ class ITForm implements XMLPropInterface {
     private $elSaveCount;
 
     /**
+     * id de TktH para copiar archivos
+     * @var int
+     */
+    private $THfiles;
+
+    /**
+     * Cantidad de adjuntos
+     * @var int
+     */
+    private $fileCount;
+
+    /**
      * Carga xml y lo parsea
      * @param string $xml
      * @return boolean  se pudo cargar ok
      */
     public function load_xml($xml) {
         $this->set_view(0);
+        $this->fileCount = 0;
         $this->xml_input_text = $xml;
         try {
             $this->xml_input = new \DOMDocument();
@@ -139,7 +152,35 @@ class ITForm implements XMLPropInterface {
                 $this->elSaveCount++;
             }
         }
+
+        $els = $this->xml_output->getElementsByTagName("filelnk");
+        if($els->length){
+            $this->THfiles=
+                    $els->item(0)->getElementsByTagName('idth')->item(0)->nodeValue;
+        }
         return true;
+    }
+
+    /**
+     * Devuelve array del input
+     * @return array XML con values en array
+     */
+    public function getFormArray() {
+        return $this->formArray;
+    }
+
+    /**
+     * Devuelve array del input
+     * @return array XML con values en array con indice numerico
+     */
+    public function getFormArrayLoad() {
+        $tmp = array();
+        $i = 0;
+        foreach ($this->formArray as $el) {
+            $tmp[$i] = $el;
+            $i++;
+        }
+        return $tmp;
     }
 
     /**
@@ -211,7 +252,7 @@ class ITForm implements XMLPropInterface {
         }
 
         if ($element["type"] == "fileupl") {
-            $element["value"] = Context::getContext()->get_files_count();
+            $element["value"] = $this->fileCount;
         }
 
         foreach ($element["validations"] as $valName => $valValue) {
@@ -265,18 +306,30 @@ class ITForm implements XMLPropInterface {
      */
     private function loadValtoXML() {
         $this->loadOutput();
-        $this->okToSave = false;
+        $this->okToSave = true;
+        $error = "ok";
         $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
             $id = trim($this->getImmediateChildrenByTagName($field, 'id')->nodeValue);
             $rta = $this->check_values($this->formArray[$id]);
             if ($rta != "ok") {
-                return $rta;
+                $this->okToSave = false;
+                $error = $rta;
+            }
+            $list = $this->getImmediateChildrenByTagName($field, 'value', false);
+            if (count($list)) {
+                $field->removeChild($list[0]);
             }
             $field->appendChild($this->xml_output->createElement('value', xmlEscape($this->formArray[$id]['value'])));
         }
-        $this->okToSave = true;
-        return "ok";
+        if ($this->THfiles) {
+            $fileLnk = $this->xml_output->createElement('filelnk');
+            $fileLnk->appendChild($this->xml_output->createElement('idth', $this->THfiles));
+            $this->xml_output->firstChild->appendChild(
+                    $fileLnk
+            );
+        }
+        return $error;
     }
 
     /**
@@ -290,8 +343,14 @@ class ITForm implements XMLPropInterface {
         if ($formname) {
             $prefix = $formname . '_';
         }
+        foreach ($this->formArray as &$el) {
+            $el['value'] = '';
+        }
         foreach ($arr as $a) {
             $id = trim(str_replace($prefix, '', $a['id']));
+            if (is_array($a['value'])) {
+                throw new \Exception('Error de value es array ' . $id);
+            }
             if (isset($this->formArray[$id])) {
                 $this->formArray[$id]['value'] = $a['value'];
             } else {
@@ -299,6 +358,34 @@ class ITForm implements XMLPropInterface {
             }
         }
         return $this->loadValtoXML();
+    }
+
+    /**
+     * Agrega link para archivos
+     * @param TktH $TH
+     */
+    public function addFileLinkTh($TH) {
+        if ($TH) {
+            $this->THfiles = $TH->get_prop('id');
+        } else {
+            $this->THfiles = 0;
+        }
+    }
+
+    /**
+     * Id de TH adjunto para archivos
+     * @return int
+     */
+    public function getFileLinkTh() {
+        return $this->THfiles;
+    }
+
+    /**
+     * Setear candtidad de adjuntos
+     * @param int $cant
+     */
+    public function setFileCount($cant) {
+        $this->fileCount = $cant;
     }
 
     /**
@@ -345,11 +432,19 @@ class ITForm implements XMLPropInterface {
     }
 
     /**
+     * Clona out en in
+     */
+    public function setOutToIn() {
+        $this->xml_input = clone $this->xml_output;
+    }
+
+    /**
      * Devuelve domdocument para guardar
      * @return \DOMDocument
      */
     public function getSaveDom() {
         if (!$this->okToSave) {
+            throw new \Exception("NO OK");
             return null;
         }
         $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');

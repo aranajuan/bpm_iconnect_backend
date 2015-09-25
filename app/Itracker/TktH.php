@@ -364,9 +364,10 @@ class TktH extends ITObject {
     }
 
     /**
+     * Devuelve nombres de archivos
      * @return array<string> filesnames
      */
-    private function get_files() {
+    public function get_files() {
 
         if (intval($this->view["archivo_descarga"]) != 1) {
             return null;
@@ -374,6 +375,12 @@ class TktH extends ITObject {
 
         $path = $this->getInstance()->get_prop("archivos_externos") . "/adjuntos";
 
+        if($this->itform->getFileLinkTh()){
+            $idTH =$this->itform->getFileLinkTh();
+        }else{
+            $idTH = $this->id;
+        }
+        
         if (is_dir($path)) {
 
             $dh = opendir($path);
@@ -386,7 +393,7 @@ class TktH extends ITObject {
             while (($file = readdir($dh)) !== false) {
                 $fileV = explode("_", $file);
 
-                if ($fileV[0] == $this->id) {
+                if ($fileV[0] == $idTH) {
                     $list[$count] = $file;
                     $count++;
                 }

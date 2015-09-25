@@ -69,7 +69,7 @@ class Action extends ITObject {
      * @var TktH
      */
     private $TH;
-    
+
     /**
      * Primer accion trabajada
      * @var boolean 
@@ -166,6 +166,7 @@ class Action extends ITObject {
      * Cargar desde la base el id especificado
      * @param int $id     /
      */
+
     private function loadDB_id($id) {
         $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
@@ -242,24 +243,24 @@ class Action extends ITObject {
      * @return string
      */
     private function loadItform() {
-        if($this->itf!=NULL){
+        if ($this->itf != NULL) {
             return 'ok';
         }
-        
-        if($this->ejecuta=='update'){
-            if($this->TH->get_prop('UA')!=
+
+        if ($this->ejecuta == 'update') {
+            if ($this->TH->get_prop('UA') !=
                     $this->getContext()->get_User()->get_prop('usr')
-                    ){
+            ) {
                 //solo puede actualizar el propio generador
                 return 'Error acceso denegado #1';
-                    }
+            }
             $this->itf = $this->TH->getUpdateForm();
-            if($this->itf==null){
+            if ($this->itf == null) {
                 return 'Error al cargar formulario';
             }
             return 'ok';
         }
-        
+
         if ($this->form != '') {
             $this->itf = new ITForm();
             if ($this->itf->load_xml($this->form) == false) {
@@ -268,7 +269,7 @@ class Action extends ITObject {
         } else {
             $this->itf = null;
         }
-        
+
         return 'ok';
     }
 
@@ -379,13 +380,13 @@ class Action extends ITObject {
         }
         return true;
     }
-    
+
     /**
      * Carga TH del evento
      * @param TktH
      */
-    public function loadTH($TH){
-        $this->TH=$TH;
+    public function loadTH($TH) {
+        $this->TH = $TH;
     }
 
     /**
@@ -419,7 +420,7 @@ class Action extends ITObject {
     public function getTKT() {
         return $this->TKT;
     }
-    
+
     /**
      * Setea como ticket en trabajo
      */
@@ -452,6 +453,13 @@ class Action extends ITObject {
         }
         if ($this->get_prop('itf') == null) {  //no requiere formulario esta accion
             return "ok";
+        }
+        if ($this->get_prop('ejecuta') == 'update' &&
+                !Context::getContext()->get_files_count()) {
+            $this->itf->setFileCount(count($this->getTH()->get_files()));
+            $this->itf->addFileLinkTh($this->getTH());
+        } else {
+            $this->itf->setFileCount(Context::getContext()->get_files_count());
         }
         $rta = $this->itf->load_values($values, $formname);
         return $rta;
@@ -637,7 +645,7 @@ class Action extends ITObject {
      */
     public function getitform() {
         $rta = $this->loadItform();
-        if($rta != 'ok'){
+        if ($rta != 'ok') {
             return null;
         }
         return $this->itf;

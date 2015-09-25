@@ -19,7 +19,9 @@ function GO($Context) {
         return null;
     }
 
-    $view = $Context->get_User()->getMyView();
+    $viewA = $Context->get_User()->getMyView();
+    $view = $viewA[0];
+    $fields=$viewA[1];
     
     $Tl = new Itracker\TktLister();
     $Tl->loadFilter($Tf);
@@ -33,7 +35,7 @@ function GO($Context) {
     $response = $Context->createElement("data");
     $response->appendChild($Context->createElement("view", $view));
     $listL = $Context->createElement("list");
-    $fields = array("id", "usr_o.nombre", "usr_o.equiposname", "FA", "FB", "u_tom_o.nombre", "prioridadtext", "childsc", "origen_json", "equipo.nombre", "status", "critic");
+    
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $listL->appendChild($l->getXML($Context, $fields));

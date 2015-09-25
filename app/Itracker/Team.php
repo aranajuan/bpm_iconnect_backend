@@ -321,6 +321,26 @@ class Team extends ITObject {
             return "ok";
     }
 
+    /**
+     * Calcula campos necesarios para generar la vista
+     * @param string    parametro getprop del home requerido
+     * @return array
+     */
+    public function getFieldRequired($home){
+        $fields=array();
+        $vista = $this->get_prop($home);
+        $fieldsDefaults = array("id", "childsc", "origen_json", "status", "critic");
+        
+        $vistaV = explode(',',$vista);
+        foreach($vistaV as $fv){
+            $fv_exp = explode('=>',$fv);
+            if(!strpos($fv_exp[0],':')){
+                array_push($fields, $fv_exp[0]);
+            }
+        }
+        return array_unique(array_merge($fields,$fieldsDefaults));
+    }
+    
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {

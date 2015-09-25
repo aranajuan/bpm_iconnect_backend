@@ -908,15 +908,24 @@ class User extends ITObject {
         $this->dbroot->query($ssql);
     }
 
+    /**
+     * Devuelve vista del primer equipo
+     * @param string $type tipo de vista (staff o my)
+     * @return array(vista,campos)
+     */
     private function getView($type) {
         $equipos = $this->get_prop("equiposobj");
         if (count($equipos)) {
-            return $equipos[0]->get_prop($type);
+            return array($equipos[0]->get_prop($type),$equipos[0]->getFieldRequired($type));
         } else {
-            return "";
+            return array('','');
         }
     }
 
+     /**
+     * Devuelve vista del primer equipo my
+     * @return array(vista,campos)
+     */
     public function getMyView() {
         return $this->getView("mytkts_vista");
     }

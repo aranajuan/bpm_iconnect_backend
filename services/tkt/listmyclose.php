@@ -15,7 +15,9 @@ function GO($Context) {
     $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, $desde);
     $Tf->set_filter(Itracker\TktFilter::$DATE_TO, $hasta);
 
-    $view = $Context->get_User()->getMyView();
+    $viewA = $Context->get_User()->getMyView();
+    $view = $viewA[0];
+    $fields=$viewA[1];
 
     $Tl = new Itracker\TktLister();
 
@@ -30,7 +32,7 @@ function GO($Context) {
     $response = $Context->createElement("data");
     $response->appendChild($Context->createElement("view", "id,FA,FB=>FC"));
     $listL = $Context->createElement("list");
-    $fields=array("id","usr_o.nombre","usr_o.equiposname","FA","FB","u_tom_o.nombre","prioridadtext","childsc","origen_json","equipo.nombre","status","critic");
+    
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $listL->appendChild($l->getXML($Context, $fields));

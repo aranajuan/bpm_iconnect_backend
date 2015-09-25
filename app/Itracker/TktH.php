@@ -375,7 +375,7 @@ class TktH extends ITObject {
 
         $path = $this->getInstance()->get_prop("archivos_externos") . "/adjuntos";
 
-        if($this->itform->getFileLinkTh()){
+        if($this->itform && $this->itform->getFileLinkTh()){
             $idTH =$this->itform->getFileLinkTh();
         }else{
             $idTH = $this->id;

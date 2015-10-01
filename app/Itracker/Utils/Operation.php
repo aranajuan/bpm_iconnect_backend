@@ -136,6 +136,16 @@ class Operation {
                 return $a1;
             case "isset":
                 return $a1set;
+            case "todate":
+                try{
+                    if($a2!=''){
+                        return STRdate_format($a1, $a2, 'datetime')->getTimestamp();
+                    }else{
+                        return STRdate_format($a1, USERDATE_READ, 'datetime')->getTimestamp();
+                    }
+                }  catch (\Exception $e){
+                    return -1;
+                }
             case "!isset":
                 return !$a1set;
             case "empty":

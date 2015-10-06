@@ -127,12 +127,16 @@ class Operation {
         try {
             $a1 = $this->argValue($operation, $offset);
             $a1set = true;
-        } catch (\Exception $e) {
+        }catch (\Exception $e) {
             $a1set = false;
+            $err=$e;
         }
         $a2 = $this->argValue($operation, $offset + 1);
         switch ($operation->getOpe($offset)) {
             case null:
+                if($a1set==false){
+                    throw $err;
+                }
                 return $a1;
             case "isset":
                 return $a1set;
@@ -288,6 +292,16 @@ class Operation {
     private function getAliasValue($prop) {
         $arr = $this->getArrayAlias($prop);
         $obj = $arr[0];
+        if(substr($arr[1], -1, 1)==')'){
+            //es funcion
+            if($obj instanceof ScriptFunctions){
+                return $this->normalize(
+                        $obj->itsEjecute($arr[1])
+                        );
+            }else{
+                return 'undefined';
+            }
+        }
         if ($obj instanceof \Itracker\XMLPropInterface) {
             return $this->normalize(
                             $obj->get_Subprop($arr[1])

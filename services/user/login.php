@@ -20,6 +20,7 @@ function GO($Context) {
         $userL->appendChild($Context->createElement("ubicacion", $user->get_prop("ubicacion")));
         $userL->appendChild($Context->createElement("mail", $user->get_prop("mail")));
         $userL->appendChild($Context->createElement("telefono", $user->get_prop("telefono")));
+        $userL->appendChild($Context->createElement("superuser", $user->get_prop("superuser")));
     }
     else{
         $userL = $Context->createElement("error",$rta);

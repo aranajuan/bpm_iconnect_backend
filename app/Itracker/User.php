@@ -64,6 +64,7 @@ class User extends ITObject {
     private $perfilAccess;
     private $perfilLoaded;
     private $debug;
+    private $superuser;
     private $perfil_vista;
     private $hash = null;
     private $dbroot;
@@ -230,6 +231,13 @@ class User extends ITObject {
         } else {
             $this->debug = 0;
         }
+        if (in_array($this->usr,  
+                $this->getContext()->get_GlobalConfig()->getArray('configs/superusers'))){
+            $this->superuser = 1;
+        } else {
+            $this->superuser = 0;
+        }
+        
         if ($this->estado == I_ACTIVE)
             return "ok";
         return "eliminado";
@@ -942,6 +950,8 @@ class User extends ITObject {
                 return $this->mail;
             case 'debug':
                 return $this->debug;
+            case 'superuser':
+                return $this->superuser;
             case 'telefono':
                 return $this->tel;
             case 'nombre':

@@ -76,5 +76,7 @@
         <objcache>true</objcache>
         <!-- maximo periodo a reportar en dias -->
         <reportlimit>390</reportlimit>
+        <!-- usuarios prioritarios o ADM -->
+        <superusers>U550046,U548391,U193120,U190196,U199629</superusers>
     </configs>
 </itracker>

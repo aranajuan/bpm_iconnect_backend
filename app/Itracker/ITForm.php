@@ -169,6 +169,8 @@ class ITForm implements XMLPropInterface {
                     $arr["valuetxt"] = trim($this->getImmediateChildrenByTagName($opt, 'text')->nodeValue);
                 }
             }
+        }else{
+            $arr["valuetxt"]=$arr["value"];
         }
 
         $arr["validations"] = array();
@@ -304,10 +306,14 @@ class ITForm implements XMLPropInterface {
     /**
      * Devuelve valor del form elegido
      * @param string $id
+     * @param boolean $text extraer en texto    default:false
      * @return string
      */
-    private function get_value($id) {
+    private function get_value($id,$text=false) {
         if (isset($this->formArray[$id]['value'])) {
+            if($text){
+                return $this->formArray[$id]['valuetxt'];
+            }
             return $this->formArray[$id]['value'];
         }
         return null;
@@ -457,16 +463,17 @@ class ITForm implements XMLPropInterface {
         $arrTitles = array();
         foreach ($els as $el) {
             $arr[$i] = $this->elementToArray($el);
+            if ($arr[$i]["type"] == "select") {
+                $arr[$i]["type"] = "input";
+            }
             $arr[$i]["type"] = $this->getReportType($arr[$i]);
             $arr[$i]["title"] = $arr[$i]["label"];
             if (in_array($arr[$i]["title"], $arrTitles)) {
                 $arr[$i]["title"].=$arr[$i]["id"];
             }
             array_push($arrTitles, $arr[$i]["title"]);
-            if ($arr[$i]["type"] == "select") {
-                $arr[$i]["type"] = "input";
-                $arr[$i]["value"] = $arr[$i]["valuetxt"];
-            }
+
+            $arr[$i]["value"] = $arr[$i]["valuetxt"];
             $i++;
         }
         return $arr;
@@ -482,11 +489,15 @@ class ITForm implements XMLPropInterface {
 
     public function get_prop($property) {
         $property = strtolower($property);
+        $text = false;
+        if(substr($property, 0, 6)=='(text)'){
+            $property=  substr($property, 6,  strlen($property));
+            $text=true;
+        }
         if ($property == "*") {
             return $this->getArrReport();
         }
-
-        $rta = $this->get_value($property);
+        $rta = $this->get_value($property,$text);
         if ($rta) {
             return $rta;
         }

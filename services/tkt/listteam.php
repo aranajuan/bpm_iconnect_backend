@@ -49,6 +49,7 @@ function GO($Context) {
 
     $equipo = $u->get_team_obj($arrayTeam[0]);
     $view = $equipo->get_prop("staffhome_vista");
+    $fields = $equipo->getFieldRequired("staffhome_vista");
 
     $Tf->set_filter(Itracker\TktFilter::$IDMASTER, array('null'));
 
@@ -64,7 +65,7 @@ function GO($Context) {
     $response = $Context->createElement("data");
     $response->appendChild($Context->createElement("view", $view));
     $listL = $Context->createElement("list");
-    $fields = array("id", "usr_o.nombre", "usr_o.equiposname", "FA", "FB", "u_tom_o.nombre", "prioridadtext", "childsc", "origen_json", "equipo.nombre", "status", "critic");
+    
     if ($ALL_v) {
         foreach ($ALL_v as $l) {
             $listL->appendChild($l->getXML($Context, $fields));

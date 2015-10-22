@@ -99,6 +99,14 @@ class OperationParser {
     }
 
     /**
+     * Devuelve operandos
+     * @return array
+     */
+    public function getArgs($pos) {
+        return $this->args;
+    }
+
+    /**
      * Devuelve operador de la posicion
      * @param int $pos
      * @return string
@@ -191,10 +199,10 @@ class OperationParser {
             }
             if ($char == '\\') {
                 $this->jumper = true;
-            }else{
+            } else {
                 $this->temp.=$char;
             }
-        } 
+        }
 
 
         if ($i < $this->operationStrLen) {
@@ -261,7 +269,7 @@ class OperationParser {
      */
     private function getNumber($i, $recursive = false) {
         $char = $this->operationStr{$i};
-        if ($char == '.' || is_numeric($char) || $char == ',') {
+        if ($char == '.' || is_numeric($char)) {
             $this->temp.=$char;
             if ($i < $this->operationStrLen) {
                 $i = $this->getNumber($i + 1, true);

@@ -524,7 +524,8 @@ class User extends ITObject {
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
             return "El campo perfil es obligatorio";
-        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL))
+        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) 
+                && trim($this->mail)!="")
             return "Mail invalido";
         if ($this->dbteams == "" || $this->dbteams == null) {
             return "Seleccione al menos un equipo";

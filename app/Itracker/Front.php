@@ -115,7 +115,7 @@ class Front extends ITObject {
             case 'nombre':
                 return ucwords($this->nombre);
             case 'ip':
-                return $this->ip;
+                return trim($this->ip);
             default:
                 return "Propiedad invalida.";
         }

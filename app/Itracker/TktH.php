@@ -139,6 +139,57 @@ class TktH extends ITObject {
         $this->accion = $tmpU;
     }
 
+    /**
+     * Devuelve formulario para actualizar
+     * @return ITForm
+     */
+    public function getUpdateForm() {
+        $this->loadTKT();
+        //si es update buscar form master y cargar datos del update
+        $THmaster = $this;
+        while ($THmaster->get_prop('accion')->get_prop('ejecuta') == 'update') {
+            $THmaster = $THmaster->get_prop('objadj');
+        }
+        $actOr = $THmaster->get_prop('accion');
+
+        if ($actOr->get_prop('ejecuta') == 'open') {
+            //formulario de apertura
+
+            if ($this->TKT) {
+                $lst = $this->TKT->get_last();
+                if (!$lst) {
+                    echo 'Error, no hay opcion';
+                    return NULL;
+                }
+                $itf = $lst->get_prop('itform');
+            }
+        } else {
+            $itf = $actOr->get_prop('itf');
+        }
+        if ($itf instanceof ITForm) {
+            $itf->load_values($this->get_prop('itform')->getFormArrayLoad());
+            $itf->setOutToIn();
+        }
+        return $itf;
+    }
+
+    /**
+     * Devuelve TktH que lo actualiza o null si no existe
+     * @return TktH|null
+     */
+    public function getThUpdate() {
+        $this->loadTKT();
+        $events = $this->TKT->get_tktHObj();
+        foreach ($events as $e) {
+            if ($e->get_prop('accion')
+                            ->get_prop('ejecuta') == 'update' && $e->get_prop('objadj_id') == $this->id
+            ) {
+                return $e;
+            }
+        }
+        return null;
+    }
+
     /* Inserta nuevo registro y carga ID en el objeto
      */
 
@@ -212,6 +263,12 @@ class TktH extends ITObject {
         $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
+        if ($this->getThUpdate() != null) {
+            $isupdate = "true";
+        } else {
+            $isupdate = "false";
+        }
+        $action->appendChild($element->createElement("isupdated", $isupdate));
         $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
         $elementData->appendChild($action);
         if ($this->get_prop("itform") != null) {
@@ -282,11 +339,16 @@ class TktH extends ITObject {
         }
         $UA = $this->objsCache->get_object("User", $this->UA);
         $rta = $this->objsCache->get_status("User", $this->UA);
+        $this->UA_o = $UA;
         if ($rta == "ok") {
-            $this->UA_o = $UA;
             return $this->UA_o;
         }
-        $this->getContext()->getLogger()->warning("Evento de usuario eliminado", array($this->id, $this->idtkt, $this->UA));
+         if ($rta == "eliminado") {
+            $this->getContext()->getLogger()->warning("Evento de usuario eliminado", array($this->id, $this->idtkt, $this->UA));
+            return $this->UA_o;
+        }
+        $this->getContext()->getLogger()->error("Evento de usuario invalido",
+                array($this->id, $this->idtkt, $this->UA,$rta));
         return null;
     }
 
@@ -307,9 +369,10 @@ class TktH extends ITObject {
     }
 
     /**
+     * Devuelve nombres de archivos
      * @return array<string> filesnames
      */
-    private function get_files() {
+    public function get_files() {
 
         if (intval($this->view["archivo_descarga"]) != 1) {
             return null;
@@ -317,6 +380,12 @@ class TktH extends ITObject {
 
         $path = $this->getInstance()->get_prop("archivos_externos") . "/adjuntos";
 
+        if($this->itform && $this->itform->getFileLinkTh()){
+            $idTH =$this->itform->getFileLinkTh();
+        }else{
+            $idTH = $this->id;
+        }
+        
         if (is_dir($path)) {
 
             $dh = opendir($path);
@@ -329,7 +398,7 @@ class TktH extends ITObject {
             while (($file = readdir($dh)) !== false) {
                 $fileV = explode("_", $file);
 
-                if ($fileV[0] == $this->id) {
+                if ($fileV[0] == $idTH) {
                     $list[$count] = $file;
                     $count++;
                 }
@@ -383,19 +452,31 @@ class TktH extends ITObject {
     }
 
     /**
+     * Carga ticket
+     * @return string
+     */
+    private function loadTKT() {
+        if ($this->TKT == null) {
+            $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop('idtkt'));
+            $rta = $this->objsCache->get_status("Tkt", $this->get_prop('idtkt'));
+            if ($rta != 'ok') {
+                $this->TKT = null;
+            }
+            return 'ok';
+        }
+        return 'ok';
+    }
+
+    /**
      * Carga ticket y vista si es necesario
      */
     private function loadview() {
         if ($this->view == null) {
-            if ($this->TKT == null) {
-                $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop("idtkt"));
-                if ($this->objsCache->get_status("Tkt", $this->get_prop("idtkt")) != "ok") {
-                    echo "error TKT" . $this->get_prop("idtkt");
-                    $this->view = null;
-                }
+            if ($this->loadTKT() == 'ok') {
                 $this->view = $this->TKT->get_prop("view");
             } else {
-                $this->view = $this->TKT->get_prop("view");
+                echo "error TKT" . $this->get_prop("idtkt");
+                $this->view = null;
             }
         }
     }

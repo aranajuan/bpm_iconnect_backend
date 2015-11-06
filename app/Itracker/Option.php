@@ -65,7 +65,9 @@ class Option extends ITObject {
 
         if ($this->pretext != '') {
             $this->itform = new ITForm();
-            $this->itform->load_xml($this->pretext);
+            if($this->itform->load_xml($this->pretext)!='ok'){
+                $this->itform=null;
+            }
         } else {
             $this->itform = null;
         }

@@ -65,6 +65,12 @@ class Action extends ITObject {
     private $TKT;
 
     /**
+     * th sobre el cual se ejecuta accion
+     * @var TktH
+     */
+    private $TH;
+
+    /**
      * Primer accion trabajada
      * @var boolean 
      */
@@ -216,14 +222,6 @@ class Action extends ITObject {
         $this->descripcion = trim($tmpU["descripcion"]);
         $this->script = trim($tmpU["script"]);
         $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
-        if ($this->form != "") {
-            $this->itf = new ITForm();
-            if ($this->itf->load_xml($this->form) == false) {
-                return "Error al cargar formulario de la tipificacion.";
-            }
-        } else {
-            $this->itf = null;
-        }
         $this->ejecuta = trim($tmpU["ejecuta"]);
         $this->alias = trim($tmpU["alias"]);
         return 'ok';
@@ -238,6 +236,41 @@ class Action extends ITObject {
         $this->estado = $tmpU["estado"];
         $this->nombre = $tmpU["nombre"];
         return $this->load_VEC($tmpU);
+    }
+
+    /**
+     * Carga y devuelve itform
+     * @return string
+     */
+    private function loadItform() {
+        if ($this->itf != NULL) {
+            return 'ok';
+        }
+
+        if ($this->ejecuta == 'update') {
+            if ($this->TH->get_prop('UA') !=
+                    $this->getContext()->get_User()->get_prop('usr')
+            ) {
+                //solo puede actualizar el propio generador
+                return 'Error acceso denegado #1';
+            }
+            $this->itf = $this->TH->getUpdateForm();
+            if ($this->itf == null) {
+                return 'Error al cargar formulario';
+            }
+            return 'ok';
+        }
+
+        if ($this->form != '') {
+            $this->itf = new ITForm();
+            if ($this->itf->load_xml($this->form) == false) {
+                return 'Error al cargar formulario de la tipificacion.';
+            }
+        } else {
+            $this->itf = null;
+        }
+
+        return 'ok';
     }
 
     /**
@@ -349,6 +382,14 @@ class Action extends ITObject {
     }
 
     /**
+     * Carga TH del evento
+     * @param TktH
+     */
+    public function loadTH($TH) {
+        $this->TH = $TH;
+    }
+
+    /**
      * Carga Archivos
      * @param array $files 
      */
@@ -362,6 +403,14 @@ class Action extends ITObject {
      */
     public function getFiles() {
         return $this->files;
+    }
+
+    /**
+     * Devuelve TH
+     * @return TktH
+     */
+    public function getTH() {
+        return $this->TH;
     }
 
     /**
@@ -402,8 +451,15 @@ class Action extends ITObject {
         if ($this->TKT == null) {
             return "Error ticket sin cargar";
         }
-        if ($this->itf == null) {  //no requiere formulario esta accion
+        if ($this->get_prop('itf') == null) {  //no requiere formulario esta accion
             return "ok";
+        }
+        if ($this->get_prop('ejecuta') == 'update' &&
+                !Context::getContext()->get_files_count()) {
+            $this->itf->setFileCount(count($this->getTH()->get_files()));
+            $this->itf->addFileLinkTh($this->getTH());
+        } else {
+            $this->itf->setFileCount(Context::getContext()->get_files_count());
         }
         $rta = $this->itf->load_values($values, $formname);
         return $rta;
@@ -420,8 +476,8 @@ class Action extends ITObject {
         $const->setValue('time', date(USERDATE_READ_TIME));
         $const->setValue('datetime', date(USERDATE_READ));
         $globals = new Utils\Vars();
-        $grta = $globals->loadFile(ROOT_DIR.'/config/itscript/globals.xml');
-        if($grta){
+        $grta = $globals->loadFile(ROOT_DIR . '/config/itscript/globals.xml');
+        if ($grta) {
             $globals->setRootTag('ITglobal');
             $this->ITScript->addObject('GLOBALS', $globals);
         }
@@ -501,11 +557,11 @@ class Action extends ITObject {
         if ($postAction != '') {
             $rta = $this->getTKT()->ejecute_action($postAction, json_decode($ItResponse->get_prop('post_action_form'), true), $ItResponse->get_prop('post_action_id'));
             if (!is_array($rta)) {
-                $valid=$rta;
+                $valid = $rta;
                 $rtaSave = $rta;
             } else {
                 $valid = $rta['result'];
-                $rtaSave = $rta['result'].'-'.$rta['msj'];
+                $rtaSave = $rta['result'] . '-' . $rta['msj'];
             }
         }
         if ($valid == 'ok') {
@@ -588,6 +644,10 @@ class Action extends ITObject {
      * @return itform
      */
     public function getitform() {
+        $rta = $this->loadItform();
+        if ($rta != 'ok') {
+            return null;
+        }
         return $this->itf;
     }
 
@@ -605,7 +665,7 @@ class Action extends ITObject {
             case 'tipo':
                 return $this->tipo;
             case 'itf':
-                return $this->itf;
+                return $this->getitform();
             case 'formulario':
                 return $this->formulario;
             case 'objadj_id':

@@ -64,6 +64,7 @@ class User extends ITObject {
     private $perfilAccess;
     private $perfilLoaded;
     private $debug;
+    private $superuser;
     private $perfil_vista;
     private $hash = null;
     private $dbroot;
@@ -230,6 +231,13 @@ class User extends ITObject {
         } else {
             $this->debug = 0;
         }
+        if (in_array($this->usr,  
+                $this->getContext()->get_GlobalConfig()->getArray('configs/superusers'))){
+            $this->superuser = 1;
+        } else {
+            $this->superuser = 0;
+        }
+        
         if ($this->estado == I_ACTIVE)
             return "ok";
         return "eliminado";
@@ -516,7 +524,8 @@ class User extends ITObject {
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
             return "El campo perfil es obligatorio";
-        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL))
+        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) 
+                && trim($this->mail)!="")
             return "Mail invalido";
         if ($this->dbteams == "" || $this->dbteams == null) {
             return "Seleccione al menos un equipo";
@@ -908,15 +917,24 @@ class User extends ITObject {
         $this->dbroot->query($ssql);
     }
 
+    /**
+     * Devuelve vista del primer equipo
+     * @param string $type tipo de vista (staff o my)
+     * @return array(vista,campos)
+     */
     private function getView($type) {
         $equipos = $this->get_prop("equiposobj");
         if (count($equipos)) {
-            return $equipos[0]->get_prop($type);
+            return array($equipos[0]->get_prop($type),$equipos[0]->getFieldRequired($type));
         } else {
-            return "";
+            return array('','');
         }
     }
 
+     /**
+     * Devuelve vista del primer equipo my
+     * @return array(vista,campos)
+     */
     public function getMyView() {
         return $this->getView("mytkts_vista");
     }
@@ -933,6 +951,8 @@ class User extends ITObject {
                 return $this->mail;
             case 'debug':
                 return $this->debug;
+            case 'superuser':
+                return $this->superuser;
             case 'telefono':
                 return $this->tel;
             case 'nombre':

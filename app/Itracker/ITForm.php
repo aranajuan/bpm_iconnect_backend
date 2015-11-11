@@ -261,7 +261,7 @@ class ITForm implements XMLPropInterface {
             switch ($valName) {
                 case "numeric":
                     if ($valValue == "true" && !is_numeric($element["value"]) && !(trim($element["value"]) == "" || $element["value"] == null)) {
-                        return "El campo " . $element["label"] . " debe ser numerico.";
+                        return "El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).";
                     }
                     break;
                 case "required":

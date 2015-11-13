@@ -154,9 +154,8 @@ class ITForm implements XMLPropInterface {
         }
 
         $els = $this->xml_output->getElementsByTagName("filelnk");
-        if($els->length){
-            $this->THfiles=
-                    $els->item(0)->getElementsByTagName('idth')->item(0)->nodeValue;
+        if ($els->length) {
+            $this->THfiles = $els->item(0)->getElementsByTagName('idth')->item(0)->nodeValue;
         }
         return true;
     }
@@ -210,8 +209,8 @@ class ITForm implements XMLPropInterface {
                     $arr["valuetxt"] = trim($this->getImmediateChildrenByTagName($opt, 'text')->nodeValue);
                 }
             }
-        }else{
-            $arr["valuetxt"]=$arr["value"];
+        } else {
+            $arr["valuetxt"] = $arr["value"];
         }
 
         $arr["validations"] = array();
@@ -258,43 +257,46 @@ class ITForm implements XMLPropInterface {
         }
 
         foreach ($element["validations"] as $valName => $valValue) {
+            $notempty = !(trim($element["value"]) == "" || $element["value"] == null);
             switch ($valName) {
                 case "numeric":
-                    if ($valValue == "true" && !is_numeric($element["value"]) && !(trim($element["value"]) == "" || $element["value"] == null)) {
-                        return "El campo " . $element["label"] . " debe ser numerico.";
+                    if ($valValue == "true" && !is_numeric($element["value"]) && $notempty) {
+                        return "El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).";
                     }
                     break;
                 case "required":
-                    if ($valValue == "true" && (trim($element["value"]) == "" || $element["value"] == null)) {
+                    if ($valValue == "true" && !$notempty) {
                         return "El campo " . $element["label"] . " es obligatorio.";
                     }
                     break;
                 case "maxlen":
-                    if (strlen($element["value"]) > $valValue) {
+                    if (strlen($element["value"]) > $valValue && $notempty) {
                         return "El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres";
                     }
                     break;
                 case "minlen":
-                    if (strlen($element["value"]) < $valValue) {
+                    if (strlen($element["value"]) < $valValue && $notempty) {
                         return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
                     }
                     break;
                 case "max":
-                    if ($element["value"] > $valValue) {
+                    if ($element["value"] > $valValue && $notempty) {
                         return "El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue;
                     }
                     break;
                 case "min":
-                    if ($element["value"] < $valValue) {
+                    if ($element["value"] < $valValue && $notempty) {
                         return "El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue;
                     }
                     break;
                 case "regex":
-                    $valid = preg_match($valValue, $element["value"], $newstr);
-                    if (!$valid) {
-                        return "El campo " . $element["label"] . " no cumple el formato solicitado.";
-                    } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
-                        return "El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
+                    if ($notempty) {
+                        $valid = preg_match($valValue, $element["value"], $newstr);
+                        if (!$valid) {
+                            return "El campo " . $element["label"] . " no cumple el formato solicitado.";
+                        } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
+                            return "El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
+                        }
                     }
                     break;
             }
@@ -396,9 +398,9 @@ class ITForm implements XMLPropInterface {
      * @param boolean $text extraer en texto    default:false
      * @return string
      */
-    private function get_value($id,$text=false) {
+    private function get_value($id, $text = false) {
         if (isset($this->formArray[$id]['value'])) {
-            if($text){
+            if ($text) {
                 return $this->formArray[$id]['valuetxt'];
             }
             return $this->formArray[$id]['value'];
@@ -585,14 +587,14 @@ class ITForm implements XMLPropInterface {
     public function get_prop($property) {
         $property = strtolower($property);
         $text = false;
-        if(substr($property, 0, 6)=='(text)'){
-            $property=  substr($property, 6,  strlen($property));
-            $text=true;
+        if (substr($property, 0, 6) == '(text)') {
+            $property = substr($property, 6, strlen($property));
+            $text = true;
         }
         if ($property == "*") {
             return $this->getArrReport();
         }
-        $rta = $this->get_value($property,$text);
+        $rta = $this->get_value($property, $text);
         if ($rta) {
             return $rta;
         }

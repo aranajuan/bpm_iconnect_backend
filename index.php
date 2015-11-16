@@ -16,7 +16,18 @@ if ($Context->get_GlobalConfig()->getString('database/motor') == 'mssql')
 /* Routing */
 if(preg_match('/\\/aux\\/.*/' ,$_SERVER["REQUEST_URI"])){
     /* aux connections */
-    
+    $req = $_GET['service'];
+    if(preg_match('/[a-zA-Z0-9_]*/',$req )){
+        $filereq = ROOT_DIR.DIRECTORY_SEPARATOR.'aux'.DIRECTORY_SEPARATOR.$req.'.php'; 
+        if(file_exists($filereq)){
+            include $filereq;
+        }else{
+            echo 'invalid service.#1';
+        }
+    }else{
+        echo 'invalid service.#2';
+    }
+    exit();
 }
 
 $RQ = trim(file_get_contents('php://input'));

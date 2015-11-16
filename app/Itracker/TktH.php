@@ -343,12 +343,11 @@ class TktH extends ITObject {
         if ($rta == "ok") {
             return $this->UA_o;
         }
-         if ($rta == "eliminado") {
+        if ($rta == "eliminado") {
             $this->getContext()->getLogger()->warning("Evento de usuario eliminado", array($this->id, $this->idtkt, $this->UA));
             return $this->UA_o;
         }
-        $this->getContext()->getLogger()->error("Evento de usuario invalido",
-                array($this->id, $this->idtkt, $this->UA,$rta));
+        $this->getContext()->getLogger()->error("Evento de usuario invalido", array($this->id, $this->idtkt, $this->UA, $rta));
         return null;
     }
 
@@ -369,6 +368,21 @@ class TktH extends ITObject {
     }
 
     /**
+     * @return  int id de donde leer archivos
+     */
+    public function get_idFiles() {
+        if ($this->itform && $this->itform->getFileLinkTh()) {
+            $idTH = $this->itform->getFileLinkTh();
+            $thUP = $this->objsCache->get_object("TktH", $idTH);
+            if($this->objsCache->get_status("TktH", $idTH)=='ok'){
+                return $thUP->get_idFiles();
+            }
+        } else {
+            return $this->id;
+        }
+    }
+
+    /**
      * Devuelve nombres de archivos
      * @return array<string> filesnames
      */
@@ -380,12 +394,8 @@ class TktH extends ITObject {
 
         $path = $this->getInstance()->get_prop("archivos_externos") . "/adjuntos";
 
-        if($this->itform && $this->itform->getFileLinkTh()){
-            $idTH =$this->itform->getFileLinkTh();
-        }else{
-            $idTH = $this->id;
-        }
-        
+        $idTH = $this->get_idFiles();
+
         if (is_dir($path)) {
 
             $dh = opendir($path);

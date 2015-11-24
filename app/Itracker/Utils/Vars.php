@@ -156,7 +156,7 @@ class Vars implements \Itracker\XMLPropInterface {
                     return false;
                 }
             } else {
-                $rpos = $v->getNodePath();
+                $rpos = strtolower($v->getNodePath());
                 $value = $v->nodeValue;
                 $this->vars[$rpos] = $value;
             }
@@ -188,7 +188,7 @@ class Vars implements \Itracker\XMLPropInterface {
      */
     public function getValue($varName,$exception=false) {
         $varName = str_replace('.', '/', $varName);
-        $varName = '/' . $this->rootTag . '/' . $varName;
+        $varName = strtolower('/' . $this->rootTag . '/' . $varName);
         if (!isset($this->vars[$varName])) {
             if($exception){
                 throw new \Exception('Variable no seteada-'.$varName);
@@ -207,7 +207,7 @@ class Vars implements \Itracker\XMLPropInterface {
      */
     public function setValue($varName, $value) {
         $varName = str_replace('.', '/', $varName);
-        $varName = '/' . $this->rootTag . '/' . $varName;
+        $varName = strtolower('/' . $this->rootTag . '/' . $varName);
         $this->vars[$varName] = $value;
     }
 

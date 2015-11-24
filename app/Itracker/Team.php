@@ -329,7 +329,7 @@ class Team extends ITObject {
     public function getFieldRequired($home){
         $fields=array();
         $vista = $this->get_prop($home);
-        $fieldsDefaults = array("id", "childsc", "origen_json", "status", "critic");
+        $fieldsDefaults = array("id", "childsc", "origen_json", "status", "critic","fb","fa");
         
         $vistaV = explode(',',$vista);
         foreach($vistaV as $fv){

@@ -102,6 +102,7 @@ class Context extends Utils\XMLhandler {
         
         if($this->get_User()->get_prop('superuser')==1){
             set_time_limit(12000);
+            ini_set('memory_limit','512M');
         }else{
             set_time_limit(300);
         }

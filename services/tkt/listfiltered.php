@@ -20,7 +20,7 @@ function GO($Context) {
     $Tf = new Itracker\TktFilter();
     $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
     $Tf->set_filter(Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
-    $Tf->set_filter(Itracker\TktFilter::$ORIGINS, explode(',',$Context->get_params("origin")));
+    $Tf->set_filter(Itracker\TktFilter::$ORIGINS, explode(';',$Context->get_params("origin")));
 
     $taken = $Context->get_params("taken");
     if ($taken) {

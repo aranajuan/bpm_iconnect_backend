@@ -572,12 +572,12 @@ class Tkt extends Tree {
                 } else {
                     $lu = $this->getLogged();
                     if ($lu->in_team($this->get_prop("idequipo"))) {
-                        $this->getContext()->getLogger()->warning("Ticket liberado usuario fuera del equipo", array($this->id, $this->$this->u_tom));
+                        $this->getContext()->getLogger()->warning("Ticket liberado usuario fuera del equipo", array($this->id, $this->u_tom));
                         $this->ejecute_action("LIBERAR");
                     }
                 }
             } else {
-                $this->getContext()->getLogger()->warning("Ticket liberado por error en usurio", array($this->id, $this->$this->u_tom, $rta));
+                $this->getContext()->getLogger()->warning("Ticket liberado por error en usurio", array($this->id, $this->u_tom, $rta));
                 $this->ejecute_action("LIBERAR");
             }
         }

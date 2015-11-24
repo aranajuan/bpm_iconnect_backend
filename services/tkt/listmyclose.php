@@ -30,7 +30,7 @@ function GO($Context) {
     $ALL_v = $Tl->getObjs();
     
     $response = $Context->createElement("data");
-    $response->appendChild($Context->createElement("view", "id,FA,FB=>FC"));
+    $response->appendChild($Context->createElement("view", $view.",fb=>FC"));
     $listL = $Context->createElement("list");
     
     if ($ALL_v) {

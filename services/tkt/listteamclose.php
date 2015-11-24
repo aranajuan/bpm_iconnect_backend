@@ -44,7 +44,7 @@ function GO($Context) {
 
 
     $response = $Context->createElement("data");
-    $response->appendChild($Context->createElement("view", "id,js:show_childs:id:childsc=>Adjuntos,usr_o.nombre=>Usuario,usr_o.equiposname=>Grupo,FA,FB=>FC,u_tom_o.nombre=>Staff"));
+    $response->appendChild($Context->createElement("view", $view.",fb=>FC"));
     $listL = $Context->createElement("list");
     
     if ($ALL_v) {

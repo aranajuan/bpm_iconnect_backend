@@ -83,3 +83,4 @@ $RECYCLE.BIN/
 config/*
 logs/*
 xtra/*
+app/DomPdf/lib/fonts/log.htm

@@ -77,7 +77,8 @@ $access = array(
     array(55,"TKT","idsel_teamderive","Lista equipos a los que se puede derivar"), //usado
     array(56,"REPORT","report","Ejecuta reportes"),//usado
     array(57,"TKT","getsimilars","Carga tickets similares a uno no creado"),//usado
-    array(58,"TKT","listtouch","Lista tickets que ya no estan en el equipo")//usado
+    array(58,"TKT","listtouch","Lista tickets que ya no estan en el equipo"),//usado
+    array(59,"TKT","getpdf","Exportar a pdf")//usado
 );
 
 

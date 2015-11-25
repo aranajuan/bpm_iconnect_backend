@@ -25,14 +25,24 @@ function GO($Context) {
     }
     $html_tree.="</table>";
 
+    $html.="<div class='master_TH' style='width:95%;margin:10px;padding:5px;border:solid 1px;'>";
+    $html.="<div class='title_TH' style='font-weight: bold'>Itracker</div>";
+    $html.="<table>";
+        $html.="<tr><td>ID</td><td>".$idtkt."</td></tr>";
+    $html.="<tr><td>Fecha exportacion</td><td>".date(USERDATE_READ)."</td></tr>";
+    $html.="</table>";
+    $html.="</div>";
+    $html.="<div class='master_TH' style='width:95%;margin:10px;padding:5px;border:solid 1px;'>";
+    $html.="Eventos del ticket<br/><i style='font-size:10px;'>Los archivos adjuntos deben descargarse desde la web</i>";
+    $html.="</div>";
     $THALL = $TKT->get_tktHObj();
     $cvalid = 0;
     foreach ($THALL as $TH) {
         if ($TH) {
             $html.="<div class='master_TH' style='width:95%;margin:10px;padding:5px;'>";
             $html.="<div class='header_TH'>";
-            $html.="<div class='title_TH' style='font-weight: bold'>" . strtoupper($TH->get_prop('accion')->get_prop('alias')) . "</div>";
-            $html.="<div class='date_TH'>" . $TH->get_prop('fa') . "</div>";
+            $html.="<div class='title_TH' style='font-weight: bold;float:left;'>" . strtoupper($TH->get_prop('accion')->get_prop('alias')) . "</div>";
+            $html.="<div class='date_TH' style='float:right;'>" . $TH->get_prop('fa') . "</div>";
             $html.="</div>";
             if ($TH->get_prop('accion')->get_prop('ejecuta') === "open") {
                 $html.="<div class='element'>";
@@ -45,7 +55,7 @@ function GO($Context) {
                 $itfV = $itf->getReportArr();
                 foreach($itfV as $field){
                     $html.="<tr>";
-                    $html.="<td>".$field['title']."</td><td>".$field['valuetxt']."</td>";
+                    $html.="<td>".$field['title'].":   </td><td>".$field['valuetxt']."</td>";
                     $html.="</tr>";
                 }
                 $html.="</table>";
@@ -56,6 +66,10 @@ function GO($Context) {
             $html.="</div><hr/>";
         }
     }
+    $html.="<div class='master_TH' style='width:95%;margin:10px;padding:5px;border:solid 1px;'>";
+    $html.="<b>Coordinacion productos y servicios</b><br/><i><a href='>https://itracker'>https://itracker</a>
+        <br/><a href='>https://itracker.personal.com.ar'>https://itracker.personal.com.ar</a></i>";
+    $html.="</div>";
     if ($cvalid == 0) {
         return $Context->createElement("error", "Ticket invalido.#2");
     }

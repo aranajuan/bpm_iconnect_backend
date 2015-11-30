@@ -348,6 +348,9 @@ class Team extends ITObject {
                 return ucwords($this->id);
             case 'nombre':
                 return ucwords($this->nombre);
+            case 'nombrefull':
+                return $this->get_prop('nombre').
+                    ' -'.$this->get_prop('direccionname');
             case 't_conformidad':
                 return $this->t_conformidad;
             case 'idlistin':

@@ -198,6 +198,7 @@ class ITForm implements XMLPropInterface {
             $arr["label"] = $label;
         }
         $arr["value"] = trim($this->getImmediateChildrenByTagName($element, 'value')->nodeValue);
+        $arr["view"] = trim($this->getImmediateChildrenByTagName($element, 'view')->nodeValue);
         $arr["notsave"] = trim($this->getImmediateChildrenByTagName($element, 'notsave')->nodeValue);
         $this->arr_val[$arr["id"]] = $arr["value"];
         $arr["type"] = trim($this->getImmediateChildrenByTagName($element, 'type')->nodeValue);
@@ -481,11 +482,15 @@ class ITForm implements XMLPropInterface {
                 $nar["type"] = "input";
                 $nar["value"] = $nar["valuetxt"];
             }
+            $vRQ = intval($nar['view'] || 0);
+            if ($vRQ != 0 && $this->view_level > $vRQ) {
+                $nar["value"] = "****";
+            }
             array_push($arr_ret, $nar);
         }
         return $arr_ret;
     }
-
+   
     /**
      * Devuelve Dom para que el usuario complete
      * @return \DOMDocument

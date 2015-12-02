@@ -8,10 +8,9 @@ function GO($Context) {
 
     $u = $Context->get_User();
     $rname = $Context->get_Instance()->get_prop("nombre")."_".$u->get_prop("perfilt");
-    $filepath=ROOT_DIR . "/config/reports/".$rname.".json";
-    if(!file_exists($filepath)){
-         return $Context->createElement("error", "No hay reporte disponible para el perfil. $rname");
-    }
+    $filepath=ROOT_DIR . "/config/reports/".$rname;
+    
+    $ffound = false;
     $arrayTeam = array();
     $idsteams = explode(",", $Context->get_params("team"));
     foreach ($idsteams as $idteam) {
@@ -19,7 +18,21 @@ function GO($Context) {
             return $Context->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
         }
         array_push($arrayTeam, $idteam);
+        if(!$ffound && file_exists($filepath.'_'.$idteam.'.json')){
+            $filepath.='_'.$idteam.'.json';
+            $rname.='_'.$u->get_team_obj($idteam)->get_prop('nombre').'('.$idteam.')';
+            $ffound=true;
+        }
     }
+    
+    if(!$ffound){
+         if(file_exists($filepath.'.json')){
+             $filepath.='.json';
+         }else{
+            return $Context->createElement("error", "No hay reporte disponible para el perfil. $rname");
+         }
+    }
+    
 
     $Tf = new Itracker\TktFilter();
     $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($Context->get_params("from") . "00:00", USERDATE_READ, DBDATE_WRITE));

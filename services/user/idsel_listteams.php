@@ -9,7 +9,7 @@ function GO($Context) {
     $listL=$Context->createElement("list");
     if ($teams) {
         foreach ($teams as $l)
-            $listL->appendChild($l->getXML($Context,array('id','nombre')));
+            $listL->appendChild($l->getXML($Context,array('id','nombrefull')));
         return $listL;
     }
     return null;

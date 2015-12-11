@@ -68,11 +68,41 @@ abstract class XMLhandler {
      * @param string $tag
      * @param string $value
      */
-    private function add_accessLog($tag,$value){
+    public function add_accessLog($tag,$value){
         if($value instanceof \SimpleXMLElement){
             $value = (string)$value;
         }
         $this->logAccessArray[$tag]= $value;
+    }
+    
+    /**
+     * Agrega al access log incrementando
+     * @param string $tag
+     * @param float $value  null para unset
+     */
+    public function add_incrementaccessLog($tag,$value){
+        if($value === NULL){
+            if(!isset($this->logAccessArray[$tag])){
+                unset($this->logAccessArray[$tag]);
+            }
+            return;
+        }
+        if(!is_numeric($value)){
+            throw new Exception('Valor invalido a log, se espera un numero '.$value);
+        }
+        if(!isset($this->logAccessArray[$tag])){
+            $this->logAccessArray[$tag]= $value;
+        }else{
+            $this->logAccessArray[$tag]+= $value;
+        }
+    }
+    
+    /**
+     * Devuelve json de log de acceso
+     * @return string
+     */
+    public function get_accesslogJson(){
+        return json_encode($this->logAccessArray);
     }
     
     /**
@@ -308,7 +338,6 @@ abstract class XMLhandler {
     public function get_response() {
         $this->add_error_response();
         $this->add_accessLog('date_resp', date(USERDATE_READ.':s'));
-        LoggerFactory::getAccessLogger()->write(json_encode($this->logAccessArray).','.PHP_EOL);
         return $this->response->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 

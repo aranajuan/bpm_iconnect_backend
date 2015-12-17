@@ -19,19 +19,19 @@ if ($Context->get_GlobalConfig()->getString('database/motor') == 'mssql')
 if(preg_match('/\\/aux\\/.*/' ,$_SERVER["REQUEST_URI"])){
     /* aux connections */
     $req = $_GET['service'];
-    $this->add_accessLog('rq_class', 'xtra');
-    $this->add_accessLog('rq_method', $req);
-    $this->add_accessLog('front_ip', $_SERVER['REMOTE_ADDR']);
+    $Context->add_accessLog('rq_class', 'xtra');
+    $Context->add_accessLog('rq_method', $req);
+    $Context->add_accessLog('front_ip', $_SERVER['REMOTE_ADDR']);
     if(preg_match('/[a-zA-Z0-9_]*/',$req )){
         $filereq = ROOT_DIR.DIRECTORY_SEPARATOR.'xtra'.DIRECTORY_SEPARATOR.$req.'.php'; 
         if(file_exists($filereq)){
             include $filereq;
         }else{
-            $this->add_accessLog('error','invalid service.#1');
+            $Context->add_accessLog('error','invalid service.#1');
             echo 'invalid service.#1';
         }
     }else{
-        $this->add_accessLog('error','invalid service.#2');
+        $Context->add_accessLog('error','invalid service.#2');
         echo 'invalid service.#2';
     }
     

@@ -14,7 +14,15 @@ if($T){
 }
 
 if($this->get_prop("UA_o")){
-    $userGen="Generado por :"." ".$this->get_prop("UA")."-".$this->get_prop("UA_o")->get_prop("nombre")." (".$this->get_prop("UA_o")->get_prop("equiposname").")";
+    $tnames=$this->get_prop("UA_o")->get_prop("equiposname");
+    $tnamesv= explode(';',$tnames);
+    if(count($tnamesv)>3){
+        $tnames = implode(';',array_slice($tnamesv, 0,3));
+        $tnames .= ' (+)';
+    }
+    $userGen="Generado por :"." ".$this->get_prop("UA")."-".
+            $this->get_prop("UA_o")->get_prop("nombre").
+            " (".$tnames.")";
 }else{
     $userGen="Generado por: Indeterminado - Error ".$this->get_prop("UA");
 }

@@ -220,6 +220,7 @@ abstract class Tree extends ITObject {
      * options => array => Title<br/>
      *                  => Destiny (cifrado)<br/>
      *                  => End (fin de arbol)<br/>
+     *                  => isnew
      * error => string<br/>
      * object => cuando es ultima opcion [OPTION] <br/>
      * @return  array
@@ -276,6 +277,8 @@ abstract class Tree extends ITObject {
                     $rta["options"][$i]["title"] = $s->get_prop("nombre");
                     $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "S" . $s->get_prop("id") . ",");
                     $rta["options"][$i]["end"] = false;
+                    $fstQ = $actualO->get_fst_Q($s->get_prop("id"));
+                    $rta["options"][$i]["isnew"]=$fstQ->get_prop('isnew');
                     $i++;
                 }
                 return $rta;
@@ -297,6 +300,7 @@ abstract class Tree extends ITObject {
                         continue;
                     }
                     $rta["options"][$i]["title"] = $opt->get_prop("texto");
+                    $rta["options"][$i]["isnew"] = $opt->get_prop("isnew");
                     $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
                     if ($opt->get_prop("idpregunta_destino")) {
                         $rta["options"][$i]["end"] = false;
@@ -317,6 +321,7 @@ abstract class Tree extends ITObject {
                     $i = 0;
                     foreach ($opts as $opt) {
                         $rta["options"][$i]["title"] = $opt->get_prop("texto");
+                        $rta["options"][$i]["isnew"] = $opt->get_prop("isnew");
                         $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
                         if ($opt->get_prop("idpregunta_destino")) {
                             $rta["options"][$i]["end"] = false;

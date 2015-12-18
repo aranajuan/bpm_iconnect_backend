@@ -65,8 +65,8 @@ class Option extends ITObject {
 
         if ($this->pretext != '') {
             $this->itform = new ITForm();
-            if($this->itform->load_xml($this->pretext)!='ok'){
-                $this->itform=null;
+            if ($this->itform->load_xml($this->pretext) != 'ok') {
+                $this->itform = null;
             }
         } else {
             $this->itform = null;
@@ -125,6 +125,13 @@ class Option extends ITObject {
                 return $this->texto_critico;
             case 'idpregunta_destino':
                 return $this->idpregunta_destino;
+            case 'fa':
+                return STRdate_format($this->FA, DBDATE_READ, USERDATE_READ);
+            case 'isnew':
+                $min = DiffBetweenDates($this->get_prop('fa'), 'NOW');
+                $days = $min /1440;
+                return $days<=30;
+                
             default:
                 return "Propiedad invalida.";
         }

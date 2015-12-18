@@ -39,6 +39,7 @@ class Question extends ITObject {
     function load_VEC($tmpU) {
         $this->texto = trim($tmpU["texto"]);
         $this->detalle = trim($tmpU["detalle"]);
+        $this->opciones=NULL;
     }
 
     /**
@@ -59,8 +60,10 @@ class Question extends ITObject {
      * @return int q de opciones
      */
     private function load_options() {
+        if($this->opciones!=NULL){
+            return count($this->opciones);
+        }
         $i = 0;
-        $this->opciones = NULL;
         $ssql = "select id from TBL_OPCIONES where idpregunta=" . intval($this->id) . " and UB is null";
         $this->dbinstance->loadRS($ssql);
         while ($o = $this->dbinstance->get_vector()) {
@@ -87,6 +90,14 @@ class Question extends ITObject {
             case 'opcionesobj':
                 $this->load_options();
                 return $this->opciones;
+            case 'isnew':
+                $this->load_options();
+                foreach($this->opciones as $o){
+                    if($o->get_prop('isnew')){
+                        return true;
+                    }
+                }
+                return false;
             default:
                 return "Propiedad invalida.";
         }

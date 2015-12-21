@@ -130,8 +130,7 @@ class Option extends ITObject {
             case 'isnew':
                 $min = DiffBetweenDates($this->get_prop('fa'), 'NOW');
                 $days = $min /1440;
-                return $days<=30;
-                
+                return $days<= $this->getContext()->get_GlobalConfig()->getInt('configs/optnewdays');      
             default:
                 return "Propiedad invalida.";
         }

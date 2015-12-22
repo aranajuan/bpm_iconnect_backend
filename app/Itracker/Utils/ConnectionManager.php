@@ -33,8 +33,6 @@ class ConnectionManager {
         } else {
             $this->dbRootlink = null;
             $this->status = "root_error";
-            LoggerFactory::getLogger()
-                    ->critical("Imposible conectar a DB", array($motor, $host, $user, $pass));
             return false;
         }
     }
@@ -59,8 +57,6 @@ class ConnectionManager {
         } else {
             $this->dbInstancelink = null;
             $this->status = "instance_error";
-            LoggerFactory::getLogger()
-                    ->critical("Imposible conectar a DB", array($host, $user, $pass));
             return false;
         }
     }
@@ -73,17 +69,19 @@ class ConnectionManager {
      */
     private function new_link($host, $user, $pass) {
         if ($this->serverMotor == 'mysql') {
-            return mysql_connect($host, $user, \Encrypter::decrypt($pass));
+            $strCn='mysql:host='.$host;
         } elseif ($this->serverMotor == 'mssql') {
-            $pdo = null;
-            try {
-                $pdo = new \PDO('odbc:' .
-                        GlobalConfig::getInstance()->getString('database/odbc'), $user, \Encrypter::decrypt($pass));
-            } catch (\Exception $e) {
-                return null;
-            }
-            return $pdo;
+            $strCn='odbc:' .GlobalConfig::getInstance()->getString('database/odbc');
         }
+        try {
+            $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
+            return $pdo;
+        } catch (\Exception $e) {
+            LoggerFactory::getLogger()
+                    ->critical("Imposible conectar a DB", array($strCn,
+                        $host, $user, $pass,$e->getMessage()));
+            return null;
+        }       
     }
 
     /**

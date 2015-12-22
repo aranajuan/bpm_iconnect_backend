@@ -221,9 +221,9 @@ class User extends ITObject {
         $this->instancias = $tmpU["instancias"];
         $this->instanciasV = explode(",", $this->instancias);
         $this->estado = trim($tmpU["estado"]);
-        $this->dbteams = trim($tmpU["idsequipos"]);
+        $this->dbteams = trim(space_delete($tmpU["idsequipos"], array("\t", "\n", "\0", "\x0B", " ")));
         $this->idsequipos = $this->dbteams;
-        $this->idsequiposadm = trim($tmpU["idsequiposadm"]);
+        $this->idsequiposadm = trim(space_delete($tmpU["idsequiposadm"], array("\t", "\n", "\0", "\x0B", " ")));
         $this->equiposLoaded = false;
         if (in_array($this->usr,  
                 $this->getContext()->get_GlobalConfig()->getArray('debug/user'))){

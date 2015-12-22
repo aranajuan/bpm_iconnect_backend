@@ -54,7 +54,7 @@ function GO($Context) {
                     $opendata->appendChild($joined);
                     $treeL->appendChild($opendata);
                     if ($topts["object"]->get_prop("unir")) {
-                        $simi = $Context->createElement("join",'true');
+                        $simi = $Context->createElement("join", 'true');
                         $treeL->appendChild($simi);
                     }
                     return $treeL;
@@ -81,6 +81,7 @@ function GO($Context) {
             foreach ($topts["options"] as $o) {
                 $option = $options->appendChild($Context->createElement("OPTION"));
                 $option->appendChild($Context->createElement("title", $o["title"]));
+                $option->appendChild($Context->createElement("isnew", $o["isnew"]));
                 $option->appendChild($Context->createElement("destiny", $o["destiny"]));
                 $option->appendChild($Context->createElement("end", $o["end"]));
                 $options->appendChild($option);

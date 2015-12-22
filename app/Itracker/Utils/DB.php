@@ -53,23 +53,23 @@ class DB {
     public function loadRS($ssql) {
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
-            mysql_query("SET NAMES 'utf8'", $this->get_link());
-            $this->RS = mysql_query($ssql, $this->get_link());
+            $this->get_link()->query("SET NAMES 'utf8'");
+            $this->RS = $this->get_link()->query($ssql);
             $this->lastSQL = $ssql;
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud.";
-                $this->logError(mysql_error()."-".$ssql);
-                 $this->noEmpty = 0;
+                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
+                $this->noEmpty = 0;
                 $this->cReg = 0;
                 return 1;
             } else {
-                $this->cReg = mysql_num_rows($this->RS);
-                if ($this->cReg) {
+                $this->resultarr=$this->RS->fetchAll();
+                $this->cReg =count($this->resultarr);
+                if ($this->cReg)
                     $this->noEmpty = 1;
-                } else {
+                else
                     $this->noEmpty = 0;
-                }
                 return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
@@ -102,13 +102,17 @@ class DB {
 
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
-            if (!mysql_query($ssql, $this->get_link())) {
-                $this->details = "Error al ejecutar solicitud."; // mysql_error();
-                $this->logError(mysql_error()."-".$ssql);
-                return mysql_error();
-            }
-            else
+            if (!($this->get_link()->query($ssql))) {
+                $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
+                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
+                $this->lstIDmss = $this->get_link()->lastInsertId();
+                return 1;
+            } else {
+                $rs = $this->get_link()->query("select @@identity as lastid;");
+                $lstID = $rs->fetchColumn();
+                $this->lstIDmss = $lstID;
                 return 0;
+            }
         }
         elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
@@ -133,7 +137,7 @@ class DB {
      */
     public function get_vector() {
         if ($this->connection->get_motor() == 'mysql') {
-            return mysql_fetch_array($this->RS);
+            return array_shift($this->resultarr);
         } elseif ($this->connection->get_motor() == 'mssql') {
             $arr = array_shift($this->resultarr);
             if ($arr) {
@@ -151,11 +155,7 @@ class DB {
      * @return type
      */
     public function get_lastID() {
-        if ($this->connection->get_motor() == 'mysql') {
-            return mysql_insert_id();
-        } elseif ($this->connection->get_motor() == 'mssql') {
             return $this->lstIDmss;
-        }
     }
     
     /**

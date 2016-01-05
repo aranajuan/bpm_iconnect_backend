@@ -66,12 +66,13 @@ class User extends ITObject {
     private $debug;
     private $superuser;
     private $perfil_vista;
-    private $hash = null;
+    private $hash;
     private $dbroot;
     private $estado;
 
     function __construct($conn = null) {
         parent::__construct($conn);
+        $this->hash = null;
         $this->dbroot = new Utils\DB($this->conn, true);
     }
 
@@ -225,19 +226,17 @@ class User extends ITObject {
         $this->idsequipos = $this->dbteams;
         $this->idsequiposadm = trim(space_delete($tmpU["idsequiposadm"], array("\t", "\n", "\0", "\x0B", " ")));
         $this->equiposLoaded = false;
-        if (in_array($this->usr,  
-                $this->getContext()->get_GlobalConfig()->getArray('debug/user'))){
+        if (in_array($this->usr, $this->getContext()->get_GlobalConfig()->getArray('debug/user'))) {
             $this->debug = 1;
         } else {
             $this->debug = 0;
         }
-        if (in_array($this->usr,  
-                $this->getContext()->get_GlobalConfig()->getArray('configs/superusers'))){
+        if (in_array($this->usr, $this->getContext()->get_GlobalConfig()->getArray('configs/superusers'))) {
             $this->superuser = 1;
         } else {
             $this->superuser = 0;
         }
-        
+
         if ($this->estado == I_ACTIVE)
             return "ok";
         return "eliminado";
@@ -519,13 +518,11 @@ class User extends ITObject {
         if ($this->usr == "" || $this->usr == null)
             return "El usuario es obligatorio";
 
-        if (!in_array($this->dominio,
-                $this->getContext()->get_GlobalConfig()->getArray('domains')))
+        if (!in_array($this->dominio, $this->getContext()->get_GlobalConfig()->getArray('domains')))
             return "Dominion invalido";
         if (!is_numeric($this->perfil))
             return "El campo perfil es obligatorio";
-        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) 
-                && trim($this->mail)!="")
+        if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) && trim($this->mail) != "")
             return "Mail invalido";
         if ($this->dbteams == "" || $this->dbteams == null) {
             return "Seleccione al menos un equipo";
@@ -737,8 +734,7 @@ class User extends ITObject {
             case "derivado":
                 $THs = $TKT->get_tktHObj();
                 foreach ($THs as $TH) {
-                    if ($TH->get_prop("accion")->get_prop("ejecuta") == "open" 
-                            || $TH->get_prop("accion")->get_prop("ejecuta") == "derive") {
+                    if ($TH->get_prop("accion")->get_prop("ejecuta") == "open" || $TH->get_prop("accion")->get_prop("ejecuta") == "derive") {
                         if ($this->in_team($TH->get_prop("objadj_id"))) {
                             return true;
                         }
@@ -799,15 +795,21 @@ class User extends ITObject {
         if ($this->estado != I_ACTIVE)
             return "Usuario invalido";
 
-        if( $this->dominio=="BLOQUEADO"){
+        if ($this->dominio == "BLOQUEADO") {
             return "Acceso deshabilitado apra el usuario";
         }
-        
+
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
 
+        $sessionC = $this->sessionCount();
+
         if ($front->is_trusted()) {
-            return $this->newSession($front, $ipuser);
+            if ($sessionC >=
+                    $this->getContext()->get_GlobalConfig()->getInt('configs/sessionmax')) {
+                return 'Limite de sesiones alcanzado. Cierre una sesion.';
+            }
+            return $this->sessionCreate($front, $ipuser);
         }
 
         if ($passL == "" || $this->error == true)
@@ -866,8 +868,22 @@ class User extends ITObject {
             default:
                 return "Usuario o contrase&ntilde;a invalidos.";
         }
+        if ($sessionC >=
+                $this->getContext()->get_GlobalConfig()->getInt('configs/sessionmax')) {
+            return 'Limite de sesiones alcanzado. Cierre una sesion.';
+        }
+        return $this->sessionCreate($front, $ipuser);
+    }
 
-        return $this->newSession($front, $ipuser);
+    /**
+     * Actualiza la fecha de actividad
+     */
+    public function sessionActivity() {
+        if (!$this->hash) {
+            return;
+        }
+        $ssql = "update TBL_SESIONES set fecha_actividad = now() where hash='" . strToSQL($this->hash) . "'";
+        $this->dbroot->query($ssql);
     }
 
     /**
@@ -876,17 +892,43 @@ class User extends ITObject {
      * @param string $ipuser
      * @return string ok
      */
-    private function newSession($front, $ipuser) {
+    private function sessionCreate($front, $ipuser) {
 
         $hash = hash("sha1", (string) microtime());
-
-        $this->closeSession();
-        $ssql = "insert into TBL_SESIONES (usr,front,ip,hash,fecha) values ('" . strToSQL($this->usr) . "'," . $front->get_prop("id") . ",'" . strToSQL($ipuser) . "','" . $hash . "',now())";
+        /** clear and check max * */
+        $ssql = "insert into TBL_SESIONES (usr,front,ip,hash,fecha,fecha_actividad) values
+            ('" . strToSQL($this->usr) .
+                "'," . $front->get_prop("id") . ",'"
+                . strToSQL($ipuser) . "','" . $hash . "',now(),now())";
         if ($this->dbroot->query($ssql)) {
             return "Error: imposible loguear usuario" . mysql_error();
         }
         $this->hash = $hash;
         return "ok";
+    }
+
+    /**
+     * Cantidad de sesiones abiertas del usuario
+     * @return int
+     */
+    public function sessionCount() {
+        $this->sessionClear();
+        $ssql = 'select count(*) from TBL_SESIONES where  usr=\'' . strToSQL($this->usr) . '\'';
+        $this->dbroot->loadRS($ssql);
+        $c = $this->dbroot->get_vector();
+        return $c[0];
+    }
+
+    /**
+     * Limpia sesiones vencidas
+     */
+    private function sessionClear() {
+        $desde = date(DBDATE_WRITE, strtotime('-' .
+                        $this->getContext()->get_GlobalConfig()->getInt('configs/sessiontimeout')
+                        . ' minute'));
+        $ssql = 'delete from TBL_SESIONES where  usr=\'' . strToSQL($this->usr) . '\'' .
+                ' and fecha_actividad < \'' . $desde . '\'';
+        $this->dbroot->query($ssql);
     }
 
     /**
@@ -896,10 +938,17 @@ class User extends ITObject {
      * @param type $ipuser
      * @return boolean
      */
-    public function logged($hash, $front, $ipuser) {
+    public function sessionValidate($hash, $front, $ipuser) {
         if ($this->estado != I_ACTIVE)
             return false;
-        $ssql = "select usr from TBL_SESIONES where usr='" . strToSQL($this->usr) . "' and front=" . $front->get_prop("id") . " and hash='" . strToSQL($hash) . "' and ip='" . strToSQL($ipuser) . "' ";
+        $desde = date(DBDATE_WRITE, strtotime('-' .
+                        $this->getContext()->get_GlobalConfig()->getInt('configs/sessiontimeout')
+                        . ' minute'));
+        $ssql = "select usr from TBL_SESIONES where usr='" . strToSQL($this->usr) .
+                "' and front=" . $front->get_prop("id") .
+                " and hash='" . strToSQL($hash) .
+                "' and ip='" . strToSQL($ipuser) . "'" .
+                " and fecha_actividad between '" . $desde . "' and now()";
         $this->dbroot->loadRS($ssql);
         if ($this->dbroot->cReg == 1) {
             $this->hash = $hash;
@@ -910,10 +959,18 @@ class User extends ITObject {
     }
 
     /**
+     * Cierra sesiones del usuario
+     */
+    public function sessionCloseAll() {
+        $ssql = "delete from TBL_SESIONES where usr='" . strToSQL($this->usr) . "'";
+        $this->dbroot->query($ssql);
+    }
+
+    /**
      * Cierra sesion
      */
-    public function closeSession() {
-        $ssql = "delete from TBL_SESIONES where usr='" . strToSQL($this->usr) . "'";
+    public function sessionClose() {
+        $ssql = "delete from TBL_SESIONES where hash='" . strToSQL($this->hash) . "'";
         $this->dbroot->query($ssql);
     }
 
@@ -925,13 +982,13 @@ class User extends ITObject {
     private function getView($type) {
         $equipos = $this->get_prop("equiposobj");
         if (count($equipos)) {
-            return array($equipos[0]->get_prop($type),$equipos[0]->getFieldRequired($type));
+            return array($equipos[0]->get_prop($type), $equipos[0]->getFieldRequired($type));
         } else {
-            return array('','');
+            return array('', '');
         }
     }
 
-     /**
+    /**
      * Devuelve vista del primer equipo my
      * @return array(vista,campos)
      */
@@ -965,7 +1022,7 @@ class User extends ITObject {
                 return $this->dominio;
             case 'iddirecciones':
                 $arr = $this->get_divisions();
-                return implode(',',makeproparr($arr,'id'));
+                return implode(',', makeproparr($arr, 'id'));
             case 'idsequipos':
                 $this->load_teams();
                 return $this->idsequipos;
@@ -979,7 +1036,7 @@ class User extends ITObject {
                 foreach ($this->equipos as $t) {
                     $ret.=$t->get_prop("nombre") . "; ";
                 }
-                return substr($ret,0,(strlen($ret)-2));
+                return substr($ret, 0, (strlen($ret) - 2));
             case 'idsequiposadm':
                 $this->load_teamsAdm();
                 return $this->idsequiposadm;

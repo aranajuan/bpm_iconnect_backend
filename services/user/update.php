@@ -16,7 +16,7 @@ function GO($Context) {
         if ($Context->get_params("idsequipos") != "" && count($tAdds)) {
             $Ul->change_teams($tAdds);
             $result = $Ul->update_DB();
-            $Ul->closeSession();
+            $Ul->sessionCloseAll();
         } else {
             $result = "Seleccione al menos un equipo";
         }

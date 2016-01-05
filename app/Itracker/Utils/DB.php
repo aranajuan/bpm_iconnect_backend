@@ -15,18 +15,19 @@ class DB {
     private $error = FALSE; /* error en la ultima consulta */
     private $lstIDmss = NULL;   /* ultimo id-> para mssql */
     public $details;    /* detalle del error */
-    var $RS;    /* recordset cargado */
-    var $cReg;  /*  q de registros en recordset */
-    var $noEmpty;   /* consulta con datos */
-    var $lastSQL;
+    private $RS;    /* recordset cargado */
+    public $cReg;  /*  q de registros en recordset */
+    public $noEmpty;   /* consulta con datos */
+    private $lastSQL;
 
-    var $resultarr; /* array resultado de PDO */
+    private $resultarr; /* array resultado de PDO */
     /**
      * Carga connectionmanager
      * 
      */
     function __construct($conn, $root = false) {
         $this->connection = $conn;
+        $this->reqC=0;
         if ($root) {
             $this->RI = ConnectionManager::$ROOT;
         } else {
@@ -51,10 +52,12 @@ class DB {
      * @param String $ssql
      */
     public function loadRS($ssql) {
+        start_measure('sql');
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
             $this->get_link()->query("SET NAMES 'utf8'");
             $this->RS = $this->get_link()->query($ssql);
+            $this->connection->addCounters($this->RI, get_measure('sql'));
             $this->lastSQL = $ssql;
             if (!$this->RS) {
                 $this->error = TRUE;
@@ -74,6 +77,7 @@ class DB {
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
             $this->RS = $this->get_link()->query($ssql);
+            $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud."; 
@@ -99,16 +103,20 @@ class DB {
      * @return int 1/exito
      */
     public function query($ssql) {
-
+        start_measure('sql');
         $ssql = $this->tablenames($ssql);
         if ($this->connection->get_motor() == 'mysql') {
-            if (!($this->get_link()->query($ssql))) {
+            $result=$this->get_link()->query($ssql);
+            $this->connection->addCounters($this->RI, get_measure('sql'));
+            if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->lstIDmss = $this->get_link()->lastInsertId();
                 return 1;
             } else {
+                start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
+                $this->connection->addCounters($this->RI, get_measure('sql'));
                 $lstID = $rs->fetchColumn();
                 $this->lstIDmss = $lstID;
                 return 0;
@@ -117,13 +125,17 @@ class DB {
         elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
             $ssql = mb_convert_encoding($ssql, 'ISO-8859-15', 'UTF-8');
-            if (!($this->get_link()->query($ssql))) {
+            $result=$this->get_link()->query($ssql);
+            $this->connection->addCounters($this->RI, get_measure('sql'));
+            if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {
+                start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
+                $this->connection->addCounters($this->RI, get_measure('sql'));
                 $lstID = $rs->fetchColumn();
                 $this->lstIDmss = $lstID;
                 return 0;

@@ -133,8 +133,7 @@ class Context extends Utils\XMLhandler {
             return false;
         }
 
-        if ($this->get_class() == "user" && ($this->get_method() == "login" || 
-                $this->get_method() == "logout" )) {
+        if ($this->get_class() == "user" && $this->get_method() == "login") {
             return true;
         }
 
@@ -143,6 +142,10 @@ class Context extends Utils\XMLhandler {
              return false;
         }
 
+        if ($this->get_class() == "user" && $this->get_method() == "logout") {
+            return true;
+        }
+        
         if (!$this->user->validAction($this->get_class(), $this->get_method())) {
             $this->error = "Acceso denegado a ".$this->get_class()."/".$this->get_method();
             return false;

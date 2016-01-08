@@ -802,12 +802,21 @@ class User extends ITObject {
         if ($this->usr == "" || $this->error == true)
             return "Usuario sin cargar";
 
-        $sessionC = $this->sessionCount();
+        $maxsessions = $this->getContext()->get_GlobalConfig()
+                ->getInt('configs/sessionmax');
+
+        if ($maxsessions != 1) {
+            $sessionC = $this->sessionCount();
+        } else {
+            $sessionC = -1;
+        }
 
         if ($front->is_trusted()) {
-            if ($sessionC >=
-                    $this->getContext()->get_GlobalConfig()->getInt('configs/sessionmax')) {
+            if ($sessionC >= $maxsessions) {
                 return 'Limite de sesiones alcanzado. Cierre una sesion.';
+            }
+            if ($maxsessions == 1) {
+                $this->sessionCloseAll();
             }
             return $this->sessionCreate($front, $ipuser);
         }
@@ -868,9 +877,11 @@ class User extends ITObject {
             default:
                 return "Usuario o contrase&ntilde;a invalidos.";
         }
-        if ($sessionC >=
-                $this->getContext()->get_GlobalConfig()->getInt('configs/sessionmax')) {
+        if ($sessionC >= $maxsessions) {
             return 'Limite de sesiones alcanzado. Cierre una sesion.';
+        }
+        if ($maxsessions == 1) {
+            $this->sessionCloseAll();
         }
         return $this->sessionCreate($front, $ipuser);
     }

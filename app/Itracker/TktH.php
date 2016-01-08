@@ -210,7 +210,10 @@ class TktH extends ITObject {
             } else {
                 $form = "";
             }
-            $this->save_files();
+            $err="ok";
+            if(!$this->save_files()){
+                $err="Archivos no guardados";
+            }
             if (trim($form) == "") { // accion sin formulario
                 return "ok";
             }
@@ -221,7 +224,7 @@ class TktH extends ITObject {
             if ($this->dbinstance->query($ssql)) {
                 return "THTH_D_insert: Error no se guardaron los detalles pero si se avanzo el tkt:" . $this->dbinstance->details;
             }
-            return "ok";
+            return $err;
         }
     }
 
@@ -353,6 +356,7 @@ class TktH extends ITObject {
 
     /**
      * Guarda archivos
+     * @return boolean Se guardaron los datos
      */
     private function save_files() {
         $path = $this->getInstance()->get_prop("archivos_externos");
@@ -363,8 +367,15 @@ class TktH extends ITObject {
             $count = explode("_", $fileexp[0]);
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
-            fwrite($fileO, base64_decode($f["data"]));
+            if(fwrite($fileO, base64_decode($f["data"]))==FALSE){
+                return false;
+            }
+            fclose($fileO);
+            if(!file_exists($fname)){
+                return false;
+            }
         }
+        return true;
     }
 
     /**

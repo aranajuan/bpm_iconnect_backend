@@ -80,5 +80,9 @@
         <superusers>U550046,U548391,U193120,U190196,U199629</superusers>
         <!-- Dias de opcion considerada nueva -->
         <optnewdays>30</optnewdays>
+        <!-- Minutos de inactividad para la sesion -->
+        <sessiontimeout>30</sessiontimeout>
+        <!-- Cantidad maximas de sesiones -->
+        <sessionmax>4</sessionmax>
     </configs>
 </itracker>

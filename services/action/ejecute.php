@@ -51,13 +51,18 @@ function GO($Context) {
         return $Context->createElement("error", "Error en formulario. " . $validation);
     }
     
-    if($Context->get_params("sendfiles")=="true"){
+    $fget = false;
+    if($Context->get_params("sendfiles")=="true" && $A->get_prop('formulario')){
         $files = $Context->get_files();
         $A->loadFiles($files);
+        $fget = true;
     }
     
     $Notif = new \Itracker\Notify();
     $actionResult = $A->ejecute();
+    if(!$fget && $actionResult["sendfiles"]=='ok'){
+        $actionResult["sendfiles"]='no requerido';
+    }
     if($actionResult["result"]=="ok"){
         $Notif->load_actionOBJ($A);
         $actionResult["mail"]= $Notif->send();

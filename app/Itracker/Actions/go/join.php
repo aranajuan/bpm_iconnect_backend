@@ -11,7 +11,7 @@ $TKT = $this->getTKT();
 $idmaster = $this->getScriptResponse()->get_prop('id');
 $master = $obCI->get_object('Tkt', $idmaster);
 if ($obCI->get_status('Tkt', $idmaster) != "ok") {
-    return array("result" => "error", "msj" => "Erro al cargar tkt.");
+    return array("result" => "error", "msj" => "Error al cargar tkt.");
 }
 
 if ($this->isWorking()) {

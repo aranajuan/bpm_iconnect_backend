@@ -107,6 +107,8 @@ class Context extends Utils\XMLhandler {
             set_time_limit(300);
         }
         
+        $this->get_User()->sessionActivity();
+        
         if (!$this->ejectute_request()) {
             $this->set_error("ejecution", $this->error);
             return false;
@@ -135,13 +137,15 @@ class Context extends Utils\XMLhandler {
             return true;
         }
 
-        if (!$this->user->logged($this->getHash(), $this->front, $this->getIp())) {
+        if (!$this->user->sessionValidate($this->getHash(), $this->front, $this->getIp())) {
             $this->error = "Usuario no logeado";
-            if($this->get_class()!="user" || $this->get_method()!="login"){
-                return false;
-            }
+             return false;
         }
 
+        if ($this->get_class() == "user" && $this->get_method() == "logout") {
+            return true;
+        }
+        
         if (!$this->user->validAction($this->get_class(), $this->get_method())) {
             $this->error = "Acceso denegado a ".$this->get_class()."/".$this->get_method();
             return false;

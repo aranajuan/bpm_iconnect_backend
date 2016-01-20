@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-12-2015 a las 15:57:54
+-- Tiempo de generación: 05-01-2016 a las 14:50:41
 -- Versión del servidor: 5.6.20
 -- Versión de PHP: 5.5.15
 
@@ -29,7 +29,6 @@ USE `itracker_agentes_tkt`;
 -- Estructura de tabla para la tabla `tickets`
 --
 
-DROP TABLE IF EXISTS `tickets`;
 CREATE TABLE IF NOT EXISTS `tickets` (
 `id` int(11) NOT NULL,
   `usr` varchar(15) NOT NULL,
@@ -140,7 +139,6 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 -- Estructura de tabla para la tabla `tickets_m`
 --
 
-DROP TABLE IF EXISTS `tickets_m`;
 CREATE TABLE IF NOT EXISTS `tickets_m` (
 `id` int(11) NOT NULL,
   `idtkt` int(11) NOT NULL,
@@ -606,7 +604,6 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 -- Estructura de tabla para la tabla `tickets_m_detalles`
 --
 
-DROP TABLE IF EXISTS `tickets_m_detalles`;
 CREATE TABLE IF NOT EXISTS `tickets_m_detalles` (
   `idtktm` int(11) NOT NULL,
   `detalle` longtext NOT NULL
@@ -974,7 +971,6 @@ USE `itracker_agentes_uta`;
 -- Estructura de tabla para la tabla `acciones`
 --
 
-DROP TABLE IF EXISTS `acciones`;
 CREATE TABLE IF NOT EXISTS `acciones` (
 `id` int(11) NOT NULL COMMENT 'identificador',
   `nombre` varchar(200) NOT NULL COMMENT 'nombre de la accion',
@@ -1033,7 +1029,6 @@ INSERT INTO `acciones` (`id`, `nombre`, `alias`, `ejecuta`, `tipo`, `formulario`
 -- Estructura de tabla para la tabla `direccion`
 --
 
-DROP TABLE IF EXISTS `direccion`;
 CREATE TABLE IF NOT EXISTS `direccion` (
 `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
@@ -1054,7 +1049,6 @@ INSERT INTO `direccion` (`id`, `nombre`, `linkwi`, `estado`) VALUES
 -- Estructura de tabla para la tabla `equipos`
 --
 
-DROP TABLE IF EXISTS `equipos`;
 CREATE TABLE IF NOT EXISTS `equipos` (
 `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
@@ -1086,7 +1080,6 @@ INSERT INTO `equipos` (`id`, `nombre`, `t_conformidad`, `idlistin`, `iddireccion
 -- Estructura de tabla para la tabla `listines`
 --
 
-DROP TABLE IF EXISTS `listines`;
 CREATE TABLE IF NOT EXISTS `listines` (
 `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
@@ -1113,7 +1106,6 @@ INSERT INTO `listines` (`id`, `nombre`, `too`, `cc`, `estado`) VALUES
 -- Estructura de tabla para la tabla `opciones`
 --
 
-DROP TABLE IF EXISTS `opciones`;
 CREATE TABLE IF NOT EXISTS `opciones` (
 `id` int(11) NOT NULL,
   `idpregunta` int(11) NOT NULL,
@@ -1211,7 +1203,6 @@ INSERT INTO `opciones` (`id`, `idpregunta`, `texto`, `texto_critico`, `habilita_
 -- Estructura de tabla para la tabla `perfiles`
 --
 
-DROP TABLE IF EXISTS `perfiles`;
 CREATE TABLE IF NOT EXISTS `perfiles` (
   `id` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
@@ -1235,7 +1226,6 @@ INSERT INTO `perfiles` (`id`, `nombre`, `accesos`) VALUES
 -- Estructura de tabla para la tabla `prefiles_vistas`
 --
 
-DROP TABLE IF EXISTS `prefiles_vistas`;
 CREATE TABLE IF NOT EXISTS `prefiles_vistas` (
 `id` int(11) NOT NULL,
   `prioridad` int(11) NOT NULL,
@@ -1264,7 +1254,6 @@ INSERT INTO `prefiles_vistas` (`id`, `prioridad`, `perfil`, `relacion`, `vista`,
 -- Estructura de tabla para la tabla `preguntas`
 --
 
-DROP TABLE IF EXISTS `preguntas`;
 CREATE TABLE IF NOT EXISTS `preguntas` (
 `id` int(11) NOT NULL,
   `texto` varchar(255) NOT NULL,
@@ -1313,7 +1302,6 @@ INSERT INTO `preguntas` (`id`, `texto`, `detalle`, `UA`, `FA`, `UB`, `FB`) VALUE
 -- Estructura de tabla para la tabla `sisdir`
 --
 
-DROP TABLE IF EXISTS `sisdir`;
 CREATE TABLE IF NOT EXISTS `sisdir` (
 `id` int(11) NOT NULL,
   `idsistema` int(11) NOT NULL,
@@ -1335,7 +1323,6 @@ INSERT INTO `sisdir` (`id`, `idsistema`, `iddireccion`, `p_pregunta`, `estado`) 
 -- Estructura de tabla para la tabla `sistemas`
 --
 
-DROP TABLE IF EXISTS `sistemas`;
 CREATE TABLE IF NOT EXISTS `sistemas` (
 `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
@@ -1379,7 +1366,6 @@ INSERT INTO `sistemas` (`id`, `nombre`, `estado`) VALUES
 -- Estructura de tabla para la tabla `usuarios`
 --
 
-DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `usr` varchar(15) NOT NULL,
   `idsequipos` varchar(50) DEFAULT NULL,
@@ -1535,7 +1521,6 @@ USE `itracker_root`;
 -- Estructura de tabla para la tabla `fronts`
 --
 
-DROP TABLE IF EXISTS `fronts`;
 CREATE TABLE IF NOT EXISTS `fronts` (
   `id` int(11) NOT NULL,
   `nombre` varchar(45) NOT NULL,
@@ -1559,7 +1544,6 @@ INSERT INTO `fronts` (`id`, `nombre`, `ip`, `confianza`, `instancias`, `estado`)
 -- Estructura de tabla para la tabla `instancias`
 --
 
-DROP TABLE IF EXISTS `instancias`;
 CREATE TABLE IF NOT EXISTS `instancias` (
   `nombre` varchar(45) NOT NULL,
   `dbhost` varchar(45) NOT NULL,
@@ -1581,29 +1565,14 @@ INSERT INTO `instancias` (`nombre`, `dbhost`, `dbuser`, `dbpass`, `archivos_exte
 -- Estructura de tabla para la tabla `sesiones`
 --
 
-DROP TABLE IF EXISTS `sesiones`;
 CREATE TABLE IF NOT EXISTS `sesiones` (
   `usr` varchar(50) NOT NULL,
   `ip` varchar(50) NOT NULL,
   `front` int(11) NOT NULL,
   `hash` varchar(45) NOT NULL,
-  `fecha` datetime NOT NULL
+  `fecha` datetime NOT NULL,
+  `fecha_actividad` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Volcado de datos para la tabla `sesiones`
---
-
-INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`) VALUES
-('COM1', '10.66.93.46', 1, 'b7c42c48bcefc6a1e9293d4b19f58433f395ecbc', '2015-12-16 15:27:03'),
-('COM2', '192.168.1.34', 1, '01eb6b89fbc4b9b50faff38dc52583c369a31831', '2015-10-30 14:49:31'),
-('COMGO', '190.175.110.1', 1, 'bdbb102b38ec6e6ceeb0a81c4bb062ab20912fb2', '2014-11-22 20:11:39'),
-('COMRES', '10.112.0.4', 1, '3e434e01511e4c4fe34f1389468794017a77808a', '2014-12-31 10:27:28'),
-('FEDE', '10.66.93.46', 1, '5b5ff479ca227827238a3734d4a21770faf2e512', '2014-12-12 12:50:53'),
-('FULLADM', '10.66.93.46', 1, '2378cb1f38e7cc1cd33bc2086a1981141af97e46', '2015-11-30 16:02:55'),
-('U1AG1', '10.66.93.46', 1, '286515ec420b1637135b7bd38a375d440cd6fb64', '2015-12-21 11:45:10'),
-('U1AG2', '10.66.93.46', 1, 'f4f42277139f18857eb4a5ef6cb353364cd8d4ac', '2015-06-17 14:27:46'),
-('U2AG1', '10.66.93.46', 1, 'ce451faf5b35594edde1b4470d3c0381e8518873', '2015-11-11 11:31:25');
 
 -- --------------------------------------------------------
 
@@ -1611,7 +1580,6 @@ INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`) VALUES
 -- Estructura de tabla para la tabla `ucontac`
 --
 
-DROP TABLE IF EXISTS `ucontac`;
 CREATE TABLE IF NOT EXISTS `ucontac` (
   `usr` varchar(15) NOT NULL,
   `mail` varchar(255) DEFAULT NULL,
@@ -1643,7 +1611,6 @@ INSERT INTO `ucontac` (`usr`, `mail`, `tel`, `nombre`, `puesto`, `ubicacion`) VA
 -- Estructura de tabla para la tabla `usuarios`
 --
 
-DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `usr` varchar(50) NOT NULL,
   `dominio` varchar(15) NOT NULL,
@@ -1688,7 +1655,7 @@ ALTER TABLE `instancias`
 -- Indices de la tabla `sesiones`
 --
 ALTER TABLE `sesiones`
- ADD PRIMARY KEY (`usr`), ADD UNIQUE KEY `hash_UNIQUE` (`hash`);
+ ADD UNIQUE KEY `hash_UNIQUE` (`hash`), ADD KEY `usr` (`usr`);
 
 --
 -- Indices de la tabla `ucontac`

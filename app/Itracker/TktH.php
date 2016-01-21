@@ -319,7 +319,8 @@ class TktH extends ITObject {
             return false;
         }
 
-        if (!$this->getLogged()->cansee($this->get_UA())) {
+        if (!$this->getLogged()->cansee($this->get_UA()) 
+                && $this->getLogged()->get_prop('fulladm')!=true) {
             return false;
         }
 

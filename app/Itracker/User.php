@@ -990,6 +990,8 @@ class User extends ITObject {
                 return $this->get_viewTeams();
             case 'perfil':
                 return $this->perfil;
+            case 'fulladm':
+                return $this->get_prop('perfilt')=='admin_full';
             case 'fronts':
                 return $this->fronts;
             case 'perfilt':

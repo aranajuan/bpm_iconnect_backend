@@ -5,14 +5,14 @@ namespace Itracker\Services\Tkt;
 class Listmyteams implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $Tf = new Itracker\TktFilter();
+        $Tf = new \Itracker\TktFilter();
 
         if ($Context->get_params("status") == "open") {
-            $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
+            $Tf->set_filter(\Itracker\TktFilter::$IS_OPEN, "true");
         } elseif ($Context->get_params("status") == "closed") {
-            $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FB);
-            $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, @STRdate_format($Context->get_params("cfrom"), USERDATE_READ, DBDATE_WRITE));
-            $Tf->set_filter(Itracker\TktFilter::$DATE_TO, @STRdate_format($Context->get_params("cto"), USERDATE_READ, DBDATE_WRITE));
+            $Tf->set_filter(\Itracker\TktFilter::$DATE_FILTER, \Itracker\TktFilter::$DATE_FILTER_FB);
+            $Tf->set_filter(\Itracker\TktFilter::$DATE_FROM, @STRdate_format($Context->get_params("cfrom"), USERDATE_READ, DBDATE_WRITE));
+            $Tf->set_filter(\Itracker\TktFilter::$DATE_TO, @STRdate_format($Context->get_params("cto"), USERDATE_READ, DBDATE_WRITE));
         } else {
             return null;
         }
@@ -28,8 +28,8 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
                 }
             }
         }
-        $Tf->set_filter(Itracker\TktFilter::$UA, $uids);
-        $Tl = new Itracker\TktLister();
+        $Tf->set_filter(\Itracker\TktFilter::$UA, $uids);
+        $Tl = new \Itracker\TktLister();
         $Tl->loadFilter($Tf);
         if (!$Tl->execute()) {
             return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());

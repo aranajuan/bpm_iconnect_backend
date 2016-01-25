@@ -5,7 +5,7 @@ namespace Itracker\Services\Instance;
 class IdselListfronts implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $Front = new Itracker\Front($Context->get_Connection());
+        $Front = new \Itracker\Front($Context->get_Connection());
         $FF = $Front->list_all();
         $FL = array();
         foreach ($FF as $F) {

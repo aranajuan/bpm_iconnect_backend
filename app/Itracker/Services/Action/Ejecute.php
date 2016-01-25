@@ -19,7 +19,7 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
            return $Context->createElement("error", "Tipificacion invalida. ".$lV_rta); 
         }
     }
-    $A = new Itracker\Action();
+    $A = new \Itracker\Action();
     $A->load_DB($Context->get_params("action"));
     $A->setWorking();
     $TKT->setWorking();

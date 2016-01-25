@@ -5,7 +5,7 @@ namespace Itracker\Services\Listin;
 class Lister implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $LISTINALL = new Itracker\Listin();
+        $LISTINALL = new \Itracker\Listin();
         $LISTINALL_v = $LISTINALL->list_all();
         $listL = $Context->createElement("list");
         if ($LISTINALL_v) {

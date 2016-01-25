@@ -17,17 +17,17 @@ class Listfiltered implements \Itracker\Services\ITServiceInterface {
         }
         $actions = $Context->get_params("actions");
 
-        $Tf = new Itracker\TktFilter();
-        $Tf->set_filter(Itracker\TktFilter::$IS_OPEN, "true");
-        $Tf->set_filter(Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
-        $Tf->set_filter(Itracker\TktFilter::$ORIGINS, explode(';', $Context->get_params("origin")));
+        $Tf = new \Itracker\TktFilter();
+        $Tf->set_filter(\Itracker\TktFilter::$IS_OPEN, "true");
+        $Tf->set_filter(\Itracker\TktFilter::$IDSTEAMS, $arrayTeam);
+        $Tf->set_filter(\Itracker\TktFilter::$ORIGINS, explode(';', $Context->get_params("origin")));
 
         $taken = $Context->get_params("taken");
         if ($taken) {
-            $Tf->set_filter(Itracker\TktFilter::$TAKENBY, explode(",", $taken));
+            $Tf->set_filter(\Itracker\TktFilter::$TAKENBY, explode(",", $taken));
         }
 
-        $Tl = new Itracker\TktLister();
+        $Tl = new \Itracker\TktLister();
         $Tl->loadFilter($Tf);
 
         if (!$Tl->execute()) {

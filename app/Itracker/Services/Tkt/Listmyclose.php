@@ -9,17 +9,17 @@ class Listmyclose implements \Itracker\Services\ITServiceInterface {
         $desde = date(DBDATE_WRITE, strtotime('-' . $dias . ' day'));
         $hasta = date(DBDATE_WRITE, strtotime('+1 day'));
 
-        $Tf = new Itracker\TktFilter();
-        $Tf->set_filter(Itracker\TktFilter::$UA, array($Context->get_User()->get_prop("usr")));
-        $Tf->set_filter(Itracker\TktFilter::$DATE_FILTER, Itracker\TktFilter::$DATE_FILTER_FB);
-        $Tf->set_filter(Itracker\TktFilter::$DATE_FROM, $desde);
-        $Tf->set_filter(Itracker\TktFilter::$DATE_TO, $hasta);
+        $Tf = new \Itracker\TktFilter();
+        $Tf->set_filter(\Itracker\TktFilter::$UA, array($Context->get_User()->get_prop("usr")));
+        $Tf->set_filter(\Itracker\TktFilter::$DATE_FILTER, \Itracker\TktFilter::$DATE_FILTER_FB);
+        $Tf->set_filter(\Itracker\TktFilter::$DATE_FROM, $desde);
+        $Tf->set_filter(\Itracker\TktFilter::$DATE_TO, $hasta);
 
         $viewA = $Context->get_User()->getMyView();
         $view = $viewA[0];
         $fields = $viewA[1];
 
-        $Tl = new Itracker\TktLister();
+        $Tl = new \Itracker\TktLister();
 
         $Tl->loadFilter($Tf);
 

@@ -5,7 +5,7 @@ namespace Itracker\Services\Listin;
 class IdselList implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $ALL = new Itracker\Listin($Context->get_Connection());
+        $ALL = new \Itracker\Listin($Context->get_Connection());
         $ALL_v = $ALL->list_all();
         $listL = $Context->createElement("list");
         if ($ALL_v) {

@@ -231,12 +231,12 @@ class TktH extends ITObject {
     private function loadObjadj() {
         if ($this->objadj_txt != "")
             return;
-        $file = ROOT_DIR . "/app/Itracker/Actions/show/" . $this->accion->get_prop("ejecuta") . ".php";
-        if (file_exists($file)) {
-            $obCI = $this->objsCache;
-            $val = include $file;
-            $this->objadj = $val[0];
-            $this->objadj_txt = $val[1];
+        $cname = '\\Itracker\\Actions\\'.ucfirst($this->accion->get_prop("ejecuta")).'Action';
+        if (class_exists($cname)) {
+            $cAction = $cname();
+            $response = $cAction->show($this);
+            $this->objadj = $response->getObj();
+            $this->objadj_txt = $response->getTxt();
         } else {
             $this->objadj = null;
             $this->objadj_txt = $this->get_prop("objadj_id");

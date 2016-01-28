@@ -214,12 +214,12 @@ class Context extends Utils\XMLhandler {
      * @return boolean
      */
     private function ejectute_request() {
-        $ClassName = '\\Itracker\\Services\\'.$this->get_class().'\\'.$this->get_method();
+        $ClassName = '\\Itracker\\Services\\ '.$this->get_class().'\\ '.$this->get_method();
         $ClassName=  str_replace('_', ' ', $ClassName);
         $ClassName=ucwords($ClassName);
         $ClassName=  str_replace(' ', '', $ClassName);
         if(!class_exists($ClassName)){
-            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($file));
+            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($ClassName));
             $this->error="Error al ejecutar solicitud";
             return false;
         }

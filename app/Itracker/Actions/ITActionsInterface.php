@@ -17,7 +17,7 @@ interface ITActionsInterface {
 
     /**
      * Muestra valor accion
-     * @param \Itracker\TktH
+     * @param \Itracker\TktH    $th
      * @return ITActionsShowResponse
      */
     public static function show($th);

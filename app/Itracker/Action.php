@@ -528,7 +528,7 @@ class Action extends ITObject {
                 $this->getContext()->getLogger()->critical("Clase no encontrada", array($cname));
                 return array("result" => "error", "msj" => "Error al ejecutar.");
             }
-            $cAction = $cname();
+            $cAction = new $cname();
             $response = $cAction->go($this);
             if ($response->getResult() != "ok") {
                 return $response->toArray();

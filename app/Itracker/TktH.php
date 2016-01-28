@@ -233,7 +233,7 @@ class TktH extends ITObject {
             return;
         $cname = '\\Itracker\\Actions\\'.ucfirst($this->accion->get_prop("ejecuta")).'Action';
         if (class_exists($cname)) {
-            $cAction = $cname();
+            $cAction = new $cname();
             $response = $cAction->show($this);
             $this->objadj = $response->getObj();
             $this->objadj_txt = $response->getTxt();

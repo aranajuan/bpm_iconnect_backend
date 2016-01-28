@@ -55,5 +55,3 @@ class JoinAction implements ITActionsInterface {
     }
 
 }
-
-?>

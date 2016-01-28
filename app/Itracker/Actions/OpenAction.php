@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-class JoinAction implements ITActionsInterface {
+class OpenAction implements ITActionsInterface {
 
     public static function go($action) {
 

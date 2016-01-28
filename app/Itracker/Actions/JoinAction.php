@@ -8,7 +8,7 @@ class JoinAction implements ITActionsInterface {
 
         $obCI = \Itracker\ObjectCache::getInstance();
         $TKT = $action->getTKT();
-
+        $context = \Itracker\Context::getContext();
 
         $idmaster = $action->getScriptResponse()->get_prop('id');
         $master = $obCI->get_object('Tkt', $idmaster);
@@ -18,12 +18,12 @@ class JoinAction implements ITActionsInterface {
 
         if ($action->isWorking()) {
 
-            if (!$action->getLogged()->in_team($master->get_prop('idequipo'))) {
+            if (!$context->get_User()->in_team($master->get_prop('idequipo'))) {
                 return new ITActionsGoResponse('error', 'El ticket master no esta en tu equipo');
             }
 
             $utomM = $master->get_prop("u_tom");
-            if ($utomM != null && $utomM != $action->getLogged()->get_prop('usr')) { //el ticket master esta tomado por otro
+            if ($utomM != null && $utomM != $context->get_User()->get_prop('usr')) { //el ticket master esta tomado por otro
                 $arrEJ = makeproparr($action->getTKT()->valid_actions(), 'ejecuta');
                 if (!in_array('asign', $arrEJ)) {
                     return new ITActionsGoResponse('error',

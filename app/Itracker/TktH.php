@@ -154,7 +154,6 @@ class TktH extends ITObject {
 
         if ($actOr->get_prop('ejecuta') == 'open') {
             //formulario de apertura
-
             if ($this->TKT) {
                 $lst = $this->TKT->get_last();
                 if (!$lst) {
@@ -235,6 +234,10 @@ class TktH extends ITObject {
         if (class_exists($cname)) {
             $cAction = new $cname();
             $response = $cAction->show($this);
+        }else{
+            $response=null;
+        }
+        if($response){
             $this->objadj = $response->getObj();
             $this->objadj_txt = $response->getTxt();
         } else {

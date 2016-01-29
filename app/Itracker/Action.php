@@ -523,26 +523,27 @@ class Action extends ITObject {
         }
         $this->getTKT()->setEjecutingAction($this);
         if ($this->get_prop("ejecuta")) {
-            $obCI = $this->objsCache;
-            $file = ROOT_DIR . "/app/Itracker/Actions/go/" . strtolower($this->get_prop("ejecuta")) . ".php";
-            if (!file_exists($file)) {
-                $this->getContext()->getLogger()->critical("Archivo no encontrado", array($file));
+            $cname = '\\Itracker\\Actions\\'.ucfirst($this->get_prop("ejecuta")).'Action';
+            if (!class_exists($cname)) {
+                $this->getContext()->getLogger()->critical("Clase no encontrada", array($cname));
                 return array("result" => "error", "msj" => "Error al ejecutar.");
             }
-            $response = include($file);
-            if ($response["result"] != "ok") {
-                return $response;
+            $cAction = new $cname();
+            $response = $cAction->go($this);
+            if ($response->getResult() != "ok") {
+                return $response->toArray();
             }
             $rta = $this->addTKT_H();
             $this->pasteTKTH($rta["obj"]);
+            $resposeV=$response->toArray();;
         } else {
-            $response["result"] = "ok";
+            $resposeV["result"] = "ok";
             $rta = $this->addTKT_H();
         }
-        $response["tkth"] = $rta["status"];
-        $response["sendfiles"] = $response["tkth"];
-        $response['postactions'] = $this->postAction();
-        return $response;
+        $resposeV["tkth"] = $rta["status"];
+        $resposeV["sendfiles"] = $resposeV["tkth"];
+        $resposeV['postactions'] = $this->postAction();
+        return $resposeV;
     }
 
     /**

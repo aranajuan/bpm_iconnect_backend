@@ -107,6 +107,8 @@ class Context extends Utils\XMLhandler {
             set_time_limit(300);
         }
         
+        $this->get_User()->sessionActivity();
+        
         if (!$this->ejectute_request()) {
             $this->set_error("ejecution", $this->error);
             return false;
@@ -135,13 +137,15 @@ class Context extends Utils\XMLhandler {
             return true;
         }
 
-        if (!$this->user->logged($this->getHash(), $this->front, $this->getIp())) {
+        if (!$this->user->sessionValidate($this->getHash(), $this->front, $this->getIp())) {
             $this->error = "Usuario no logeado";
-            if($this->get_class()!="user" || $this->get_method()!="login"){
-                return false;
-            }
+             return false;
         }
 
+        if ($this->get_class() == "user" && $this->get_method() == "logout") {
+            return true;
+        }
+        
         if (!$this->user->validAction($this->get_class(), $this->get_method())) {
             $this->error = "Acceso denegado a ".$this->get_class()."/".$this->get_method();
             return false;
@@ -210,14 +214,17 @@ class Context extends Utils\XMLhandler {
      * @return boolean
      */
     private function ejectute_request() {
-        $file = 'services/' . strtolower($this->get_class()) . "/" . strtolower($this->get_method()) . ".php";
-        if(!file_exists($file)){
-            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($file));
+        $ClassName = '\\Itracker\\Services\\ '.$this->get_class().'\\ '.$this->get_method();
+        $ClassName=  str_replace('_', ' ', $ClassName);
+        $ClassName=ucwords($ClassName);
+        $ClassName=  str_replace(' ', '', $ClassName);
+        if(!class_exists($ClassName)){
+            $this->getLogger()->critical("No se encuentra archivo de ejecucion",array($ClassName));
             $this->error="Error al ejecutar solicitud";
             return false;
         }
         include $file;
-        $ret = GO($this);
+        $ret = $ClassName::GO($this);
         if ($ret) {
             $this->append_response($ret);
         }

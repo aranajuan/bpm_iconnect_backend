@@ -127,35 +127,37 @@ class Operation {
         try {
             $a1 = $this->argValue($operation, $offset);
             $a1set = true;
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $a1set = false;
-            $err=$e;
+            $err = $e;
         }
         $a2 = $this->argValue($operation, $offset + 1);
         switch ($operation->getOpe($offset)) {
             case null:
-                if($a1set==false){
+                if ($a1set == false) {
                     throw $err;
                 }
                 return $a1;
             case "isset":
                 return $a1set;
+            case "issnumeric":
+                return is_numeric($a1set);
             case "todate":
-                try{
-                    if($a2!=''){
+                try {
+                    if ($a2 != '') {
                         return STRdate_format($a1, $a2, 'datetime')->getTimestamp();
-                    }else{
+                    } else {
                         return STRdate_format($a1, USERDATE_READ, 'datetime')->getTimestamp();
                     }
-                }  catch (\Exception $e){
+                } catch (\Exception $e) {
                     return -1;
                 }
             case "!isset":
                 return !$a1set;
             case "empty":
-                return ($a1set==false || $a1=='');    
+                return ($a1set == false || $a1 == '');
             case "!empty":
-                return ($a1set==true && $a1!=''); 
+                return ($a1set == true && $a1 != '');
             case "==":
                 return $a1 == $a2;
             case "!=":
@@ -285,6 +287,40 @@ class Operation {
     }
 
     /**
+     * Parsea y ejecuta la funcion
+     * @param string $function
+     * @param ScriptFunctionsInterface | XMLPropInterface $obj
+     * @return mixed
+     */
+    private function itsEjecute($function, $obj) {
+        $lastp = -1;
+        for ($i = 0; $i < strlen($function); $i++) {
+            if (substr($function, $i, 1) == '.') {
+                $lastp = $i;
+            }
+            if (substr($function, $i, 1) == '(') {
+                break;
+            }
+        }
+        if ($lastp != -1) {
+            if ($obj instanceof \Itracker\XMLPropInterface) {
+                $obj = $obj->get_Subprop(substr($function, 0, $lastp));
+            } else {
+                return 'undefined';
+            }
+        }
+
+        if (!($obj instanceof ScriptFunctionsInterface)) {
+            return 'undefined';
+        }
+        $fname = substr($function, $lastp + 1, $i - ($lastp + 1));
+        $paramsStr = substr($function, $i + 1, strlen($function) - $i - 2);
+        $opParser = new OperationParser($paramsStr);
+        $params = $opParser->getArgs();
+        return $obj->scriptEjecute($fname, $params);
+    }
+
+    /**
      * Devuelve el valor de la propiedad
      * @param string $prop
      * @return string
@@ -292,15 +328,10 @@ class Operation {
     private function getAliasValue($prop) {
         $arr = $this->getArrayAlias($prop);
         $obj = $arr[0];
-        if(substr($arr[1], -1, 1)==')'){
-            //es funcion
-            if($obj instanceof ScriptFunctions){
-                return $this->normalize(
-                        $obj->itsEjecute($arr[1])
-                        );
-            }else{
-                return 'undefined';
-            }
+        if (substr($arr[1], -1, 1) == ')') {
+            return $this->normalize(
+                            $this->itsEjecute($arr[1], $obj)
+            );
         }
         if ($obj instanceof \Itracker\XMLPropInterface) {
             return $this->normalize(

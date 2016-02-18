@@ -306,12 +306,12 @@ class Operation {
             if ($obj instanceof \Itracker\XMLPropInterface) {
                 $obj = $obj->get_Subprop(substr($function, 0, $lastp));
             } else {
-                return 'undefined#1';
+                return 'undefined';
             }
         }
 
         if (!($obj instanceof ScriptFunctionsInterface)) {
-            return 'undefined#2';
+            return 'undefined';
         }
         $fname = substr($function, $lastp + 1, $i - ($lastp + 1));
         $paramsStr = substr($function, $i + 1, strlen($function) - $i - 2);

@@ -29,7 +29,7 @@ function orderProfile($el1, $el2) {
 /**
  * Clase usuario
  */
-class User extends ITObject {
+class User extends ITObject implements Utils\ScriptFunctionsInterface {
     /* tabla usuarios */
 
     /* root */
@@ -333,6 +333,26 @@ class User extends ITObject {
         $this->tel = $tel;
     }
 
+    /**
+     * Devuelve los equipos de una direccion por nombre o id
+     * @param int|string $division
+     * @return array<Team>
+     */
+    public function getDivisionTeams($division){
+        if(is_numeric($division)){
+            $pread='iddireccion';
+        }else{
+            $pread='direccionname';
+        }
+        $td=array();
+        foreach ($this->get_prop('equiposobj') as $t){
+            if($t->get_prop($pread)==$division){
+                array_push($td, $t);
+            }
+        }
+        return $td;
+    }
+    
     /**
      * Carga objetos equipos
      * @return int q de equipos
@@ -1076,6 +1096,16 @@ class User extends ITObject {
                 return $this->puesto;
             default:
                 return "Propiedad invalida.";
+        }
+    }
+
+    public function scriptEjecute($function, $params) {
+        $function = trim(strtolower($function));
+        switch ($function) {
+            case 'division_teams':
+                return makeproparr($this->getDivisionTeams($params[0]), 'id');
+            default:
+                return "Funcion invalida. $function";
         }
     }
 

@@ -197,19 +197,19 @@ abstract class Tree extends ITObject {
                     case 0:
                         $rta[$i]["question"] = "Canal";
                         $rta[$i]["ans"] = $this->get_division()->get_prop("nombre");
-                        $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id") . ",";
+                        $rta[$i]["path"] = "D" . $this->get_division()->get_prop("id");
                         break;
                     case 1:
                         $rta[$i]["question"] = "Tipo";
                         $rta[$i]["ans"] = $this->get_system()->get_prop("nombre");
-                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "S" . $this->get_system()->get_prop("id") . ",";
+                        $rta[$i]["path"] = $rta[$i - 1]["path"] . ",S" . $this->get_system()->get_prop("id");
                         break;
                     default:
                         $o = $this->path_obj[$i];
                         $q = $this->objsCache->get_object("Question", $o->get_prop("idpregunta"));
                         $rta[$i]["question"] = $q->get_prop("texto");
                         $rta[$i]["ans"] = $o->get_prop("texto");
-                        $rta[$i]["path"] = $rta[$i - 1]["path"] . "O" . $o->get_prop("id") . ",";
+                        $rta[$i]["path"] = $rta[$i - 1]["path"] . ",O" . $o->get_prop("id");
                         break;
                 }
             }
@@ -248,14 +248,14 @@ abstract class Tree extends ITObject {
             }
             //$dir=-1;
             if ($dir > 0) {
-                $this->load_path("D" . $dir . ",", false);
+                $this->load_path("D" . $dir, false);
             } else {
                 $rta["title"] = "Seleccione un area";
                 $rta["back"] = "none";
                 $i = 0;
                 foreach ($usrDirs as $d) {
                     $rta["options"][$i]["title"] = $d->get_prop("nombre");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt("D" . $d->get_prop("id") . ",");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt("D" . $d->get_prop("id"));
                     $rta["options"][$i]["end"] = false;
                     $i++;
                 }
@@ -270,7 +270,7 @@ abstract class Tree extends ITObject {
             $backPATH[$i] = $this->path[$i];
         }
         if (count($backPATH)) {
-            $rta["back"] = \Encrypter::encrypt(implode(",", $backPATH) . ",");
+            $rta["back"] = \Encrypter::encrypt(implode(",", $backPATH));
         } else {
             $rta["back"] = "";
         }
@@ -282,7 +282,7 @@ abstract class Tree extends ITObject {
                 $i = 0;
                 foreach ($ss as $s) {
                     $rta["options"][$i]["title"] = $s->get_prop("nombre");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "S" . $s->get_prop("id") . ",");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . ",S" . $s->get_prop("id"));
                     $rta["options"][$i]["end"] = false;
                     $fstQ = $actualO->get_fst_Q($s->get_prop("id"));
                     $rta["options"][$i]["isnew"]=$fstQ->get_prop('isnew');
@@ -308,7 +308,7 @@ abstract class Tree extends ITObject {
                     }
                     $rta["options"][$i]["title"] = $opt->get_prop("texto");
                     $rta["options"][$i]["isnew"] = $opt->get_prop("isnew");
-                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
+                    $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . ",O" . $opt->get_prop("id"));
                     if ($opt->get_prop("idpregunta_destino")) {
                         $rta["options"][$i]["end"] = false;
                     } else {
@@ -329,7 +329,7 @@ abstract class Tree extends ITObject {
                     foreach ($opts as $opt) {
                         $rta["options"][$i]["title"] = $opt->get_prop("texto");
                         $rta["options"][$i]["isnew"] = $opt->get_prop("isnew");
-                        $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . "O" . $opt->get_prop("id") . ",");
+                        $rta["options"][$i]["destiny"] = \Encrypter::encrypt($actualPATH . ",O" . $opt->get_prop("id"));
                         if ($opt->get_prop("idpregunta_destino")) {
                             $rta["options"][$i]["end"] = false;
                         } else {

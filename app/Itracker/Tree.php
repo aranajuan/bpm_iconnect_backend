@@ -57,16 +57,23 @@ abstract class Tree extends ITObject {
      * @return string
      */
     private function check_valid() {
-        $this->path_max = count($this->path) - 2;
-        for ($i = 0; $i < $this->path_max; $i++) {
-            if (!is_numeric(substr($this->path[$i], 1))) {
+        $this->path_max = 0;
+        $len=count($this->path);
+        $rpath=array();
+        for ($i = 0; $i < $len; $i++) {
+            $code=trim(substr($this->path[$i], 1));
+            if($code==''){ continue;}
+            if (!is_numeric($code)) {
                 $tmp = implode(",", $this->path);
                 $this->path = NULL;
                 $this->path_max = 0;
                 return "Arbol invalido ('$tmp')";
             }
+            $rpath[$this->path_max]=$this->path[$i];
+            $this->path_max++;
         }
-
+        $this->path_max--;
+        $this->path=$rpath;
         return $this->load_objects();
     }
 

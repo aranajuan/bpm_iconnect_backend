@@ -353,6 +353,15 @@ class Action extends ITObject {
                 )) {
             return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
         }
+        if($tvars->get_prop('actionfilter-blacklist')!=null &&
+                in_array($this->get_prop('nombre'), explode(',',$tvars->get_prop('actionfilter-blacklist'))) ) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #3.BL';
+        }
+        if($tvars->get_prop('actionfilter-whitelist')!=null && 
+                $tvars->get_prop('actionfilter-whitelist')!=''
+                && !in_array($this->get_prop('nombre'), explode(',',$tvars->get_prop('actionfilter-whitelist'))) ) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #3.WL';
+        }
         if ($this->habilita_equipos_usr != '*' &&
                 count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {
             return 'Esta accion no esta habilitada a tu equipo';

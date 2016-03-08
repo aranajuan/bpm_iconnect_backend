@@ -118,7 +118,7 @@ class Action extends ITObject {
         }
 
         if ($l->get_prop("usr") == $this->TKT->get_prop("usr"))
-            $a_propio = "habilita_a_propio in (0,1)";  //generado por el usuario logueado
+            $a_propio = "habilita_a_propio in (0,1,3)";  //generado por el usuario logueado
         else
             $a_propio = "habilita_a_propio in (0,2,3)"; //generado por otro usuario
 

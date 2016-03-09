@@ -76,6 +76,7 @@ class DB {
                 return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
+            $ssql = str_replace("now()", "getdate()", $ssql);
             $this->RS = $this->get_link()->query($ssql);
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$this->RS) {

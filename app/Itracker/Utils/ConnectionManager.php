@@ -14,6 +14,22 @@ class ConnectionManager {
     public static $INSTANCE = 2;
 
     /**
+     * Contadores de sqls
+     * @var int
+     */
+    private $sqlC_root;
+    private $sqlCT_root;
+    private $sqlC_instance;
+    private $sqlCT_instance;
+    
+    public function __construct() {
+        $this->sqlCT_root=0;
+        $this->sqlC_root=0;
+        $this->sqlCT_instance=0;
+        $this->sqlC_instance=0;
+    }
+    
+    /**
      * Conecta a base root
      * @param type $motor
      * @param type $host
@@ -118,6 +134,39 @@ class ConnectionManager {
         return $this->serverMotor;
     }
 
+    /**
+     * Contadores de sql
+     * @param self::constan $dbType
+     * @param float $time
+     */
+    public function addCounters($dbType,$time){
+        
+        if($dbType==self::$INSTANCE){
+            $this->sqlC_instance++;
+            $this->sqlCT_instance+=$time;
+        }else{
+            $this->sqlC_root++;
+            $this->sqlCT_root+=$time;
+        }
+        
+    }
+ 
+    /**
+     * Tiempo empleado en consultas sql
+     * @return float
+     */
+    public function getSqlElapsed(){
+        return $this->sqlCT_instance+$this->sqlCT_root;
+    }
+    
+    /**
+     * Cantidad de consultas realizadas
+     * @return int
+     */
+    public function getSqlCount(){
+        return $this->sqlC_instance+$this->sqlC_root;
+    }
+    
 }
 
 ?>

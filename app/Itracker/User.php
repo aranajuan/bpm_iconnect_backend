@@ -354,6 +354,21 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     }
     
     /**
+     * Verifica si esta en la direccion
+     * @param Division $division
+     * @return array<Team>
+     */
+    public function in_division($division){
+        $this->load_teams();
+        foreach($this->equipos as $t){
+            if($t->get_prop('iddireccion')==$division->get_prop('id')){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Carga objetos equipos
      * @return int q de equipos
      */
@@ -664,6 +679,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 return $v;
             }
         }
+        return null;
     }
 
     /**
@@ -728,7 +744,19 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 if ($uT && $uT->get_prop("usr") == $this->get_prop("usr"))
                     return true;
                 break;
-            case "generado_por_equipo_de_usuario":
+            case "generado_por_equipo_de_usuario_dir_propia":
+                if($this->in_division($TKT->get_division())==false){
+                    return false;
+                }
+                $uT = $TKT->get_prop("usr_o");
+                if ($uT == null)
+                    return false;
+                foreach ($uT->get_prop("equiposobj") as $t) {
+                    if ($this->in_team($t->get_prop("id")))
+                        return true;
+                }
+                break;
+            case "generado_por_equipo_de_usuario_todas_direc":
                 $uT = $TKT->get_prop("usr_o");
                 if ($uT == null)
                     return false;

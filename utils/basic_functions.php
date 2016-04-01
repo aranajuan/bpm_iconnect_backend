@@ -303,7 +303,10 @@ function microtime_float() {
 /**
  * se ejecuta al finalizar script */
 function finish() {
-    
+    $Context = \Itracker\Context::getContext();
+    if($Context->get_Connection() instanceof \Itracker\Utils\ConnectionManager){
+        $Context->get_Connection()->close_connections(true);
+    }
 }
 
 class Encrypter {

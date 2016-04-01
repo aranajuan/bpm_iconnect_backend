@@ -255,7 +255,7 @@ class Context extends Utils\XMLhandler {
     public function get_Connection(){
         return $this->connections;
     }
-    
+       
     /**
      * Devuelve instancia solicitada
      * @return Instance

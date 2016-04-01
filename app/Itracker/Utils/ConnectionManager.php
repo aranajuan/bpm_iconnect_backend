@@ -78,6 +78,28 @@ class ConnectionManager {
     }
 
     /**
+     * Cierra conecciones y realiza commits
+     * @param boolean $failure
+     */
+    public function close_connections($failure=false){
+        if($this->dbInstancelink instanceof \PDO){
+            if($failure){
+                $this->dbInstancelink->rollBack();
+            }else{
+                $this->dbInstancelink->commit();
+            }
+            $this->dbInstancelink=NULL;
+        }
+        if($this->dbRootlink instanceof \PDO){
+            if($failure){
+                $this->dbRootlink->rollBack();
+            }else{
+                $this->dbRootlink->commit();
+            }
+            $this->dbRootlink=NULL;
+        }
+    }
+    /**
      * Conecta a base de datos
      * @param type $host
      * @param type $user
@@ -91,6 +113,10 @@ class ConnectionManager {
         }
         try {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
+            if(!$pdo->beginTransaction()){
+                echo 'No se puede iniciar transaccion';
+                exit();
+            }
             return $pdo;
         } catch (\Exception $e) {
             LoggerFactory::getLogger()

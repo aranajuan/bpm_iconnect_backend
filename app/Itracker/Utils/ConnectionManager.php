@@ -85,6 +85,8 @@ class ConnectionManager {
         if($this->dbInstancelink instanceof \PDO){
             if($failure){
                 $this->dbInstancelink->rollBack();
+                echo 'Ocurrio un error inesperado, reintente la operacion.';
+                exit();
             }else{
                 $this->dbInstancelink->commit();
             }
@@ -93,6 +95,8 @@ class ConnectionManager {
         if($this->dbRootlink instanceof \PDO){
             if($failure){
                 $this->dbRootlink->rollBack();
+                echo 'Ocurrio un error inesperado, reintente la operacion.';
+                exit();
             }else{
                 $this->dbRootlink->commit();
             }

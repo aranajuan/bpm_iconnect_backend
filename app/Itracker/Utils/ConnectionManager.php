@@ -82,6 +82,7 @@ class ConnectionManager {
      * @param boolean $failure
      */
     public function close_connections($failure=false){
+        $close=false;
         if($this->dbInstancelink instanceof \PDO){
             if($failure){
                 $this->dbInstancelink->rollBack();
@@ -89,6 +90,7 @@ class ConnectionManager {
                 $this->dbInstancelink->commit();
             }
             $this->dbInstancelink=NULL;
+            $close=true;
         }
         if($this->dbRootlink instanceof \PDO){
             if($failure){
@@ -97,8 +99,9 @@ class ConnectionManager {
                 $this->dbRootlink->commit();
             }
             $this->dbRootlink=NULL;
+            $close=true;
         }
-        if($failure){
+        if($failure && $close){
             echo 'Ocurrio un error inesperado, reintente la operacion.';
             exit();
         }

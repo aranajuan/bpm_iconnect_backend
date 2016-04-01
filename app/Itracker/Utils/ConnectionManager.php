@@ -98,6 +98,10 @@ class ConnectionManager {
             }
             $this->dbRootlink=NULL;
         }
+        if($failure){
+            echo 'Ocurrio un error inesperado, reintente la operacion.';
+            exit();
+        }
     }
     /**
      * Conecta a base de datos

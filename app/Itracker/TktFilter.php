@@ -259,7 +259,7 @@ class TktFilter extends BasicObject {
                     . ' dias.';
             $this->ssql= null;
         }
-        $SSQL .= $sWHERE;
+        $SSQL .= $sWHERE.' order by TKT.id';
         $this->ssql= $SSQL;
     }
     

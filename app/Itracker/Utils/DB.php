@@ -112,7 +112,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->lstIDmss = $this->get_link()->lastInsertId();
+                $this->connection->close_connections(true);
                 return 1;
             } else {
                 start_measure('sql');
@@ -131,6 +131,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
+                $this->connection->close_connections(true);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {

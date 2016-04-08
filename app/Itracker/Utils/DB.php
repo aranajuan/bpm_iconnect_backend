@@ -47,6 +47,13 @@ class DB {
         return $this->connection->get_link($this->RI);
     }
 
+    private function beginTran(){
+        if($this->RI==ConnectionManager::$ROOT){
+            return true; //sin transacciones en root
+        }
+        return $this->connection->beginTran($this->RI);
+    }
+    
     /**
      * Carga recordset
      * @param String $ssql
@@ -106,6 +113,7 @@ class DB {
     public function query($ssql) {
         start_measure('sql');
         $ssql = $this->tablenames($ssql);
+        $this->beginTran();
         if ($this->connection->get_motor() == 'mysql') {
             $result=$this->get_link()->query($ssql);
             $this->connection->addCounters($this->RI, get_measure('sql'));

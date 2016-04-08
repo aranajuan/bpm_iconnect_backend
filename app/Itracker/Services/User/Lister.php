@@ -4,9 +4,21 @@ namespace Itracker\Services\User;
 
 class Lister implements \Itracker\Services\ITServiceInterface {
 
+    /**
+     * 
+     * @param \Itracker\Context $Context
+     * @return type
+     */
     public static function GO($Context) {
-        $USERALL = new \Itracker\User($Context->get_Connection());
-        $USERALL_v = $USERALL->list_all();
+        $idteam =  $Context->get_params('idteam');
+        if(!$Context->get_User()->isadm($idteam)){
+            return $Context->createElement('error', 'No tienes acceso a este equipo '.$idteam);
+        }
+        $team = $Context->get_objcache()->get_object("Team", $idteam);
+        if($Context->get_objcache()->get_status("Team", $idteam) != "ok"){
+            return $Context->createElement('error', 'Equipo invalido '.$idteam);
+        }
+        $USERALL_v = $team->get_users();
         $userL = $Context->createElement("list");
         if ($USERALL_v) {
             foreach ($USERALL_v as $u)

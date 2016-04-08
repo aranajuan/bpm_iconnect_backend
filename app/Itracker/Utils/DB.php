@@ -47,6 +47,13 @@ class DB {
         return $this->connection->get_link($this->RI);
     }
 
+    private function beginTran(){
+        if($this->RI==ConnectionManager::$ROOT){
+            return true; //sin transacciones en root
+        }
+        return $this->connection->beginTran($this->RI);
+    }
+    
     /**
      * Carga recordset
      * @param String $ssql
@@ -76,6 +83,7 @@ class DB {
                 return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
+            $ssql = str_replace("now()", "getdate()", $ssql);
             $this->RS = $this->get_link()->query($ssql);
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$this->RS) {
@@ -105,13 +113,14 @@ class DB {
     public function query($ssql) {
         start_measure('sql');
         $ssql = $this->tablenames($ssql);
+        $this->beginTran();
         if ($this->connection->get_motor() == 'mysql') {
             $result=$this->get_link()->query($ssql);
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->lstIDmss = $this->get_link()->lastInsertId();
+                $this->connection->close_connections(true);
                 return 1;
             } else {
                 start_measure('sql');
@@ -130,6 +139,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
+                $this->connection->close_connections(true);
                 $this->lstIDmss = NULL;
                 return 1;
             } else {

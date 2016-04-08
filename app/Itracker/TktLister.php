@@ -74,7 +74,9 @@ class TktLister extends BasicObject {
         $this->resultobjts = array();
         foreach ($this->resultids as $id) {
             $T = $this->objsCache->get_object("Tkt", $id);
-            array_push($this->resultobjts, $T);
+            if($this->getContext()->get_User()->get_view($T)!=null){
+                array_push($this->resultobjts, $T);
+            }
         }
     }
 

@@ -44,14 +44,8 @@ if(preg_match('/\\/aux\\/.*/' ,$_SERVER["REQUEST_URI"])){
 }
 
 stop_measure('fullscript');
-$Context->add_accessLog('timeelapsed', get_measure('fullscript'));
-$Context->add_accessLog('memoryusage', memory_get_peak_usage(true));
-if( $Context->get_Connection() instanceof Itracker\Utils\ConnectionManager){
-    $Context->add_accessLog('sql_elapsed', $Context->get_Connection()->getSqlElapsed());
-    $Context->add_accessLog('sql_count', $Context->get_Connection()->getSqlCount());
-}
+$Context->finishScript();
 
-\Itracker\Utils\LoggerFactory::getAccessLogger()->write($Context->get_accesslogJson().','.PHP_EOL);
 exit();
 
 ?>

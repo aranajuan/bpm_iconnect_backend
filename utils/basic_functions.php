@@ -303,7 +303,8 @@ function microtime_float() {
 /**
  * se ejecuta al finalizar script */
 function finish() {
-    
+    $Context = \Itracker\Context::getContext();
+    $Context->finishScript(true);
 }
 
 class Encrypter {

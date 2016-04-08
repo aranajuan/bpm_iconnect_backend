@@ -1,9 +1,8 @@
 <?php
+namespace Itracker\Services\Tkt;
 
 require_once ROOT_DIR . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'DomPdf'
         . DIRECTORY_SEPARATOR . 'dompdf_config.inc.php';
-
-namespace Itracker\Services\Tkt;
 
 class Getpdf implements \Itracker\Services\ITServiceInterface {
 
@@ -74,7 +73,7 @@ class Getpdf implements \Itracker\Services\ITServiceInterface {
             return $Context->createElement("error", "Ticket invalido.#2");
         }
 
-        $pdf = new DOMPDF();
+        $pdf = new \DOMPDF();
         $pdf->load_html($html);
         $pdf->render();
         $pdfDoc = $pdf->output();

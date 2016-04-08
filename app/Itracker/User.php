@@ -29,7 +29,7 @@ function orderProfile($el1, $el2) {
 /**
  * Clase usuario
  */
-class User extends ITObject {
+class User extends ITObject implements Utils\ScriptFunctionsInterface {
     /* tabla usuarios */
 
     /* root */
@@ -333,6 +333,41 @@ class User extends ITObject {
         $this->tel = $tel;
     }
 
+    /**
+     * Devuelve los equipos de una direccion por nombre o id
+     * @param int|string $division
+     * @return array<Team>
+     */
+    public function getDivisionTeams($division){
+        if(is_numeric($division)){
+            $pread='iddireccion';
+        }else{
+            $pread='direccionname';
+        }
+        $td=array();
+        foreach ($this->get_prop('equiposobj') as $t){
+            if($t->get_prop($pread)==$division){
+                array_push($td, $t);
+            }
+        }
+        return $td;
+    }
+    
+    /**
+     * Verifica si esta en la direccion
+     * @param Division $division
+     * @return array<Team>
+     */
+    public function in_division($division){
+        $this->load_teams();
+        foreach($this->equipos as $t){
+            if($t->get_prop('iddireccion')==$division->get_prop('id')){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Carga objetos equipos
      * @return int q de equipos
@@ -644,6 +679,7 @@ class User extends ITObject {
                 return $v;
             }
         }
+        return null;
     }
 
     /**
@@ -708,7 +744,19 @@ class User extends ITObject {
                 if ($uT && $uT->get_prop("usr") == $this->get_prop("usr"))
                     return true;
                 break;
-            case "generado_por_equipo_de_usuario":
+            case "generado_por_equipo_de_usuario_dir_propia":
+                if($this->in_division($TKT->get_division())==false){
+                    return false;
+                }
+                $uT = $TKT->get_prop("usr_o");
+                if ($uT == null)
+                    return false;
+                foreach ($uT->get_prop("equiposobj") as $t) {
+                    if ($this->in_team($t->get_prop("id")))
+                        return true;
+                }
+                break;
+            case "generado_por_equipo_de_usuario_todas_direc":
                 $uT = $TKT->get_prop("usr_o");
                 if ($uT == null)
                     return false;
@@ -1058,6 +1106,8 @@ class User extends ITObject {
                 return $this->get_viewTeams();
             case 'perfil':
                 return $this->perfil;
+            case 'fulladm':
+                return $this->get_prop('perfilt')=='admin_full';
             case 'fronts':
                 return $this->fronts;
             case 'perfilt':
@@ -1074,6 +1124,16 @@ class User extends ITObject {
                 return $this->puesto;
             default:
                 return "Propiedad invalida.";
+        }
+    }
+
+    public function scriptEjecute($function, $params) {
+        $function = trim(strtolower($function));
+        switch ($function) {
+            case 'division_teams':
+                return makeproparr($this->getDivisionTeams($params[0]), 'id');
+            default:
+                return "Funcion invalida. $function";
         }
     }
 

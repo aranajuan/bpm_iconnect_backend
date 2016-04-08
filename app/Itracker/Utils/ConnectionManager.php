@@ -8,6 +8,8 @@ class ConnectionManager {
     private $dbInstancelink; // recurso a db instancia
     private $dbRootAlias;
     private $dbInstanceAlias;
+    private $dbRootTran;
+    private $dbInstanceTran;
     private $serverMotor;
     private $status;
     public static $ROOT = 1;
@@ -21,14 +23,14 @@ class ConnectionManager {
     private $sqlCT_root;
     private $sqlC_instance;
     private $sqlCT_instance;
-    
+
     public function __construct() {
-        $this->sqlCT_root=0;
-        $this->sqlC_root=0;
-        $this->sqlCT_instance=0;
-        $this->sqlC_instance=0;
+        $this->sqlCT_root = 0;
+        $this->sqlC_root = 0;
+        $this->sqlCT_instance = 0;
+        $this->sqlC_instance = 0;
     }
-    
+
     /**
      * Conecta a base root
      * @param type $motor
@@ -42,6 +44,7 @@ class ConnectionManager {
         $this->serverMotor = $motor;
         $this->dbRootAlias = $dbAlias;
         $lnk = $this->new_link($host, $user, $pass);
+        $this->dbRootTran = false;
         if ($lnk) {
             $this->dbRootlink = $lnk;
             $this->status = "root_ok";
@@ -66,6 +69,7 @@ class ConnectionManager {
             return false;
         $this->dbInstanceAlias = $dbAlias;
         $lnk = $this->new_link($host, $user, $pass);
+        $this->dbInstanceTran = false;
         if ($lnk) {
             $this->dbInstancelink = $lnk;
             $this->status = "ok";
@@ -78,6 +82,45 @@ class ConnectionManager {
     }
 
     /**
+     * Cierra conecciones y realiza commits
+     * @param boolean $failure
+     * @param boolean $exit close on failure
+     */
+    public function close_connections($failure = false,$exit=true) {
+        $close = false;
+        if ($this->dbInstancelink instanceof \PDO) {
+            if ($this->dbInstanceTran) {
+                if ($failure) {
+                    $this->dbInstancelink->rollBack();
+                } else {
+                    $this->dbInstancelink->commit();
+                }
+            }
+            $this->dbInstanceTran = false;
+            $this->dbInstancelink = NULL;
+            $close = true;
+        }
+        if ($this->dbRootlink instanceof \PDO) {
+            if ($this->dbRootTran) {
+                if ($failure) {
+                    $this->dbRootlink->rollBack();
+                } else {
+                    $this->dbRootlink->commit();
+                }
+            }
+            $this->dbRootTran = false;
+            $this->dbRootlink = NULL;
+            $close = true;
+        }
+        if ($failure && $close) {
+            echo 'Ocurrio un error inesperado, reintente la operacion.';
+            if($exit){
+                exit();
+            }
+        }
+    }
+
+    /**
      * Conecta a base de datos
      * @param type $host
      * @param type $user
@@ -85,9 +128,9 @@ class ConnectionManager {
      */
     private function new_link($host, $user, $pass) {
         if ($this->serverMotor == 'mysql') {
-            $strCn='mysql:host='.$host;
+            $strCn = 'mysql:host=' . $host;
         } elseif ($this->serverMotor == 'mssql') {
-            $strCn='odbc:' .GlobalConfig::getInstance()->getString('database/odbc');
+            $strCn = 'odbc:' . GlobalConfig::getInstance()->getString('database/odbc');
         }
         try {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
@@ -95,15 +138,35 @@ class ConnectionManager {
         } catch (\Exception $e) {
             LoggerFactory::getLogger()
                     ->critical("Imposible conectar a DB", array($strCn,
-                        $host, $user, $pass,$e->getMessage()));
+                        $host, $user, $pass, $e->getMessage()));
             return null;
-        }       
+        }
     }
 
     /**
      * Devuelve link solicitado
      * @param type $db connectionmanager::
-     * @return type
+     * @return boolean
+     */
+    public function beginTran($db) {
+        if ($db == ConnectionManager::$INSTANCE && 
+                $this->dbInstancelink && 
+                $this->dbInstanceTran==false) {
+            $this->dbInstanceTran=true;
+            return $this->get_link($db)->beginTransaction();
+        } elseif ($db == ConnectionManager::$ROOT&& 
+                $this->dbRootlink && 
+                $this->dbRootTran==false) {
+            $this->dbRootTran=true;
+            return $this->get_link($db)->beginTransaction();
+        }
+        return 0;
+    }
+
+    /**
+     * Devuelve link solicitado
+     * @param type $db connectionmanager::
+     * @return \PDO
      */
     public function get_link($db) {
         if ($db == ConnectionManager::$INSTANCE) {
@@ -139,34 +202,33 @@ class ConnectionManager {
      * @param self::constan $dbType
      * @param float $time
      */
-    public function addCounters($dbType,$time){
-        
-        if($dbType==self::$INSTANCE){
+    public function addCounters($dbType, $time) {
+
+        if ($dbType == self::$INSTANCE) {
             $this->sqlC_instance++;
             $this->sqlCT_instance+=$time;
-        }else{
+        } else {
             $this->sqlC_root++;
             $this->sqlCT_root+=$time;
         }
-        
     }
- 
+
     /**
      * Tiempo empleado en consultas sql
      * @return float
      */
-    public function getSqlElapsed(){
-        return $this->sqlCT_instance+$this->sqlCT_root;
+    public function getSqlElapsed() {
+        return $this->sqlCT_instance + $this->sqlCT_root;
     }
-    
+
     /**
      * Cantidad de consultas realizadas
      * @return int
      */
-    public function getSqlCount(){
-        return $this->sqlC_instance+$this->sqlC_root;
+    public function getSqlCount() {
+        return $this->sqlC_instance + $this->sqlC_root;
     }
-    
+
 }
 
 ?>

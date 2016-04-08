@@ -22,7 +22,7 @@ class Action extends ITObject {
     private $habilita_tomado;   /* tomado por cuaklquier usuario -> menos el logueado (marcar tambien la anterior) */
     private $habilita_perfiles; /* perfiles habilitados (separados por coma) */
     private $habilita_equipos;   /* equipo habilitados para esta accion */
-    private $habilita_a_propio; /* abierto por el usuario */
+    private $habilita_a_propio; /* abierto por el usuario 3: generado por equipo */
     private $habilita_abierto;  /* abierto */
     private $habilita_equipo;   /* equipo del TKT */
     private $habilita_equipos_usr;   /* equipo del usuario */
@@ -118,9 +118,9 @@ class Action extends ITObject {
         }
 
         if ($l->get_prop("usr") == $this->TKT->get_prop("usr"))
-            $a_propio = "habilita_a_propio in (0,1)";  //generado por el usuario logueado
+            $a_propio = "habilita_a_propio in (0,1,3)";  //generado por el usuario logueado
         else
-            $a_propio = "habilita_a_propio in (0,2)"; //generado por otro usuario
+            $a_propio = "habilita_a_propio in (0,2,3)"; //generado por otro usuario
 
         $perfil = "(habilita_perfiles like '%" . $l->get_prop("perfil") . ",%' or habilita_perfiles like '*%')";
 
@@ -334,6 +334,10 @@ class Action extends ITObject {
         }else { // abierto por otro
             if ($this->habilita_a_propio == 1)
                 return "Esta accion no se puede aplicar a un ticket generado por otro";
+            if($this->habilita_a_propio == 3 && 
+                    $l->check_relation('generado_por_equipo_de_usuario', $this->getTKT()) == false){
+                return "Esta accion no se puede aplicar a un ticket generado por otro equipo";
+            }
         }
 
         if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL) { // cerrado - no abierto
@@ -352,6 +356,15 @@ class Action extends ITObject {
         if (!preg_match_array(explode(',', $this->habilita_filtroacciones), $tvars->get_prop('actionfilter')
                 )) {
             return 'Esta accion no se puede ejecutar en el estado actual del ticket #2';
+        }
+        if($tvars->get_prop('actionfilter-blacklist')!=null &&
+                in_array($this->get_prop('nombre'), explode(',',$tvars->get_prop('actionfilter-blacklist'))) ) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #3.BL';
+        }
+        if($tvars->get_prop('actionfilter-whitelist')!=null && 
+                $tvars->get_prop('actionfilter-whitelist')!=''
+                && !in_array($this->get_prop('nombre'), explode(',',$tvars->get_prop('actionfilter-whitelist'))) ) {
+            return 'Esta accion no se puede ejecutar en el estado actual del ticket #3.WL';
         }
         if ($this->habilita_equipos_usr != '*' &&
                 count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {

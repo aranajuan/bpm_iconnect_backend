@@ -202,28 +202,6 @@ class Team extends ITObject {
     }
 
     /**
-     * Carga equipos a los que puede ver y actualiza IDs
-     * @return int Qequipos
-     */
-    private function load_teamsView() {
-        $arrTeam = explode(",", $this->idsequiposvisible);
-        $arrTeamIDn = array();
-        $i = 0;
-        foreach ($arrTeam as $tid) {
-            if (is_numeric($tid)) {
-                $t = $this->objsCache->get_object("Team", $tid);
-                if ($this->objsCache->get_status("Team", $tid) == "ok") {
-                    $this->equiposvisible[$i] = $t;
-                    $arrTeamIDn[$i] = $tid;
-                    $i++;
-                }
-            }
-        }
-        $this->idsequiposvisible = implode(",", $arrTeamIDn);
-        return $i;
-    }
-
-    /**
      * Verifica si puede deivar
      * @param int $id Id a chequear|null(a cualquiera)
      * @return boolean

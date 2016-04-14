@@ -60,6 +60,8 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     private $equipos;
     private $equiposLoaded;
     private $equiposAdmLoaded;
+    private $idsequiposvista;
+    private $idsequiposreporta;
     private $perfil;
     private $perfilAccess;
     private $perfilLoaded;
@@ -373,15 +375,16 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @return int q de equipos
      */
     private function load_teams() {
+        if ($this->equiposLoaded)
+            return count($this->idsequiposV);
+        
         $tmpT = explode(",", $this->idsequipos);
         if ($this->hash == null) { // no es el logueado
             $usr = $this->getLogged();
             $teamsL = array_merge($usr->get_prop("equiposview"), explode(",", $usr->get_prop("idsequiposadm")), explode(",", $usr->get_prop("idsequipos")));
             $tmpT = array_intersect($tmpT, $teamsL);
         }
-
-        if ($this->equiposLoaded)
-            return count($this->idsequiposV);
+        
         $this->equiposLoaded = true;
         $this->idsequiposV = NULL;
         $this->equipos = NULL;
@@ -510,11 +513,19 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     /**
      * Verifica si el usuario se encuentra en el equipo del id solicitado
      * @param type $id
+     * @param bool  $reporting
      * @return type
      */
-    public function in_team($id) {
+    public function in_team($id,$reporting) {
         $this->load_teams();
-        return in_array($id, $this->idsequiposV);
+        $arr = $this->idsequiposV;
+        if($reporting){
+            $arr2 = $this->get_ReportingTeams();
+            if(is_array($arr2)){
+                $arr = array_merge($arr,$arr2);
+            }
+        }
+        return in_array($id, $arr);
     }
 
     /**
@@ -675,7 +686,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     public function get_view($TKT) {
         $this->load_profile();
         foreach ($this->perfil_vista as $v) {
-            if ($this->check_relation($v["nombre"], $TKT)) {
+            if ($this->check_relation($v["nombre"], $TKT,true)) {
                 return $v;
             }
         }
@@ -687,11 +698,31 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @return array
      */
     private function get_viewTeams() {
+        if(is_array($this->idsequiposvista)){
+            return $this->idsequiposvista;
+        }
         $arr = array();
         foreach ($this->get_prop("equiposobj") as $t) {
             $arr = array_merge($arr, explode(",", $t->get_prop("idsequiposvisible")));
         }
-        return $arr;
+        $this->idsequiposvista=$arr;
+        return $this->idsequiposvista;
+    }
+    
+    /**
+     * Array de equipos que ve el usuario
+     * @return array
+     */
+    private function get_ReportingTeams() {
+        if(is_array($this->idsequiposreporta)){
+            return $this->idsequiposreporta;
+        }
+        $arr = array();
+        foreach ($this->get_prop("equiposobj") as $t) {
+            $arr = array_merge($arr, explode(",", $t->get_prop("idsequiposreporta")));
+        }
+        $this->idsequiposreporta=$arr;
+        return $this->idsequiposreporta;
     }
 
     /**
@@ -703,7 +734,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         $uteams = explode(",", $U->get_prop("idsequipos"));
         $mytview = $this->get_viewTeams();
         foreach ($uteams as $tid) {
-            if ($this->in_team($tid)) {
+            if ($this->in_team($tid,true)) {
                 return true;
             }
             if (in_array($tid, $mytview)) {
@@ -716,9 +747,10 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * Verifica si se cumple relacion
      * @param type $rel
      * @param Tkt $TKT
+     * @param bool  $reporting
      * @return boolean
      */
-    public function check_relation($rel, $TKT) {
+    public function check_relation($rel, $TKT,$reporting) {
         switch ($rel) {
             case "*":
                 return true;
@@ -728,15 +760,15 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                     return true;
                 break;
             case "tomado_por_otro_usuario":
-                if ($TKT->get_prop("u_tom_o") && $this->in_team($TKT->get_prop("idequipo")))
+                if ($TKT->get_prop("u_tom_o") && $this->in_team($TKT->get_prop("idequipo"),$reporting))
                     return true;
                 break;
             case "sin_tomar":
-                if ($TKT->get_prop("u_tom_o") == null && $this->in_team($TKT->get_prop("idequipo")))
+                if ($TKT->get_prop("u_tom_o") == null && $this->in_team($TKT->get_prop("idequipo"),$reporting))
                     return true;
                 break;
             case "en_equipo":
-                if ($this->in_team($TKT->get_prop("idequipo")))
+                if ($this->in_team($TKT->get_prop("idequipo"),$reporting))
                     return true;
                 break;
             case "generado_por_usuario":
@@ -752,7 +784,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 if ($uT == null)
                     return false;
                 foreach ($uT->get_prop("equiposobj") as $t) {
-                    if ($this->in_team($t->get_prop("id")))
+                    if ($this->in_team($t->get_prop("id"),$reporting))
                         return true;
                 }
                 break;
@@ -761,7 +793,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 if ($uT == null)
                     return false;
                 foreach ($uT->get_prop("equiposobj") as $t) {
-                    if ($this->in_team($t->get_prop("id")))
+                    if ($this->in_team($t->get_prop("id"),$reporting))
                         return true;
                 }
                 break;
@@ -778,12 +810,11 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                         return true;
                 }
                 break;
-                break;
             case "derivado":
                 $THs = $TKT->get_tktHObj();
                 foreach ($THs as $TH) {
                     if ($TH->get_prop("accion")->get_prop("ejecuta") == "open" || $TH->get_prop("accion")->get_prop("ejecuta") == "derive") {
-                        if ($this->in_team($TH->get_prop("objadj_id"))) {
+                        if ($this->in_team($TH->get_prop("objadj_id"),$reporting)) {
                             return true;
                         }
                     }
@@ -793,7 +824,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $TKT->load_childs();
                 $chs = $TKT->get_prop("childs");
                 foreach ($chs as $ch) {
-                    if ($this->check_relation("generado_por_usuario", $ch))
+                    if ($this->check_relation("generado_por_usuario", $ch,$reporting))
                         return true;
                 }
                 break;
@@ -801,7 +832,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $TKT->load_childs();
                 $chs = $TKT->get_prop("childs");
                 foreach ($chs as $ch) {
-                    if ($this->check_relation("generado_por_equipo_de_usuario", $ch))
+                    if ($this->check_relation("generado_por_equipo_de_usuario", $ch,$reporting))
                         return true;
                 }
                 break;

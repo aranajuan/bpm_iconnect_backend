@@ -364,8 +364,6 @@ class Team extends ITObject {
                 }
                 return "Invalida/Error";
             case 'idsequiposderiva':
-                if ($this->equiposderiva == null)
-                    $this->load_teamsDer();
                 return $this->idsequiposderiva;
             case 'equiposderiva':
                 if ($this->equiposderiva == null)

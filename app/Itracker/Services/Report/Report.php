@@ -14,7 +14,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
         $arrayTeam = array();
         $idsteams = explode(",", $Context->get_params("team"));
         foreach ($idsteams as $idteam) {
-            if (!$u->in_team($idteam)) {
+            if (!$u->in_team($idteam,true)) {
                 return $Context->createElement("error", "Equipo invalido($idteam). Acceso denegado.");
             }
             array_push($arrayTeam, $idteam);
@@ -50,8 +50,8 @@ class Report implements \Itracker\Services\ITServiceInterface {
         } else {
             $users = array();
             foreach ($arrayTeam as $id) {
-                $t = $u->get_team_obj($id);
-                if ($t) {
+                $t =  $Context->get_objcache()->get_object("Team", $id);
+                if ($Context->get_objcache()->get_status("Team", $id) == "ok") {
                     $users = array_merge($users, makeproparr($t->get_users(), "usr"));
                 }
             }

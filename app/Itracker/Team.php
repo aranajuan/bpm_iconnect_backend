@@ -184,6 +184,9 @@ class Team extends ITObject {
      * @return int Qequipos
      */
     private function load_teamsDer() {
+        if(isset($this->equiposderiva)){
+            return count($this->equiposderiva);
+        }
         $arrTeam = explode(",", $this->idsequiposderiva);
         $arrTeamIDn = array();
         $i = 0;

@@ -78,7 +78,8 @@ class Report implements \Itracker\Services\ITServiceInterface {
         $RR->loadITJson(file_get_contents($filepath));
 
         $RR->execute();
-        $RPADAPTER = new \Itracker\Report\ExcelAdapter($RR);
+        //$RPADAPTER = new \Itracker\Report\PHPExcel($RR);
+        $RPADAPTER = new \Itracker\Report\PHP_XLSXWriter($RR);
         $RPADAPTER->loadExcel();
 
         $arch = $Context->createElement("file");

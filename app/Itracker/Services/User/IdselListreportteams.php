@@ -2,10 +2,10 @@
 
 namespace Itracker\Services\User;
 
-class IdselListteams implements \Itracker\Services\ITServiceInterface {
+class IdselListreportteams implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $teams = $Context->get_User()->get_prop("equiposobj");
+        $teams = $Context->get_User()->get_prop("equiposreportaobj");
         $listL = $Context->createElement("list");
         $filter = json_decode($Context->get_params("sel_params"),true);
         $filter=$filter['filter'];

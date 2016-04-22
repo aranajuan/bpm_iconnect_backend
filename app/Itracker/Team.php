@@ -17,6 +17,7 @@ class Team extends ITObject {
     private $idsequiposderiva; /* equipos a los que puede derivar por fuera del arbol */
     private $equiposderiva; /* equipos a los que puede derivar por fuera del arbol */
     private $idsequiposvisible; /* equipos de los cuales puede ver los tickets sin relacion */
+    private $idsequiposreporta; /* equipos de los cuales puede ver como propios */
     private $equiposvisible; /* equipos de los cuales puede ver los tickets sin relacion */
     private $mytkts_vista;  /* vista para tabla de mytkts */
     private $staffhome_vista; /* vista para tabla staff home */
@@ -84,6 +85,7 @@ class Team extends ITObject {
         $this->iddireccion = trim($tmpU["iddireccion"]);
         $this->idsequiposderiva = trim($tmpU["idsequipos_deriva"]);
         $this->idsequiposvisible = trim($tmpU["idsequipos_visible"]);
+        $this->idsequiposreporta=trim($tmpU["idsequipos_reporta"]);
         $this->mytkts_vista = trim($tmpU["mytkts_vista"]);
         $this->staffhome_vista = trim($tmpU["staffhome_vista"]);
         $this->direccion = null;
@@ -141,7 +143,6 @@ class Team extends ITObject {
         if (!$division)
             return "Debe seleccionar una direccion valida";
         $this->load_teamsDer();
-        $this->load_teamsView();
         if (HsToMin($this->t_conformidad) == -1)
             return "Tiempo de conformidad invalido, respete el formato HH:MM";
         if ($this->estado == I_DELETED)
@@ -183,15 +184,16 @@ class Team extends ITObject {
      * @return int Qequipos
      */
     private function load_teamsDer() {
+        if(isset($this->equiposderiva)){
+            return count($this->equiposderiva);
+        }
         $arrTeam = explode(",", $this->idsequiposderiva);
         $arrTeamIDn = array();
         $i = 0;
         foreach ($arrTeam as $tid) {
             if (is_numeric($tid)) {
                 $t =  $this->objsCache->get_object("Team", $tid);
-
                 if ($this->objsCache->get_status("Team", $tid) == "ok") {
-
                     $this->equiposderiva[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
                     $i++;
@@ -199,28 +201,6 @@ class Team extends ITObject {
             }
         }
         $this->idsequiposrelacion = implode(",", $arrTeamIDn);
-        return $i;
-    }
-
-    /**
-     * Carga equipos a los que puede ver y actualiza IDs
-     * @return int Qequipos
-     */
-    private function load_teamsView() {
-        $arrTeam = explode(",", $this->idsequiposvisible);
-        $arrTeamIDn = array();
-        $i = 0;
-        foreach ($arrTeam as $tid) {
-            if (is_numeric($tid)) {
-                $t = $this->objsCache->get_object("Team", $tid);
-                if ($this->objsCache->get_status("Team", $tid) == "ok") {
-                    $this->equiposvisible[$i] = $t;
-                    $arrTeamIDn[$i] = $tid;
-                    $i++;
-                }
-            }
-        }
-        $this->idsequiposvisible = implode(",", $arrTeamIDn);
         return $i;
     }
 
@@ -283,6 +263,7 @@ class Team extends ITObject {
                     "',iddireccion=" . intval($this->iddireccion) .
                     ",idsequipos_deriva='" . strToSQL($this->idsequiposderiva) .
                     "',idsequipos_visible='" . strToSQL($this->idsequiposvisible) .
+                    "',idsequipos_reporta='" . strToSQL($this->idsequiposreporta) .
                     "', mytkts_vista = '" . strToSQL($this->mytkts_vista) .
                     "', staffhome_vista = '" . strToSQL($this->staffhome_vista) .
                     "',idlistin=" . intval($this->idlistin) .
@@ -299,8 +280,8 @@ class Team extends ITObject {
         $this->estado = I_ACTIVE;
         $this->id = I_NEWID;
         if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idlistin,mytkts_vista,staffhome_vista,estado) values ('" .
-                    strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "'," . intval($this->idlistin) . ",'" . strToSQL($this->mytkts_vista) . "','" . strToSQL($this->staffhome_vista) . "',0);";
+            $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idsequipos_reporta,idlistin,mytkts_vista,staffhome_vista,estado) values ('" .
+                    strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "','" . strToSQL($this->idsequiposreporta) . "'," . intval($this->idlistin) . ",'" . strToSQL($this->mytkts_vista) . "','" . strToSQL($this->staffhome_vista) . "',0);";
             if ($this->dbinstance->query($ssql))
                 return "Team_insert: " . $this->dbinstance->details;
             else {
@@ -386,21 +367,15 @@ class Team extends ITObject {
                 }
                 return "Invalida/Error";
             case 'idsequiposderiva':
-                if ($this->equiposderiva == null)
-                    $this->load_teamsDer();
                 return $this->idsequiposderiva;
             case 'equiposderiva':
                 if ($this->equiposderiva == null)
                     $this->load_teamsDer();
                 return $this->equiposderiva;
             case 'idsequiposvisible':
-                if ($this->equiposvisible == null)
-                    $this->load_teamsView();
                 return $this->idsequiposvisible;
-            case 'equiposvisible':
-                if ($this->equiposvisible == null)
-                    $this->load_teamsView();
-                return $this->equiposvisible;
+            case 'idsequiposreporta':
+                return $this->idsequiposreporta;
             default:
                 return "Propiedad invalida.";
         }

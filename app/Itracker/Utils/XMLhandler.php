@@ -44,6 +44,7 @@ abstract class XMLhandler {
 			echo "<input type=\"text\" id=\"pass\" />";
 			echo "<input type=\"button\" value=\"Cifrar\" onclick=\"location.href='?text='+encodeURIComponent(document.getElementById('pass').value)\" />";
 		}
+                \Itracker\Context::getContext()->finishScript();
                 exit();
             }
             $this->getLogger()->notice("Se recibio XML invalido",array($text, $ipOr, $date,$e->getMessage()));

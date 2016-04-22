@@ -109,7 +109,7 @@ class Context extends Utils\XMLhandler {
 
         $this->get_User()->sessionActivity();
 
-        if (!$this->ejectute_request()) {
+        if (!$this->execute_request()) {
             $this->set_error("ejecution", $this->error);
             return false;
         }
@@ -212,7 +212,7 @@ class Context extends Utils\XMLhandler {
      * Ejecuta GO agrega a response
      * @return boolean
      */
-    private function ejectute_request() {
+    private function execute_request() {
         $ClassName = '\\Itracker\\Services\\ ' . $this->get_class() . '\\ ' . $this->get_method();
         $ClassName = str_replace('_', ' ', $ClassName);
         $ClassName = ucwords($ClassName);

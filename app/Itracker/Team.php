@@ -184,6 +184,9 @@ class Team extends ITObject {
      * @return int Qequipos
      */
     private function load_teamsDer() {
+        if(isset($this->equiposderiva)){
+            return count($this->equiposderiva);
+        }
         $arrTeam = explode(",", $this->idsequiposderiva);
         $arrTeamIDn = array();
         $i = 0;
@@ -364,8 +367,6 @@ class Team extends ITObject {
                 }
                 return "Invalida/Error";
             case 'idsequiposderiva':
-                if ($this->equiposderiva == null)
-                    $this->load_teamsDer();
                 return $this->idsequiposderiva;
             case 'equiposderiva':
                 if ($this->equiposderiva == null)

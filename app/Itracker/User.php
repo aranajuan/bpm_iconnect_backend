@@ -340,36 +340,36 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @param int|string $division
      * @return array<Team>
      */
-    public function getDivisionTeams($division){
-        if(is_numeric($division)){
-            $pread='iddireccion';
-        }else{
-            $pread='direccionname';
+    public function getDivisionTeams($division) {
+        if (is_numeric($division)) {
+            $pread = 'iddireccion';
+        } else {
+            $pread = 'direccionname';
         }
-        $td=array();
-        foreach ($this->get_prop('equiposobj') as $t){
-            if($t->get_prop($pread)==$division){
+        $td = array();
+        foreach ($this->get_prop('equiposobj') as $t) {
+            if ($t->get_prop($pread) == $division) {
                 array_push($td, $t);
             }
         }
         return $td;
     }
-    
+
     /**
      * Verifica si esta en la direccion
      * @param Division $division
      * @return array<Team>
      */
-    public function in_division($division){
+    public function in_division($division) {
         $this->load_teams();
-        foreach($this->equipos as $t){
-            if($t->get_prop('iddireccion')==$division->get_prop('id')){
+        foreach ($this->equipos as $t) {
+            if ($t->get_prop('iddireccion') == $division->get_prop('id')) {
                 return true;
             }
         }
         return false;
     }
-    
+
     /**
      * Carga objetos equipos
      * @return int q de equipos
@@ -377,14 +377,14 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     private function load_teams() {
         if ($this->equiposLoaded)
             return count($this->idsequiposV);
-        
+
         $tmpT = explode(",", $this->idsequipos);
         if ($this->hash == null) { // no es el logueado
             $usr = $this->getLogged();
             $teamsL = array_merge($usr->get_prop("equiposview"), explode(",", $usr->get_prop("idsequiposadm")), explode(",", $usr->get_prop("idsequipos")));
             $tmpT = array_intersect($tmpT, $teamsL);
         }
-        
+
         $this->equiposLoaded = true;
         $this->idsequiposV = NULL;
         $this->equipos = NULL;
@@ -441,6 +441,31 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         else
             $this->idsequiposadm = NULL;
         return $i;
+    }
+
+    /**
+     * Devuelve lista de usuarios que reporta, incluidos los propios
+     */
+    private function get_ReportingTeamsObj() {
+        $final = array();
+        $this->load_teams();
+        $arr = $this->idsequiposV;
+        $arr2 = $this->get_ReportingTeams();
+        if (is_array($arr2)) {
+            $arr = array_merge($arr, $arr2);
+        }
+        array_unique($arr);
+
+        foreach ($arr as $tid) {
+            if (is_numeric($tid)) {
+                $t = $this->objsCache->get_object("Team", $tid);
+                if ($this->objsCache->get_status("Team", $tid) == "ok") {
+                    array_push($final,$t);
+                }
+            }
+        }
+
+        return $final;
     }
 
     /**
@@ -516,13 +541,13 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @param bool  $reporting
      * @return type
      */
-    public function in_team($id,$reporting) {
+    public function in_team($id, $reporting = FALSE) {
         $this->load_teams();
         $arr = $this->idsequiposV;
-        if($reporting){
+        if ($reporting) {
             $arr2 = $this->get_ReportingTeams();
-            if(is_array($arr2)){
-                $arr = array_merge($arr,$arr2);
+            if (is_array($arr2)) {
+                $arr = array_merge($arr, $arr2);
             }
         }
         return in_array($id, $arr);
@@ -686,7 +711,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     public function get_view($TKT) {
         $this->load_profile();
         foreach ($this->perfil_vista as $v) {
-            if ($this->check_relation($v["nombre"], $TKT,true)) {
+            if ($this->check_relation($v["nombre"], $TKT, true)) {
                 return $v;
             }
         }
@@ -698,30 +723,30 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @return array
      */
     private function get_viewTeams() {
-        if(is_array($this->idsequiposvista)){
+        if (is_array($this->idsequiposvista)) {
             return $this->idsequiposvista;
         }
         $arr = array();
         foreach ($this->get_prop("equiposobj") as $t) {
             $arr = array_merge($arr, explode(",", $t->get_prop("idsequiposvisible")));
         }
-        $this->idsequiposvista=$arr;
+        $this->idsequiposvista = $arr;
         return $this->idsequiposvista;
     }
-    
+
     /**
      * Array de equipos que ve el usuario
      * @return array
      */
     private function get_ReportingTeams() {
-        if(is_array($this->idsequiposreporta)){
+        if (is_array($this->idsequiposreporta)) {
             return $this->idsequiposreporta;
         }
         $arr = array();
         foreach ($this->get_prop("equiposobj") as $t) {
             $arr = array_merge($arr, explode(",", $t->get_prop("idsequiposreporta")));
         }
-        $this->idsequiposreporta=$arr;
+        $this->idsequiposreporta = $arr;
         return $this->idsequiposreporta;
     }
 
@@ -734,7 +759,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         $uteams = explode(",", $U->get_prop("idsequipos"));
         $mytview = $this->get_viewTeams();
         foreach ($uteams as $tid) {
-            if ($this->in_team($tid,true)) {
+            if ($this->in_team($tid, true)) {
                 return true;
             }
             if (in_array($tid, $mytview)) {
@@ -750,7 +775,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @param bool  $reporting
      * @return boolean
      */
-    public function check_relation($rel, $TKT,$reporting) {
+    public function check_relation($rel, $TKT, $reporting) {
         switch ($rel) {
             case "*":
                 return true;
@@ -760,15 +785,15 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                     return true;
                 break;
             case "tomado_por_otro_usuario":
-                if ($TKT->get_prop("u_tom_o") && $this->in_team($TKT->get_prop("idequipo"),$reporting))
+                if ($TKT->get_prop("u_tom_o") && $this->in_team($TKT->get_prop("idequipo"), $reporting))
                     return true;
                 break;
             case "sin_tomar":
-                if ($TKT->get_prop("u_tom_o") == null && $this->in_team($TKT->get_prop("idequipo"),$reporting))
+                if ($TKT->get_prop("u_tom_o") == null && $this->in_team($TKT->get_prop("idequipo"), $reporting))
                     return true;
                 break;
             case "en_equipo":
-                if ($this->in_team($TKT->get_prop("idequipo"),$reporting))
+                if ($this->in_team($TKT->get_prop("idequipo"), $reporting))
                     return true;
                 break;
             case "generado_por_usuario":
@@ -777,14 +802,14 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                     return true;
                 break;
             case "generado_por_equipo_de_usuario_dir_propia":
-                if($this->in_division($TKT->get_division())==false){
+                if ($this->in_division($TKT->get_division()) == false) {
                     return false;
                 }
                 $uT = $TKT->get_prop("usr_o");
                 if ($uT == null)
                     return false;
                 foreach ($uT->get_prop("equiposobj") as $t) {
-                    if ($this->in_team($t->get_prop("id"),$reporting))
+                    if ($this->in_team($t->get_prop("id"), $reporting))
                         return true;
                 }
                 break;
@@ -793,7 +818,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 if ($uT == null)
                     return false;
                 foreach ($uT->get_prop("equiposobj") as $t) {
-                    if ($this->in_team($t->get_prop("id"),$reporting))
+                    if ($this->in_team($t->get_prop("id"), $reporting))
                         return true;
                 }
                 break;
@@ -814,7 +839,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $THs = $TKT->get_tktHObj();
                 foreach ($THs as $TH) {
                     if ($TH->get_prop("accion")->get_prop("ejecuta") == "open" || $TH->get_prop("accion")->get_prop("ejecuta") == "derive") {
-                        if ($this->in_team($TH->get_prop("objadj_id"),$reporting)) {
+                        if ($this->in_team($TH->get_prop("objadj_id"), $reporting)) {
                             return true;
                         }
                     }
@@ -824,7 +849,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $TKT->load_childs();
                 $chs = $TKT->get_prop("childs");
                 foreach ($chs as $ch) {
-                    if ($this->check_relation("generado_por_usuario", $ch,$reporting))
+                    if ($this->check_relation("generado_por_usuario", $ch, $reporting))
                         return true;
                 }
                 break;
@@ -832,7 +857,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $TKT->load_childs();
                 $chs = $TKT->get_prop("childs");
                 foreach ($chs as $ch) {
-                    if ($this->check_relation("generado_por_equipo_de_usuario", $ch,$reporting))
+                    if ($this->check_relation("generado_por_equipo_de_usuario", $ch, $reporting))
                         return true;
                 }
                 break;
@@ -1133,12 +1158,14 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             case 'equiposadmobj':
                 $this->load_teamsAdm();
                 return $this->equiposadm;
+            case 'equiposreportaobj':
+                return $this->get_ReportingTeamsObj();
             case 'equiposview':
                 return $this->get_viewTeams();
             case 'perfil':
                 return $this->perfil;
             case 'fulladm':
-                return $this->get_prop('perfilt')=='admin_full';
+                return $this->get_prop('perfilt') == 'admin_full';
             case 'fronts':
                 return $this->fronts;
             case 'perfilt':

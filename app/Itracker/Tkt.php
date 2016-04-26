@@ -8,13 +8,13 @@ class Tkt extends Tree {
     private $usr;   /* id usuario que reclama */
     private $usr_o; /* usuario que reclama */
     private $idequipo;  /* id del equipo asignado */
+    private $equipos_tratan;  /* equipos por los que se derivo el tkt */
     private $equipo;    /* equipo asignado */
     /* Fue cargado el equipo */
     private $teamLoaded;
     private $idmaster;  /* id del ticket master */
     private $master;    /* ticket master */
     private $origen;    /* ruta origen */
-
     private $u_tom; /* id usuario tomado */
     private $u_tom_o;   /* usuario tomado */
     private $u_asig;    /* id usuario asigno */
@@ -30,14 +30,14 @@ class Tkt extends Tree {
     private $childs;    /* tickets adjuntos */
     private $view;  /* vista para el usuario */
     private $working;
-
     private $variables;
+
     /**
      * Variables de ticket
      * @var \Itracker\Utils\Vars
      */
     private $vars;
-    
+
     /**
      * Accion que se esta ejecutando
      * @var Action
@@ -89,16 +89,15 @@ class Tkt extends Tree {
     private function load_DV($tmpU) {
         $this->id = $tmpU["id"];
         $this->variables = trim($tmpU["variables"]);
-        if($this->variables!='' && $this->variables!='<?xml version="1.0"?>'){
-            $this->vars=new \Itracker\Utils\Vars();
+        if ($this->variables != '' && $this->variables != '<?xml version="1.0"?>') {
+            $this->vars = new \Itracker\Utils\Vars();
             $this->vars->setRootTag('tkt');
-            if($this->vars->loadXML($this->variables)==false){
-                $this->getContext()->getLogger()->error('Variables invalidas en tkt',
-                        array('id'=>$this->id,'vars'=>$this->variables));
+            if ($this->vars->loadXML($this->variables) == false) {
+                $this->getContext()->getLogger()->error('Variables invalidas en tkt', array('id' => $this->id, 'vars' => $this->variables));
                 return 'Error al cargar tkt.[Vars Error]';
             }
-        }else{
-            $this->vars=new Utils\Vars();
+        } else {
+            $this->vars = new Utils\Vars();
             $this->vars->setRootTag('tkt');
             $this->vars->clean();
         }
@@ -111,6 +110,7 @@ class Tkt extends Tree {
         $this->prioridad = $tmpU["prioridad"];
         $this->idmaster = $tmpU["idmaster"];
         $this->idequipo = $tmpU["idequipo"];
+        $this->equipos_tratan = trim($tmpU["equipos_tratan"]);
         $this->teamLoaded = false;
         $rta = $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
@@ -119,7 +119,7 @@ class Tkt extends Tree {
         show_measure("OBJ:TKT:DB:" . $this->id);
         return $rta;
     }
-   
+
     /**
      * Carga ruta
      * @param type $tmpU
@@ -131,7 +131,6 @@ class Tkt extends Tree {
         $this->origen = $tmpU["origen"];
         return $this->load_path($this->origen, !$fromdb);
     }
-
 
     /**
      * Es master?
@@ -203,8 +202,8 @@ class Tkt extends Tree {
         if ($this->dbinstance->noEmpty) {
             while ($tc = $this->dbinstance->get_vector()) {
                 $TKT = $this->objsCache->get_object("Tkt", $tc["id"]);
-                    $this->childs[$i] = $TKT;
-                    $i++;
+                $this->childs[$i] = $TKT;
+                $i++;
             }
             return $i;
         }
@@ -282,28 +281,28 @@ class Tkt extends Tree {
      * Devuelve variables del ticket
      * @return \Itracker\Utils\Vars
      */
-    public function getVars(){
-        if(!$this->vars){
-            $this->vars=new Utils\Vars();
+    public function getVars() {
+        if (!$this->vars) {
+            $this->vars = new Utils\Vars();
             $this->vars->setRootTag('tkt');
             $this->vars->clean();
         }
         return clone $this->vars;
     }
-    
+
     /**
      * Setea variables de ticket
      * @param \Itracker\Utils\Vars $vars
      * @return string se pudo guardar
      */
-    public function setVars($vars){
-        if(! ($vars instanceof Utils\Vars)){
+    public function setVars($vars) {
+        if (!($vars instanceof Utils\Vars)) {
             return 'Parametro invalido setVars #1';
         }
-        $ssql = "update TBL_TICKETS set variables='".  strToSQL($vars->getXml()->saveXML())."' where id=" . intval($this->id);
+        $ssql = "update TBL_TICKETS set variables='" . strToSQL($vars->getXml()->saveXML()) . "' where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql))
             return "Ticket_vars: " . $this->dbinstance->details;
-        $this->vars=$vars;
+        $this->vars = $vars;
         return 'ok';
     }
 
@@ -312,7 +311,7 @@ class Tkt extends Tree {
      * @return string
      */
     public function get_LargeStatus() {
-        if($this->getVars()->getValue('largestatus')){
+        if ($this->getVars()->getValue('largestatus')) {
             return $this->vars->getValue('largestatus');
         }
         return '';
@@ -322,12 +321,13 @@ class Tkt extends Tree {
      * devuelve el estado del tkt
      * @return  string
      */
+
     public function get_status() {
-        
-        if($this->getVars()->getValue('status')){
+
+        if ($this->getVars()->getValue('status')) {
             return $this->vars->getValue('status');
         }
-        
+
         $TKTHF = $this->get_last_tktH();
         if ($this->UB) {
             $status = "Cerrado";
@@ -356,7 +356,7 @@ class Tkt extends Tree {
                 }
             }
         }
-        return $status.'*';
+        return $status . '*';
     }
 
     /**
@@ -367,7 +367,7 @@ class Tkt extends Tree {
         if (is_array($this->tkt_hOBJ) && count($this->tkt_hOBJ) && $this->tkthActionsLoaded == "*")
             return $this->tkt_hOBJ[count($this->tkt_hOBJ) - 1];
         $ssql = "
-            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and UB is null order by FA
+            select id from TBL_TICKETS_M where idtkt=" . intval($this->id) . " and FB is null order by FA
         ";
         $this->dbinstance->loadRS($ssql);
         if ($this->dbinstance->noEmpty) {
@@ -525,24 +525,23 @@ class Tkt extends Tree {
      * @return string
      */
     public function ejecute_action($action, $values = null, $objadj_id = null) {
-        $this->getContext()->getLogger()->info('Ejecutando',array(
-            'accion'=>$action,
-            'values'=>print_r($values,true),
-            'objID'=>$objadj_id
+        $this->getContext()->getLogger()->info('Ejecutando', array(
+            'accion' => $action,
+            'values' => print_r($values, true),
+            'objID' => $objadj_id
         ));
         $A = $this->objsCache->get_object("Action", $action, true);
         if ($this->objsCache->get_status("Action", $action) != "ok") {
-            $this->getContext()->getLogger()->error('Error al cargar accion',array(
-            'accion'=>$action,
-
-             ));
+            $this->getContext()->getLogger()->error('Error al cargar accion', array(
+                'accion' => $action,
+            ));
             return "no se puede cargar accion";
         }
         $A->loadTKT($this);
         if ($values) {
             $valid = $A->loadFormValues($values);
             if ($valid != 'ok') {
-                return array('result'=>$valid);
+                return array('result' => $valid);
             }
         }
         if ($objadj_id) {
@@ -629,6 +628,7 @@ class Tkt extends Tree {
         $this->u_asig = NULL;
         $this->usr = $this->getLogged()->get_prop("usr");
         $this->idequipo = $idequipo;
+        $this->equipos_tratan = ',' . $idequipo . ',';
         $this->teamLoaded = false;
         $this->load_team();
         return $this->insert_DB();
@@ -708,7 +708,8 @@ class Tkt extends Tree {
             }
         }
         $this->load_childs();
-        $ssql = "update TBL_TICKETS set idequipo=" . $equipo->get_prop("id") . ",u_tom= NULL , u_asig= NULL, prioridad=NULL where id=" . intval($this->id);
+        $tmpTratan = $this->equipos_tratan . $equipo->get_prop("id") . ',';
+        $ssql = "update TBL_TICKETS set idequipo=" . $equipo->get_prop("id") . ", equipos_tratan='" . $tmpTratan . "', u_tom= NULL , u_asig= NULL, prioridad=NULL where id=" . intval($this->id);
         if ($this->dbinstance->query($ssql)) {
             return "TKT_derivar: " . $this->dbinstance->details;
         }
@@ -718,7 +719,7 @@ class Tkt extends Tree {
                 $c->derive($equipo);
             }
         }
-
+        $this->equipos_tratan = $tmpTratan;
         $this->idequipo = $equipo->get_prop("id");
         $this->equipo = $equipo;
         $this->u_asig = NULL;
@@ -753,7 +754,6 @@ class Tkt extends Tree {
 
         return "ok";
     }
-
 
     /**
      * Toma el ticket para el usuario logueado
@@ -927,9 +927,6 @@ class Tkt extends Tree {
         foreach ($childs as $c) {
             $c->join($master);
         }
-
-
-
         return "ok";
     }
 
@@ -961,7 +958,7 @@ class Tkt extends Tree {
 
         $criticVC = explode(",", $critico);
         $ssql = "
-            select id,origen from TBL_TICKETS where idmaster is null and UB is null 
+            select id,origen from TBL_TICKETS where idmaster is null and FB is null 
             and origen like 'D%,S" . intval($this->get_system()->get_prop("id")) . ",%'"; // todos los tkts del sistema abiertos
         $this->dbinstance->loadRS($ssql);
         if (!$this->dbinstance->noEmpty) {
@@ -998,9 +995,9 @@ class Tkt extends Tree {
         if (($rta = $this->check_data())) {
             return $rta;
         }
-        $ssql = "insert into TBL_TICKETS(usr,idequipo,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)" .
+        $ssql = "insert into TBL_TICKETS(usr,idequipo,equipos_tratan,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)" .
                 "values ('" . strToSQL($this->get_prop("usr")) . "'," .
-                $this->get_prop("idequipo") . ",NULL,'" . strToSQL($this->get_path()) .
+                $this->get_prop("idequipo") . ",'" . $this->get_prop("equipostratan") . "',NULL,'" . strToSQL($this->get_path()) .
                 "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
 
 
@@ -1035,6 +1032,8 @@ class Tkt extends Tree {
             case 'idequipo':
                 $this->load_team();
                 return $this->idequipo;
+            case 'equipostratan':
+                return $this->equipos_tratan;
             case 'equipo':
                 $this->load_team();
                 return $this->equipo;

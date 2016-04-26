@@ -92,13 +92,13 @@ class XLSXWriter
 
 		$zip->addEmptyDir("xl/worksheets/");
 		foreach($this->sheets as $sheet) {
-			$zip->addFile($sheet->filename, "xl/worksheets/".$sheet->xmlname );
+			$zip->addFromString("xl/worksheets/".$sheet->xmlname,file_get_contents($sheet->filename) );
 		}
 		if (!empty($this->shared_strings)) {
-			$zip->addFile($this->writeSharedStringsXML(), "xl/sharedStrings.xml" );  //$zip->addFromString("xl/sharedStrings.xml",     self::buildSharedStringsXML() );
+			$zip->addFromString("xl/sharedStrings.xml",file_get_contents($this->writeSharedStringsXML()) );  //$zip->addFromString("xl/sharedStrings.xml",     self::buildSharedStringsXML() );
 		}
 		$zip->addFromString("xl/workbook.xml"         , self::buildWorkbookXML() );
-		$zip->addFile($this->writeStylesXML(), "xl/styles.xml" );  //$zip->addFromString("xl/styles.xml"           , self::buildStylesXML() );
+		$zip->addFromString( "xl/styles.xml",file_get_contents($this->writeStylesXML()) );  //$zip->addFromString("xl/styles.xml"           , self::buildStylesXML() );
 		$zip->addFromString("[Content_Types].xml"     , self::buildContentTypesXML() );
 
 		$zip->addEmptyDir("xl/_rels/");

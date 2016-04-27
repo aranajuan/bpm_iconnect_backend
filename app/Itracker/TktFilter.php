@@ -178,25 +178,17 @@ class TktFilter extends BasicObject {
                     $SSQL.=")";
                     break;
                 case self::$TOUCH_BY_TEAM:
-                    $SSQL.=" and  
-                        ( select count(*) from TBL_TICKETS_M as TKT_H_O 
-                        inner join TBL_ACCIONES as ACCIONES_O on (ACCIONES_O.id=TKT_H_O.idaccion)
-                        where TKT_H_O.idtkt=TKT.id and
-                        (
-                            ACCIONES_O.ejecuta in ('open','derive') and
-                            TKT_H_O.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')
-                        ) OR
-                        (
-                            ACCIONES_O.ejecuta in ('link') and (
-                                select count(TKT_H_O2.valoraccion) from TBL_TICKETS_M as TKT_H_O2
-                                inner join TBL_ACCIONES as ACCIONES_O2 on (ACCIONES_O2.id=TKT_H_O2.idaccion)
-                                where
-                                TKT_H_O2.id=TKT_H_O.valoraccion and
-                                ACCIONES_O2.ejecuta in ('derive') and
-                                TKT_H_O2.valoraccion in ('" . implode("','", $this->get_filter($type)) . "')
-                            )>0
-                        )
-                        )>0";
+                        $SSQL .= "and (";
+                        $fst = true;
+                        foreach($this->get_filter($type) as $id){
+                            if($fst){
+                                $fst=false;
+                                $SSQL .= "TKT.equipos_tratan like '%,".$id.",%'";
+                            }else{
+                                $SSQL .= " or TKT.equipos_tratan like '%,".$id.",%'";
+                            }
+                        }
+                        $SSQL .= ")";
                     break;
                 case self::$IDMASTER:
                     $idmaster = $this->get_filter($type);

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-04-2016 a las 19:29:02
+-- Tiempo de generación: 26-04-2016 a las 20:57:33
 -- Versión del servidor: 10.1.10-MariaDB
 -- Versión de PHP: 7.0.4
 
@@ -40,6 +40,7 @@ CREATE TABLE `tickets` (
   `u_asig` int(11) DEFAULT NULL,
   `prioridad` smallint(6) DEFAULT NULL,
   `variables` text,
+  `equipos_tratan` varchar(100) DEFAULT NULL,
   `FA` datetime NOT NULL,
   `UA` varchar(15) NOT NULL,
   `FB` datetime DEFAULT NULL,
@@ -50,104 +51,104 @@ CREATE TABLE `tickets` (
 -- Volcado de datos para la tabla `tickets`
 --
 
-INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `u_asig`, `prioridad`, `variables`, `FA`, `UA`, `FB`, `UB`) VALUES
-(1, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n', '2014-11-23 21:11:04', 'U1AG1', NULL, NULL),
-(2, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:11:55', 'U1AG1', '2014-11-24 14:02:37', 'COM1'),
-(3, 'U1AG1', NULL, 'D1,S1,O5,O9,O15,', 2, 'COM1', NULL, NULL, NULL, '2014-11-23 21:13:17', 'U1AG1', '2014-11-24 14:13:47', 'COM1'),
-(4, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, '2014-11-27 13:18:31', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
-(5, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, NULL, '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
-(6, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, '2014-12-10 10:18:29', 'U1AG1', '2015-02-18 14:58:31', 'COM1'),
-(7, 'U1AG1', 10, 'D1,S1,O4,O9,O14,', 2, NULL, 0, NULL, NULL, '2014-12-10 10:19:24', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(8, 'U1AG1', 1, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, NULL, '2014-12-12 09:25:49', 'U1AG1', NULL, NULL),
-(9, 'U1AG1', 10, 'D1,S1,O3,O7,O12,', 2, 'COM1', NULL, NULL, NULL, '2015-01-15 11:14:31', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(10, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 11:55:15', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
-(11, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, '2015-02-04 16:53:07', 'U1AG1', '2015-02-19 15:00:26', 'COM1'),
-(12, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 2, 'COM1', NULL, NULL, NULL, '2015-02-05 14:53:21', 'U1AG1', '2015-02-09 14:35:57', 'COM1'),
-(13, 'U1AG2', 4, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, NULL, '2015-02-06 16:41:37', 'U1AG2', '2015-05-07 16:05:41', 'COM1'),
-(14, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:17', 'U1AG1', '2015-02-27 09:03:25', 'COM1'),
-(15, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 15:34:54', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
-(16, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:20:16', 'U1AG1', NULL, NULL),
-(17, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:21:33', 'U1AG1', '2015-02-27 10:03:44', 'COM1'),
-(18, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:22:19', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
-(19, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:25:00', 'U1AG1', '2015-02-19 15:01:33', 'COM1'),
-(20, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-09 16:28:24', 'U1AG1', '2015-04-27 16:04:11', 'COM1'),
-(21, 'U1AG1', 18, 'D1,S1,O5,O9,O14,', 2, NULL, NULL, NULL, NULL, '2015-02-09 16:41:46', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
-(22, 'U1AG1', 16, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, '2015-02-09 16:42:12', 'U1AG1', NULL, NULL),
-(23, 'U1AG1', 4, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-10 09:53:18', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
-(24, 'U1AG1', 15, 'D1,S1,O5,O9,O14,', 2, NULL, NULL, NULL, NULL, '2015-02-10 10:19:12', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
-(25, 'U1AG1', 1, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, NULL, '2015-02-10 10:21:15', 'U1AG1', NULL, NULL),
-(26, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(27, 'U1AG2', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
-(28, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(29, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
-(30, 'U1AG1', 28, 'D1,S1,O4,O9,O14,', 2, NULL, NULL, NULL, NULL, '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(31, 'U1AG1', 37, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(32, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(33, 'U1AG1', NULL, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status><seteado>0</seteado></tkt>\n', '2015-03-05 09:49:47', 'U1AG1', '2016-01-07 15:41:57', 'COM1'),
-(34, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n', '2015-03-12 12:52:41', 'U1AG1', NULL, NULL),
-(35, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:37:11', 'U1AG1', '2015-06-04 11:20:21', 'COM1'),
-(36, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', '2015-03-12 14:38:00', 'U1AG1', '2015-10-16 10:21:50', 'COM1'),
-(37, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:38:31', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(38, 'U1AG1', 37, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, '2015-03-12 14:39:15', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
-(39, 'U1AG1', 43, 'D1,S1,O1,', 6, NULL, NULL, NULL, NULL, '2015-03-12 14:41:29', 'U1AG1', NULL, NULL),
-(40, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:44:29', 'U1AG1', '2015-03-12 14:44:29', 'U1AG1'),
-(41, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:46:49', 'U1AG1', '2015-03-12 14:46:49', 'U1AG1'),
-(42, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-03-12 14:48:11', 'U1AG1', '2015-03-12 14:48:11', 'U1AG1'),
-(43, 'U1AG2', NULL, 'D1,S1,O4,O9,O14,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', '2015-04-23 15:00:59', 'U1AG2', NULL, NULL),
-(44, 'U1AG2', 45, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, '2015-04-23 15:23:46', 'U1AG2', '2015-10-01 09:50:10', 'COM1'),
-(45, 'U1AG2', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', '2015-04-23 15:25:40', 'U1AG2', '2015-10-01 09:50:10', 'COM1'),
-(46, 'U1AG2', 47, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n', '2015-04-23 15:26:07', 'U1AG2', NULL, NULL),
-(47, 'U1AG2', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', '2015-04-23 15:26:54', 'U1AG2', NULL, NULL),
-(48, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:10:19', 'U1AG2', '2015-06-25 14:27:55', 'COM1'),
-(49, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', '2015-04-29 14:10:41', 'U1AG2', NULL, NULL),
-(50, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', '2015-04-29 14:11:50', 'U1AG2', NULL, NULL),
-(51, 'U1AG2', 47, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Tomado</status></tkt>\n', '2015-04-29 14:12:31', 'U1AG2', NULL, NULL),
-(52, 'U1AG2', 53, 'D1,S1,O3,O7,O13,', 2, 'COM1', 0, NULL, NULL, '2015-04-29 14:13:25', 'U1AG2', '2016-01-07 15:50:00', 'COM1'),
-(53, 'U1AG2', NULL, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', '2015-04-29 14:16:00', 'U1AG2', '2016-01-07 15:50:00', 'COM1'),
-(54, 'U1AG2', 47, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>comentado&gt;!!</status></tkt>\n', '2015-04-29 14:16:17', 'U1AG2', NULL, NULL),
-(55, 'U1AG2', NULL, 'D1,S1,O4,O8,', 2, 'COM1', NULL, NULL, NULL, '2015-04-29 14:16:29', 'U1AG2', '2015-06-25 14:10:03', 'COM1'),
-(56, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-04 11:59:04', 'U1AG1', '2015-06-04 11:59:04', 'U1AG1'),
-(57, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:12:55', 'U1AG1', '2015-06-22 14:12:55', 'U1AG1'),
-(58, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:19:04', 'U1AG1', '2015-06-22 14:19:04', 'U1AG1'),
-(59, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:20:12', 'U1AG1', '2015-06-22 14:20:12', 'U1AG1'),
-(60, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Tomado</status></tkt>\n', '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
-(61, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-22 14:23:45', 'U1AG1', '2015-06-22 14:23:45', 'U1AG1'),
-(62, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:25:50', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
-(63, 'U1AG1', NULL, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:27:13', 'U1AG1', '2015-06-25 14:33:41', 'COM1'),
-(64, 'U1AG1', 62, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, '2015-06-22 14:39:10', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
-(65, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 6, NULL, NULL, NULL, NULL, '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
-(66, 'U1AG1', NULL, 'D1,S1,O3,O6,O11,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', '2015-06-26 11:41:30', 'U1AG1', '2016-01-12 08:52:14', 'COM1'),
-(67, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, '2015-06-26 11:49:42', 'U1AG1', '2015-06-26 11:49:42', 'U1AG1'),
-(68, 'U1AG1', NULL, 'D1,S1,O1,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', '2015-08-20 15:57:52', 'U1AG1', '2015-08-20 15:57:52', 'U1AG1'),
-(69, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:40:34', 'U1AG1', NULL, NULL),
-(70, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:47:26', 'U1AG1', NULL, NULL),
-(71, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:49:12', 'U1AG1', NULL, NULL),
-(72, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:49:47', 'U1AG1', NULL, NULL),
-(73, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL),
-(74, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-27 10:58:31', 'U1AG1', NULL, NULL),
-(75, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-27 11:01:57', 'U1AG1', NULL, NULL),
-(76, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-28 15:47:42', 'U1AG1', NULL, NULL),
-(77, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-08-28 15:48:37', 'U1AG1', NULL, NULL),
-(78, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-09-24 15:49:00', 'U1AG1', NULL, NULL),
-(79, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-09-25 09:28:44', 'U1AG1', NULL, NULL),
-(80, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-11-12 13:58:05', 'U1AG1', NULL, NULL),
-(81, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-11-12 13:58:58', 'U1AG1', NULL, NULL),
-(82, 'U1AG1', NULL, 'D1,S1,O3,O6,O11,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-11-16 09:52:27', 'U1AG1', NULL, NULL),
-(83, 'U1AG1', NULL, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-11-16 09:52:45', 'U1AG1', NULL, NULL),
-(84, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, NULL, '2015-12-17 10:21:01', 'U1AG1', NULL, NULL),
-(85, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-12-17 10:23:11', 'U1AG1', NULL, NULL),
-(86, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-12-17 10:31:40', 'U1AG1', NULL, NULL),
-(87, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2015-12-17 12:48:06', 'U1AG1', NULL, NULL),
-(88, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-01-08 10:21:05', 'U1AG1', NULL, NULL),
-(89, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-01-08 10:21:13', 'U1AG1', NULL, NULL),
-(90, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-01-12 08:49:34', 'U1AG1', NULL, NULL),
-(91, 'U1AG1', NULL, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-01-28 11:57:46', 'U1AG1', NULL, NULL),
-(92, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-03-31 16:01:16', 'U1AG1', NULL, NULL),
-(93, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-03-31 16:01:54', 'U1AG1', NULL, NULL),
-(94, 'U1AG1', NULL, 'D1,S1,O4,O9,O14', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-03-31 16:14:21', 'U1AG1', NULL, NULL),
-(95, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-03-31 16:14:50', 'U1AG1', NULL, NULL),
-(96, 'U1AG1', NULL, 'D1,S1,O3,O6,O10', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-04-07 19:16:26', 'U1AG1', NULL, NULL),
-(97, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL);
+INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `u_asig`, `prioridad`, `variables`, `equipos_tratan`, `FA`, `UA`, `FB`, `UB`) VALUES
+(1, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n', ',2,1,', '2014-11-23 21:11:04', 'U1AG1', NULL, NULL),
+(2, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-23 21:11:55', 'U1AG1', '2014-11-24 14:02:37', 'COM1'),
+(3, 'U1AG1', NULL, 'D1,S1,O5,O9,O15,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-23 21:13:17', 'U1AG1', '2014-11-24 14:13:47', 'COM1'),
+(4, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-27 13:18:31', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
+(5, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
+(6, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-12-10 10:18:29', 'U1AG1', '2015-02-18 14:58:31', 'COM1'),
+(7, 'U1AG1', 10, 'D1,S1,O4,O9,O14,', 2, NULL, 0, NULL, NULL, ',2,', '2014-12-10 10:19:24', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(8, 'U1AG1', 1, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2014-12-12 09:25:49', 'U1AG1', NULL, NULL),
+(9, 'U1AG1', 10, 'D1,S1,O3,O7,O12,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-01-15 11:14:31', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(10, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-04 11:55:15', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
+(11, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-04 16:53:07', 'U1AG1', '2015-02-19 15:00:26', 'COM1'),
+(12, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-05 14:53:21', 'U1AG1', '2015-02-09 14:35:57', 'COM1'),
+(13, 'U1AG2', 4, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-06 16:41:37', 'U1AG2', '2015-05-07 16:05:41', 'COM1'),
+(14, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 15:34:17', 'U1AG1', '2015-02-27 09:03:25', 'COM1'),
+(15, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 15:34:54', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
+(16, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2015-02-09 16:20:16', 'U1AG1', NULL, NULL),
+(17, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 16:21:33', 'U1AG1', '2015-02-27 10:03:44', 'COM1'),
+(18, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 16:22:19', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
+(19, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 16:25:00', 'U1AG1', '2015-02-19 15:01:33', 'COM1'),
+(20, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-09 16:28:24', 'U1AG1', '2015-04-27 16:04:11', 'COM1'),
+(21, 'U1AG1', 18, 'D1,S1,O5,O9,O14,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-02-09 16:41:46', 'U1AG1', '2015-02-18 15:07:36', 'COM1'),
+(22, 'U1AG1', 16, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, ',2,', '2015-02-09 16:42:12', 'U1AG1', NULL, NULL),
+(23, 'U1AG1', 4, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-10 09:53:18', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
+(24, 'U1AG1', 15, 'D1,S1,O5,O9,O14,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-02-10 10:19:12', 'U1AG1', '2015-02-18 15:11:55', 'COM1'),
+(25, 'U1AG1', 1, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2015-02-10 10:21:15', 'U1AG1', NULL, NULL),
+(26, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(27, 'U1AG2', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
+(28, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
+(29, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,6,', '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
+(30, 'U1AG1', 28, 'D1,S1,O4,O9,O14,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
+(31, 'U1AG1', 37, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(32, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(33, 'U1AG1', NULL, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status><seteado>0</seteado></tkt>\n', ',2,', '2015-03-05 09:49:47', 'U1AG1', '2016-01-07 15:41:57', 'COM1'),
+(34, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n', ',2,', '2015-03-12 12:52:41', 'U1AG1', NULL, NULL),
+(35, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-12 14:37:11', 'U1AG1', '2015-06-04 11:20:21', 'COM1'),
+(36, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',2,', '2015-03-12 14:38:00', 'U1AG1', '2015-10-16 10:21:50', 'COM1'),
+(37, 'U1AG1', NULL, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-12 14:38:31', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(38, 'U1AG1', 37, 'D1,S1,O1,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-12 14:39:15', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
+(39, 'U1AG1', 43, 'D1,S1,O1,', 6, NULL, NULL, NULL, NULL, ',2,', '2015-03-12 14:41:29', 'U1AG1', NULL, NULL),
+(40, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-03-12 14:44:29', 'U1AG1', '2015-03-12 14:44:29', 'U1AG1'),
+(41, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-03-12 14:46:49', 'U1AG1', '2015-03-12 14:46:49', 'U1AG1'),
+(42, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-03-12 14:48:11', 'U1AG1', '2015-03-12 14:48:11', 'U1AG1'),
+(43, 'U1AG2', NULL, 'D1,S1,O4,O9,O14,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,6,', '2015-04-23 15:00:59', 'U1AG2', NULL, NULL),
+(44, 'U1AG2', 45, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-04-23 15:23:46', 'U1AG2', '2015-10-01 09:50:10', 'COM1'),
+(45, 'U1AG2', NULL, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',2,', '2015-04-23 15:25:40', 'U1AG2', '2015-10-01 09:50:10', 'COM1'),
+(46, 'U1AG2', 47, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n', ',2,', '2015-04-23 15:26:07', 'U1AG2', NULL, NULL),
+(47, 'U1AG2', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,1,', '2015-04-23 15:26:54', 'U1AG2', NULL, NULL),
+(48, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-04-29 14:10:19', 'U1AG2', '2015-06-25 14:27:55', 'COM1'),
+(49, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,1,', '2015-04-29 14:10:41', 'U1AG2', NULL, NULL),
+(50, 'U1AG2', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,1,', '2015-04-29 14:11:50', 'U1AG2', NULL, NULL),
+(51, 'U1AG2', 47, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Tomado</status></tkt>\n', ',2,', '2015-04-29 14:12:31', 'U1AG2', NULL, NULL),
+(52, 'U1AG2', 53, 'D1,S1,O3,O7,O13,', 2, 'COM1', 0, NULL, NULL, ',2,', '2015-04-29 14:13:25', 'U1AG2', '2016-01-07 15:50:00', 'COM1'),
+(53, 'U1AG2', NULL, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',2,', '2015-04-29 14:16:00', 'U1AG2', '2016-01-07 15:50:00', 'COM1'),
+(54, 'U1AG2', 47, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>comentado&gt;!!</status></tkt>\n', ',2,', '2015-04-29 14:16:17', 'U1AG2', NULL, NULL),
+(55, 'U1AG2', NULL, 'D1,S1,O4,O8,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-04-29 14:16:29', 'U1AG2', '2015-06-25 14:10:03', 'COM1'),
+(56, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-04 11:59:04', 'U1AG1', '2015-06-04 11:59:04', 'U1AG1'),
+(57, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:12:55', 'U1AG1', '2015-06-22 14:12:55', 'U1AG1'),
+(58, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:19:04', 'U1AG1', '2015-06-22 14:19:04', 'U1AG1'),
+(59, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:20:12', 'U1AG1', '2015-06-22 14:20:12', 'U1AG1'),
+(60, 'U1AG1', NULL, 'D1,S1,O1,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,6,', '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
+(61, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:23:45', 'U1AG1', '2015-06-22 14:23:45', 'U1AG1'),
+(62, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:25:50', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
+(63, 'U1AG1', NULL, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:27:13', 'U1AG1', '2015-06-25 14:33:41', 'COM1'),
+(64, 'U1AG1', 62, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:39:10', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
+(65, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 6, NULL, NULL, NULL, NULL, ',6,', '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
+(66, 'U1AG1', NULL, 'D1,S1,O3,O6,O11,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',2,', '2015-06-26 11:41:30', 'U1AG1', '2016-01-12 08:52:14', 'COM1'),
+(67, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-26 11:49:42', 'U1AG1', '2015-06-26 11:49:42', 'U1AG1'),
+(68, 'U1AG1', NULL, 'D1,S1,O1,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',1,', '2015-08-20 15:57:52', 'U1AG1', '2015-08-20 15:57:52', 'U1AG1'),
+(69, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', ',1,', '2015-08-20 16:40:34', 'U1AG1', NULL, NULL),
+(70, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', ',1,', '2015-08-20 16:47:26', 'U1AG1', NULL, NULL),
+(71, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', ',1,', '2015-08-20 16:49:12', 'U1AG1', NULL, NULL),
+(72, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', ',1,', '2015-08-20 16:49:47', 'U1AG1', NULL, NULL),
+(73, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Pendiente</status></tkt>\n', ',1,', '2015-08-20 16:50:33', 'U1AG1', NULL, NULL),
+(74, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-08-27 10:58:31', 'U1AG1', NULL, NULL),
+(75, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-08-27 11:01:57', 'U1AG1', NULL, NULL),
+(76, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-08-28 15:47:42', 'U1AG1', NULL, NULL),
+(77, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-08-28 15:48:37', 'U1AG1', NULL, NULL),
+(78, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-09-24 15:49:00', 'U1AG1', NULL, NULL),
+(79, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-09-25 09:28:44', 'U1AG1', NULL, NULL),
+(80, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-11-12 13:58:05', 'U1AG1', NULL, NULL),
+(81, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-11-12 13:58:58', 'U1AG1', NULL, NULL),
+(82, 'U1AG1', NULL, 'D1,S1,O3,O6,O11,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-11-16 09:52:27', 'U1AG1', NULL, NULL),
+(83, 'U1AG1', NULL, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-11-16 09:52:45', 'U1AG1', NULL, NULL),
+(84, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, NULL, NULL, '2015-12-17 10:21:01', 'U1AG1', NULL, NULL),
+(85, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-12-17 10:23:11', 'U1AG1', NULL, NULL),
+(86, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-12-17 10:31:40', 'U1AG1', NULL, NULL),
+(87, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2015-12-17 12:48:06', 'U1AG1', NULL, NULL),
+(88, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-01-08 10:21:05', 'U1AG1', NULL, NULL),
+(89, 'U1AG1', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-01-08 10:21:13', 'U1AG1', NULL, NULL),
+(90, 'U1AG1', NULL, 'D1,S1,O4,O8,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-01-12 08:49:34', 'U1AG1', NULL, NULL),
+(91, 'U1AG1', NULL, 'D1,S1,O3,O7,O12,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-01-28 11:57:46', 'U1AG1', NULL, NULL),
+(92, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:01:16', 'U1AG1', NULL, NULL),
+(93, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:01:54', 'U1AG1', NULL, NULL),
+(94, 'U1AG1', NULL, 'D1,S1,O4,O9,O14', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:14:21', 'U1AG1', NULL, NULL),
+(95, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:14:50', 'U1AG1', NULL, NULL),
+(96, 'U1AG1', NULL, 'D1,S1,O3,O6,O10', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-04-07 19:16:26', 'U1AG1', NULL, NULL),
+(97, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -691,7 +692,8 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 (519, 96, 1, '1', '2016-04-07 19:16:26', 'U1AG1', NULL, NULL, 0),
 (520, 34, 11, '', '2016-04-07 19:16:29', 'U1AG1', NULL, NULL, 0),
 (521, 97, 1, '1', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL, 0),
-(523, 34, 17, '', '2016-04-07 19:31:36', 'COM1', NULL, NULL, 0);
+(523, 34, 17, '', '2016-04-07 19:31:36', 'COM1', NULL, NULL, 0),
+(524, 60, 4, '6', '2016-04-26 15:55:32', 'COM1', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -1090,7 +1092,8 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 (518, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>ss</value></element> </itform>\n'),
 (519, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>      <element>      <type>input</type>      <label>VALOR</label>      <id>valor</id>      <view>1</view>  <comment>view 1 - numerico requerido</comment>      <validations>         <numeric>true</numeric>         <required>true</required>      </validations>   <value>234</value></element>   <element>      <type>text</type>      <id>TEXTO</id>      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>   <value/></element>   <element>      <type>input</type>      <id>regex</id>      <comment>/U[0-9]{6}/</comment>      <label>REGEX</label>      <validations>         <regex>/U[0-9]{6}/</regex>      </validations>   <value>U123123</value></element>   <element>      <type>inputlong</type>      <label>COMENTARIO</label>      <id>comentario</id>   <value/></element>   <element>      <type>datetime</type>      <id>datetime</id>      <label>DATETIME</label>   <value>12-04-2016 00:00</value></element>   <element>      <type>month</type>      <id>month</id>      <label>MONTH</label>   <value/></element>   <element>      <type>select</type>      <id>seleccion</id>      <label>SELECCION</label>      <option>         <value>1</value>         <text>opcion1</text>      </option>      <option>         <value>2</value>         <text>opcion2</text>      </option>   <value>1</value></element>   <element>      <type>link</type>      <id>link</id>      <label>LINK</label>      <path>siebel/aa/dd.ppt</path>      <text>Link</text>      <comment>Descargue el archivo para luego anexarlo</comment>   <value/></element></itform>\n'),
 (521, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>456767</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>xdfdsfg</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>25-04-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
-(523, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>sddf</value></element> </itform>\n');
+(523, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>sddf</value></element> </itform>\n'),
+(524, '<?xml version="1.0"?>\n<itform>  <element> <type> inputlong </type> <label>Comentario</label><id> comment </id> <comment> Commentario </comment> <value>test</value></element> </itform>\n');
 
 --
 -- Índices para tablas volcadas
@@ -1100,13 +1103,19 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 -- Indices de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `UA` (`UA`),
+  ADD KEY `FB` (`FB`),
+  ADD KEY `idmaster` (`idmaster`,`origen`,`idequipo`,`u_tom`,`FA`),
+  ADD KEY `equipos_deriva` (`equipos_tratan`);
 
 --
 -- Indices de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idtkt` (`idtkt`,`idaccion`,`valoraccion`),
+  ADD KEY `FA` (`FA`,`FB`);
 
 --
 -- Indices de la tabla `tickets_m_detalles`
@@ -1128,7 +1137,7 @@ ALTER TABLE `tickets`
 -- AUTO_INCREMENT de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=524;--
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=525;--
 -- Base de datos: `itracker_agentes_uta`
 --
 DROP DATABASE `itracker_agentes_uta`;
@@ -1245,7 +1254,7 @@ CREATE TABLE `equipos` (
 
 INSERT INTO `equipos` (`id`, `nombre`, `t_conformidad`, `idlistin`, `iddireccion`, `idsequipos_deriva`, `idsequipos_visible`, `idsequipos_reporta`, `mytkts_vista`, `staffhome_vista`, `estado`) VALUES
 (1, 'GO_Comisiones2', '48:00', 2, 1, '', '', '1,3', '', '', 0),
-(2, 'Comisiones', '48:00', 1, 1, '1,6', '1,3,4', NULL, '', 'id,js:show_childs:id:childsc=>ADJ,FA=>Fecha cracion,usr_o.nombre=>Agente,nextans:S1=>S1,nextans:O33:P2=>S2,nextans:O24=>S3,vars.status=>estadoVar', 0),
+(2, 'Comisiones', '48:00', 1, 1, '1,6', '1,3,4', '6', '', 'id,js:show_childs:id:childsc=>ADJ,FA=>Fecha cracion,usr_o.nombre=>Agente,nextans:S1=>S1,nextans:O33:P2=>S2,nextans:O24=>S3,vars.status=>estadoVar', 0),
 (3, 'Agente1', '03:00', 3, 1, '2', '2', NULL, 'id,equipo.nombre=>area,status,vars.status', '', 0),
 (4, 'Agente2', '03:00', 4, 1, '2', '2', NULL, '', '', 0),
 (5, 'Adms', '02:00', 5, 1, '', '', '1,2,3,4,5,6', '', '', 0),
@@ -1395,11 +1404,11 @@ CREATE TABLE `perfiles` (
 --
 
 INSERT INTO `perfiles` (`id`, `nombre`, `accesos`) VALUES
-(1, 'admin_full', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,'),
-(2, 'admin_teams', '0,19,20,21,22,23,24,30,31,47,49,50,51,52,53,56'),
-(3, 'comisiones_analista', '0,24,30,31,32,33,34,35,36,37,38,47,53,54,55,56,58,59'),
-(4, 'comisiones_responsable', '0,24,30,31,32,33,34,35,36,37,38,41,47,53,54,55,56,58'),
-(5, 'agente', '0,24,30,31,32,34,36,37,39,40,43,46,47,53,56,57');
+(1, 'admin_full', '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,62,'),
+(2, 'admin_teams', '0,19,20,21,22,23,24,30,31,47,49,50,51,52,53,56,62'),
+(3, 'comisiones_analista', '0,24,30,31,32,33,34,35,36,37,38,47,53,54,55,56,58,59,62'),
+(4, 'comisiones_responsable', '0,24,30,31,32,33,34,35,36,37,38,41,47,53,54,55,56,58,62'),
+(5, 'agente', '0,24,30,31,32,34,36,37,39,40,43,46,47,53,56,57,62');
 
 -- --------------------------------------------------------
 
@@ -1774,9 +1783,11 @@ CREATE TABLE `sesiones` (
 --
 
 INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`, `fecha_actividad`) VALUES
-('U1AG1', '127.0.0.1', 1, 'f65651de0a92d7315366c34aa6af69064cc5143d', '2016-04-07 19:16:03', '2016-04-07 19:19:06'),
-('COM1', '127.0.0.1', 1, 'd8353f914b9553469b87fbe32b875a88d4995ca5', '2016-04-14 14:42:13', '2016-04-14 14:42:20'),
-('FULLADM', '127.0.0.1', 1, '32ed7b5fe92c94a45cede7c06592c8b0800b4517', '2016-04-15 14:14:16', '2016-04-15 14:25:49');
+('COM1', '127.0.0.1', 1, '756c140a9ec29c55c94076b7ad38c6d5b340485d', '2016-04-26 15:49:50', '2016-04-26 15:53:14'),
+('U1AG1', '127.0.0.1', 1, '18406eece37770b567b325c64f8e3a70835cebfc', '2016-04-26 15:51:04', '2016-04-26 15:51:04'),
+('FULLADM', '127.0.0.1', 1, 'd71f574215f2d2fd89014775c905ad7a3a88703f', '2016-04-26 15:51:14', '2016-04-26 15:51:26'),
+('COM1', '127.0.0.1', 1, '4541317e2d29b8fbcf27aacc6964f4daf68424a9', '2016-04-26 15:52:26', '2016-04-26 15:55:39'),
+('FULLADM', '127.0.0.1', 1, 'aa1fd88cbd1ffa76f7020cb707797f9c8f6a3ed6', '2016-04-26 15:53:33', '2016-04-26 15:53:38');
 
 -- --------------------------------------------------------
 

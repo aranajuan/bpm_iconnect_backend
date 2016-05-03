@@ -10,7 +10,7 @@ class Lister implements \Itracker\Services\ITServiceInterface {
     $listL=$Context->createElement("list");
     if ($ALL_v) {
         foreach ($ALL_v as $l)
-            $listL->appendChild($l->getXML($Context,array("id","nombre","t_conformidad","iddireccion","idsequiposderiva","idsequiposvisible","idsadms","staffhome_vista","mytkts_vista","idlistin","direccionname")));
+            $listL->appendChild($l->getXML($Context,array("id","nombre","t_conformidad","iddireccion","idsequiposderiva","idsequiposvisible","idsequiposreporta","idsadms","staffhome_vista","mytkts_vista","idlistin","direccionname")));
         return $listL;
     }
     return null;

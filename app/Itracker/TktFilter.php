@@ -178,7 +178,7 @@ class TktFilter extends BasicObject {
                     $SSQL.=")";
                     break;
                 case self::$TOUCH_BY_TEAM:
-                        $SSQL .= "and (";
+                        $SSQL .= " and (";
                         $fst = true;
                         foreach($this->get_filter($type) as $id){
                             if($fst){

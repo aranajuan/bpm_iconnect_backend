@@ -16,7 +16,10 @@ class Geth implements \Itracker\Services\ITServiceInterface {
 
         $responseData->appendChild($response->createElement("idmaster", $TKT->get_prop("idmaster")));
         $responseData->appendChild($response->createElement("largestatus", $TKT->get_LargeStatus()));
-
+        $responseData->appendChild(
+                $TKT->get_prop('usr_o')->getXML($response,
+                        array('usr','nombre','mail'))
+                );
         $opts = $TKT->get_tree_history();
         $tree = $response->createElement("tree");
         foreach ($opts as $o) {

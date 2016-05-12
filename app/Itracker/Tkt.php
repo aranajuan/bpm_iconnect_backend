@@ -317,6 +317,16 @@ class Tkt extends Tree {
         return '';
     }
 
+    /**
+     * Setea status en var
+     * @param String $status
+     */
+    public function set_status($status){
+    	$v = $this->getVars();
+    	$v->set_prop('status', $status);
+    	return $this->setVars($v);
+    }
+    
     /*
      * devuelve el estado del tkt
      * @return  string
@@ -891,7 +901,7 @@ class Tkt extends Tree {
                 return "TKT_derive_join: " . $rta["msj"];
             }
         }
-
+        
         /* ADECUACION USUARIO TOMADO */
         $utomM = $master->get_prop("u_tom");
         $utom = $this->get_prop("u_tom");
@@ -924,6 +934,16 @@ class Tkt extends Tree {
         $this->master = $master;
         $this->clear_childs();
 
+        /* ADECUACION STATUS */
+        if($this->isWorking() &&
+        		$this->get_status()!=$master->get_status()){
+        	$tv = $this->getEjecutingAction()->getITS()->getObject('TKTVAR');
+        	if($tv instanceof Utils\Vars){
+        		$tv->set_prop('status',$master->get_status());
+        		$this->getEjecutingAction()->getITS()->addObject('TKTVAR', $tv);
+        	}
+        }
+        
         foreach ($childs as $c) {
             $c->join($master);
         }

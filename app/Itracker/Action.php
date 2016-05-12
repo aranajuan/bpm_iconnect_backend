@@ -518,6 +518,14 @@ class Action extends ITObject {
     }
 
     /**
+     * Devuelve script ejecutado
+     * return Utils\ITScript
+     */
+    public function getITS(){
+    	return $this->ITScript;
+    }
+    
+    /**
      * Devuelve response
      * @return Utils\Vars
      */
@@ -648,8 +656,10 @@ class Action extends ITObject {
      */
     private function pasteTKTH($TH) {
         $childs = $this->getChilds();
+        $status = $this->getTKT()->get_status();
         foreach ($childs as $c) {
             $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
+            $c->set_status($status);
         }
     }
 

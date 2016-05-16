@@ -40,9 +40,12 @@ define('USERDATE_READ_DATE',$ContextConf->getString('time/userread/date'));
 define('USERDATE_READ',USERDATE_READ_DATE.' '.USERDATE_READ_TIME);
 define('DBDATE_READ',$ContextConf->getString('time/database/read'));
 define('DBDATE_WRITE',$ContextConf->getString('time/database/write'));
+define('TMP_DIR',ROOT_DIR . DIRECTORY_SEPARATOR. 'tmp');
 
 error_reporting($ContextConf->getInt('debug/error_reporting'));
-
+if(!is_dir(TMP_DIR)){
+    mkdir(TMP_DIR);
+}
 
 register_shutdown_function('finish'); // registra funcion de finalizacion - ver basic_functions
 

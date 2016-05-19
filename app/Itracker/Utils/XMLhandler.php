@@ -356,7 +356,11 @@ abstract class XMLhandler {
         } else {
             $obj = $parent->{$paramName};
         }
-        $cobj = $obj->children();
+        if($obj){
+        	$cobj = $obj->children();
+        } else {
+        	return null;
+        }
 
         if (count($cobj)) {
             $ret = array();

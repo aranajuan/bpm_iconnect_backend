@@ -11,9 +11,10 @@ class UpdateAction implements ITActionsInterface {
         $TH = $action->getTH();
         if ($TH instanceof \Itracker\TktH) {
             $THA_name = $TH->get_prop('accion')->get_prop('nombre');
+            $THA_nameV = explode('-',$THA_name);
             $ActName = explode('-', $action->get_prop('nombre'));
 
-            if ($ActName[1] != 'UPDATE' || $ActName[0] != $THA_name) {
+            if ($ActName[1] != 'UPDATE' || $ActName[0] != $THA_nameV[0]) {
                 return new ITActionsGoResponse('error', 'No se puede actualizar (' . $THA_name . '->' .
                         $action->get_prop('nombre') . ')');
             }

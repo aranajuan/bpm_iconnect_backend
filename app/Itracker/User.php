@@ -454,7 +454,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         if (is_array($arr2)) {
             $arr = array_merge($arr, $arr2);
         }
-        array_unique($arr);
+        $arr = array_unique($arr);
 
         foreach ($arr as $tid) {
             if (is_numeric($tid)) {

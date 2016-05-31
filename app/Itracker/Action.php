@@ -497,6 +497,7 @@ class Action extends ITObject {
         $this->ITScript->addObject('CONSTANT', $const);
         $this->ITScript->addObject('TMP', new Utils\Vars('TMP'));
         $this->ITScript->addObject('RESPONSE', new Utils\Vars('RESPONSE'));
+        $master = $this->getTKT()->get_prop('master');
         $this->ITScript->addObject('TKT', $this->getTKT());
         $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
         $this->ITScript->addObject('USR', $this->getContext()->get_User());
@@ -517,6 +518,14 @@ class Action extends ITObject {
         return $rta;
     }
 
+    /**
+     * Devuelve script ejecutado
+     * return Utils\ITScript
+     */
+    public function getITS(){
+    	return $this->ITScript;
+    }
+    
     /**
      * Devuelve response
      * @return Utils\Vars
@@ -648,8 +657,10 @@ class Action extends ITObject {
      */
     private function pasteTKTH($TH) {
         $childs = $this->getChilds();
+        $status = $this->getTKT()->get_status();
         foreach ($childs as $c) {
             $c->ejecute_action("LINK", array(array("id" => "idth", "value" => $TH->get_prop("id"))));
+            $c->set_status($status);
         }
     }
 

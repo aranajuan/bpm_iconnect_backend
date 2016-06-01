@@ -250,6 +250,7 @@ class TktFilter extends BasicObject {
                     $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit') 
                     . ' dias.';
             $this->ssql= null;
+            return;
         }
         $SSQL .= $sWHERE.' order by TKT.id';
         $this->ssql= $SSQL;

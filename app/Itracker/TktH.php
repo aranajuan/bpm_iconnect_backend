@@ -124,6 +124,17 @@ class TktH extends ITObject {
     }
 
     /**
+     * Es una actualizacion
+     * @return boolean
+     */
+    public function isUpdate(){
+        if($this->get_prop('accion') instanceof Action){
+            return $this->get_prop('accion')->get_prop('ejecuta')=='update';
+        }
+        return false;
+    }
+    
+    /**
      * Setea id del equipo
      * @param int $id
      */
@@ -260,13 +271,22 @@ class TktH extends ITObject {
 
         $action = $element->createElement("action");
         $action->appendChild($element->createElement("id", $this->get_prop("id")));
+        $alias = $this->accion->get_prop("alias");
+        $value = $this->get_prop("objadj_txt");
         if ($this->isLinked()) {
-            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias") . " - (en TKT " . $this->get_prop("idtkt") . ")"));
-        } else {
-            $action->appendChild($element->createElement("alias", $this->accion->get_prop("alias")));
+            $alias .= " - (en TKT " . $this->get_prop("idtkt") . ")";
+        } 
+        if ($this->isUpdate()) {
+            $mm = $this->getFstUpdate();
+            $alias = $mm->get_prop('accion')->get_prop('alias') . " (Actualizado)";
+            if($value == ''){
+                $value = $mm->get_prop("objadj_txt");
+            }
         }
+        
+        $action->appendChild($element->createElement("alias", $alias));
         $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        $action->appendChild($element->createElement("value", $this->get_prop("objadj_txt")));
+        $action->appendChild($element->createElement("value",$value ));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         if ($this->getThUpdate() != null) {
@@ -434,6 +454,18 @@ class TktH extends ITObject {
         return null;
     }
 
+    /**
+     * Obtiene primer evento, el no actualizado.
+     * @return TktH
+     */
+    public function getFstUpdate(){
+        if(!$this->isUpdate()) {
+            return $this;
+        }
+        $THm = $this->get_prop('objadj');
+        return $THm->getFstUpdate();
+    }
+    
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {

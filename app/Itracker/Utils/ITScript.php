@@ -198,6 +198,7 @@ class ITScript extends Operation {
                 return 'ok';
             }
             if ($this->operate($lineStr)) {//error en if
+            	LoggerFactory::getLogger()->error('Error en script condicional', array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
                 return 'Error al ejecutar operacion linea #2:' . $line;
             }
             return $this->ejecuteLine($line + 1, 'next line');

@@ -8,6 +8,7 @@ class Front extends ITObject {
     private $nombre;
     private $ip;
     private $confianza;
+    private $accesos;
     private $instancias;
     private $instanciasV;
     private $estado;
@@ -62,6 +63,7 @@ class Front extends ITObject {
         $this->nombre = $tmpU["nombre"];
         $this->ip = $tmpU["ip"];
         $this->confianza = $tmpU["confianza"];
+        $this->accesos = $tmpU["accesos"];
         $this->instancias = $tmpU["instancias"];
         $this->instanciasV = explode(",", $this->instancias);
     }
@@ -75,6 +77,25 @@ class Front extends ITObject {
         return in_array($instanceName, $this->instanciasV);
     }
 
+    /**
+     * Valida el acceso al metodo solicitado
+     * @param type $class
+     * @param type $method
+     */
+    public function validAction($class, $method) {
+        if($this->accesos=='*'){
+            return true;
+        }
+        $valid = explode(",", $this->accesos);
+        foreach ($valid as $v) {
+            $v = trim($v);
+            if (strtolower($GLOBALS["access"][$v][1]) == $class && strtolower($GLOBALS["access"][$v][2]) == $method) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Carga de base de datos a propiedades
      * @param type $tmpU

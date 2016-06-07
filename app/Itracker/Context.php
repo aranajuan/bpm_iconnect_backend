@@ -137,6 +137,11 @@ class Context extends Utils\XMLhandler {
             return true;
         }
 
+         if (!$this->front->validAction($this->get_class(), $this->get_method())) {
+            $this->error = "Acceso denegado a " . $this->get_class() . "/" . $this->get_method()." #1";
+            return false;
+        }
+        
         if (!$this->user->sessionValidate($this->getHash(), $this->front, $this->getIp())) {
             $this->error = "Usuario no logeado";
             return false;

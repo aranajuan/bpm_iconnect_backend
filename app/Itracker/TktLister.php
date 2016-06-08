@@ -5,7 +5,7 @@ namespace Itracker;
 class TktLister extends BasicObject {
 
     private $resultids;
-    private $resultobjts;
+    private $posRead;
     private $ssql;
 
     /**
@@ -31,6 +31,7 @@ class TktLister extends BasicObject {
     public function execute(){
         $this->filter->makeSQL();
         $ssql= $this->filter->getSQL();
+        $this->posRead=0;
         if($ssql){
             $this->ssql=$ssql;
             return $this->executeSQL();
@@ -63,21 +64,7 @@ class TktLister extends BasicObject {
             array_push($retArr, $tid["id"]);
         }
         $this->resultids = $retArr;
-        $this->loadObjs();
         return true;
-    }
-
-    /**
-     * Carga vector de objetos TKT
-     */
-    private function loadObjs() {
-        $this->resultobjts = array();
-        foreach ($this->resultids as $id) {
-            $T = $this->objsCache->get_object("Tkt", $id);
-            if($this->getContext()->get_User()->get_view($T)!=null){
-                array_push($this->resultobjts, $T);
-            }
-        }
     }
 
     /**
@@ -85,15 +72,25 @@ class TktLister extends BasicObject {
      * @return int
      */
     public function getCount(){
-        return count($this->resultobjts);
+        return count($this->resultids);
     }
     
     /**
      * Lista de tickets filtrados
-     * @return array<TKT>
+     * @return TKT
      */
-    public function getObjs() {
-        return $this->resultobjts;
+    public function getObj() {
+        $id = $this->resultids[$this->posRead];
+        $this->posRead++;
+        if($this->posRead > $this->getCount()){
+            return null;
+        }
+        $T = $this->objsCache->get_object("Tkt", $id);
+        $this->objsCache->clean_object("Tkt", $id);
+        if($this->getContext()->get_User()->get_view($T)!=null){
+            return $T;
+        }
     }
 
+    
 }

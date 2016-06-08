@@ -73,7 +73,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
             return $Context->createElement("error", "No hay tickets para mostrar con el filtro seleccionado.");
         }
 
-        $RR->loadTKTS($Tl->getObjs());
+        $RR->loadTKTS($Tl);
 
         $RR->loadITJson(file_get_contents($filepath));
 

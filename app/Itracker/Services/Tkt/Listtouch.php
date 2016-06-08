@@ -38,14 +38,12 @@ class Listtouch implements \Itracker\Services\ITServiceInterface {
             return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());
         }
 
-        $ALL_v = $Tl->getObjs();
-
         $response = $Context->createElement("data");
         $response->appendChild($Context->createElement("view", $view));
         $listL = $Context->createElement("list");
 
-        if ($ALL_v) {
-            foreach ($ALL_v as $l) {
+        if ($Tl->getCount()) {
+            while ($l=$Tl->getObj()) {
                 $listL->appendChild($l->getXML($Context, $fields));
             }
             $response->appendChild($listL);

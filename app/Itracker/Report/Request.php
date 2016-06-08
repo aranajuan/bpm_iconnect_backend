@@ -6,7 +6,7 @@ class Request {
 
     /**
      *
-     * @var array<Itracker\Tkt>
+     * @var array<Itracker\TktLister>
      */
     private $tktsDB;
 
@@ -72,7 +72,7 @@ class Request {
 
     /**
      *  Carga tickets a reportar
-     * @param Array<\Itracker\Tkt> $tktsDB
+     * @param Array<\Itracker\TktLister> $tktsDB
      */
     public function loadTKTS($tktsDB) {
         $this->tktsDB = $tktsDB;
@@ -147,7 +147,7 @@ class Request {
      */
     public function execute() {
         $itkt = 0;
-        foreach ($this->tktsDB as $tkt) {
+        while ($tkt=$this->tktsDB->getObj()) {
             $this->createTKTvalues($itkt);
             $this->addValues($itkt, $tkt);
             $itkt++;

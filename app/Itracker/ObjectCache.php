@@ -121,8 +121,9 @@ class ObjectCache {
      * @return int  Indice eliminado
      */
     public function clean_object($class, $id) {
+        $class = $this->getITClass($class);
         $pos =$this->getindex_obj($class, $id);
-        if(!$pos) return 0;
+        if($pos==0) return 0; 
         unset($this->itobjects[$pos]);
         unset($this->status[$pos]);
         unset($this->index[$pos]);
@@ -133,7 +134,7 @@ class ObjectCache {
      * Busca indice en cache
      * @param String $class
      * @param String $id
-     * @return int Index, -1 si no encuentra
+     * @return int Index, 0 si no encuentra
      */
     private function getindex_obj($class, $id) {
         if ($this->last == 0)

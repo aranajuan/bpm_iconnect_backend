@@ -115,6 +115,21 @@ class ObjectCache {
     }
 
     /**
+     * Elimina objeto de la cache
+     * @param String $class clase requerida
+     * @param String $id    Id de la base de datos
+     * @return int  Indice eliminado
+     */
+    public function clean_object($class, $id) {
+        $pos =$this->getindex_obj($class, $id);
+        if(!$pos) return 0;
+        unset($this->itobjects[$pos]);
+        unset($this->status[$pos]);
+        unset($this->index[$pos]);
+        return $pos;
+    }
+    
+    /**
      * Busca indice en cache
      * @param String $class
      * @param String $id

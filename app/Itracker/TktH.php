@@ -129,7 +129,9 @@ class TktH extends ITObject {
      */
     public function isUpdate(){
         if($this->get_prop('accion') instanceof Action){
-            return $this->get_prop('accion')->get_prop('ejecuta')=='update';
+        	if(is_numeric($this->get_prop('objadj_id'))) {
+            	return $this->get_prop('accion')->get_prop('ejecuta')=='update';
+        	}
         }
         return false;
     }

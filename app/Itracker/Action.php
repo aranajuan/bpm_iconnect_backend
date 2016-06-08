@@ -562,6 +562,12 @@ class Action extends ITObject {
             $resposeV["result"] = "ok";
             $rta = $this->addTKT_H();
         }
+        $info = $this->getScriptResponse()->get_prop('info');
+        if($info){
+        	$resposeV["info"]=trim($info);
+        } else {
+        	$resposeV["info"] = '';
+        }
         $resposeV["tkth"] = $rta["status"];
         $resposeV["sendfiles"] = $resposeV["tkth"];
         $resposeV['postactions'] = $this->postAction();

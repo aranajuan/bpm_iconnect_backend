@@ -34,13 +34,11 @@ class Listfiltered implements \Itracker\Services\ITServiceInterface {
             return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());
         }
 
-        $ALL_v = $Tl->getObjs();
-
         $listL = new \DOMDocument();
         $list = $listL->createElement("list");
 
-        if ($ALL_v) {
-            foreach ($ALL_v as $l) {
+        if ($Tl->getCount()) {
+            while ($l=$Tl->getObj()) {
                 $tkt = $listL->createElement("tkt");
                 $tkt->appendChild($listL->createElement("id", $l->get_prop('id')));
                 $tkt->appendChild($listL->createElement("FA", $l->get_prop('FA')));

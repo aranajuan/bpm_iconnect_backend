@@ -92,6 +92,7 @@ class ConnectionManager {
             if ($this->dbInstanceTran) {
                 if ($failure) {
                     $this->dbInstancelink->rollBack();
+                    LoggerFactory::getLogger()->critical("Rolling back instance");
                 } else {
                     $this->dbInstancelink->commit();
                 }
@@ -104,6 +105,7 @@ class ConnectionManager {
             if ($this->dbRootTran) {
                 if ($failure) {
                     $this->dbRootlink->rollBack();
+                    LoggerFactory::getLogger()->critical("Rolling back root");
                 } else {
                     $this->dbRootlink->commit();
                 }

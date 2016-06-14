@@ -210,6 +210,22 @@ class Operation {
                     $a1 = explode(',', $a1);
                 }
                 return count($a1);
+            case "array_merge":
+                if (!is_array($a1)) {
+                    $a1 = explode(',', $a1);
+                }
+                if (!is_array($a2)) {
+                    $a2 = explode(',', $a2);
+                }
+                return implode(',', array_unique(array_merge($a1, $a2)));
+            case "array_diff":
+                if (!is_array($a1)) {
+                    $a1 = explode(',', $a1);
+                }
+                if (!is_array($a2)) {
+                    $a2 = explode(',', $a2);
+                }
+                return implode(',', array_unique(array_diff($a1, $a2)));
             default :
                 LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
                 );

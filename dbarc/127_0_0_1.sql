@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.5.1
+-- version 4.2.7.1
 -- http://www.phpmyadmin.net
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-04-2016 a las 20:57:33
--- Versión del servidor: 10.1.10-MariaDB
--- Versión de PHP: 7.0.4
+-- Tiempo de generación: 07-06-2016 a las 19:55:46
+-- Versión del servidor: 5.6.20
+-- Versión de PHP: 5.5.15
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -14,12 +14,11 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
 
 --
 -- Base de datos: `itracker_agentes_tkt`
 --
-DROP DATABASE `itracker_agentes_tkt`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_tkt` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_tkt`;
 
@@ -30,8 +29,8 @@ USE `itracker_agentes_tkt`;
 --
 
 DROP TABLE IF EXISTS `tickets`;
-CREATE TABLE `tickets` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `tickets` (
+`id` int(11) NOT NULL,
   `usr` varchar(15) NOT NULL,
   `idmaster` int(11) DEFAULT NULL,
   `origen` varchar(255) DEFAULT NULL,
@@ -45,7 +44,7 @@ CREATE TABLE `tickets` (
   `UA` varchar(15) NOT NULL,
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=103 ;
 
 --
 -- Volcado de datos para la tabla `tickets`
@@ -56,7 +55,7 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 (2, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-23 21:11:55', 'U1AG1', '2014-11-24 14:02:37', 'COM1'),
 (3, 'U1AG1', NULL, 'D1,S1,O5,O9,O15,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-23 21:13:17', 'U1AG1', '2014-11-24 14:13:47', 'COM1'),
 (4, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-11-27 13:18:31', 'U1AG1', '2015-05-07 16:05:41', 'COM1'),
-(5, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
+(5, 'U1AG1', NULL, 'D1,S1,O4,O9,O15,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n', ',2,1,', '2014-12-10 10:02:23', 'U1AG1', NULL, NULL),
 (6, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2014-12-10 10:18:29', 'U1AG1', '2015-02-18 14:58:31', 'COM1'),
 (7, 'U1AG1', 10, 'D1,S1,O4,O9,O14,', 2, NULL, 0, NULL, NULL, ',2,', '2014-12-10 10:19:24', 'U1AG1', '2015-02-18 14:59:58', 'COM1'),
 (8, 'U1AG1', 1, 'D1,S1,O3,O7,O13,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2014-12-12 09:25:49', 'U1AG1', NULL, NULL),
@@ -80,7 +79,7 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 (26, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-10 16:56:54', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
 (27, 'U1AG2', NULL, 'D1,S1,O5,O9,O14,', 1, NULL, NULL, NULL, NULL, ',2,1,', '2015-02-18 14:49:15', 'U1AG2', NULL, NULL),
 (28, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-02-26 12:10:16', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
-(29, 'U1AG1', NULL, 'D1,S1,O4,O9,O14,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,6,', '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
+(29, 'U1AG1', 100, 'D1,S1,O4,O9,O14,', 6, 'COM2', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>undefined</status></tkt>\n', ',2,6,', '2015-02-26 12:19:18', 'U1AG1', NULL, NULL),
 (30, 'U1AG1', 28, 'D1,S1,O4,O9,O14,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-02-27 15:00:10', 'U1AG1', '2015-06-04 10:49:08', 'COM1'),
 (31, 'U1AG1', 37, 'D1,S1,O4,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-03 11:27:35', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
 (32, 'U1AG1', 37, 'D1,S1,O5,O9,O14,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-03-03 11:29:18', 'U1AG1', '2015-06-30 15:12:05', 'COM1'),
@@ -111,12 +110,12 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 (57, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:12:55', 'U1AG1', '2015-06-22 14:12:55', 'U1AG1'),
 (58, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:19:04', 'U1AG1', '2015-06-22 14:19:04', 'U1AG1'),
 (59, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:20:12', 'U1AG1', '2015-06-22 14:20:12', 'U1AG1'),
-(60, 'U1AG1', NULL, 'D1,S1,O1,', 6, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Derivado</status></tkt>\n', ',2,6,', '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
+(60, 'U1AG1', 100, 'D1,S1,O1,', 6, 'COM2', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>undefined</status></tkt>\n', ',2,6,', '2015-06-22 14:22:57', 'U1AG1', NULL, NULL),
 (61, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-22 14:23:45', 'U1AG1', '2015-06-22 14:23:45', 'U1AG1'),
 (62, 'U1AG1', NULL, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:25:50', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
 (63, 'U1AG1', NULL, 'D1,S1,O5,O8,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:27:13', 'U1AG1', '2015-06-25 14:33:41', 'COM1'),
 (64, 'U1AG1', 62, 'D1,S1,O3,O6,O10,', 2, 'COM1', NULL, NULL, NULL, ',2,', '2015-06-22 14:39:10', 'U1AG1', '2015-06-25 14:09:55', 'COM1'),
-(65, 'U1AG1', NULL, 'D1,S1,O3,O7,O13,', 6, NULL, NULL, NULL, NULL, ',6,', '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
+(65, 'U1AG1', 100, 'D1,S1,O3,O7,O13,', 6, 'COM2', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>undefined</status></tkt>\n', ',6,', '2015-06-22 14:50:19', 'U1AG1', NULL, NULL),
 (66, 'U1AG1', NULL, 'D1,S1,O3,O6,O11,', 2, 'COM1', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',2,', '2015-06-26 11:41:30', 'U1AG1', '2016-01-12 08:52:14', 'COM1'),
 (67, 'U1AG1', NULL, 'D1,S1,O1,', 2, NULL, NULL, NULL, NULL, ',2,', '2015-06-26 11:49:42', 'U1AG1', '2015-06-26 11:49:42', 'U1AG1'),
 (68, 'U1AG1', NULL, 'D1,S1,O1,', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Cerrado</status></tkt>\n', ',1,', '2015-08-20 15:57:52', 'U1AG1', '2015-08-20 15:57:52', 'U1AG1'),
@@ -148,7 +147,12 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 (94, 'U1AG1', NULL, 'D1,S1,O4,O9,O14', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:14:21', 'U1AG1', NULL, NULL),
 (95, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-03-31 16:14:50', 'U1AG1', NULL, NULL),
 (96, 'U1AG1', NULL, 'D1,S1,O3,O6,O10', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-04-07 19:16:26', 'U1AG1', NULL, NULL),
-(97, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL);
+(97, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL),
+(98, 'U1AG1', NULL, 'D1,S1,O4,O9,O15', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-05-11 15:28:29', 'U1AG1', NULL, NULL),
+(99, 'U1AG1', NULL, 'D1,S1,O5,O9,O14', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-05-11 15:48:49', 'U1AG1', NULL, NULL),
+(100, 'U1AG1', NULL, 'D1,S1,O3,O7,O13', 6, 'COM2', NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>Tomado</status></tkt>\n', ',1,6,', '2016-05-16 15:12:52', 'U1AG1', NULL, NULL),
+(101, 'U1AG1', NULL, 'D1,S1,O4,O9,O14', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-05-16 15:13:48', 'U1AG1', NULL, NULL),
+(102, 'U1AG1', NULL, 'D1,S1,O3,O7,O13', 1, NULL, NULL, NULL, '<?xml version="1.0"?>\n<tkt><status>PEN Pendiente</status></tkt>\n', ',1,', '2016-06-01 11:14:58', 'U1AG1', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -157,8 +161,8 @@ INSERT INTO `tickets` (`id`, `usr`, `idmaster`, `origen`, `idequipo`, `u_tom`, `
 --
 
 DROP TABLE IF EXISTS `tickets_m`;
-CREATE TABLE `tickets_m` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `tickets_m` (
+`id` int(11) NOT NULL,
   `idtkt` int(11) NOT NULL,
   `idaccion` int(11) NOT NULL,
   `valoraccion` varchar(50) NOT NULL,
@@ -167,7 +171,7 @@ CREATE TABLE `tickets_m` (
   `FB` datetime DEFAULT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=548 ;
 
 --
 -- Volcado de datos para la tabla `tickets_m`
@@ -693,7 +697,27 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 (520, 34, 11, '', '2016-04-07 19:16:29', 'U1AG1', NULL, NULL, 0),
 (521, 97, 1, '1', '2016-04-07 19:19:04', 'U1AG1', NULL, NULL, 0),
 (523, 34, 17, '', '2016-04-07 19:31:36', 'COM1', NULL, NULL, 0),
-(524, 60, 4, '6', '2016-04-26 15:55:32', 'COM1', NULL, NULL, 0);
+(524, 60, 4, '6', '2016-04-26 15:55:32', 'COM1', NULL, NULL, 0),
+(525, 98, 1, '1', '2016-05-11 15:28:29', 'U1AG1', NULL, NULL, 0),
+(526, 99, 1, '1', '2016-05-11 15:48:49', 'U1AG1', NULL, NULL, 0),
+(527, 65, 5, '', '2016-05-11 16:05:01', 'COM2', NULL, NULL, 0),
+(528, 29, 10, '60', '2016-05-11 16:05:32', 'COM2', NULL, NULL, 0),
+(532, 60, 5, '', '2016-05-11 16:20:13', 'COM2', NULL, NULL, 0),
+(533, 60, 10, '65', '2016-05-11 16:20:13', 'COM2', NULL, NULL, 0),
+(534, 100, 1, '1', '2016-05-16 15:12:52', 'U1AG1', NULL, NULL, 0),
+(535, 101, 1, '1', '2016-05-16 15:13:48', 'U1AG1', NULL, NULL, 0),
+(536, 100, 5, '', '2016-05-16 15:17:29', 'COMGO', NULL, NULL, 0),
+(537, 100, 4, '6', '2016-05-16 15:18:23', 'COMGO', NULL, NULL, 0),
+(538, 100, 5, '', '2016-05-16 15:43:53', 'COM2', NULL, NULL, 0),
+(539, 65, 10, '100', '2016-05-16 15:43:53', 'COM2', NULL, NULL, 0),
+(540, 5, 23, '20', '2016-05-31 14:33:02', 'U1AG1', NULL, NULL, 0),
+(541, 5, 232, '58', '2016-05-31 14:43:33', 'U1AG1', NULL, NULL, 0),
+(542, 5, 232, '541', '2016-05-31 15:46:13', 'U1AG1', NULL, NULL, 0),
+(543, 5, 20, '540', '2016-05-31 16:04:02', 'U1AG1', NULL, NULL, 0),
+(544, 102, 1, '1', '2016-06-01 11:14:58', 'U1AG1', NULL, NULL, 0),
+(545, 102, 16, '', '2016-06-01 11:15:18', 'U1AG1', NULL, NULL, 0),
+(546, 102, 20, '544', '2016-06-01 11:15:28', 'U1AG1', NULL, NULL, 0),
+(547, 102, 20, '546', '2016-06-01 11:15:47', 'U1AG1', NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -702,7 +726,7 @@ INSERT INTO `tickets_m` (`id`, `idtkt`, `idaccion`, `valoraccion`, `FA`, `UA`, `
 --
 
 DROP TABLE IF EXISTS `tickets_m_detalles`;
-CREATE TABLE `tickets_m_detalles` (
+CREATE TABLE IF NOT EXISTS `tickets_m_detalles` (
   `idtktm` int(11) NOT NULL,
   `detalle` longtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1094,6 +1118,20 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 (521, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>456767</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>xdfdsfg</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>25-04-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
 (523, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>sddf</value></element> </itform>\n'),
 (524, '<?xml version="1.0"?>\n<itform>  <element> <type> inputlong </type> <label>Comentario</label><id> comment </id> <comment> Commentario </comment> <value>test</value></element> </itform>\n');
+INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
+(525, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>32434</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value>U123456</value></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value/></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>01-05-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(526, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>asd</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>20-05-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(534, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdfsfd</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(535, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>123213</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>dfsf</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(537, '<?xml version="1.0"?>\n<itform>  <element> <type> inputlong </type> <label>Comentario</label><id> comment </id> <comment> Commentario </comment> <value>23432</value></element> </itform>\n'),
+(540, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>234324</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdfsdf</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>20-05-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n<filelnk><idth>20</idth></filelnk></itform>\n'),
+(541, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>asdasd asasfggg</value></element> <filelnk><idth>58</idth></filelnk></itform>\n'),
+(542, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>s</value></element> <filelnk><idth>541</idth></filelnk></itform>\n'),
+(543, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>234324</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>sdfsdf // nueva actualizacion</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value>20-05-2016 00:00</value></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n<filelnk><idth>540</idth></filelnk></itform>\n'),
+(544, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>1232</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>asda</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n'),
+(545, '<?xml version="1.0"?>\n<itform> <element> <label> Comentario </label> <type> inputlong </type> <id> comment </id> <validations> <required>true</required> </validations> <value>asdasd</value></element> </itform>\n'),
+(546, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>1232</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>asda +1</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n<filelnk><idth>544</idth></filelnk></itform>\n'),
+(547, '<?xml version="1.0" encoding="UTF-8"?>\n<itform>\n   \n   <element>\n      <type>input</type>\n      <label>VALOR</label>\n      <id>valor</id>\n      <view>1</view>\n  <comment>view 1 - numerico requerido</comment>\n      <validations>\n         <numeric>true</numeric>\n         <required>true</required>\n      </validations>\n   <value>1232</value></element>\n   <element>\n      <type>text</type>\n      <id>TEXTO</id>\n      <text>[TEXTO]holatext este si es largo para verificar el contenido alargado a su maxima longitud</text>\n   <value/></element>\n   <element>\n      <type>input</type>\n      <id>regex</id>\n      <comment>/U[0-9]{6}/</comment>\n      <label>REGEX</label>\n      <validations>\n         <regex>/U[0-9]{6}/</regex>\n      </validations>\n   <value/></element>\n   <element>\n      <type>inputlong</type>\n      <label>COMENTARIO</label>\n      <id>comentario</id>\n   <value>asda +1</value></element>\n   <element>\n      <type>datetime</type>\n      <id>datetime</id>\n      <label>DATETIME</label>\n   <value/></element>\n   <element>\n      <type>month</type>\n      <id>month</id>\n      <label>MONTH</label>\n   <value/></element>\n   <element>\n      <type>select</type>\n      <id>seleccion</id>\n      <label>SELECCION</label>\n      <option>\n         <value>1</value>\n         <text>opcion1</text>\n      </option>\n      <option>\n         <value>2</value>\n         <text>opcion2</text>\n      </option>\n   <value>1</value></element>\n   <element>\n      <type>link</type>\n      <id>link</id>\n      <label>LINK</label>\n      <path>siebel/aa/dd.ppt</path>\n      <text>Link</text>\n      <comment>Descargue el archivo para luego anexarlo</comment>\n   <value/></element>\n</itform>\n');
 
 --
 -- Índices para tablas volcadas
@@ -1103,26 +1141,19 @@ INSERT INTO `tickets_m_detalles` (`idtktm`, `detalle`) VALUES
 -- Indices de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `UA` (`UA`),
-  ADD KEY `FB` (`FB`),
-  ADD KEY `idmaster` (`idmaster`,`origen`,`idequipo`,`u_tom`,`FA`),
-  ADD KEY `equipos_deriva` (`equipos_tratan`);
+ ADD PRIMARY KEY (`id`), ADD KEY `UA` (`UA`), ADD KEY `FB` (`FB`), ADD KEY `idmaster` (`idmaster`,`origen`,`idequipo`,`u_tom`,`FA`), ADD KEY `equipos_deriva` (`equipos_tratan`);
 
 --
 -- Indices de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idtkt` (`idtkt`,`idaccion`,`valoraccion`),
-  ADD KEY `FA` (`FA`,`FB`);
+ ADD PRIMARY KEY (`id`), ADD KEY `idtkt` (`idtkt`,`idaccion`,`valoraccion`), ADD KEY `FA` (`FA`,`FB`);
 
 --
 -- Indices de la tabla `tickets_m_detalles`
 --
 ALTER TABLE `tickets_m_detalles`
-  ADD UNIQUE KEY `idtktm` (`idtktm`),
-  ADD KEY `idtktm_2` (`idtktm`);
+ ADD UNIQUE KEY `idtktm` (`idtktm`), ADD KEY `idtktm_2` (`idtktm`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1132,15 +1163,14 @@ ALTER TABLE `tickets_m_detalles`
 -- AUTO_INCREMENT de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=103;
 --
 -- AUTO_INCREMENT de la tabla `tickets_m`
 --
 ALTER TABLE `tickets_m`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=525;--
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=548;--
 -- Base de datos: `itracker_agentes_uta`
 --
-DROP DATABASE `itracker_agentes_uta`;
 CREATE DATABASE IF NOT EXISTS `itracker_agentes_uta` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_agentes_uta`;
 
@@ -1151,8 +1181,8 @@ USE `itracker_agentes_uta`;
 --
 
 DROP TABLE IF EXISTS `acciones`;
-CREATE TABLE `acciones` (
-  `id` int(11) NOT NULL COMMENT 'identificador',
+CREATE TABLE IF NOT EXISTS `acciones` (
+`id` int(11) NOT NULL COMMENT 'identificador',
   `nombre` varchar(200) NOT NULL COMMENT 'nombre de la accion',
   `alias` varchar(50) NOT NULL COMMENT 'nombre a mostrar a usuarios',
   `ejecuta` varchar(50) NOT NULL COMMENT 'condigo que ejecutara',
@@ -1175,7 +1205,7 @@ CREATE TABLE `acciones` (
   `notificacion_texto` text NOT NULL COMMENT 'texto a notificar',
   `descripcion` varchar(255) DEFAULT NULL COMMENT 'descripcion',
   `estado` int(11) NOT NULL COMMENT 'activo o no'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=233 ;
 
 --
 -- Volcado de datos para la tabla `acciones`
@@ -1191,7 +1221,7 @@ INSERT INTO `acciones` (`id`, `nombre`, `alias`, `ejecuta`, `tipo`, `formulario`
 (7, 'SET_MASTER', 'Set master', 'setmaster', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', '.*', 1, 0, '*', '*', '3,4,', 0, 1, 1, 2, '', '', NULL, 0),
 (8, 'ASIGNAR', 'Asignar', 'asign', 2, 1, '<itform>\n  <element>\n    <label>Asignar a:</label>\n    <notsave>true</notsave>\n    <type>idsel</type>\n    <id>idusr</id>\n    <idselparams>\n      <class>tkt</class>\n      <method>idsel_userasign</method>\n    </idselparams>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n  <element>\n    <type> 			inputlong 		</type>\n    <label>Comentario</label>\n    <id> 			comment 		</id>\n    <comment> 			Commentario 		</comment>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\n{RESPONSE.id}={ITFORM.idusr}\n{TKTVAR.status}=''En tratamiento''', '.*', '.*', 0, 2, '*', '*', '4,', 0, 1, 1, 1, '(always)(to:{u_tom})', 'Se te ha asignado el tkt {id} del sistema {system->name}.<br />\nPuedes verlo en ITRACKER.\n', 'Asignar el ticket a un miembro del equipo', 0),
 (9, 'PRIORIZAR', 'Priorizar', 'priorice', 3, 1, '<itform> 	<element> 		<label> 			Prioridad: 		</label> 		<notsave>true</notsave> 		<type> 			select 		</type> 		<id> 			prioridad 		</id> 		<option><value>3</value><text>ALTA</text></option> 		<option><value>6</value><text>MEDIA</text></option> 		<option><value>9</value><text>BAJA</text></option> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.prioridad}', '.*', '.*', 0, 0, '*', '*', '4,', 0, 1, 1, 1, '', '', 'Establece una nueva prioridad al ticket', 0),
-(10, 'UNIR', 'Unir', 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idmaster}', '.*', '.*', 0, 0, '*', '*', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
+(10, 'UNIR', 'Unir', 'join', 1, 1, '<itform> 	<element> 		<label> 			Unir a id: 		</label> 		<notsave>true</notsave> 		<type> 			input 		</type> 		<id> 			idmaster 		</id> 		<validations> 			<required>true</required> 			<numeric>true</numeric> 		</validations>		 	</element>	 </itform>', '{TKTVAR.status}={MASTERVAR.status}\r\n{RESPONSE.result}=''ok''\r\n{RESPONSE.id}={ITFORM.idmaster}', '.*', '.*', 0, 0, '*', '*', '3,4,', 0, 1, 1, 1, '', '', 'Relaciona el ticket a otro', 0),
 (11, 'SEPARAR', 'Separar', 'unjoin', 1, 0, NULL, '{RESPONSE.result}=''ok''', '.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 2, '', '', 'Elimina la relacion al ticket padre', 0),
 (12, 'CERRAR_COMISIONES_PROCEDENTE', 'Cerrar Procedente', 'close', 1, 1, '<itform>\r\n  <element>\r\n    <label>Tipo cierre</label>\r\n    <id>tipocierre</id>\r\n    <type>select</type>\r\n    <option>\r\n      <value>1</value>\r\n      <text>Procedente</text>\r\n    </option>\r\n    <validations>\r\n      <required>true</required>\r\n      <numeric>true</numeric>\r\n    </validations>\r\n  </element>\r\n  <element>\r\n    <label>Monto a ajustar</label>\r\n    <type>input</type>\r\n    <id>monto</id>\r\n    <comment>(Punto separador decimal)</comment>\r\n    <validations>\r\n      <required>true</required>\r\n      <numeric>true</numeric>\r\n    </validations>\r\n  </element>\r\n  <element>\r\n    <label>Cantidad de operaciones</label>\r\n    <type>input</type>\r\n    <id>qoper</id>\r\n    <validations>\r\n      <required>true</required>\r\n      <numeric>true</numeric>\r\n    </validations>\r\n  </element>\r\n  <element>\r\n   <label>Se ajustara en el mes</label>\r\n    <type>month</type>\r\n    <id>majust</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n  </element>\r\n <element>\r\n    <label>Adjunto</label>\r\n    <type>fileupl</type>\r\n    <id>adjunto</id>\r\n    <notsave>true</notsave>\r\n <validations>\r\n      <min>2</min>\r\n    </validations>\r\n  </element>\r\n  <element>\r\n    <label> 			Comentario 		</label>\r\n    <type> 			inputlong 		</type>\r\n    <id> 			comment 		</id>\r\n    <validations>\r\n      <required>true</required>\r\n    </validations>\r\n  </element>\r\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones procedente', 0),
 (13, 'CERRAR_COMISIONES_NOPROCE', 'Cerrar No Procedente', 'close', 1, 1, '<itform>\n  <element>\n    <label>Tipo cierre</label>\n    <id>tipocierre</id>\n    <type>select</type>\n    <option>\n      <value>2</value>\n      <text>No corresponde</text>\n    </option>\n    <option>\n      <value>3</value>\n      <text>Error de formato</text>\n    </option>\n    <validations>\n      <required>true</required>\n      <numeric>true</numeric>\n    </validations>\n  </element>\n  <element>\n    <label>Adjunto</label>\n    <type>fileupl</type>\n    <id>adjunto</id>\n    <notsave>true</notsave>\n  </element>\n  <element>\n    <label> 			Comentario 		</label>\n    <type> 			inputlong 		</type>\n    <id> 			comment 		</id>\n    <validations>\n      <required>true</required>\n    </validations>\n  </element>\n</itform>', '{RESPONSE.result}=''ok''\r\n{TKTVAR.status}=''Cerrado''', '.*', '.*', 1, 1, '*', '*', '3,4,', 0, 1, 1, 1, '(always)(to:{clients},{event_user=>tomar}::cc:{clients->teams})', 'Se ha cerrado un itracker que generaste.<br/>\nID: {id}<br/>\nPuedes verlo en ITRACKER', 'cerrar comisiones no procedente', 0),
@@ -1213,12 +1243,12 @@ INSERT INTO `acciones` (`id`, `nombre`, `alias`, `ejecuta`, `tipo`, `formulario`
 --
 
 DROP TABLE IF EXISTS `direccion`;
-CREATE TABLE `direccion` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `direccion` (
+`id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `linkwi` varchar(255) NOT NULL,
   `estado` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
 -- Volcado de datos para la tabla `direccion`
@@ -1234,8 +1264,8 @@ INSERT INTO `direccion` (`id`, `nombre`, `linkwi`, `estado`) VALUES
 --
 
 DROP TABLE IF EXISTS `equipos`;
-CREATE TABLE `equipos` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `equipos` (
+`id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `t_conformidad` varchar(5) NOT NULL,
   `idlistin` int(11) NOT NULL,
@@ -1246,14 +1276,14 @@ CREATE TABLE `equipos` (
   `mytkts_vista` text,
   `staffhome_vista` text,
   `estado` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
 -- Volcado de datos para la tabla `equipos`
 --
 
 INSERT INTO `equipos` (`id`, `nombre`, `t_conformidad`, `idlistin`, `iddireccion`, `idsequipos_deriva`, `idsequipos_visible`, `idsequipos_reporta`, `mytkts_vista`, `staffhome_vista`, `estado`) VALUES
-(1, 'GO_Comisiones2', '48:00', 2, 1, '', '', '1,3', '', '', 0),
+(1, 'GO_Comisiones2', '48:00', 2, 1, '6', '', '1,3', '', 'id,js:show_childs:id:childsc=>ADJ,FA=>Fecha cracion,usr_o.nombre=>Agente,nextans:S1=>S1,nextans:O33:P2=>S2,nextans:O24=>S3,vars.status=>estadoVar', 0),
 (2, 'Comisiones', '48:00', 1, 1, '1,6', '1,3,4', '6', '', 'id,js:show_childs:id:childsc=>ADJ,FA=>Fecha cracion,usr_o.nombre=>Agente,nextans:S1=>S1,nextans:O33:P2=>S2,nextans:O24=>S3,vars.status=>estadoVar', 0),
 (3, 'Agente1', '03:00', 3, 1, '2', '2', NULL, 'id,equipo.nombre=>area,status,vars.status', '', 0),
 (4, 'Agente2', '03:00', 4, 1, '2', '2', NULL, '', '', 0),
@@ -1267,13 +1297,13 @@ INSERT INTO `equipos` (`id`, `nombre`, `t_conformidad`, `idlistin`, `iddireccion
 --
 
 DROP TABLE IF EXISTS `listines`;
-CREATE TABLE `listines` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `listines` (
+`id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `too` text,
   `cc` text,
   `estado` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
 -- Volcado de datos para la tabla `listines`
@@ -1294,8 +1324,8 @@ INSERT INTO `listines` (`id`, `nombre`, `too`, `cc`, `estado`) VALUES
 --
 
 DROP TABLE IF EXISTS `opciones`;
-CREATE TABLE `opciones` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `opciones` (
+`id` int(11) NOT NULL,
   `idpregunta` int(11) NOT NULL,
   `texto` varchar(255) NOT NULL,
   `texto_critico` varchar(50) DEFAULT NULL,
@@ -1308,7 +1338,7 @@ CREATE TABLE `opciones` (
   `FA` datetime NOT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `FB` date DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=70 ;
 
 --
 -- Volcado de datos para la tabla `opciones`
@@ -1393,7 +1423,7 @@ INSERT INTO `opciones` (`id`, `idpregunta`, `texto`, `texto_critico`, `habilita_
 --
 
 DROP TABLE IF EXISTS `perfiles`;
-CREATE TABLE `perfiles` (
+CREATE TABLE IF NOT EXISTS `perfiles` (
   `id` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `accesos` longtext
@@ -1417,15 +1447,15 @@ INSERT INTO `perfiles` (`id`, `nombre`, `accesos`) VALUES
 --
 
 DROP TABLE IF EXISTS `prefiles_vistas`;
-CREATE TABLE `prefiles_vistas` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `prefiles_vistas` (
+`id` int(11) NOT NULL,
   `prioridad` int(11) NOT NULL,
   `perfil` int(50) NOT NULL,
   `relacion` varchar(255) NOT NULL,
   `vista` int(11) NOT NULL,
   `tipos_eventos` varchar(50) NOT NULL,
   `archivo_descarga` tinyint(4) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
 -- Volcado de datos para la tabla `prefiles_vistas`
@@ -1446,15 +1476,15 @@ INSERT INTO `prefiles_vistas` (`id`, `prioridad`, `perfil`, `relacion`, `vista`,
 --
 
 DROP TABLE IF EXISTS `preguntas`;
-CREATE TABLE `preguntas` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `preguntas` (
+`id` int(11) NOT NULL,
   `texto` varchar(255) NOT NULL,
   `detalle` longtext,
   `UA` varchar(15) NOT NULL,
   `FA` date NOT NULL,
   `UB` varchar(15) DEFAULT NULL,
   `FB` date DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28 ;
 
 --
 -- Volcado de datos para la tabla `preguntas`
@@ -1495,13 +1525,13 @@ INSERT INTO `preguntas` (`id`, `texto`, `detalle`, `UA`, `FA`, `UB`, `FB`) VALUE
 --
 
 DROP TABLE IF EXISTS `sisdir`;
-CREATE TABLE `sisdir` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `sisdir` (
+`id` int(11) NOT NULL,
   `idsistema` int(11) NOT NULL,
   `iddireccion` int(11) NOT NULL,
   `p_pregunta` int(11) NOT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 --
 -- Volcado de datos para la tabla `sisdir`
@@ -1517,11 +1547,11 @@ INSERT INTO `sisdir` (`id`, `idsistema`, `iddireccion`, `p_pregunta`, `estado`) 
 --
 
 DROP TABLE IF EXISTS `sistemas`;
-CREATE TABLE `sistemas` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `sistemas` (
+`id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `estado` tinyint(4) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 --
 -- Volcado de datos para la tabla `sistemas`
@@ -1561,7 +1591,7 @@ INSERT INTO `sistemas` (`id`, `nombre`, `estado`) VALUES
 --
 
 DROP TABLE IF EXISTS `usuarios`;
-CREATE TABLE `usuarios` (
+CREATE TABLE IF NOT EXISTS `usuarios` (
   `usr` varchar(15) NOT NULL,
   `idsequipos` varchar(50) DEFAULT NULL,
   `idsequiposadm` varchar(100) DEFAULT NULL,
@@ -1581,7 +1611,7 @@ INSERT INTO `usuarios` (`usr`, `idsequipos`, `idsequiposadm`, `perfil`, `estado`
 ('U1AG2', ',4', NULL, 5, 0),
 ('COM1', ',2', NULL, 3, 0),
 ('COMRES', ',2', NULL, 4, 0),
-('COMGO', ',2,4', NULL, 3, 0),
+('COMGO', ',2,4,1', NULL, 3, 0),
 ('SP1', ',3', NULL, 5, 1),
 ('COM2', ',6', NULL, 3, 0);
 
@@ -1593,73 +1623,67 @@ INSERT INTO `usuarios` (`usr`, `idsequipos`, `idsequiposadm`, `perfil`, `estado`
 -- Indices de la tabla `acciones`
 --
 ALTER TABLE `acciones`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `listines`
 --
 ALTER TABLE `listines`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `opciones`
 --
 ALTER TABLE `opciones`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `perfiles`
 --
 ALTER TABLE `perfiles`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
 
 --
 -- Indices de la tabla `prefiles_vistas`
 --
 ALTER TABLE `prefiles_vistas`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `perfil` (`perfil`);
+ ADD PRIMARY KEY (`id`), ADD KEY `perfil` (`perfil`);
 
 --
 -- Indices de la tabla `preguntas`
 --
 ALTER TABLE `preguntas`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `sisdir`
 --
 ALTER TABLE `sisdir`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `sistemas`
 --
 ALTER TABLE `sistemas`
-  ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`usr`);
+ ADD PRIMARY KEY (`usr`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1669,50 +1693,49 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `acciones`
 --
 ALTER TABLE `acciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'identificador', AUTO_INCREMENT=233;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'identificador',AUTO_INCREMENT=233;
 --
 -- AUTO_INCREMENT de la tabla `direccion`
 --
 ALTER TABLE `direccion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `listines`
 --
 ALTER TABLE `listines`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `opciones`
 --
 ALTER TABLE `opciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=70;
 --
 -- AUTO_INCREMENT de la tabla `prefiles_vistas`
 --
 ALTER TABLE `prefiles_vistas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT de la tabla `preguntas`
 --
 ALTER TABLE `preguntas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=28;
 --
 -- AUTO_INCREMENT de la tabla `sisdir`
 --
 ALTER TABLE `sisdir`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT de la tabla `sistemas`
 --
 ALTER TABLE `sistemas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;--
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;--
 -- Base de datos: `itracker_root`
 --
-DROP DATABASE `itracker_root`;
 CREATE DATABASE IF NOT EXISTS `itracker_root` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `itracker_root`;
 
@@ -1723,12 +1746,13 @@ USE `itracker_root`;
 --
 
 DROP TABLE IF EXISTS `fronts`;
-CREATE TABLE `fronts` (
+CREATE TABLE IF NOT EXISTS `fronts` (
   `id` int(11) NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `ip` varchar(45) NOT NULL,
   `confianza` tinyint(4) DEFAULT NULL,
   `instancias` varchar(100) DEFAULT NULL,
+  `accesos` longtext,
   `estado` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -1736,9 +1760,10 @@ CREATE TABLE `fronts` (
 -- Volcado de datos para la tabla `fronts`
 --
 
-INSERT INTO `fronts` (`id`, `nombre`, `ip`, `confianza`, `instancias`, `estado`) VALUES
-(1, 'DMZ', '192.168.1.2,127.0.0.1,::1,192.168.1.7', 0, 'AGENTES', 0),
-(2, 'SHAREPOINT', '::1', 1, 'AGENTES', 0);
+INSERT INTO `fronts` (`id`, `nombre`, `ip`, `confianza`, `instancias`, `accesos`, `estado`) VALUES
+(1, 'DMZ', '192.168.1.2,127.0.0.1,::1,192.168.1.7', 0, 'AGENTES', '*', 0),
+(2, 'SHAREPOINT', '::1', 1, 'AGENTES', '*', 0),
+(3, 'API_DMZ', '*.*.*.*,::1', 0, 'AGENTES', '21', 0);
 
 -- --------------------------------------------------------
 
@@ -1747,7 +1772,7 @@ INSERT INTO `fronts` (`id`, `nombre`, `ip`, `confianza`, `instancias`, `estado`)
 --
 
 DROP TABLE IF EXISTS `instancias`;
-CREATE TABLE `instancias` (
+CREATE TABLE IF NOT EXISTS `instancias` (
   `nombre` varchar(45) NOT NULL,
   `dbhost` varchar(45) NOT NULL,
   `dbuser` varchar(45) NOT NULL,
@@ -1760,7 +1785,7 @@ CREATE TABLE `instancias` (
 --
 
 INSERT INTO `instancias` (`nombre`, `dbhost`, `dbuser`, `dbpass`, `archivos_externos`) VALUES
-('AGENTES', 'localhost', '', '', '/home/juan/datosTelecomCCT');
+('AGENTES', 'localhost', '', '', 'C:/Users/u548391/DatosIT');
 
 -- --------------------------------------------------------
 
@@ -1769,7 +1794,7 @@ INSERT INTO `instancias` (`nombre`, `dbhost`, `dbuser`, `dbpass`, `archivos_exte
 --
 
 DROP TABLE IF EXISTS `sesiones`;
-CREATE TABLE `sesiones` (
+CREATE TABLE IF NOT EXISTS `sesiones` (
   `usr` varchar(50) NOT NULL,
   `ip` varchar(50) NOT NULL,
   `front` int(11) NOT NULL,
@@ -1783,11 +1808,12 @@ CREATE TABLE `sesiones` (
 --
 
 INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`, `fecha_actividad`) VALUES
-('COM1', '127.0.0.1', 1, '756c140a9ec29c55c94076b7ad38c6d5b340485d', '2016-04-26 15:49:50', '2016-04-26 15:53:14'),
-('U1AG1', '127.0.0.1', 1, '18406eece37770b567b325c64f8e3a70835cebfc', '2016-04-26 15:51:04', '2016-04-26 15:51:04'),
-('FULLADM', '127.0.0.1', 1, 'd71f574215f2d2fd89014775c905ad7a3a88703f', '2016-04-26 15:51:14', '2016-04-26 15:51:26'),
-('COM1', '127.0.0.1', 1, '4541317e2d29b8fbcf27aacc6964f4daf68424a9', '2016-04-26 15:52:26', '2016-04-26 15:55:39'),
-('FULLADM', '127.0.0.1', 1, 'aa1fd88cbd1ffa76f7020cb707797f9c8f6a3ed6', '2016-04-26 15:53:33', '2016-04-26 15:53:38');
+('COM2', '10.66.93.46', 1, '5ad29fc08546ec673a6bb6265b5671f4fdac5936', '2016-05-16 15:10:51', '2016-05-16 16:37:32'),
+('COM2', '10.66.93.46', 1, '1c9eb58ce3f14ea557503101b7621da719e696f4', '2016-05-16 15:14:07', '2016-05-16 15:14:12'),
+('COMGO', '10.66.93.46', 1, '726d8821422f900b681351d46edbd492924e4521', '2016-05-16 15:15:50', '2016-05-16 15:18:25'),
+('COM1', '10.66.93.46', 1, '6e528e0a84772a8d25cac9f6f536a545864b9c2a', '2016-06-01 15:41:36', '2016-06-01 15:44:32'),
+('U1AG1', '10.66.93.46', 1, '29bb4e7f3fe9d4a51b117384bc01167c3d8fa5d2', '2016-06-07 10:25:32', '2016-06-07 10:42:21'),
+('FULLADM', '::1', 3, '026a3cc0964af3f03fad7b912ddb6c1caf0a7ad2', '2016-06-07 12:58:12', '2016-06-07 13:01:03');
 
 -- --------------------------------------------------------
 
@@ -1796,7 +1822,7 @@ INSERT INTO `sesiones` (`usr`, `ip`, `front`, `hash`, `fecha`, `fecha_actividad`
 --
 
 DROP TABLE IF EXISTS `ucontac`;
-CREATE TABLE `ucontac` (
+CREATE TABLE IF NOT EXISTS `ucontac` (
   `usr` varchar(15) NOT NULL,
   `mail` varchar(255) DEFAULT NULL,
   `tel` varchar(255) DEFAULT NULL,
@@ -1828,7 +1854,7 @@ INSERT INTO `ucontac` (`usr`, `mail`, `tel`, `nombre`, `puesto`, `ubicacion`) VA
 --
 
 DROP TABLE IF EXISTS `usuarios`;
-CREATE TABLE `usuarios` (
+CREATE TABLE IF NOT EXISTS `usuarios` (
   `usr` varchar(50) NOT NULL,
   `dominio` varchar(15) NOT NULL,
   `pass` varchar(15) DEFAULT NULL,
@@ -1841,12 +1867,12 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`usr`, `dominio`, `pass`, `fronts`, `instancias`) VALUES
-('fulladm', 'ITRACKER', 'juan', '1', 'AGENTES'),
+('fulladm', 'ITRACKER', 'juan', '1,3', 'AGENTES'),
 ('FEDE', 'ITRACKER', 'pass', '1', 'AGENTES'),
-('U1AG1', 'ITRACKER', 'pass', '1', 'AGENTES'),
+('U1AG1', 'ITRACKER', 'pass', '1,2,3', 'AGENTES'),
 ('U2AG1', 'ITRACKER', 'pass', '1', 'AGENTES'),
 ('U1AG2', 'ITRACKER', 'pass', '1', 'AGENTES'),
-('COM1', 'ITRACKER', 'pass', '1', 'AGENTES'),
+('COM1', 'ITRACKER', 'pass', '1,3,2', 'AGENTES'),
 ('COMRES', 'ITRACKER', 'pass', '1', 'AGENTES'),
 ('COMGO', 'ITRACKER', 'pass', '1', 'AGENTES'),
 ('SP1', 'SHAREPOINT', NULL, '1,2', 'AGENTES'),
@@ -1860,32 +1886,31 @@ INSERT INTO `usuarios` (`usr`, `dominio`, `pass`, `fronts`, `instancias`) VALUES
 -- Indices de la tabla `fronts`
 --
 ALTER TABLE `fronts`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
+ ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `nombre_UNIQUE` (`nombre`);
 
 --
 -- Indices de la tabla `instancias`
 --
 ALTER TABLE `instancias`
-  ADD PRIMARY KEY (`nombre`);
+ ADD PRIMARY KEY (`nombre`);
 
 --
 -- Indices de la tabla `sesiones`
 --
 ALTER TABLE `sesiones`
-  ADD KEY `usr` (`usr`);
+ ADD KEY `usr` (`usr`);
 
 --
 -- Indices de la tabla `ucontac`
 --
 ALTER TABLE `ucontac`
-  ADD PRIMARY KEY (`usr`);
+ ADD PRIMARY KEY (`usr`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`usr`);
+ ADD PRIMARY KEY (`usr`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

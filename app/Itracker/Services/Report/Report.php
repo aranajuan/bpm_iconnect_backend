@@ -7,10 +7,14 @@ class Report implements \Itracker\Services\ITServiceInterface {
     public static function GO($Context) {
 
         $u = $Context->get_User();
-        $rname = $Context->get_Instance()->get_prop("nombre") . "_" . $u->get_prop("perfilt");
-        $filepath = ROOT_DIR . "/config/reports/" . $rname;
-
-        $ffound = false;
+        if($u->get_prop('superuser') && $Context->get_params("config")!=''){
+            $configJSON=$Context->get_params("config");
+            $ffound = true;
+        }else{
+            $rname = $Context->get_Instance()->get_prop("nombre") . "_" . $u->get_prop("perfilt");
+            $filepath = ROOT_DIR . "/config/reports/" . $rname;
+            $ffound = false;
+        }
         $arrayTeam = array();
         $idsteams = explode(",", $Context->get_params("team"));
         foreach ($idsteams as $idteam) {
@@ -21,6 +25,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
             if (!$ffound && file_exists($filepath . '_' . $idteam . '.json')) {
                 $filepath.='_' . $idteam . '.json';
                 $rname.='_' . $u->get_team_obj($idteam)->get_prop('nombre') . '(' . $idteam . ')';
+                $configJSON=file_get_contents($filepath);
                 $ffound = true;
             }
         }
@@ -28,6 +33,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
         if (!$ffound) {
             if (file_exists($filepath . '.json')) {
                 $filepath.='.json';
+                $configJSON=file_get_contents($filepath);
             } else {
                 return $Context->createElement("error", "No hay reporte disponible para el perfil. $rname");
             }
@@ -75,7 +81,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
 
         $RR->loadTKTS($Tl);
 
-        $RR->loadITJson(file_get_contents($filepath));
+        $RR->loadITJson($configJSON);
 
         $RR->execute();
         //$RPADAPTER = new \Itracker\Report\PHPExcel($RR);

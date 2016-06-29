@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<errors>
+    <xmlprop>
+        <code>1</code>
+        <getprop>
+            <code>1</code>
+            <description>Propiedad invalida</description>    
+        </getprop>
+    </xmlprop>
+    
+    <dbobject>
+        <code>2</code>
+        <load>
+            <code>1</code>
+            <description>No se pudo cargar objeto</description>
+        </load>
+    </dbobject>
+    
+    <action>
+        <code>3</code>
+        <invalid>
+            <code>1</code>
+            <description>Accion invalida</description>
+        </invalid>
+        <ejecutescript>
+            <code>2</code>
+            <description>Error en accion</description> 
+        </ejecutescript>
+        <notfound>
+            <code>3</code>
+            <description>Error en accion (parametrizacion)</description>
+        </notfound>
+    </action>
+</errors>

@@ -35,6 +35,14 @@ class ITActionsGoResponse {
         return $this->result;
     }
 
+    public function mergeExtras($extrasP){
+        if($this->extras==null){
+            $this->extras = $extrasP;
+            return;
+        }
+        $this->extras = array_merge($this->extras,$extrasP);
+    }
+    
     public function getMsj() {
         return $this->msj;
     }

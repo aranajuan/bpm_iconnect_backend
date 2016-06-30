@@ -45,7 +45,7 @@ class ObjectCache {
      * @param boolean $force_update Forzar actualizacion desde db
      * @return \Itracker\ITObject|null Objecto de la clase solicitada null si falla
      */
-    public function get_object($class, $id, $force_update = false) {
+    public function get_object($class, $id, $force_update = false, $allow_deleted = false) {
         $this->call++;
         $class = $this->getITClass($class);
         if (!Utils\GlobalConfig::getInstance()->getBoolean('configs/objcache')){
@@ -60,15 +60,12 @@ class ObjectCache {
         } else {
             $this->recall++;
         }
-
-
-        if ($ind) {
-            $result = $this->itobjects[$ind];
-        } else {
-            $result = null;
-        }
-
-        return $result;
+		if($this->status[$ind]!='ok' && !$allow_deleted){
+			throw new ItException('dbobject/deleted','',
+					\KLogger\Psr\Log\LogLevel::ERROR,
+					'Objeto eliminado');
+		}
+		return $this->itobjects[$ind];
     }
 
     /**
@@ -96,21 +93,16 @@ class ObjectCache {
     private function load_object($class, $id) {
             $cn = new $class();
             if ($cn) {
-                $resp = $cn->load_DB($id);
-                if($resp!='ok'){
-                    \Itracker\Utils\LoggerFactory::getLogger()->warning('Error al cargar objeto',array(
-                        'class'=>$class,
-                        'id'=>$id,
-                        'rta'=>$resp
-                    ));
-                }
+                $cn->load_DB($id);
                 $this->last++;
                 $this->itobjects[$this->last] = $cn;
                 $this->status[$this->last] = $resp;
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {
-                return 0;
+                throw  new ItException('objectcache/classnotfound','',
+                		\KLogger\Psr\Log\LogLevel::CRITICAL,
+                		'Clase invalida',array('nombre'=>$class));
             }
     }
 

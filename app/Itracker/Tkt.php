@@ -535,6 +535,7 @@ class Tkt extends Tree {
      * @return string
      */
     public function ejecute_action($action, $values = null, $objadj_id = null) {
+    	//lanzar error!
         $this->getContext()->getLogger()->info('Ejecutando', array(
             'accion' => $action,
             'values' => print_r($values, true),
@@ -633,6 +634,7 @@ class Tkt extends Tree {
      * @return string result
      */
     function open($idequipo) {
+    	// can open /is active
         $this->id = I_NEWID;
         $this->u_tom = NULL;
         $this->u_asig = NULL;

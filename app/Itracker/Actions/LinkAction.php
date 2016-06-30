@@ -11,7 +11,7 @@ class LinkAction implements ITActionsInterface {
             $action->loadObjadjId($idth);
             return new ITActionsGoResponse('ok', '');
         } else {
-            return new ITActionsGoResponse('error', 'Id invalido');
+        	throw new ItException ('action/go/invalid','Id invalido');
         }
     }
 

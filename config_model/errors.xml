@@ -4,7 +4,7 @@
         <code>1</code>
         <getprop>
             <code>1</code>
-            <description>Propiedad invalida</description>    
+            <description>Propiedad invalida</description>
         </getprop>
     </xmlprop>
     
@@ -14,10 +14,22 @@
             <code>1</code>
             <description>No se pudo cargar objeto</description>
         </load>
+        <deleted>
+            <code>2</code>
+            <description>Objeto eliminados</description>
+        </deleted>
     </dbobject>
     
-    <action>
+    <objectcache>
         <code>3</code>
+        <classnotfound>
+            <code>1</code>
+            <description>Clase inexistente</description>
+        </classnotfound>
+    </objectcache>
+    
+    <action>
+        <code>4</code>
         <invalid>
             <code>1</code>
             <description>Accion invalida</description>
@@ -30,5 +42,13 @@
             <code>3</code>
             <description>Error en accion (parametrizacion)</description>
         </notfound>
+        
+        <go>
+            <code>4</code>
+            <invalid>
+                <code>1</code>
+                <description>Error de validacion</description>
+            </invalid>
+        </go>
     </action>
 </errors>

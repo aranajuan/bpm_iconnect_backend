@@ -1,5 +1,7 @@
 <?php
 namespace Itracker;
+
+use Itracker\Exceptions\ItException;
 /**
  * Administra cache de objetos y crea itobjects nuevos
  */

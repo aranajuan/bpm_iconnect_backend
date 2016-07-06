@@ -2,6 +2,7 @@
 
 namespace Itracker;
 
+use Itracker\Exceptions\ItException;
 /**
  * Clase de administracion de acciones
  * Ejecucion, vita html, validaciones

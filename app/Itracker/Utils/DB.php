@@ -69,10 +69,13 @@ class DB {
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud.";
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                return 1;
+                throw new ErrorException('db/query', '',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 $this->resultarr=$this->RS->fetchAll();
                 $this->cReg =count($this->resultarr);
@@ -80,7 +83,6 @@ class DB {
                     $this->noEmpty = 1;
                 else
                     $this->noEmpty = 0;
-                return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
@@ -89,10 +91,13 @@ class DB {
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud."; 
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                return 1;
+                 throw new ErrorException('db/query', '',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 $this->resultarr=$this->RS->fetchAll();
                 $this->cReg =count($this->resultarr);
@@ -100,7 +105,6 @@ class DB {
                     $this->noEmpty = 1;
                 else
                     $this->noEmpty = 0;
-                return 0;
             }
         }
     }
@@ -119,16 +123,17 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->connection->close_connections(true);
-                return 1;
+                 throw new ErrorException('db/query', '',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
                 $this->connection->addCounters($this->RI, get_measure('sql'));
                 $lstID = $rs->fetchColumn();
                 $this->lstIDmss = $lstID;
-                return 0;
             }
         }
         elseif ($this->connection->get_motor() == 'mssql') {
@@ -138,10 +143,12 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->connection->close_connections(true);
                 $this->lstIDmss = NULL;
-                return 1;
+                 throw new ErrorException('db/query', '',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
@@ -179,16 +186,6 @@ class DB {
     public function get_lastID() {
             return $this->lstIDmss;
     }
-    
-    /**
-     * Log de error SQL
-     * @param String $msj
-     */
-    private function logError($msj){
-        $context = \Itracker\Context::getContext();
-        $context->getLogger()->critical($context->getLogString().__CLASS__."\t".$msj);
-    }
-
 }
 
 ?>

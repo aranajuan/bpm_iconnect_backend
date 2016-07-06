@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\ItException;
+use Itracker\Exceptions\ItException;
 
 class DeriveAction implements ITActionsInterface {
 
@@ -12,7 +12,7 @@ class DeriveAction implements ITActionsInterface {
         $TKT = $action->getTKT();
 
         $idequipo = $action->getScriptResponse()->get_prop('id');
-        $obCI->get_object('Team', $idequipo);
+        $td=$obCI->get_object('Team', $idequipo);
 
         $TKT->derive($td);
 

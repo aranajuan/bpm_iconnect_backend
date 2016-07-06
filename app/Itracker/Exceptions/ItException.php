@@ -1,5 +1,5 @@
 <?php
-namespace Itracker;
+namespace Itracker\Exceptions;
 
 /*
  * To change this template, choose Tools | Templates

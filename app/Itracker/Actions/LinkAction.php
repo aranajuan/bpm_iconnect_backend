@@ -2,6 +2,8 @@
 
 namespace Itracker\Actions;
 
+use Itracker\Exceptions\ItException;
+
 class LinkAction implements ITActionsInterface {
 
     public static function go($action) {

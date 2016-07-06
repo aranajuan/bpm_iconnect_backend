@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\ItException;
+use Itracker\Exceptions\ItException;
 
 class TakeAction implements ITActionsInterface {
 	public static function go($action) {

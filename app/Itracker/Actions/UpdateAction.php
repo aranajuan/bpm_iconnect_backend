@@ -2,6 +2,8 @@
 
 namespace Itracker\Actions;
 
+use Itracker\Exceptions\ItException;
+
 class UpdateAction implements ITActionsInterface {
 	public static function go($action) {
 		$obCI = \Itracker\ObjectCache::getInstance ();

@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <errors>
-    <xmlprop>
+    <!--Errores fatales/graves -->
+    <vars>
         <code>1</code>
+        <load>
+            <code>1</code>
+            <description>No se puede cargar vars</description>
+        </load>
+        <unset>
+            <code>2</code>
+            <description>Variable no seteada</description>
+        </unset>
+    </vars>
+    <connection>
+        <code>2</code>
+        <closeerror>
+            <code>1</code>
+            <description>Ocurrio un error inesperado, reintente la operacion</description>
+        </closeerror>
+        <open>
+            <code>2</code>
+            <description>Imposible conectar a DB</description>
+        </open>
+    </connection>
+    <db>
+        <code>3</code>
+        <query>
+            <code>1</code>
+            <description>Error al ejecutar sql</description>
+        </query>
+    </db>
+
+    <!--Errores itracker -->
+    <xmlprop>
+        <code>5</code>
         <getprop>
             <code>1</code>
             <description>Propiedad invalida</description>
@@ -9,7 +41,7 @@
     </xmlprop>
     
     <dbobject>
-        <code>2</code>
+        <code>6</code>
         <load>
             <code>1</code>
             <description>No se pudo cargar objeto</description>
@@ -21,7 +53,7 @@
     </dbobject>
     
     <objectcache>
-        <code>3</code>
+        <code>7</code>
         <classnotfound>
             <code>1</code>
             <description>Clase inexistente</description>
@@ -29,7 +61,7 @@
     </objectcache>
     
     <action>
-        <code>4</code>
+        <code>8</code>
         <invalid>
             <code>1</code>
             <description>Accion invalida</description>

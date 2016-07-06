@@ -2,6 +2,8 @@
 
 namespace Itracker\Actions;
 
+use Itracker\Exceptions\ItException;
+
 use KLogger;
 
 class OpenAction implements ITActionsInterface {

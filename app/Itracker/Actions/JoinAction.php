@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\ItException;
+use Itracker\Exceptions\ItException;
 
 class JoinAction implements ITActionsInterface {
 	public static function go($action) {

@@ -2,6 +2,7 @@
 
 namespace Itracker\Utils;
 
+use Itracker\Exceptions\ErrorException;
 /**
  * Variables de XML
  * Se ingresa XML y se extraen u opera con datos de las variables
@@ -50,28 +51,35 @@ class Vars implements \Itracker\XMLPropInterface {
     /**
      *  Carga variables desde archivo
      * @param string $path
-     * @return boolean
      */
     public function loadFile($path) {
+        if (!is_readable($path)) {
+            throw new ErrorException('vars/load','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'No se pudo cargar archivo de configuraciones'.$path);
+        }
+
         $this->dom_init = new \DOMDocument();
         $this->dom = null;
         $this->vars = null;
         try {
             if ($this->dom_init->load($path) == false) {
-                LoggerFactory::getLogger()->error('Error al parsear Xml de variables', array($path));
-                return false;
+                throw new ErrorException('vars/load','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error al parsear Xml de variables'.$path);
             }
         } catch (\Exception $e) {
-            LoggerFactory::getLogger()->error(
-                    'Error en archivo de vars', array('path' => $path, 'msg' => $e->getMessage()));
-            return false;
+            throw new ErrorException('vars/load','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error en archivo de vars'.$path,
+                    array('msg' => $e->getMessage()));
         }
 
         $this->xml = $this->dom_init->saveXML();
 
         $this->dom = clone $this->dom_init;
 
-        return $this->loadVars();
+        $this->loadVars();
     }
 
     /**
@@ -85,13 +93,15 @@ class Vars implements \Itracker\XMLPropInterface {
         $this->dom = null;
         $this->vars = null;
         if ($this->dom_init->loadXML($this->xml) == false) {
-            LoggerFactory::getLogger()->error('Error al parsear Xml de variables', array($xml));
-            return false;
+            throw new ErrorException('vars/load','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error al parsear Xml de variables',
+                    array('xml' => $xml));
         }
 
         $this->dom = clone $this->dom_init;
 
-        return $this->loadVars();
+        $this->loadVars();
     }
 
     /**
@@ -105,8 +115,10 @@ class Vars implements \Itracker\XMLPropInterface {
         $this->vars = null;
         $nodeImp = $this->dom_init->importNode($node, true);
         if ($nodeImp == false) {
-            LoggerFactory::getLogger()->error('No se puede importar nodo de var', array($node->textContent));
-            return false;
+            throw new ErrorException('vars/load','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'No se puede importar nodo de var',
+                    array($node->textContent));
         }
 
         $this->dom_init->createElement($nodeImp->nodeName)
@@ -116,7 +128,7 @@ class Vars implements \Itracker\XMLPropInterface {
 
         $this->dom = clone $this->dom_init;
 
-        return $this->loadVars();
+        $this->loadVars();
     }
 
     /**
@@ -152,16 +164,13 @@ class Vars implements \Itracker\XMLPropInterface {
                 continue;
             }
             if ($this->hasChildren($v)) {
-                if ($this->loadVars($v) == false) {
-                    return false;
-                }
+                $this->loadVars($v);
             } else {
                 $rpos = strtolower($v->getNodePath());
                 $value = $v->nodeValue;
                 $this->vars[$rpos] = $value;
             }
         }
-        return true;
     }
 
     /**
@@ -191,7 +200,9 @@ class Vars implements \Itracker\XMLPropInterface {
         $varName = strtolower('/' . $this->rootTag . '/' . $varName);
         if (!isset($this->vars[$varName])) {
             if($exception){
-                throw new \Exception('Variable no seteada-'.$varName);
+                throw new \Itracker\Exceptions\ItException('vars/unset',
+                        $varName);
+
             }else{
                 return null;
             }

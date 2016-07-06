@@ -40,8 +40,16 @@
         </getprop>
     </xmlprop>
     
-    <dbobject>
+    <its>
         <code>6</code>
+        <error>
+            <code>1</code>
+            <description></description>
+        </error>
+    </its>
+    
+    <dbobject>
+        <code>7</code>
         <load>
             <code>1</code>
             <description>No se pudo cargar objeto</description>
@@ -53,7 +61,7 @@
     </dbobject>
     
     <objectcache>
-        <code>7</code>
+        <code>8</code>
         <classnotfound>
             <code>1</code>
             <description>Clase inexistente</description>
@@ -61,7 +69,7 @@
     </objectcache>
     
     <action>
-        <code>8</code>
+        <code>9</code>
         <invalid>
             <code>1</code>
             <description>Accion invalida</description>

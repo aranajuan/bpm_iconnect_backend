@@ -33,11 +33,6 @@ class Operation {
      */
     private $result;
 
-    /**
-     * Error en operacion
-     * @var boolean
-     */
-    private $error;
 
     /**
      * Agrega objeto con el alias a la lista
@@ -54,12 +49,7 @@ class Operation {
      */
     public function operate($operation) {
         $this->operation = $operation;
-        try {
-            $this->solve();
-        } catch (\Exception $e) {
-            $this->error = true;
-        }
-        return $this->error;
+        $this->solve();
     }
 
     /**
@@ -87,9 +77,6 @@ class Operation {
         $this->operationSolving = $this->operation;
         $this->result = null;
         $OperParser = new OperationParser($this->operationSolving);
-        if ($OperParser->getError()) {
-            throw new \Exception('Error al en parametrizacion #1');
-        }
         $this->solveOperation($OperParser);
     }
 

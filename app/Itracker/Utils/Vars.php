@@ -9,7 +9,7 @@ use Itracker\Exceptions\ErrorException;
  * 
  * @author juan
  */
-class Vars implements \Itracker\XMLPropInterface {
+class Vars implements \Itracker\PropInterface {
 
     /**
      *  Xml de la base

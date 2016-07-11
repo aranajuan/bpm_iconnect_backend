@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-abstract class ITObject extends BasicObject implements XMLPropInterface, DBObjectInterface {
+abstract class ITObject extends BasicObject implements PropInterface, DBObjectInterface {
 
     /**
      * @param DOMdocument $doc Documento para crear elementos
@@ -35,7 +35,7 @@ abstract class ITObject extends BasicObject implements XMLPropInterface, DBObjec
         while(1) {
             $rta = $cobj->get_prop($pparts[$i]);
             if (isset($pparts[$i + 1])) {
-                if ($rta instanceof XMLPropInterface) {
+                if ($rta instanceof PropInterface) {
                     $cobj = $rta;
                 } else {
                     /* Error */

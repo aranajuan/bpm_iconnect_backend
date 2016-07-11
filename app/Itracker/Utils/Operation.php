@@ -2,6 +2,8 @@
 
 namespace Itracker\Utils;
 
+use \Itracker\Exceptions\ItException;
+
 /**
  * Realiza operaciones entre objetos itracker desde string
  * Comparaciones, operaciones matematicas, asignaciones
@@ -91,10 +93,10 @@ class Operation {
         if ($Op == '=') { //es asignacion
             $asign = $operation->getArg(0);
             if ($this->getArgType($asign) != 'var') {
-                LoggerFactory::getLogger()->error('Error solo se puede asignar a variables', array('Ec' => $this->operation)
-                );
-                $this->error = true;
-                throw new \Exception('Error al en parametrizacion #2');
+                throw new ItException('its/error','',
+                        \KLogger\Psr\Log\LogLevel::ERROR,
+                        'Error solo se puede asignar a variables',
+                        array('Ec' => $this->operation));
             }
             $offset++;
         }
@@ -122,7 +124,11 @@ class Operation {
         switch ($operation->getOpe($offset)) {
             case null:
                 if ($a1set == false) {
-                    throw $err;
+                     throw new ItException('its/error','',
+                        \KLogger\Psr\Log\LogLevel::ERROR,
+                        'Error en argumentos',
+                        array('Ec' => $this->operation,
+                            'Oper' => $operation->getOpe($offset)));
                 }
                 return $a1;
             case "isset":
@@ -214,10 +220,11 @@ class Operation {
                 }
                 return implode(',', array_unique(array_diff($a1, $a2)));
             default :
-                LoggerFactory::getLogger()->error('Error operacion desconocida', array('Ec' => $this->operation, 'Oper' => $operation->getOpe($offset))
-                );
-                $this->error = true;
-                throw new \Exception('Error al en parametrizacion #3');
+                 throw new ItException('its/error','',
+                        \KLogger\Psr\Log\LogLevel::ERROR,
+                        'Error operacion desconocida',
+                        array('Ec' => $this->operation,
+                            'Oper' => $operation->getOpe($offset)));
         }
     }
 
@@ -236,11 +243,9 @@ class Operation {
     /**
      * Devuelte tipo de argumento
      * @param string $value
-     * @return string var|number|string|unknown
+     * @return string var|number|string
      */
     private function getArgType($value) {
-        if (!$value)
-            return 'unknown';
         $c = $value{0};
         if ($c == '{')
             return 'var';
@@ -292,7 +297,7 @@ class Operation {
     /**
      * Parsea y ejecuta la funcion
      * @param string $function
-     * @param ScriptFunctionsInterface | XMLPropInterface $obj
+     * @param ScriptFunctionsInterface | PropInterface $obj
      * @return mixed
      */
     private function itsEjecute($function, $obj) {
@@ -306,7 +311,7 @@ class Operation {
             }
         }
         if ($lastp != -1) {
-            if ($obj instanceof \Itracker\XMLPropInterface) {
+            if ($obj instanceof \Itracker\PropInterface) {
                 $obj = $obj->get_Subprop(substr($function, 0, $lastp));
             } else {
                 return 'undefined';
@@ -336,7 +341,7 @@ class Operation {
                             $this->itsEjecute($arr[1], $obj)
             );
         }
-        if ($obj instanceof \Itracker\XMLPropInterface) {
+        if ($obj instanceof \Itracker\PropInterface) {
             return $this->normalize(
                             $obj->get_Subprop($arr[1])
             );
@@ -364,16 +369,20 @@ class Operation {
         $propR = $this->remplaceParams($prop, false);
         $arr = $this->getArrayAlias($propR);
         $obj = $arr[0];
-        if ($obj instanceof \Itracker\XMLPropInterface) {
+        if ($obj instanceof \Itracker\PropInterface) {
             try {
                 $obj->set_prop($arr[1], $value);
             } catch (\Exception $e) {
-                LoggerFactory::getLogger()->error('Error al setear variable en objeto ', array($prop, $propR, get_class($obj), $value));
-                throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
+                throw new ItException('its/error','',
+                        \KLogger\Psr\Log\LogLevel::ERROR,
+                        'Error al setear variable en objeto ',
+                        array($prop, $propR, get_class($obj), $value));
             }
         } else {
-            LoggerFactory::getLogger()->error('Error al setear variable en objeto invalido', array($prop, $propR, get_class($obj), $value));
-            throw new \Exception('No se puede continuar la ejecucion, error al setear variable');
+            throw new ItException('its/error','',
+                        \KLogger\Psr\Log\LogLevel::ERROR,
+                        'Error al setear variable en objeto ',
+                        array($prop, $propR, get_class($obj), $value));
         }
     }
 

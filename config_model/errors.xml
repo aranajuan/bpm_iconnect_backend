@@ -44,7 +44,7 @@
         <code>6</code>
         <error>
             <code>1</code>
-            <description></description>
+            <description>Error de ejecucion</description>
         </error>
     </its>
     
@@ -54,10 +54,10 @@
             <code>1</code>
             <description>No se pudo cargar objeto</description>
         </load>
-        <deleted>
+        <checkdata>
             <code>2</code>
-            <description>Objeto eliminados</description>
-        </deleted>
+            <description>Datos invalidos</description>
+        </checkdata>
     </dbobject>
     
     <objectcache>

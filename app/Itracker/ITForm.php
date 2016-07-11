@@ -5,7 +5,7 @@ namespace Itracker;
 /**
  * Formularios xml para datos itracker
  */
-class ITForm implements XMLPropInterface {
+class ITForm implements PropInterface {
 
     /**
      *

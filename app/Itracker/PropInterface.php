@@ -4,7 +4,7 @@ namespace Itracker;
 /**
  * definicion de metodos para exportar a XML y obtener propiedades
  */
-interface XMLPropInterface {
+interface PropInterface {
 
 
     public function getXML();

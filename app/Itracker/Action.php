@@ -195,10 +195,8 @@ class Action extends ITObject {
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where nombre='" . strToSQL(strtoupper($name)) . "'");
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $rta = $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return $rta;
+            $this->load_DV($tmpU);
+            return $this->estado;
         }
         throw new ItException('dbobject/load');
     }
@@ -228,7 +226,6 @@ class Action extends ITObject {
         $this->form = trim(space_delete($tmpU["form"], array("\t", "\n", "\0", "\x0B")));
         $this->ejecuta = trim($tmpU["ejecuta"]);
         $this->alias = trim($tmpU["alias"]);
-        return 'ok';
     }
 
     /**
@@ -239,7 +236,7 @@ class Action extends ITObject {
         $this->id = $tmpU["id"];
         $this->estado = $tmpU["estado"];
         $this->nombre = $tmpU["nombre"];
-        return $this->load_VEC($tmpU);
+        $this->load_VEC($tmpU);
     }
 
     /**

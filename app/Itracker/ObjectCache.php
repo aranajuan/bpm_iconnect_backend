@@ -62,7 +62,7 @@ class ObjectCache {
         } else {
             $this->recall++;
         }
-		if($this->status[$ind]!='ok' && !$allow_deleted){
+		if($this->status[$ind]!=I_ACTIVE && !$allow_deleted){
 			throw new ItException('dbobject/deleted','',
 					\KLogger\Psr\Log\LogLevel::ERROR,
 					'Objeto eliminado');

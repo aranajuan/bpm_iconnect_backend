@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker;
+use Itracker\Exceptions\ItException;
 
 /*
  * Variables de la vista
@@ -127,7 +128,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     public function load_DB($usr) {
 
         if ($usr == "") {
-            return "Error: Id invalido";
+            throw new ItException('dbobject/load');
         }
         $usr = strtoupper(strToSQL($usr));
 
@@ -138,19 +139,18 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $userData = $this->dbinstance->get_vector();
         } else {
-            return "Error usuario invalido #usr-1"; // error evaluado no cambiar
+            throw new ItException('dbobject/load'); 
         }
+        
         $this->usr = $usr;
 
         $arrRoot = $this->load_root($this->usr);
-        if ($arrRoot) {
-            $userData = array_merge($userData, $arrRoot);
-        } else {
-            $this->estado = I_DELETED;
-            return "Error usuario invalido #usr-2"; // error evaluado no cambiar    
-        }
+        
+        $userData = array_merge($userData, $arrRoot);
 
-        return $this->load_DV($userData);
+        $this->load_DV($userData);
+        
+        return $this->estado;
     }
 
     /**
@@ -177,7 +177,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
             return $this->dbroot->get_vector();
         } else {
-            return null;
+            throw new ItException('dbobject/load');
         }
     }
 
@@ -203,7 +203,6 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         $this->puesto = trim($tmpU["puesto"]);
 
         $this->ubicacion = trim($tmpU["ubicacion"]);
-
 
         $this->perfilLoaded = false;
     }
@@ -239,9 +238,6 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             $this->superuser = 0;
         }
 
-        if ($this->estado == I_ACTIVE)
-            return "ok";
-        return "eliminado";
     }
 
     /**
@@ -279,11 +275,10 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     public function hardDelete() {
         if ($this->estado == I_DELETED) {
             $ssql = "delete from TBL_USUARIOS where usr ='" . strToSQL($this->usr) . "'";
-            if ($this->dbinstance->query($ssql))
-                return $this->dbinstance->details;
-            return "ok";
+            $this->dbinstance->query($ssql);
+            return;
         }
-        return "No se puede restaurar usuario";
+        throw new ItException('dbobject\checkdata','No se puede restaurar usuario');
     }
 
     /**
@@ -319,10 +314,8 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             $ssql = "insert into TBL_USUARIOS (usr,dominio,pass,fronts,instancias) values ('" . strToSQL($this->usr) . "','" . strToSQL($rootD["dominio"]) . "',NULL,'" . strToSQL($rootD["fronts"]) . "','" . strToSQL($rootD["instancias"]) . "');";
         }
 
-        if ($this->dbroot->query($ssql)) {
-            return $this->dbroot->details;
-        }
-        return "ok";
+        $this->dbroot->query($ssql);
+
     }
 
     /**
@@ -395,9 +388,9 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 
         $i = 0;
         foreach ($tmpT as $TID) {
+            try{
             $t = $this->objsCache->get_object("Team", $TID);
-            $rta = $this->objsCache->get_status("Team", $TID);
-            if ($rta == "ok") {
+            }catch(ItException $e){
                 $this->equipos[$i] = $t;
                 $this->idsequiposV[$i] = $TID;
                 $i++;
@@ -428,12 +421,13 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         $tmpT = explode(",", $this->idsequiposadm);
         $i = 0;
         foreach ($tmpT as $TID) {
-            $t = $this->objsCache->get_object("Team", $TID);
-            $rta = $this->objsCache->get_status("Team", $TID);
-            if ($rta == "ok") {
+            try{
+                $t = $this->objsCache->get_object("Team", $TID);
                 $this->equiposadm[$i] = $t;
                 $this->idsequiposadmV[$i] = $TID;
                 $i++;
+            }catch(ItException $e){
+                
             }
         }
         if ($i)
@@ -458,10 +452,10 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 
         foreach ($arr as $tid) {
             if (is_numeric($tid)) {
-                $t = $this->objsCache->get_object("Team", $tid);
-                if ($this->objsCache->get_status("Team", $tid) == "ok") {
+                try{
+                    $t = $this->objsCache->get_object("Team", $tid);
                     array_push($final,$t);
-                }
+                }catch(ItException $e){}
             }
         }
 
@@ -575,10 +569,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         $ssql = "insert into TBL_UCONTAC (usr,mail,tel,nombre,puesto,ubicacion) 
         values ('" . $this->usr . "', '" . strToSQL($this->mail) . "', '" . strToSQL($this->tel) . "','" . strToSQL($this->nombre) . "','" . strToSQL($this->puesto) . "','" . strToSQL($this->ubicacion) . "' )";
 
-        if ($this->dbroot->query($ssql))
-            return "Error al guardar datos.";
-        else
-            return "ok";
+        $this->dbroot->query($ssql);
     }
 
     /**

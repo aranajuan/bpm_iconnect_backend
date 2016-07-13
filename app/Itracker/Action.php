@@ -669,7 +669,7 @@ class Action extends ITObject {
             case 'descripcion':
                 return $this->descripcion;
             default:
-                throw new ItException('xmlprop/getprop');
+                throw new ItException('prop/getprop');
         }
     }
 

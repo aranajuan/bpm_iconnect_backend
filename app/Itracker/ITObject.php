@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker;
+use Itracker\Exceptions\ItException;
 
 abstract class ITObject extends BasicObject implements PropInterface, DBObjectInterface {
 
@@ -42,7 +43,7 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
                     if ($hideError) {
                         $pv = "";
                     } else {
-                        $pv = "ERROR PROPIEDAD $p";
+                        throw new ItException('prop/getprop');
                     }
                     return $pv;
                 }
@@ -54,7 +55,7 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
     }
 
     public function set_prop($property, $value) {
-        throw new \Exception('No se pueden setear propiedades en este objeto');
+        throw new ItException('prop/setprop');
     }
 
 }

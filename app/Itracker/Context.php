@@ -136,7 +136,8 @@ class Context extends Utils\XMLhandler {
         if ($this->get_class() == "user" && $this->get_method() == "login") {
             return true;
         }
-
+        
+        // no lanza error! [IMPORTANTE]
          if (!$this->front->validAction($this->get_class(), $this->get_method())) {
             $this->error = "Acceso denegado a " . $this->get_class() . "/" . $this->get_method()." #1";
             return false;

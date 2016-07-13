@@ -66,18 +66,17 @@ class Division extends ITObject {
         $i = 0;
         $nameTemp = array();
         while ($sis = $this->dbinstance->get_vector()) {
-
-            $s = $this->objsCache->get_object("System", $sis["idsistema"]);
-            if ($this->objsCache->get_status("System", $sis["idsistema"]) == "ok") {
+            try{
+                $s = $this->objsCache->get_object("System", $sis["idsistema"]);
                 $q = $this->objsCache->get_object("Question", $sis["p_pregunta"]);
-                if ($this->objsCache->get_status("Question", $sis["p_pregunta"]) == "ok") {
-                    $this->idsistemas[$i] = $s->get_prop("id");
-                    $this->sistemas[$i] = $s;
-                    $nameTemp[$i] = $s->get_prop("nombre");
-                    $this->idPpreguntas[$s->get_prop("id")] = $q->get_prop("id");
-                    $this->Ppreguntas[$s->get_prop("id")] = $q;
-                    $i++;
-                }
+                $this->idsistemas[$i] = $s->get_prop("id");
+                $this->sistemas[$i] = $s;
+                $nameTemp[$i] = $s->get_prop("nombre");
+                $this->idPpreguntas[$s->get_prop("id")] = $q->get_prop("id");
+                $this->Ppreguntas[$s->get_prop("id")] = $q;
+                $i++;  
+            }catch(ItException $e){
+                
             }
         }
         array_multisort($nameTemp, SORT_STRING, $this->sistemas, $this->idsistemas);
@@ -91,6 +90,11 @@ class Division extends ITObject {
      */
     function get_fst_Q($idSistema) {
         $this->load_systems();
+        // error si no existe
+        if(!isset($this->Ppreguntas[$idSistema])){
+            throw new ItException('dbobject/checkdata',
+                    'Tipificacion invalida');
+        }
         return $this->Ppreguntas[$idSistema];
     }
 
@@ -122,7 +126,6 @@ class Division extends ITObject {
             throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
         if ($this->nombre == "")
             throw new ItException('dbobject/checkdata', 'El campo Nombre es obligatorio');
-
         if ($this->estado == I_DELETED)
             throw new ItException('dbobject/checkdata', 'Imposible modificar registro eliminado');
     }
@@ -178,7 +181,7 @@ class Division extends ITObject {
                 $this->load_systems();
                 return $this->sistemas;
             default:
-                throw new ItException('xmlprop/getprop');
+                throw new ItException('prop/getprop');
         }
     }
 

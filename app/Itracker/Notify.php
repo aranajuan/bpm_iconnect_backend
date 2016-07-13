@@ -491,18 +491,18 @@ class Notify extends ITObject {
      */
     public function send() {
         if (!$this->getContext()->get_GlobalConfig()->getBoolean('mail/enable')) {
-            return "Mail desactivado";
+            return;
         }
 
         if ($this->accion == "" || $this->mail_body == "" || $this->full_destino == "" || $this->tkt_final == NULL) {
-            return "Faltan datos para enviar mail";
+            return;
         }
         $this->split_str();
         $this->load_destiny();
         $this->clean_destiny();
 
         if (count($this->too) == 0 && count($this->cc) == 0) {
-            return "No hay destinatarios para esta notificacion";
+            return;
         }
 
         $this->load_body();
@@ -520,8 +520,6 @@ class Notify extends ITObject {
         foreach ($this->cc as $t) {
             $this->send_mail($t, $subject, $cbody, "", "HTML", "itracker@ta.telecom.com.ar");
         }
-
-        return "ok";
     }
 
     /**
@@ -538,9 +536,10 @@ class Notify extends ITObject {
         $extras = "From: $from\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
         $rta = mail($to, $subject, $body, $extras);
         if (!$rta) {
-            $this->getContext()->getLogger()->critical("Error en smtp");
+            throw new Exceptions\ErrorException('smtp/send','',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    'Error smtp');
         }
-        return $rta;
     }
 
     public function check_data() {

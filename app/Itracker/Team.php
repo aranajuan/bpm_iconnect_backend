@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-
+use Itracker\Exceptions\ItException;
 /**
  * Clase para administrar los equipos
  */
@@ -22,7 +22,6 @@ class Team extends ITObject {
     private $mytkts_vista;  /* vista para tabla de mytkts */
     private $staffhome_vista; /* vista para tabla staff home */
     private $estado;   /* activo / inactivo */
-    private $error = FALSE;  /* error al cargar de la base */
     private $adms = null; /* array de usuarios adms */
     private $idsadmsV = null;
 
@@ -48,24 +47,20 @@ class Team extends ITObject {
         $i = 0;
         $list = array();
         while ($idV = $this->dbinstance->get_vector()) {
-            $list[$i]=$this->objsCache->get_object(get_class(), $idV[0]);
+            $list[$i] = $this->objsCache->get_object(get_class(), $idV[0]);
             $i++;
         }
         return $list;
     }
 
     function load_DB($id) {
-        $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_EQUIPOS where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return "ok";
-        } else
-            $this->error = TRUE;
-        return "error";
+            return $this->estado;
+        }
+        throw new ItException('dbobject/load');
     }
 
     /**
@@ -85,7 +80,7 @@ class Team extends ITObject {
         $this->iddireccion = trim($tmpU["iddireccion"]);
         $this->idsequiposderiva = trim($tmpU["idsequipos_deriva"]);
         $this->idsequiposvisible = trim($tmpU["idsequipos_visible"]);
-        $this->idsequiposreporta=trim($tmpU["idsequipos_reporta"]);
+        $this->idsequiposreporta = trim($tmpU["idsequipos_reporta"]);
         $this->mytkts_vista = trim($tmpU["mytkts_vista"]);
         $this->staffhome_vista = trim($tmpU["staffhome_vista"]);
         $this->direccion = null;
@@ -113,7 +108,7 @@ class Team extends ITObject {
         $this->idsadmsV = array();
         while ($usr = $this->dbinstance->get_vector()) {
             $U = $this->objsCache->get_object("User", $usr["usr"]);
-            if($this->objsCache->get_status("User", $usr["usr"]) === "ok") {
+            if ($this->objsCache->get_status("User", $usr["usr"]) === "ok") {
                 if ($U->isadm($this->id)) {
                     array_push($this->adms, $U);
                     array_push($this->idsadmsV, $U->get_prop("usr"));
@@ -125,29 +120,25 @@ class Team extends ITObject {
 
     /**
      * Verifica dato para insert / update
-     * @return string
      */
     function check_data() {
         if (!is_numeric($this->id))
-            return "El id debe ser un numero entero";
+            throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
         if ($this->nombre == "")
-            return "El campo Nombre es obligatorio";
+            throw new ItException('dbobject/checkdata', 'El campo Nombre es obligatorio');
+
         if (!is_numeric($this->idlistin))
-            return "Debe seleccionar un listin valido";
-        $listin = $this->load_listin();
-        if (!$listin)
-            return "Debe seleccionar un listin valido";
+            throw new ItException('dbobject/checkdata', 'Debe seleccionar un listin valido');
+        $this->load_listin();
         if (!is_numeric($this->iddireccion))
-            return "Debe seleccionar una direccion valida";
-        $division = $this->load_division();
-        if (!$division)
-            return "Debe seleccionar una direccion valida";
+            throw new ItException('dbobject/checkdata', '');
+        $this->load_division();
+
         $this->load_teamsDer();
         if (HsToMin($this->t_conformidad) == -1)
-            return "Tiempo de conformidad invalido, respete el formato HH:MM";
+            throw new ItException('dbobject/checkdata', 'Tiempo de conformidad invalido, respete el formato HH:MM');
         if ($this->estado == I_DELETED)
-            return "Imposible modificar registro eliminado";
-        return NULL;
+            throw new ItException('dbobject/checkdata', 'Imposible modificar registro eliminado');
     }
 
     /**
@@ -156,12 +147,6 @@ class Team extends ITObject {
      */
     private function load_listin() {
         $this->listin = $this->objsCache->get_object("Listin", $this->idlistin);
-        if ($this->objsCache->get_status("Listin", $this->idlistin) == "ok")
-            return TRUE;
-        $this->getContext()->getLogger()->notice("El equipo tiene un listin invalido",array($this->id,$this->idlistin));
-        $this->listin = NULL;
-        $this->idlistin = NULL;
-        return FALSE;
     }
 
     /**
@@ -169,14 +154,7 @@ class Team extends ITObject {
      * @return boolean
      */
     private function load_division() {
-        if($this->iddireccion===null)
-            return true;
         $this->direccion = $this->objsCache->get_object("Division", $this->iddireccion);
-        if ( $this->objsCache->get_status("Division", $this->iddireccion) == "ok")
-            return TRUE;
-        $this->getContext()->getLogger()->notice("El equipo tiene una direccion invalida",array($this->id,$this->iddireccion));
-        $this->direccion = NULL;
-        return FALSE;
     }
 
     /**
@@ -184,7 +162,7 @@ class Team extends ITObject {
      * @return int Qequipos
      */
     private function load_teamsDer() {
-        if(isset($this->equiposderiva)){
+        if (isset($this->equiposderiva)) {
             return count($this->equiposderiva);
         }
         $arrTeam = explode(",", $this->idsequiposderiva);
@@ -192,11 +170,13 @@ class Team extends ITObject {
         $i = 0;
         foreach ($arrTeam as $tid) {
             if (is_numeric($tid)) {
-                $t =  $this->objsCache->get_object("Team", $tid);
-                if ($this->objsCache->get_status("Team", $tid) == "ok") {
+                try {
+                    $t = $this->objsCache->get_object("Team", $tid);
                     $this->equiposderiva[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
                     $i++;
+                } catch (ItException $e) {
+                    
                 }
             }
         }
@@ -236,7 +216,7 @@ class Team extends ITObject {
     function get_users($idprofile = 0) {
         if ($idprofile != 0) {
             $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and perfil=" . intval($idprofile) . " and idsequipos like '%" . intval($this->id) . "%'";
-        }else {
+        } else {
             $ssql = "select usr,idsequipos from TBL_USUARIOS where estado=" . I_ACTIVE . " and idsequipos like '%" . intval($this->id) . "%'";
         }
         $users = array();
@@ -245,10 +225,12 @@ class Team extends ITObject {
         if ($this->dbinstance->noEmpty) {
             while ($rs = $this->dbinstance->get_vector()) {
                 if (in_array($this->id, explode(",", $rs["idsequipos"]))) {
-                    $u = $this->objsCache->get_object("User", $rs["usr"]);
-                    if ($this->objsCache->get_status("User", $rs["usr"]) == "ok") {
+                    try {
+                        $u = $this->objsCache->get_object("User", $rs["usr"]);
                         $users[$i] = $u;
                         $i++;
+                    } catch (ItException $e) {
+                        
                     }
                 }
             }
@@ -257,49 +239,35 @@ class Team extends ITObject {
     }
 
     function update_DB() {
-        if (!($rta = $this->check_data())) {
-            $ssql = "update TBL_EQUIPOS set nombre='" . strToSQL($this->nombre) .
-                    "',t_conformidad='" . strToSQL($this->t_conformidad) .
-                    "',iddireccion=" . intval($this->iddireccion) .
-                    ",idsequipos_deriva='" . strToSQL($this->idsequiposderiva) .
-                    "',idsequipos_visible='" . strToSQL($this->idsequiposvisible) .
-                    "',idsequipos_reporta='" . strToSQL($this->idsequiposreporta) .
-                    "', mytkts_vista = '" . strToSQL($this->mytkts_vista) .
-                    "', staffhome_vista = '" . strToSQL($this->staffhome_vista) .
-                    "',idlistin=" . intval($this->idlistin) .
-                    " where id=" . intval($this->id);
-            if ($this->dbinstance->query($ssql))
-                return "Team_update: " . $this->dbinstance->details;
-            else
-                return "ok";
-        }
-        return $rta;
+        $this->check_data();
+        $ssql = "update TBL_EQUIPOS set nombre='" . strToSQL($this->nombre) .
+                "',t_conformidad='" . strToSQL($this->t_conformidad) .
+                "',iddireccion=" . intval($this->iddireccion) .
+                ",idsequipos_deriva='" . strToSQL($this->idsequiposderiva) .
+                "',idsequipos_visible='" . strToSQL($this->idsequiposvisible) .
+                "',idsequipos_reporta='" . strToSQL($this->idsequiposreporta) .
+                "', mytkts_vista = '" . strToSQL($this->mytkts_vista) .
+                "', staffhome_vista = '" . strToSQL($this->staffhome_vista) .
+                "',idlistin=" . intval($this->idlistin) .
+                " where id=" . intval($this->id);
+        $this->dbinstance->query($ssql);
     }
 
     function insert_DB() {
         $this->estado = I_ACTIVE;
         $this->id = I_NEWID;
-        if (!($rta = $this->check_data())) {
-            $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idsequipos_reporta,idlistin,mytkts_vista,staffhome_vista,estado) values ('" .
-                    strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "','" . strToSQL($this->idsequiposreporta) . "'," . intval($this->idlistin) . ",'" . strToSQL($this->mytkts_vista) . "','" . strToSQL($this->staffhome_vista) . "',0);";
-            if ($this->dbinstance->query($ssql))
-                return "Team_insert: " . $this->dbinstance->details;
-            else {
-                $this->id = $this->dbinstance->get_lastID();
-                return "ok";
-            }
-        } else
-            return $rta;
+        $this->check_data();
+        $ssql = "insert into TBL_EQUIPOS(nombre,t_conformidad,iddireccion,idsequipos_deriva,idsequipos_visible,idsequipos_reporta,idlistin,mytkts_vista,staffhome_vista,estado) values ('" .
+                strToSQL($this->nombre) . "','" . strToSQL($this->t_conformidad) . "'," . intval($this->iddireccion) . ",'" . strToSQL($this->idsequiposderiva) . "','" . strToSQL($this->idsequiposvisible) . "','" . strToSQL($this->idsequiposreporta) . "'," . intval($this->idlistin) . ",'" . strToSQL($this->mytkts_vista) . "','" . strToSQL($this->staffhome_vista) . "',0);";
+        $this->dbinstance->query($ssql);
+        $this->id = $this->dbinstance->get_lastID();
     }
 
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            return "El equipo ya se encuentra eliminado";
+            throw new ItException('dbobject/checkdata', 'El equipo ya se encuentra eliminado');
         $ssql = "update TBL_EQUIPOS set estado=1 where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql))
-            return "Team_delete: " . $this->dbinstance->details;
-        else
-            return "ok";
+        $this->dbinstance->query($ssql);
     }
 
     /**
@@ -307,21 +275,21 @@ class Team extends ITObject {
      * @param string    parametro getprop del home requerido
      * @return array
      */
-    public function getFieldRequired($home){
-        $fields=array();
+    public function getFieldRequired($home) {
+        $fields = array();
         $vista = $this->get_prop($home);
-        $fieldsDefaults = array("id", "childsc", "origen_json", "status", "critic","fb","fa");
-        
-        $vistaV = explode(',',$vista);
-        foreach($vistaV as $fv){
-            $fv_exp = explode('=>',$fv);
-            if(!strpos($fv_exp[0],':')){
+        $fieldsDefaults = array("id", "childsc", "origen_json", "status", "critic", "fb", "fa");
+
+        $vistaV = explode(',', $vista);
+        foreach ($vistaV as $fv) {
+            $fv_exp = explode('=>', $fv);
+            if (!strpos($fv_exp[0], ':')) {
                 array_push($fields, $fv_exp[0]);
             }
         }
-        return array_unique(array_merge($fields,$fieldsDefaults));
+        return array_unique(array_merge($fields, $fieldsDefaults));
     }
-    
+
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {
@@ -330,8 +298,8 @@ class Team extends ITObject {
             case 'nombre':
                 return ucwords($this->nombre);
             case 'nombrefull':
-                return $this->get_prop('nombre').
-                    ' -'.$this->get_prop('direccionname');
+                return $this->get_prop('nombre') .
+                        ' -' . $this->get_prop('direccionname');
             case 't_conformidad':
                 return $this->t_conformidad;
             case 'idlistin':
@@ -377,7 +345,7 @@ class Team extends ITObject {
             case 'idsequiposreporta':
                 return $this->idsequiposreporta;
             default:
-                return "Propiedad invalida.";
+                throw new ItException('prop/getprop');
         }
     }
 

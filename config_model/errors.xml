@@ -32,13 +32,17 @@
     </db>
 
     <!--Errores itracker -->
-    <xmlprop>
+    <prop>
         <code>5</code>
         <getprop>
             <code>1</code>
             <description>Propiedad invalida</description>
         </getprop>
-    </xmlprop>
+        <setprop>
+            <code>2</code>
+            <description>No se puede setear la propiedad</description>
+        </setprop>
+    </prop>
     
     <its>
         <code>6</code>
@@ -58,6 +62,10 @@
             <code>2</code>
             <description>Datos invalidos</description>
         </checkdata>
+        <deleted>
+            <code>3</code>
+            <description>Elemento eliminado</description>
+        </deleted>
     </dbobject>
     
     <objectcache>
@@ -91,4 +99,29 @@
             </invalid>
         </go>
     </action>
+    <itf>
+        <code>10</code>
+        <load>
+            <code>1</code>
+            <description>Error al cargar formulario</description>
+        </load>
+        <value>
+            <code>2</code>
+            <description>Error de validacion de campo</description>
+        </value>
+    </itf>
+    <smtp>
+        <code>11</code>
+        <send>
+            <code>1</code>
+            <description></description>
+        </send>
+    </smtp>
+    <option>
+        <code>12</code>
+        <destiny>
+            <code>1</code>
+            <description>Destino invalido</description>
+        </destiny>
+    </option>
 </errors>

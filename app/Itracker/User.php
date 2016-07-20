@@ -390,7 +390,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         foreach ($tmpT as $TID) {
             try{
             $t = $this->objsCache->get_object("Team", $TID);
-            }catch(ItException $e){
+            }catch(Exceptions\ItDeletedException $e){
                 $this->equipos[$i] = $t;
                 $this->idsequiposV[$i] = $TID;
                 $i++;
@@ -426,7 +426,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 $this->equiposadm[$i] = $t;
                 $this->idsequiposadmV[$i] = $TID;
                 $i++;
-            }catch(ItException $e){
+            }catch(Exceptions\ItDeletedException $e){
                 
             }
         }
@@ -455,7 +455,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 try{
                     $t = $this->objsCache->get_object("Team", $tid);
                     array_push($final,$t);
-                }catch(ItException $e){}
+                }catch(Exceptions\ItDeletedException $e){}
             }
         }
 
@@ -578,18 +578,20 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      */
     public function check_data() {
         if ($this->usr == "" || $this->usr == null)
-            return "El usuario es obligatorio";
-
+            throw new ItException('dbobject/checkdata', 'El usuario es obligatorio');
         if (!in_array($this->dominio, $this->getContext()->get_GlobalConfig()->getArray('domains')))
-            return "Dominion invalido";
+                throw new ItException('dbobject/checkdata', 'Dominion invalido');
+
         if (!is_numeric($this->perfil))
-            return "El campo perfil es obligatorio";
+            throw new ItException('dbobject/checkdata', 'El campo perfil es obligatorio');
+
         if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) && trim($this->mail) != "")
-            return "Mail invalido";
+                throw new ItException('dbobject/checkdata', 'Mail invalido');
+
         if ($this->dbteams == "" || $this->dbteams == null) {
-            return "Seleccione al menos un equipo";
+            throw new ItException('dbobject/checkdata', 'Seleccione al menos un equipo');
+
         }
-        return NULL;
     }
 
     /**
@@ -597,19 +599,15 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @return string
      */
     public function update_DB() {
-        if (($rta = $this->check_data())) {
-            return $rta;
-        }
+        $this->check_data();
         $ssql = "update TBL_USUARIOS set perfil=" . intval($this->get_prop("perfil")) .
                 ", idsequipos='" . strToSQL($this->dbteams) .
                 "' where usr='" . strToSQL($this->usr) . "'";
 
-        if ($this->dbinstance->query($ssql)) {
-            return "User_update: " . $this->dbinstance->details;
-        }
+        $this->dbinstance->query($ssql);
 
         $this->insert_ucontact();
-        return $this->update_root();
+        $this->update_root();
     }
 
     /**
@@ -617,18 +615,15 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      * @return string
      */
     public function insert_DB() {
-        if (($rta = $this->check_data())) {
-            return $rta;
-        }
+        $this->check_data();
+
         $ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado) 
                 values ('" . strToSQL($this->usr) . "','" . strToSQL($this->dbteams) . "',null," . intval($this->perfil) . ",0);";
 
-        if ($this->dbinstance->query($ssql)) {
-            return "User_insert: " . $this->dbinstance->details;
-        }
+        $this->dbinstance->query($ssql);
 
         $this->insert_ucontact();
-        return $this->update_root();
+        $this->update_root();
     }
 
     /**
@@ -637,10 +632,8 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      */
     public function delete_DB() {
         $ssql = "update TBL_USUARIOS set estado=" . I_DELETED . " where usr='" . strToSQL($this->usr) . "'";
-        if ($this->dbinstance->query($ssql)) {
-            return "User_delete:" . $this->dbinstance->details;
-        }
-        return "ok";
+        $this->dbinstance->query($ssql);
+
     }
 
     public function load_profile() {
@@ -757,6 +750,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                 return true;
             }
         }
+        return false;
     }
 
     /**
@@ -888,14 +882,14 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      */
     public function login($passL, $front, $ipuser) {
         if ($this->estado != I_ACTIVE)
-            return "Usuario invalido";
+            throw new ItException('dbobject/checkdata', 'Usuario invalido');
 
         if ($this->dominio == "BLOQUEADO") {
-            return "Acceso deshabilitado apra el usuario";
+            throw new ItException('dbobject/checkdata', 'Acceso deshabilitado apra el usuario');
         }
 
         if ($this->usr == "" || $this->error == true)
-            return "Usuario sin cargar";
+            throw new ItException('dbobject/checkdata', 'Usuario sin cargar');
 
         $maxsessions = $this->getContext()->get_GlobalConfig()
                 ->getInt('configs/sessionmax');
@@ -908,42 +902,35 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 
         if ($front->is_trusted()) {
             if ($sessionC >= $maxsessions) {
-                return 'Limite de sesiones alcanzado. Cierre una sesion.';
+                throw new ItException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
             }
             if ($maxsessions == 1) {
                 $this->sessionCloseAll();
             }
-            return $this->sessionCreate($front, $ipuser);
+            $this->sessionCreate($front, $ipuser);
         }
 
         if ($passL == "" || $this->error == true)
-            return "Usuario o contrase&ntilde;a invalidos.2";
+            throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos');
+
 
         switch ($this->dominio) {
             case "ITRACKER":
                 if ($passL != $this->pass) {
-                    return "Usuario o contrase&ntilde;a invalidos.";
+                    throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 }
                 break;
             case "CCPI":
                 $ldap = new \ExternalWs\LdapWs();
                 $rta = $ldap->check_user($this->get_prop("usr"), $passL);
-                if ($rta["status"] === "ok") {
-                    if ($rta["response"] != "true")
-                        return "Usuario o contrase&ntilde;a invalidos.";
-                }else {
-                    return "Error en servicio de logeo" . $rta["description"];
-                }
+                if ($rta["response"] != "true")
+                   throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 break;
             case "TELECOM":
                 $ldap = new \ExternalWs\LdapWs();
                 $rta = $ldap->check_user($this->get_prop("usr"), $passL);
-                if ($rta["status"] === "ok") {
-                    if ($rta["response"] != "true")
-                        return "Usuario o contrase&ntilde;a invalidos.";
-                }else {
-                    return "Error en servicio de logeo";
-                }
+                if ($rta["response"] != "true")
+                        throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 break;
             case "SHAREPOINT":
                 $SPF = new Front();
@@ -954,31 +941,33 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                         . " ";
                 $this->dbroot->loadRS($ssql);
                 if ($this->dbroot->cReg != 1) {
-                    return "SP::Usuario o contrase&ntilde;a invalidos.";
+                    throw new ItException('dbobject/checkdata', 'SP::Usuario o contrase&ntilde;a invalidos.');
                 }
                 $v = $this->dbroot->get_vector();
                 $f1 = strtotime($v["fecha"]);
                 if ($f1 == false) {
-                    return "SP::fecha invalida " . $v["fecha"];
+                    throw new ItException('dbobject/checkdata',  "SP::fecha invalida " . $v["fecha"]);
+
                 }
                 $f2 = strtotime('now');
                 if ($f2 == false) {
-                    return "SP::fecha invalida";
+                    throw new ItException('dbobject/checkdata', "SP::fecha invalida");
+
                 }
                 if (($f2 - $f1) > 60) {
-                    return "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1);
+                    throw new ItException('dbobject/checkdata', "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1));
                 }
                 break;
             default:
-                return "Usuario o contrase&ntilde;a invalidos.";
+                throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
         }
         if ($sessionC >= $maxsessions) {
-            return 'Limite de sesiones alcanzado. Cierre una sesion.';
+            throw new ItException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
         }
         if ($maxsessions == 1) {
             $this->sessionCloseAll();
         }
-        return $this->sessionCreate($front, $ipuser);
+        $this->sessionCreate($front, $ipuser);
     }
 
     /**
@@ -1006,11 +995,8 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             ('" . strToSQL($this->usr) .
                 "'," . $front->get_prop("id") . ",'"
                 . strToSQL($ipuser) . "','" . $hash . "',now(),now())";
-        if ($this->dbroot->query($ssql)) {
-            return "Error: imposible loguear usuario" . mysql_error();
-        }
+        $this->dbroot->query($ssql);
         $this->hash = $hash;
-        return "ok";
     }
 
     /**
@@ -1172,7 +1158,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             case 'puesto':
                 return $this->puesto;
             default:
-                return "Propiedad invalida.";
+                throw new ItException('prop/getprop');
         }
     }
 

@@ -175,7 +175,7 @@ class Team extends ITObject {
                     $this->equiposderiva[$i] = $t;
                     $arrTeamIDn[$i] = $tid;
                     $i++;
-                } catch (ItException $e) {
+                } catch (Exceptions\ItDeletedException $e) {
                     
                 }
             }
@@ -229,7 +229,7 @@ class Team extends ITObject {
                         $u = $this->objsCache->get_object("User", $rs["usr"]);
                         $users[$i] = $u;
                         $i++;
-                    } catch (ItException $e) {
+                    } catch (Exceptions\ItDeletedException $e) {
                         
                     }
                 }

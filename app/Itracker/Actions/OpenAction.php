@@ -16,7 +16,7 @@ class OpenAction implements ITActionsInterface {
 		
 		/* VALIDACIONES */
 		
-		$lstOption = $TKT->get_last ();
+		$lstOption = $TKT->get_last();
 		
 		if (! is_numeric ( $destiny->get_prop ( 'id' ) )) {
 			throw new ItException ( 'action/go/invalid', 'No hay destino valido id en script', KLogger\Psr\Log\LogLevel::WARNING, '', array (

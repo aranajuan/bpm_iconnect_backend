@@ -177,10 +177,8 @@ class Action extends ITObject {
         $this->dbinstance->loadRS("select * from TBL_ACCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $rta = $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return $rta;
+            $this->load_DV($tmpU);
+            return $this->estado;
         }
         throw new ItException('dbobject/load');
     }

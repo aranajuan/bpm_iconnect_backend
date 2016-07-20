@@ -75,7 +75,7 @@ class Division extends ITObject {
                 $this->idPpreguntas[$s->get_prop("id")] = $q->get_prop("id");
                 $this->Ppreguntas[$s->get_prop("id")] = $q;
                 $i++;  
-            }catch(ItException $e){
+            }catch(Exceptions\ItDeletedException $e){
                 
             }
         }

@@ -2,6 +2,8 @@
 
 namespace Itracker;
 
+use Itracker\Exceptions\ItException;
+
 /**
  * Eventos de tickets
  */
@@ -58,17 +60,18 @@ class TktH extends ITObject {
     }
 
     function load_DB($id) {
-        $this->error = FALSE;
         $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
                             where H.id=$id and H.estado = " . I_ACTIVE);
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            return $this->load_DV($tmpU);
-        } else {
-            $this->error = TRUE;
+            $this->load_DV($tmpU);
+            if ($this->FB != "" && $this->FB != null) {
+                return I_DELETED;
+            }
+            return I_ACTIVE;
         }
-        return "error " . $id;
+        throw new ItException('dbobject/load');
     }
 
     /**
@@ -97,22 +100,17 @@ class TktH extends ITObject {
         $accion = $this->objsCache->get_object("Action", $this->idaccion);
         if ($accion->get_prop('nombre') == "LINK") {
             $this->idLink = $this->id;
-            return $this->load_DB($this->objadj_id);
+            $this->load_DB($this->objadj_id);
+            return;
         }
         $this->detalle = $tmpU["detalle"];
         if ($this->detalle != null && $this->detalle != "") {
             $this->itform = new ITForm();
-            if ($this->itform->load_xml($this->detalle) == false) {
-                return "Error al cargar formulario " . $this->id;
-            }
+            $this->itform->load_xml($this->detalle);
         } else {
             $this->itform = null;
         }
         $this->accion = $accion;
-        if ($this->FB != "" && $this->FB != null) {
-            return "eliminado";
-        }
-        return "ok";
     }
 
     /**
@@ -127,15 +125,15 @@ class TktH extends ITObject {
      * Es una actualizacion
      * @return boolean
      */
-    public function isUpdate(){
-        if($this->get_prop('accion') instanceof Action){
-        	if(is_numeric($this->get_prop('objadj_id'))) {
-            	return $this->get_prop('accion')->get_prop('ejecuta')=='update';
-        	}
+    public function isUpdate() {
+        if ($this->get_prop('accion') instanceof Action) {
+            if (is_numeric($this->get_prop('objadj_id'))) {
+                return $this->get_prop('accion')->get_prop('ejecuta') == 'update';
+            }
         }
         return false;
     }
-    
+
     /**
      * Setea id del equipo
      * @param int $id
@@ -169,10 +167,6 @@ class TktH extends ITObject {
             //formulario de apertura
             if ($this->TKT) {
                 $lst = $this->TKT->get_last();
-                if (!$lst) {
-                    echo 'Error, no hay opcion';
-                    return NULL;
-                }
                 $itf = $lst->get_prop('itform');
             }
         } else {
@@ -212,45 +206,40 @@ class TktH extends ITObject {
                 strToSQL($this->accion->get_prop("objadj_id")) . "',now(),'"
                 . strToSQL($this->getLogged()->get_prop("usr")) . "',NULL,NULL," . I_ACTIVE . ");";
 
-        if ($this->dbinstance->query($ssql)) {
-            return "TKTH_Insert: " . $this->dbinstance->details;
+        $this->dbinstance->query($ssql);
+
+        $this->id = $this->dbinstance->get_lastID();
+        $itform = $this->accion->getitform();
+        if ($itform && $itform->getSaveElCount()) {
+            $form = $itform->getSaveDom()->saveXML();
         } else {
-            $this->id = $this->dbinstance->get_lastID();
-            $itform = $this->accion->getitform();
-            if ($itform && $itform->getSaveElCount()) {
-                $form = $itform->getSaveDom()->saveXML();
-            } else {
-                $form = "";
-            }
-            $err="ok";
-            if(!$this->save_files()){
-                $err="Archivos no guardados";
-            }
-            if (trim($form) == "") { // accion sin formulario
-                return "ok";
-            }
-            /* Agregar a tabla detalles */
-            $ssql = "insert into TBL_TICKETS_M_DETALLES (idtktm,detalle)
+            $form = "";
+        }
+
+        $this->save_files();
+
+        if (trim($form) == "") { // accion sin formulario
+            return;
+        }
+        /* Agregar a tabla detalles */
+        $ssql = "insert into TBL_TICKETS_M_DETALLES (idtktm,detalle)
                         values (" . intval($this->id) . ",'" . strToSQL($form) . "')";
 
-            if ($this->dbinstance->query($ssql)) {
-                return "THTH_D_insert: Error no se guardaron los detalles pero si se avanzo el tkt:" . $this->dbinstance->details;
-            }
-            return $err;
-        }
+        $this->dbinstance->query($ssql);
+            
     }
 
     private function loadObjadj() {
         if ($this->objadj_txt != "")
             return;
-        $cname = '\\Itracker\\Actions\\'.ucfirst($this->accion->get_prop("ejecuta")).'Action';
+        $cname = '\\Itracker\\Actions\\' . ucfirst($this->accion->get_prop("ejecuta")) . 'Action';
         if (class_exists($cname)) {
             $cAction = new $cname();
             $response = $cAction->show($this);
-        }else{
-            $response=null;
+        } else {
+            $response = null;
         }
-        if($response){
+        if ($response) {
             $this->objadj = $response->getObj();
             $this->objadj_txt = $response->getTxt();
         } else {
@@ -277,18 +266,18 @@ class TktH extends ITObject {
         $value = $this->get_prop("objadj_txt");
         if ($this->isLinked()) {
             $alias .= " - (en TKT " . $this->get_prop("idtkt") . ")";
-        } 
+        }
         if ($this->isUpdate()) {
             $mm = $this->getFstUpdate();
             $alias = $mm->get_prop('accion')->get_prop('alias') . " (Actualizado)";
-            if($value == ''){
+            if ($value == '') {
                 $value = $mm->get_prop("objadj_txt");
             }
         }
-        
+
         $action->appendChild($element->createElement("alias", $alias));
         $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        $action->appendChild($element->createElement("value",$value ));
+        $action->appendChild($element->createElement("value", $value));
         $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
         $action->appendChild($element->createElement("date", $this->get_prop("FA")));
         if ($this->getThUpdate() != null) {
@@ -347,8 +336,7 @@ class TktH extends ITObject {
             return false;
         }
 
-        if (!$this->getLogged()->cansee($this->get_UA()) 
-                && $this->getLogged()->get_prop('fulladm')!=true) {
+        if (!$this->getLogged()->cansee($this->get_UA()) && $this->getLogged()->get_prop('fulladm') != true) {
             return false;
         }
 
@@ -366,18 +354,10 @@ class TktH extends ITObject {
         if ($this->UA_o) {
             return $this->UA_o;
         }
-        $UA = $this->objsCache->get_object("User", $this->UA);
-        $rta = $this->objsCache->get_status("User", $this->UA);
+        $UA = $this->objsCache->get_object("User", $this->UA,false,true);
         $this->UA_o = $UA;
-        if ($rta == "ok") {
-            return $this->UA_o;
-        }
-        if ($rta == "eliminado") {
-            $this->getContext()->getLogger()->warning("Evento de usuario eliminado", array($this->id, $this->idtkt, $this->UA));
-            return $this->UA_o;
-        }
-        $this->getContext()->getLogger()->error("Evento de usuario invalido", array($this->id, $this->idtkt, $this->UA, $rta));
-        return null;
+
+        return $this->UA_o;
     }
 
     /**
@@ -393,15 +373,14 @@ class TktH extends ITObject {
             $count = explode("_", $fileexp[0]);
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
-            if(fwrite($fileO, base64_decode($f["data"]))==FALSE){
-                return false;
+            if (fwrite($fileO, base64_decode($f["data"])) == FALSE) {
+                throw new Exceptions\ErrorException('th/savefile');
             }
             fclose($fileO);
-            if(!file_exists($fname)){
-                return false;
+            if (!file_exists($fname)) {
+                throw new Exceptions\ErrorException('th/savefile');
             }
         }
-        return true;
     }
 
     /**
@@ -411,9 +390,7 @@ class TktH extends ITObject {
         if ($this->itform && $this->itform->getFileLinkTh()) {
             $idTH = $this->itform->getFileLinkTh();
             $thUP = $this->objsCache->get_object("TktH", $idTH);
-            if($this->objsCache->get_status("TktH", $idTH)=='ok'){
-                return $thUP->get_idFiles();
-            }
+            return $thUP->get_idFiles();
         } else {
             return $this->id;
         }
@@ -460,14 +437,14 @@ class TktH extends ITObject {
      * Obtiene primer evento, el no actualizado.
      * @return TktH
      */
-    public function getFstUpdate(){
-        if(!$this->isUpdate()) {
+    public function getFstUpdate() {
+        if (!$this->isUpdate()) {
             return $this;
         }
         $THm = $this->get_prop('objadj');
         return $THm->getFstUpdate();
     }
-    
+
     function get_prop($property) {
         $property = strtolower($property);
         switch ($property) {
@@ -506,7 +483,7 @@ class TktH extends ITObject {
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
             default:
-                return "Propiedad invalida.";
+                throw new ItException('prop/getprop');
         }
     }
 
@@ -517,13 +494,7 @@ class TktH extends ITObject {
     private function loadTKT() {
         if ($this->TKT == null) {
             $this->TKT = $this->objsCache->get_object("Tkt", $this->get_prop('idtkt'));
-            $rta = $this->objsCache->get_status("Tkt", $this->get_prop('idtkt'));
-            if ($rta != 'ok') {
-                $this->TKT = null;
-            }
-            return 'ok';
         }
-        return 'ok';
     }
 
     /**
@@ -531,12 +502,8 @@ class TktH extends ITObject {
      */
     private function loadview() {
         if ($this->view == null) {
-            if ($this->loadTKT() == 'ok') {
-                $this->view = $this->TKT->get_prop("view");
-            } else {
-                echo "error TKT" . $this->get_prop("idtkt");
-                $this->view = null;
-            }
+            $this->loadTKT();
+            $this->view = $this->TKT->get_prop("view");
         }
     }
 
@@ -555,7 +522,7 @@ class TktH extends ITObject {
 
     public function delete_DB() {
         $ssql = "update TBL_TICKETS_M set FB=now(), UB='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where id=" . intval($this->get_prop("id"));
-        return $this->dbinstance->query($ssql);
+        $this->dbinstance->query($ssql);
     }
 
     public function update_DB() {

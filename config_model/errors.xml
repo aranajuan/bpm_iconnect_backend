@@ -124,4 +124,18 @@
             <description>Destino invalido</description>
         </destiny>
     </option>
+    <tkt>
+        <code>13</code>
+        <update>
+            <code>1</code>
+            <description>Error al actualizar tkt</description>
+        </update>
+    </tkt>
+    <th>
+        <code>14</code>
+        <savefile>
+            <code>1</code>
+            <description>Error al guardar archivo</description>
+        </savefile>
+    </th>
 </errors>

@@ -11,7 +11,7 @@ namespace Itracker\Exceptions;
  *
  * @author u548391
  */
-class ItException extends ErrorException {
+class ItDeletedException extends ItException {
     
 }
 

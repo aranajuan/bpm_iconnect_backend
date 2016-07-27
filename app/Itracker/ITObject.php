@@ -2,6 +2,7 @@
 
 namespace Itracker;
 use Itracker\Exceptions\ItException;
+use Itracker\ResponseElement;
 
 abstract class ITObject extends BasicObject implements PropInterface, DBObjectInterface {
 
@@ -10,17 +11,15 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
      * @param array parametros de get_prop
      * @return DOMNode Objeto en XML
      */
-    public function getXML($doc = null, $props = null) {
-        if ($doc == null) {
-            throw new \Exception('Metodo invalido getxml sin doc itobj');
-        }
+    public function getData($props = null) {
         $cname = explode("\\", get_called_class());
-        $el = $doc->createElement(strtoupper($cname[count($cname) - 1]));
+        $rta = new ResponseElement(strtoupper($cname[count($cname) - 1]));
         foreach ($props as $p) {
             $pv = $this->get_Subprop($p, true);
-            $el->appendChild($doc->createElement($p, $pv));
+            $rta->addValue(new ResponseElement($p,$pv,
+                    ResponseElement::$TEXT));
         }
-        return $el;
+        return $rta;
     }
 
     /**

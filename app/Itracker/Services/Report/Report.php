@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker\Services\Report;
+use Itracker\ResponseElement;
 
 class Report implements \Itracker\Services\ITServiceInterface {
 
@@ -82,11 +83,13 @@ class Report implements \Itracker\Services\ITServiceInterface {
         $RPADAPTER = new \Itracker\Report\PHP_XLSXWriter($RR);
         $RPADAPTER->loadExcel();
 
-        $arch = $Context->createElement("file");
-        $arch->appendChild($Context->createElement("name", "reporteITRACKER.xlsx"));
-        $arch->appendChild($Context->createElementSecure("data", $RPADAPTER->getFile()));
+        $rta = new ResponseElement('file');
+        $rta->addValue(new ResponseElement('name', 
+                'reporteITRACKER.xlsx', ResponseElement::$TEXT));
+        $rta->addValue(new ResponseElement('data',
+                $RPADAPTER->getFile(), ResponseElement::$FILE));
 
-        return $arch;
+        return $rta;
     }
 
 }

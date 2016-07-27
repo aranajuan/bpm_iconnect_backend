@@ -1,22 +1,24 @@
 <?php
 
 namespace Itracker\Services\User;
+use Itracker\ResponseElement;
 
 class IdselDomains implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
         $V = $Context->get_User()->list_alldomains();
-        $listL = $Context->createElement("list");
+        $rta = new ResponseElement('list');
         if ($V) {
             foreach ($V as $l) {
-                $e = $Context->createElement("DOMAIN");
-                $nombre = $Context->createElement("nombre", $l);
-                $e->appendChild($nombre);
-                $listL->appendChild($e);
+                $rta->addValue(new ResponseElement('DOMAIN',
+                        array(
+                            new ResponseElement('nombre',$l,  ResponseElement::$TEXT)
+                            )
+                        ));
+
             }
-            return $listL;
         }
-        return null;
+        return $rta;
     }
 
 }

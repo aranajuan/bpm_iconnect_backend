@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker\Services\Instance;
+use Itracker\ResponseElement;
 
 class IdselListfronts implements \Itracker\Services\ITServiceInterface {
 
@@ -14,13 +15,13 @@ class IdselListfronts implements \Itracker\Services\ITServiceInterface {
             }
         }
 
-        $listL = $Context->createElement("list");
+        $rta = new ResponseElement('list');
         if ($FL) {
-            foreach ($FL as $l)
-                $listL->appendChild($l->getXML($Context, array('id', 'nombre')));
-            return $listL;
+            foreach ($FL as $l){
+                $rta->addValue($l->getData(array('id', 'nombre')));
+            }
         }
-        return null;
+        return $rta;
     }
 
 }

@@ -137,5 +137,16 @@
             <code>1</code>
             <description>Error al guardar archivo</description>
         </savefile>
+        <getfile>
+            <code>2</code>
+            <description>Error al obtener archivo</description>
+        </getfile>
     </th>
+    <responseelement>
+        <code>15</code>
+        <invalidtype>
+            <code>1</code>
+            <descripcion>Tipo invalido</descripcion>
+        </invalidtype>
+    </responseelement>
 </errors>

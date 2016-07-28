@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker\Services\Tkt;
+use Itracker\ResponseElement;
 
 class Listmyteams implements \Itracker\Services\ITServiceInterface {
 
@@ -31,26 +32,22 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         $Tf->set_filter(\Itracker\TktFilter::$UA, $uids);
         $Tl = new \Itracker\TktLister();
         $Tl->loadFilter($Tf);
-        if (!$Tl->execute()) {
-            return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());
-        }
+        $Tl->execute();
 
         $viewA = $Context->get_User()->getMyView();
         $view = $viewA[0];
         $fields = $viewA[1];
 
-        $response = $Context->createElement("data");
-        $response->appendChild($Context->createElement("view", $view));
-        $listL = $Context->createElement("list");
-
-        if ($Tl->getCount()) {
-            while ($l=$Tl->getObj()) {
-                $listL->appendChild($l->getXML($Context, $fields));
-            }
-            $response->appendChild($listL);
-            return $response;
-        }
-        return null;
+        $rta = new ResponseElement ( 'data', new ResponseElement ( 'view', $view ) );
+		$rta_list = new ResponseElement ( 'list' );
+		if ($Tl->getCount () == 0) {
+			return null;
+		}
+		while ( $l = $Tl->getObj () ) {
+			$rta_list->addValue($l->getData($fields));
+		}
+		$rta->addValue($rta_list);
+		return $rta;
     }
 
 }

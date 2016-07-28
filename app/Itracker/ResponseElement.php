@@ -86,9 +86,6 @@ class ResponseElement{
      * @param int $type
      */
     public function setType($type){
-        if($this->type!=null){
-            throw new ItException('responseelement/invalidtype','Tipo ya seteado');
-        }
         if($type>3 || $type<1){
             throw new ItException('responseelement/invalidtype');
         }
@@ -138,6 +135,9 @@ class ResponseElement{
             throw new ItException('responseelement/invalidtype');
         }
         $this->value = $value;
+        if($this->getType()==null){
+        	$this->setType(self::$TEXT);
+        }
     }
 
 

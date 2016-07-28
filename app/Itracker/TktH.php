@@ -3,6 +3,7 @@
 namespace Itracker;
 
 use Itracker\Exceptions\ItException;
+use Itracker\ResponseElement;
 
 /**
  * Eventos de tickets
@@ -249,19 +250,18 @@ class TktH extends ITObject {
     }
 
     /**
-     * Devuelve xml con vista del elemento
-     * @return DOMElement
+     * Devuelve vista del elemento
+     * @return ResponseElement
      */
-    function getXML_H() {
+    function getData_H() {
 
         if ($this->check_access() == false)
             return null;
-        $element = new \DOMDocument();
+        $rta = new ResponseElement('th');
+		$action = new ResponseElement('action');
+        
+		$action->addValue(new ResponseElement('id',$this->get_prop('id')));
 
-        $elementData = $element->createElement("th");
-
-        $action = $element->createElement("action");
-        $action->appendChild($element->createElement("id", $this->get_prop("id")));
         $alias = $this->accion->get_prop("alias");
         $value = $this->get_prop("objadj_txt");
         if ($this->isLinked()) {
@@ -274,26 +274,26 @@ class TktH extends ITObject {
                 $value = $mm->get_prop("objadj_txt");
             }
         }
-
-        $action->appendChild($element->createElement("alias", $alias));
-        $action->appendChild($element->createElement("nombre", $this->accion->get_prop("nombre")));
-        $action->appendChild($element->createElement("value", $value));
-        $action->appendChild($element->createElement("usr", $this->get_prop("UA")));
-        $action->appendChild($element->createElement("date", $this->get_prop("FA")));
+        $action->addValue(new ResponseElement('alias',$alias));
+        $action->addValue(new ResponseElement('nombre',$this->accion->get_prop('nombre')));
+        $action->addValue(new ResponseElement('value',$value));
+        $action->addValue(new ResponseElement('usr',$this->get_prop('ua')));
+        $action->addValue(new ResponseElement('date',$this->get_prop('fa')));
+        
         if ($this->getThUpdate() != null) {
             $isupdate = "true";
         } else {
             $isupdate = "false";
         }
-        $action->appendChild($element->createElement("isupdated", $isupdate));
-        $action->appendChild($element->createElement("ejecuta", $this->accion->get_prop("ejecuta")));
-        $elementData->appendChild($action);
+        $action->addValue(new ResponseElement('isupdated',$isupdate));
+        $action->addValue(new ResponseElement('ejecuta',$this->accion->get_prop('ejecuta')));
+        
+        $rta->addValue($action);
+        
         if ($this->get_prop("itform") != null) {
             $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
-                $nodo = $element->importNode(
-                        $itfDom->documentElement, true);
-                $elementData->appendChild($nodo);
+            	$rta->addValue(new ResponseElement('itf',$itfDom,ResponseElement::$XML));
             } else {
                 $this->getContext()->getLogger()->notice('itform sin nada visible', array(
                     'idth' => $this->id
@@ -303,13 +303,13 @@ class TktH extends ITObject {
         }
         $files_h = $this->get_files();
         if ($files_h && count($files_h)) {
-            $files = $element->createElement("files");
+            $files = new ResponseElement('files');
             foreach ($files_h as $f) {
-                $files->appendChild($element->createElement("file", $f));
+            	$files->addValue(new ResponseElement('file',$f,ResponseElement::$FILE));
             }
-            $elementData->appendChild($files);
+            $rta->addValue($files);
         }
-        return $elementData;
+        return $rta;
     }
 
     /**

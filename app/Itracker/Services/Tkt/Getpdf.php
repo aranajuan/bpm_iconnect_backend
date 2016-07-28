@@ -1,6 +1,8 @@
 <?php
 namespace Itracker\Services\Tkt;
 
+use Itracker\ResponseElement;
+
 require_once ROOT_DIR . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'DomPdf'
         . DIRECTORY_SEPARATOR . 'dompdf_config.inc.php';
 
@@ -12,9 +14,6 @@ class Getpdf implements \Itracker\Services\ITServiceInterface {
         $html = '';
 
         $TKT = $Context->get_objcache()->get_object("Tkt", $idtkt);
-        if ($Context->get_objcache()->get_status("Tkt", $idtkt) != "ok") {
-            return $Context->createElement("error", "Ticket invalido.#1");
-        }
 
         $opts = $TKT->get_tree_history();
         /* Prepara HTML de tipificacion */
@@ -70,18 +69,20 @@ class Getpdf implements \Itracker\Services\ITServiceInterface {
         <br/><a href='>https://itracker.personal.com.ar'>https://itracker.personal.com.ar</a></i>";
         $html.="</div>";
         if ($cvalid == 0) {
-            return $Context->createElement("error", "Ticket invalido.#2");
+        	throw new ItException('dbobject/checkdata','Ticket invalido.#2');
         }
 
         $pdf = new \DOMPDF();
         $pdf->load_html($html);
         $pdf->render();
         $pdfDoc = $pdf->output();
-        $arch = $Context->createElement("file");
-        $arch->appendChild($Context->createElement("name", 'Export id ' . $idtkt . '.pdf'));
-        $arch->appendChild($Context->createElementSecure("data", $pdfDoc));
-
-        return $arch;
+        
+        $rta = new ResponseElement('file',array(
+        		new ResponseElement('name','Export id ' . $idtkt . '.pdf'),
+        		new ResponseElement('data',$pdfDoc, ResponseElement::$FILE)
+        ));
+        
+        return $rta;
     }
 
 }

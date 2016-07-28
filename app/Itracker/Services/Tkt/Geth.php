@@ -1,6 +1,8 @@
 <?php
 
 namespace Itracker\Services\Tkt;
+use Itracker\ResponseElement;
+use Itracker\Exceptions\ItException;
 
 class Geth implements \Itracker\Services\ITServiceInterface {
 
@@ -13,28 +15,27 @@ class Geth implements \Itracker\Services\ITServiceInterface {
             $hideUpdate = false;
         }
         $TKT = $Context->get_objcache()->get_object("Tkt", $idtkt);
-        if ($Context->get_objcache()->get_status("Tkt", $idtkt) != "ok") {
-            return $Context->createElement("error", "Ticket invalido.#1");
-        }
+        
         $response = new \DOMDocument();
         $responseData = $response->createElement("data");
-
-        $responseData->appendChild($response->createElement("idmaster", $TKT->get_prop("idmaster")));
-        $responseData->appendChild($response->createElement("largestatus", $TKT->get_LargeStatus()));
-        $responseData->appendChild(
-                $TKT->get_prop('usr_o')->getXML($response, array('usr', 'nombre', 'mail'))
+		$rta = new ResponseElement('data');
+		$rta->addValue(new ResponseElement('idmaster'),$TKT->get_prop('idmaster'));
+		$rta->addValue(new ResponseElement('largestatus'),$TKT->get_LargeStatus());
+        $rta->addValue(
+                $TKT->get_prop('usr_o')->getData(array('usr', 'nombre', 'mail'))
         );
         $opts = $TKT->get_tree_history();
-        $tree = $response->createElement("tree");
+        $rta_tree = new ResponseElement('tree');
         foreach ($opts as $o) {
-            $option = $response->createElement("option");
-            $option->appendChild($response->createElement("question", $o["question"]));
-            $option->appendChild($response->createElement("ans", $o["ans"]));
-            $tree->appendChild($option);
+        	$rta_tree_option = new ResponseElement('option',array(
+        			new ResponseElement('question',$o['question']),
+        			new ResponseElement('ans',$o['ans']),
+        	));
+            $rta_tree->addValue($rta_tree_option);
         }
-        $responseData->appendChild($tree);
+        $rta->addValue($rta_tree);
 
-        $moves = $response->createElement("ths");
+        $rta_moves = new ResponseElement('ths');
         $THALL = $TKT->get_tktHObj();
         $cvalid = 0;
         $hasupdate = false;
@@ -42,8 +43,7 @@ class Geth implements \Itracker\Services\ITServiceInterface {
             if ($hideUpdate) {
                 if ($TH->isUpdate()) {
                     if (!$hasupdate) {
-                        $responseData->appendChild(
-                                $response->createElement('hasupdate', 'true'));
+                    	$rta->addValue(new ResponseElement('hasupdate','true'));
                         $hasupdate = true;
                     }
                     continue;
@@ -54,33 +54,25 @@ class Geth implements \Itracker\Services\ITServiceInterface {
                     $NTH = $NTH->getThUpdate();
                 }
             }
-            $el = $TH->getXML_H();
-            if ($el) {
-                $th = $response->importNode($el, true);
-                $moves->appendChild($th);
+            $el = $TH->getData_H();
+            if ($el instanceof ResponseElement) {
+                $rta_moves->addValue($el);
                 $cvalid++;
             }
         }
 
         if ($cvalid == 0) {
-            return $Context->createElement("error", "Ticket invalido.#2");
+        	throw new ItException('dbobject/checkdata','Ticket invalido.#2');
         }
+		$rta->addValue($rta_moves);
+		$rta_actions = new ResponseElement('actions');
 
-        $responseData->appendChild($moves);
-
-        $response->appendChild($response->createElement("master", $TKT->get_prop("idmaster")));
-        $actions = $response->createElement("actions");
         $AL = $TKT->valid_actions();
         foreach ($AL as $A) {
-            $action = $response->createElement("action");
-            $action->appendChild($response->createElement("alias", $A->get_prop("alias")));
-            $action->appendChild($response->createElement("nombre", $A->get_prop("nombre")));
-            $action->appendChild($response->createElement("formulario", $A->get_prop("formulario")));
-            $actions->appendChild($action);
+        	$rta_actions->addValue($A->getData(array('alias','nombre','formulario')));
         }
-        $responseData->appendChild($actions);
-
-        return $Context->append_xml($responseData);
+        $rta->addValue($rta_actions);
+        return $rta;
     }
 
 }

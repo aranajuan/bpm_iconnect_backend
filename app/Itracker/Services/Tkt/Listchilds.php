@@ -10,7 +10,7 @@ class Listchilds implements \Itracker\Services\ITServiceInterface {
         $TKT = $Context->get_objcache()->get_object("Tkt", $Context->get_params("idtkt"));
 
         if (!$Context->get_User()->in_team($TKT->get_prop("idequipo"))) {
-        	throw new ItException('dbobject/checkdata','Acceso denegado. El ticket no esta asignado a tu equipo.');
+        	throw new ItException('service/checkdata','Acceso denegado. El ticket no esta asignado a tu equipo.');
         }
 
         $ALL_v = $TKT->get_prop("childs");

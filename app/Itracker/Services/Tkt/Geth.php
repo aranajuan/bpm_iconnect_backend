@@ -62,7 +62,7 @@ class Geth implements \Itracker\Services\ITServiceInterface {
         }
 
         if ($cvalid == 0) {
-        	throw new ItException('dbobject/checkdata','Ticket invalido.#2');
+        	throw new ItException('service/checkdata','Ticket invalido.#2');
         }
 		$rta->addValue($rta_moves);
 		$rta_actions = new ResponseElement('actions');

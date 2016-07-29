@@ -23,7 +23,7 @@ class Insert implements \Itracker\Services\ITServiceInterface {
                 $Ul->change_teams($tAdds);
                 $Ul->update_DB();
             } else {
-                throw new ItException('dbobject/checkdata', 'Seleccione al menos un equipo');
+                throw new ItException('service/checkdata', 'Seleccione al menos un equipo');
             }
         } 
 

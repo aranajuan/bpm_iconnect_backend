@@ -149,4 +149,18 @@
             <descripcion>Tipo invalido</descripcion>
         </invalidtype>
     </responseelement>
+    <tktfilter>
+        <code>16</code>
+        <invalidparameters>
+            <code>1</code>
+            <description>Parametros invalidos</description>
+        </invalidparameters>
+    </tktfilter>
+    <service>
+        <code>17</code>
+        <checkdata>
+            <code>1</code>
+            <description>Datos invalidos en la solicitud</description>
+        </checkdata>
+    </service>
 </errors>

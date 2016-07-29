@@ -69,7 +69,7 @@ class Getpdf implements \Itracker\Services\ITServiceInterface {
         <br/><a href='>https://itracker.personal.com.ar'>https://itracker.personal.com.ar</a></i>";
         $html.="</div>";
         if ($cvalid == 0) {
-        	throw new ItException('dbobject/checkdata','Ticket invalido.#2');
+        	throw new ItException('service/checkdata','Ticket invalido.#2');
         }
 
         $pdf = new \DOMPDF();

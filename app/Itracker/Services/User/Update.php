@@ -14,7 +14,7 @@ class Update implements \Itracker\Services\ITServiceInterface {
             $Ul->update_DB();
             $Ul->sessionCloseAll();
         } else {
-            throw new ItException('dbobject/checkdata', 'Seleccione al menos un equipo');
+            throw new ItException('service/checkdata', 'Seleccione al menos un equipo');
         }
     }
 

@@ -12,7 +12,7 @@ class Listteam implements \Itracker\Services\ITServiceInterface {
 		$idsteams = explode ( ",", $Context->get_params ( "team" ) );
 		foreach ( $idsteams as $idteam ) {
 			if (! $u->in_team ( $idteam )) {
-				throw new ItException ( 'dbobject/checkdata', "Equipo invalido($idteam). Acceso denegado." );
+				throw new ItException ( 'service/checkdata', "Equipo invalido($idteam). Acceso denegado." );
 			}
 			array_push ( $arrayTeam, $idteam );
 		}

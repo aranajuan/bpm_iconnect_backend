@@ -8,16 +8,53 @@ namespace Itracker\RequestHandlers;
  */
 class Header{
 	
+	/**
+	 *
+	 * @var String
+	 */
 	private $front;
+	/**
+	 *
+	 * @var String
+	 */
 	private $ipfront;
+	/**
+	 *
+	 * @var String
+	 */
 	private $instance;
 	
+	/**
+	 *
+	 * @var String
+	 */
 	private $user;
+	/**
+	 *
+	 * @var String
+	 */
 	private $ipuser;
+	/**
+	 *
+	 * @var String
+	 */
 	private $hash;
-	
+	/**
+	 *
+	 * @var String
+	 */
 	private $pass;
 
+	/**
+	 * Constructor
+	 * @param String $front
+	 * @param String $ipfront
+	 * @param String $instance
+	 * @param String $user
+	 * @param String $ipuser
+	 * @param String $hash
+	 * @param String $pass
+	 */
 	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass) {
 		$this->setFront($front);
 		$this->setIpfront($ipfront);
@@ -25,7 +62,7 @@ class Header{
 		$this->setUser($user);
 		$this->setIpuser($ipuser);
 		$this->setHash($hash);
-		$this->setHash($hash);
+		$this->setPass($pass);
 	}
 	
 	/**

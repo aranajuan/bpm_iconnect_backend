@@ -163,4 +163,15 @@
             <description>Datos invalidos en la solicitud</description>
         </checkdata>
     </service>
+    <handler>
+	<code>18</code>
+	<format>
+	    <code>1</code>
+	    <description>Error de formato en la solicitud</description>
+	</format>
+	<invalid>
+	    <code>2</code>
+	    <description>Parametros invalidos en la solicitud</description>
+	</invalid>
+    </handler>
 </errors>

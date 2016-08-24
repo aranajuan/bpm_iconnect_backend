@@ -5,7 +5,7 @@ namespace Itracker;
 /**
  * Maneja todo el requerimiento del front
  */
-class Context extends Utils\XMLhandler {
+class Context {
 
     /**
      * usuario logueado 
@@ -36,7 +36,13 @@ class Context extends Utils\XMLhandler {
      * @var boolean
      */
     private $finished;
-    private $error;
+
+    /**
+     * Handler
+     * @var RequestHandlers\HandlerInterface  
+     */
+    private $handler;
+    
     private static $__instance;
 
     private function __construct() {
@@ -55,6 +61,55 @@ class Context extends Utils\XMLhandler {
         return static::$__instance;
     }
 
+    /**
+     * Objeto de cache
+     * @return ObjectCache
+     */
+    public function get_objcache() {
+        return ObjectCache::getInstance();
+    }
+
+    /**
+     * 
+     * @return \Itracker\Utils\GlobalConfig
+     */
+    public function get_GlobalConfig() {
+        return \Itracker\Utils\GlobalConfig::getInstance();
+    }
+    
+    /**
+     * Carga Handler
+     * @param RequestHandlers\HandlerInterface $handler
+     */
+    public function setHandler($handler){
+	    $this->handler=$handler;
+    }
+
+    public function executeRequest(){
+	    try{
+		$this->prepare();
+		$this->validate();
+		$this->handler->addResponse(
+			$this->executeWS()
+			);
+	    }catch(Itracker\Exceptions\ItException $e){
+		    
+	    }catch(\Exception $e){
+		    
+	    }
+    }
+    
+    private function prepare(){
+	    
+    }
+    
+    private function validate(){
+	    
+    }
+    
+    private function executeWS(){
+	    
+    }
     /**
      * Prepara conexiones a db, carga input, valida datos
      * @param type $text 
@@ -300,21 +355,7 @@ class Context extends Utils\XMLhandler {
         return $this->instance;
     }
 
-    /**
-     * Objeto de cache
-     * @return ObjectCache
-     */
-    public function get_objcache() {
-        return ObjectCache::getInstance();
-    }
-
-    /**
-     * 
-     * @return \Itracker\Utils\GlobalConfig
-     */
-    public function get_GlobalConfig() {
-        return \Itracker\Utils\GlobalConfig::getInstance();
-    }
+    
 
 }
 

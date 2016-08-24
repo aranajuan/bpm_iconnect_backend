@@ -1,5 +1,6 @@
 <?php
 namespace Itracker\RequestHandlers;
+use \Itracker\Exceptions\ErrorException;
 
 /**
  * Clase con datos del cuerpo de la solicitud
@@ -38,11 +39,11 @@ class Body{
 	 * @param Array $params
 	 * @param Array $files
 	 */
-	function __construct($method, $class, $params, $files) {
-		$this->method = $method;
-		$this->class = $class;
-		$this->params = $params;
-		$this->files = $files;
+	function __construct($class,$method, $params, $files) {
+		$this->setMethod($method);
+		$this->setClass($class);
+		$this->setParams($params);
+		$this->setFiles($files);
 	}
 
 	/**
@@ -57,7 +58,10 @@ class Body{
 	 * Metodo
 	 * @param String $method
 	 */
-	public function setMethod(String $method) {
+	public function setMethod($method) {
+		if ( !preg_match ( '/\\s*\\w+\\s*/', $method ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Metodo invalido' );
+		}
 		$this->method = $method;
 	}
 
@@ -74,16 +78,19 @@ class Body{
 	 * @param String $class
 	 */
 	public function setClass($class) {
+		if ( !preg_match ( '/\\s*\\w+\\s*/', $class ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Clase invalido' );
+		}
 		$this->class = $class;
 	}
 
 	/**
 	 * Obtener parametro
-	 * @param String $path
+	 * @param String $name
 	 * @return Array
 	 */
-	public function getParams($path) {
-		return $this->params;
+	public function getParams($name) {
+		return $this->params[$name];
 	}
 
 	/**
@@ -100,7 +107,15 @@ class Body{
 	 * @return Array
 	 */
 	public function getFiles($id) {
-		return $this->files;
+		return $this->files[$id];
+	}
+
+	/**
+	 * Cantidad de archivos
+	 * @return int
+	 */
+	public function getFilesCount(){
+		return count($this->files);
 	}
 
 	/**

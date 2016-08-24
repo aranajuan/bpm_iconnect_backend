@@ -1,44 +1,72 @@
 <?php
+
 namespace Itracker\RequestHandlers;
+
+use \Itracker\Exceptions\ErrorException;
 
 /**
  * Header de la solicitud
  * @author juan
  *
  */
-class Header{
+class Header {
+
+	/**
+	 * Regex ip valida
+	 * @var String
+	 */
+	private static $IPREGEX =
+		'^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.
+		([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$';
+	
+	/**
+	 * Ips validas
+	 * @var array
+	 */
+	private static $IPVALIDS = array ('::1');
+
+	/**
+	 * Hash valido
+	 * @var String
+	 */
+	private static $HASHREGEX  = '([a-fA-F\\d]{40})';
 	
 	/**
 	 *
 	 * @var String
 	 */
 	private $front;
+
 	/**
 	 *
 	 * @var String
 	 */
 	private $ipfront;
+
 	/**
 	 *
 	 * @var String
 	 */
 	private $instance;
-	
+
 	/**
 	 *
 	 * @var String
 	 */
 	private $user;
+
 	/**
 	 *
 	 * @var String
 	 */
 	private $ipuser;
+
 	/**
 	 *
 	 * @var String
 	 */
 	private $hash;
+
 	/**
 	 *
 	 * @var String
@@ -56,20 +84,20 @@ class Header{
 	 * @param String $pass
 	 */
 	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass) {
-		$this->setFront($front);
-		$this->setIpfront($ipfront);
-		$this->setInstance($instance);
-		$this->setUser($user);
-		$this->setIpuser($ipuser);
-		$this->setHash($hash);
-		$this->setPass($pass);
+		$this->setFront ( $front );
+		$this->setIpfront ( $ipfront );
+		$this->setInstance ( $instance );
+		$this->setUser ( $user );
+		$this->setIpuser ( $ipuser );
+		$this->setHash ( $hash );
+		$this->setPass ( $pass );
 	}
-	
+
 	/**
 	 * front
 	 * @return string
 	 */
-	public function getFront(){
+	public function getFront() {
 		return $this->front;
 	}
 
@@ -78,16 +106,18 @@ class Header{
 	 * @param string $front
 	 * @return Header{
 	 */
-	public function setFront($front){
-		$this->front = $front;
-		return $this;
+	public function setFront($front) {
+		if ( !preg_match ( '/\\s*\\w+\\s*/', $front ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Front invalido' );
+		}
+		$this->front = trim ( $front );
 	}
 
 	/**
 	 * ipfront
 	 * @return string
 	 */
-	public function getIpfront(){
+	public function getIpfront() {
 		return $this->ipfront;
 	}
 
@@ -96,16 +126,19 @@ class Header{
 	 * @param string $ipfront
 	 * @return Header{
 	 */
-	public function setIpfront($ipfront){
+	public function setIpfront($ipfront) {
+		$ipfront = trim ( $ipfront );
+		if ( !preg_match ( self::$IPREGEX, $ipfront ) && !in_array ( $ipfront, self::$IPVALIDS ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Front invalido' );
+		}
 		$this->ipfront = $ipfront;
-		return $this;
 	}
 
 	/**
 	 * instance
 	 * @return string
 	 */
-	public function getInstance(){
+	public function getInstance() {
 		return $this->instance;
 	}
 
@@ -114,16 +147,18 @@ class Header{
 	 * @param string $instance
 	 * @return Header{
 	 */
-	public function setInstance($instance){
-		$this->instance = $instance;
-		return $this;
+	public function setInstance($instance) {
+		if ( !preg_match ( '/\\s*\\w+\\s*/', $instance ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Instancia invalido' );
+		}
+		$this->instance = trim($instance);
 	}
 
 	/**
 	 * user
 	 * @return string
 	 */
-	public function getUser(){
+	public function getUser() {
 		return $this->user;
 	}
 
@@ -132,16 +167,18 @@ class Header{
 	 * @param string $user
 	 * @return Header{
 	 */
-	public function setUser($user){
-		$this->user = $user;
-		return $this;
+	public function setUser($user) {
+		if ( !preg_match ( '/\\s*\\w+\\s*/', $user ) ) {
+			throw new ErrorException ( 'handler/invalid', 'Usuario invalido' );
+		}
+		$this->user = trim($user);
 	}
 
 	/**
 	 * ipuser
 	 * @return string
 	 */
-	public function getIpuser(){
+	public function getIpuser() {
 		return $this->ipuser;
 	}
 
@@ -150,16 +187,18 @@ class Header{
 	 * @param string $ipuser
 	 * @return Header{
 	 */
-	public function setIpuser($ipuser){
+	public function setIpuser($ipuser) {
+		if ( !preg_match ( self::$IPREGEX, $ipuser )) {
+			throw new ErrorException ( 'handler/invalid', 'Ip usuario invalida' );
+		}
 		$this->ipuser = $ipuser;
-		return $this;
 	}
 
 	/**
 	 * hash
 	 * @return string
 	 */
-	public function getHash(){
+	public function getHash() {
 		return $this->hash;
 	}
 
@@ -168,16 +207,18 @@ class Header{
 	 * @param string $hash
 	 * @return Header{
 	 */
-	public function setHash($hash){
+	public function setHash($hash) {
+		if ( !preg_match ( self::$HASHREGEX, $hash )) {
+			throw new ErrorException ( 'handler/invalid', 'Login invalido' );
+		}
 		$this->hash = $hash;
-		return $this;
 	}
 
 	/**
 	 * pass
 	 * @return string
 	 */
-	public function getPass(){
+	public function getPass() {
 		return $this->pass;
 	}
 
@@ -186,9 +227,8 @@ class Header{
 	 * @param string $pass
 	 * @return Header{
 	 */
-	public function setPass($pass){
+	public function setPass($pass) {
 		$this->pass = $pass;
-		return $this;
 	}
 
 }

@@ -26,7 +26,7 @@ include_once 'access.php'; // lista de accesos
 ini_set('post_max_size', '100M');
 ini_set('upload_max_filesize', '100M');
 
-$ContextConf = \Itracker\Context::getContext()->get_GlobalConfig();
+$ContextConf = \Itracker\Utils\GlobalConfig::getInstance ();
 /* Constantes */
 ini_set('display_errors', $ContextConf->getInt('debug/displayerrors'));
 define('I_ACTIVE', $ContextConf->getInt('constants/active'));

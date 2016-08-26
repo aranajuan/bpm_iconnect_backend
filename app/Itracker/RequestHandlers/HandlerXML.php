@@ -36,7 +36,7 @@ class HandlerXML implements HandlerInterface{
 
 	/**
 	 * 
-	 * @param Array $input {'txt'=>,'ipfront'=>}
+	 * @param Array $input {'txt'=>,'ipfront'=>,'date'=>}
 	 */
 	public function loadEnvironment($input) {
 		//parseo
@@ -72,7 +72,8 @@ class HandlerXML implements HandlerInterface{
 			$xpath->query ( '/itracker/header/usr' )->item (0)->nodeValue,
 			$xpath->query ( '/itracker/header/ip' )->item (0)->nodeValue,
 			$hash,
-			$pass
+			$pass,
+			$input['date']
 			);
 		$params = $xpath->query ( '/itracker/request/params' );
 		$params_array=array();

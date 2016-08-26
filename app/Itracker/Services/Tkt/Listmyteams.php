@@ -19,7 +19,7 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         }
 
         $ids = explode(",", $Context->get_params("teams"));
-        $teamsall = $Context->get_User()->get_prop("equiposobj");
+        $teamsall = $Context->getUser()->get_prop("equiposobj");
         $uids = array();
         foreach ($teamsall as $t) {
             if (in_array($t->get_prop("id"), $ids)) {
@@ -34,7 +34,7 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         $Tl->loadFilter($Tf);
         $Tl->execute();
 
-        $viewA = $Context->get_User()->getMyView();
+        $viewA = $Context->getUser()->getMyView();
         $view = $viewA[0];
         $fields = $viewA[1];
 

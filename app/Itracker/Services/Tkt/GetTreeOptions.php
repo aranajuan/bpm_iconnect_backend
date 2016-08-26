@@ -22,7 +22,7 @@ class GetTreeOptions implements \Itracker\Services\ITServiceInterface {
 		if ($opts) {
 			foreach ( $opts as $o ) {
 				$ans = $o ["ans"];
-				if ($Context->get_User ()->get_prop ( "perfil" ) == 1) {
+				if ($Context->getUser ()->get_prop ( "perfil" ) == 1) {
 					$ans .= "/" . $o ["path"];
 				}
 				$rta_previous->addValue ( new ResponseElement ( 'option', array (

@@ -74,6 +74,11 @@ class Header {
 	private $pass;
 
 	/**
+	 * Fecha inicio solicitud 
+	 */
+	private $request_time;
+	
+	/**
 	 * Constructor
 	 * @param String $front
 	 * @param String $ipfront
@@ -83,7 +88,7 @@ class Header {
 	 * @param String $hash
 	 * @param String $pass
 	 */
-	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass) {
+	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass, $request_time) {
 		$this->setFront ( $front );
 		$this->setIpfront ( $ipfront );
 		$this->setInstance ( $instance );
@@ -91,8 +96,21 @@ class Header {
 		$this->setIpuser ( $ipuser );
 		$this->setHash ( $hash );
 		$this->setPass ( $pass );
+		$this->setRequestTime($request_time);
 	}
 
+	public function setRequestTime($request_time){
+		$date = date(USERDATE_READ.':s', $request_time);
+		if($date == null || $date == ''){
+			throw new ErrorException ( 'handler/invalid', 'Fecha solicitud invalido' );
+		}
+		$this->request_time = $date;
+	}
+	
+	public function getRequestTime(){
+		return $this->request_time;
+	}
+	
 	/**
 	 * front
 	 * @return string

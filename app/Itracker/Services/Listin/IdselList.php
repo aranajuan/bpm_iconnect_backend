@@ -6,7 +6,7 @@ use Itracker\ResponseElement;
 class IdselList implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $ALL = new \Itracker\Listin($Context->get_Connection());
+        $ALL = new \Itracker\Listin();
         $ALL_v = $ALL->list_all();
         $rta = new ResponseElement('list');
         if ($ALL_v) {

@@ -289,13 +289,6 @@ function microtime_float() {
     return ((float) $useg + (float) $seg);
 }
 
-/**
- * se ejecuta al finalizar script */
-function finish() {
-    $Context = \Itracker\Context::getContext();
-    $Context->finishScript(true);
-}
-
 class Encrypter {
 
     private static function encryptionKey($username, $password, $ivseed = "345dfs4#asD") {

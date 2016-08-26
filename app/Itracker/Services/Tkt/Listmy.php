@@ -8,7 +8,7 @@ class Listmy implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
 		$Tf = new \Itracker\TktFilter ();
 		$Tf->set_filter ( \Itracker\TktFilter::$UA, array (
-				$Context->get_User ()->get_prop ( "usr" ) 
+				$Context->getUser ()->get_prop ( "usr" ) 
 		) );
 		
 		if ($Context->get_params ( "status" ) == "open") {
@@ -21,7 +21,7 @@ class Listmy implements \Itracker\Services\ITServiceInterface {
 			return null;
 		}
 		
-		$viewA = $Context->get_User ()->getMyView ();
+		$viewA = $Context->getUser ()->getMyView ();
 		$view = $viewA [0];
 		$fields = $viewA [1];
 		

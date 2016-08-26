@@ -885,7 +885,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             throw new ItException('dbobject/checkdata', 'Usuario invalido');
 
         if ($this->dominio == "BLOQUEADO") {
-            throw new ItException('dbobject/checkdata', 'Acceso deshabilitado apra el usuario');
+            throw new ItException('dbobject/checkdata', 'Acceso deshabilitado para el usuario');
         }
 
         if ($this->usr == "" || $this->error == true)

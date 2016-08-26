@@ -47,6 +47,5 @@ if(!is_dir(TMP_DIR)){
     mkdir(TMP_DIR);
 }
 
-register_shutdown_function('finish'); // registra funcion de finalizacion - ver basic_functions
 
 ?>

@@ -11,13 +11,13 @@ class Listmyclose implements \Itracker\Services\ITServiceInterface {
 		
 		$Tf = new \Itracker\TktFilter ();
 		$Tf->set_filter ( \Itracker\TktFilter::$UA, array (
-				$Context->get_User ()->get_prop ( "usr" ) 
+				$Context->getUser ()->get_prop ( "usr" ) 
 		) );
 		$Tf->set_filter ( \Itracker\TktFilter::$DATE_FILTER, \Itracker\TktFilter::$DATE_FILTER_FB );
 		$Tf->set_filter ( \Itracker\TktFilter::$DATE_FROM, $desde );
 		$Tf->set_filter ( \Itracker\TktFilter::$DATE_TO, $hasta );
 		
-		$viewA = $Context->get_User ()->getMyView ();
+		$viewA = $Context->getUser ()->getMyView ();
 		$view = $viewA [0];
 		$fields = $viewA [1];
 		

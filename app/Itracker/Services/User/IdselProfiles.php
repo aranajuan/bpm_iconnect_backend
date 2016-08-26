@@ -6,7 +6,7 @@ use Itracker\ResponseElement;
 class IdselProfiles implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $V = $Context->get_User()->list_allprofiles();
+        $V = $Context->getUser()->list_allprofiles();
         $rta = new ResponseElement('list');
         if ($V) {
             foreach ($V as $l) {

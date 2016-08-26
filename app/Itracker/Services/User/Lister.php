@@ -13,7 +13,7 @@ class Lister implements \Itracker\Services\ITServiceInterface {
      */
     public static function GO($Context) {
         $idteam =  $Context->get_params('idteam');
-        if(!$Context->get_User()->isadm($idteam)){
+        if(!$Context->getUser()->isadm($idteam)){
            throw new ItException('service/checkdata', 'No puede administrar este equipo');
         }
         $team = $Context->get_objcache()->get_object("Team", $idteam);

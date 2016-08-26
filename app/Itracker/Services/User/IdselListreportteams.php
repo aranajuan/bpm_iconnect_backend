@@ -6,7 +6,7 @@ use Itracker\ResponseElement;
 class IdselListreportteams implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $teams = $Context->get_User()->get_prop("equiposreportaobj");
+        $teams = $Context->getUser()->get_prop("equiposreportaobj");
         $rta = new ResponseElement('list');
         $filter = json_decode($Context->get_params("sel_params"),true);
         $filter=$filter['filter'];

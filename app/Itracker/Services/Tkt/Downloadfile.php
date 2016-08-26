@@ -20,9 +20,9 @@ class Downloadfile implements \Itracker\Services\ITServiceInterface {
             if (!$TH->candownload()) {
                 throw new ItException('th/getfile','Archivo invalido, acceso denegado 2.');
             }
-            $filepath = $Context->get_Instance()->get_prop("archivos_externos") . "/adjuntos/" . $fname;
+            $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/adjuntos/" . $fname;
         } elseif ($type === "anexo") {
-            $filepath = $Context->get_Instance()->get_prop("archivos_externos") . "/anexos/" . $fname;
+            $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/anexos/" . $fname;
         } else {
             throw new ItException('th/getfile','Archivo invalido');
         }

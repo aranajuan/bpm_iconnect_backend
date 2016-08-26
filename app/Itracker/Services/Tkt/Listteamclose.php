@@ -7,7 +7,7 @@ use Itracker\Exceptions\ItException;
 
 class Listteamclose implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
-		$u = $Context->get_User ();
+		$u = $Context->getUser ();
 		
 		$dias = 5;
 		$desde = date ( DBDATE_WRITE, strtotime ( '-' . $dias . ' day' ) );

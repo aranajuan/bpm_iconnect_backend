@@ -12,11 +12,7 @@ abstract class XMLhandler {
     private $response; // DOMdocument con respuesta
     private $usr;
 
-    /**
-     * Log de acceso
-     * @var array
-     */
-    private $logAccessArray;
+
     
     /**
      * Carga texto del xml
@@ -64,47 +60,7 @@ abstract class XMLhandler {
         return $this->input;
     }
 
-    /**
-     * Agrega al access log
-     * @param string $tag
-     * @param string $value
-     */
-    public function add_accessLog($tag,$value){
-        if($value instanceof \SimpleXMLElement){
-            $value = (string)$value;
-        }
-        $this->logAccessArray[$tag]= $value;
-    }
     
-    /**
-     * Agrega al access log incrementando
-     * @param string $tag
-     * @param float $value  null para unset
-     */
-    public function add_incrementaccessLog($tag,$value){
-        if($value === NULL){
-            if(!isset($this->logAccessArray[$tag])){
-                unset($this->logAccessArray[$tag]);
-            }
-            return;
-        }
-        if(!is_numeric($value)){
-            throw new Exception('Valor invalido a log, se espera un numero '.$value);
-        }
-        if(!isset($this->logAccessArray[$tag])){
-            $this->logAccessArray[$tag]= $value;
-        }else{
-            $this->logAccessArray[$tag]+= $value;
-        }
-    }
-    
-    /**
-     * Devuelve json de log de acceso
-     * @return string
-     */
-    public function get_accesslogJson(){
-        return json_encode($this->logAccessArray);
-    }
     
     /**
      * Prepara respuesta XML

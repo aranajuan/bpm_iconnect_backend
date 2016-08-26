@@ -7,8 +7,8 @@ use Itracker\Exceptions\ItException;
 
 class Report implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
-		$u = $Context->get_User ();
-		$rname = $Context->get_Instance ()->get_prop ( "nombre" ) . "_" . $u->get_prop ( "perfilt" );
+		$u = $Context->getUser ();
+		$rname = $Context->getInstance ()->get_prop ( "nombre" ) . "_" . $u->get_prop ( "perfilt" );
 		$filepath = ROOT_DIR . "/config/reports/" . $rname;
 		
 		$ffound = false;

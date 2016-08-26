@@ -7,7 +7,7 @@ use Itracker\Exceptions\ItException;
 
 class Listteam implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
-		$u = $Context->get_User ();
+		$u = $Context->getUser ();
 		$arrayTeam = array ();
 		$idsteams = explode ( ",", $Context->get_params ( "team" ) );
 		foreach ( $idsteams as $idteam ) {

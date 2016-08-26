@@ -6,7 +6,7 @@ use Itracker\ResponseElement;
 class IdselDomains implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $V = $Context->get_User()->list_alldomains();
+        $V = $Context->getUser()->list_alldomains();
         $rta = new ResponseElement('list');
         if ($V) {
             foreach ($V as $l) {

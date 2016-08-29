@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para cargar y manejar opciones de arbol
  */
@@ -41,7 +41,7 @@ class Option extends ITObject {
                 return I_DELETED;
             return I_ACTIVE;
         } else {
-            throw new ItException('dbobject/load');
+            throw new ItFunctionalException('dbobject/load');
         }
     }
 
@@ -56,7 +56,7 @@ class Option extends ITObject {
 
         $this->unir = trim($tmpU['unir']);
         if ($this->destino == '' && ($this->pretext != '' || $this->idpregunta_destino == '')) {
-            throw new ItException('option/destiny','',
+            throw new ItFunctionalException('option/destiny','',
             \KLogger\Psr\Log\LogLevel::ERROR,'Error en opcion sin destino',array('id' => $this->id));
         }
 
@@ -123,7 +123,7 @@ class Option extends ITObject {
                 $days = $min /1440;
                 return $days<= $this->getContext()->get_GlobalConfig()->getInt('configs/optnewdays');      
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

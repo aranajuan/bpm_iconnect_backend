@@ -2,7 +2,7 @@
 
 namespace Itracker\Services\Tkt;
 use Itracker\ResponseElement;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Geth implements \Itracker\Services\ITServiceInterface {
 
@@ -62,7 +62,7 @@ class Geth implements \Itracker\Services\ITServiceInterface {
         }
 
         if ($cvalid == 0) {
-        	throw new ItException('service/checkdata','Ticket invalido.#2');
+        	throw new ItFunctionalException('service/checkdata','Ticket invalido.#2');
         }
 		$rta->addValue($rta_moves);
 		$rta_actions = new ResponseElement('actions');

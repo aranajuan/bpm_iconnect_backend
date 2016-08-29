@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker\Services\User;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Insert implements \Itracker\Services\ITServiceInterface {
 
@@ -23,7 +23,7 @@ class Insert implements \Itracker\Services\ITServiceInterface {
                 $Ul->change_teams($tAdds);
                 $Ul->update_DB();
             } else {
-                throw new ItException('service/checkdata', 'Seleccione al menos un equipo');
+                throw new ItFunctionalException('service/checkdata', 'Seleccione al menos un equipo');
             }
         } 
 

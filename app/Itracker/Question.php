@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para cargar y manejar preguntas
  */
@@ -26,7 +26,7 @@ class Question extends ITObject {
                 return I_DELETED;
             return I_ACTIVE;
         } else {
-            throw new ItException('dbobject/load');
+            throw new ItFunctionalException('dbobject/load');
         }
     }
 
@@ -97,7 +97,7 @@ class Question extends ITObject {
                 }
                 return false;
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

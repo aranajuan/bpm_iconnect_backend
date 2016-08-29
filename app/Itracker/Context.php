@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Utils\AccessLog;
 
 /**
@@ -124,11 +124,15 @@ class Context {
 			$response = $this->getHandler()->getResponse();
 			$this->finishScript();
 			return $response;
-		}catch(\Itracker\Exceptions\ErrorException $e){
+		}catch(ItFunctionalException $e){
+			$this->getHandler()->addResponse ( new ResponseElement ( 'error', $e->getMessage () ) );
+			$response = $this->getHandler()->getResponse();
+			$this->finishScript();
+			return $response;
+		}catch(\Itracker\Exceptions\ItErrorException $e){
 			$this->finishScript(true);
 			$this->accesslog->add('error', $e->getMessage());
-		}catch(ItException $e){
-			$this->finishScript(true);
+			
 		}catch(\Exception $e){
 			$this->finishScript(true);
 		}
@@ -154,8 +158,8 @@ class Context {
 	
 	/**
 	 * Carga contexto
-	 * @throws ErrorException
-	 * @throws ItException
+	 * @throws ItErrorException
+	 * @throws ItFunctionalException
 	 */
 	private function prepare() {
 		
@@ -190,45 +194,45 @@ class Context {
 		if(!$this->getFront()->validip(
 				$this->getHandler()->getHeader()->getIpfront()
 				)){
-				throw new ErrorException('handler/invalid','Front desconocido');
+				throw new ItErrorException('handler/invalid','Front desconocido');
 		}
 		
 		if(!$this->getFront()->is_validInstance(
 				$this->getInstance()->get_prop ( 'nombre' )
 				)){
-					throw new ErrorException('handler/invalid','Instancia desconocida al front');
+					throw new ItErrorException('handler/invalid','Instancia desconocida al front');
 		}
 		try{
 			$this->user = $this->get_objcache ()
 				->get_object ( 'User', 
 				$this->getHandler()->getHeader()->getUser() );
-		}catch(ItException $e){
-			throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+		}catch(ItFunctionalException $e){
+			throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
 		}
 		
 		if (! $this->getUser()->check_instance ( $this->getInstance()->get_prop ( 'nombre' ) )) {
-			throw new ErrorException('handler/invalid','Instancia invalida');
+			throw new ItErrorException('handler/invalid','Instancia invalida');
 		}
 		
 		if (! $this->getUser()->check_front ( $this->getFront()->get_prop ( 'id' ) )) {
-			throw new ErrorException('handler/invalid','Front invalido');
+			throw new ItErrorException('handler/invalid','Front invalido');
 		}
 		
 		$this->validateRequest();
 		
-		if ($this->get_User ()->get_prop ( 'superuser' ) == 1) {
+		if ($this->getUser ()->get_prop ( 'superuser' ) == 1) {
 			set_time_limit ( 12000 );
 			ini_set ( 'memory_limit', '512M' );
 		} else {
 			set_time_limit ( 300 );
 		}
 		
-		$this->get_User ()->sessionActivity ();
+		$this->getUser ()->sessionActivity ();
 	}
 	
 	/**
 	 * Valida accesos
-	 * @throws ItException
+	 * @throws ItFunctionalException
 	 */
 	private function validateRequest() {
 		$class = $this->getHandler()->getBody()->getClass();
@@ -239,14 +243,14 @@ class Context {
 		
 
 		if (! $this->getFront()->validAction ( 	$class, $method )) {
-					throw new ItException('dbobject/checkdata', 'Acceso denegado(Front) a '.$class.'/'.$method);
+					throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(Front) a '.$class.'/'.$method);
 		}
 		
 		if (! $this->getUser()->sessionValidate ( 
 				$this->getHandler()->getHeader()->getHash (),
 				$this->getFront(),
 				$this->getHandler()->getHeader()->getIpuser())) {
-			throw new ItException('dbobject/checkdata', 'Usuario no logueado ');
+			throw new ItFunctionalException('dbobject/checkdata', 'Usuario no logueado ');
 		}
 		
 		if ($class == 'user' && $method == 'logout') {
@@ -254,7 +258,7 @@ class Context {
 		}
 		
 		if (! $this->getUser()->validAction ( $class, $method )) {
-			throw new ItException('dbobject/checkdata', 'Acceso denegado(User) a '.$class.'/'.$method);
+			throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(User) a '.$class.'/'.$method);
 		}
 	}
 	
@@ -263,7 +267,9 @@ class Context {
 	 * @return ResponseElement
 	 */
 	private function executeWS() {
-		$ClassName = '\\Itracker\\Services\\ ' . $this->get_class () . '\\ ' . $this->get_method ();
+		$ClassName = '\\Itracker\\Services\\ ' .
+			$this->getHandler()->getBody ()->getClass () .
+			'\\ ' . $this->getHandler()->getBody ()->getMethod ();
 		$ClassName = str_replace ( '_', ' ', $ClassName );
 		$ClassName = ucwords ( $ClassName );
 		$ClassName = str_replace ( ' ', '', $ClassName );
@@ -284,9 +290,9 @@ class Context {
 		$this->accesslog->add( 'timeelapsed', get_measure ( 'fullscript' ) );
 		$this->accesslog->add ( 'memoryusage', memory_get_peak_usage ( true ) );
 		if ($this->getConnection () instanceof Utils\ConnectionManager) {
-			$this->accesslog->add ( 'sql_elapsed', $this->get_Connection ()->getSqlElapsed () );
-			$this->accesslog->add ( 'sql_count', $this->get_Connection ()->getSqlCount () );
-			$this->get_Connection ()->close_connections ( $error, false );
+			$this->accesslog->add ( 'sql_elapsed', $this->getConnection ()->getSqlElapsed () );
+			$this->accesslog->add ( 'sql_count', $this->getConnection ()->getSqlCount () );
+			$this->getConnection ()->close_connections ( $error, false );
 		} 
 		$this->accesslog->add ( 'exit_error', $error );
 		if ($error) {
@@ -329,5 +335,13 @@ class Context {
 	 */
 	public function getInstance() {
 		return $this->instance;
+	}
+	
+	/**
+	 * Nombre del parametro
+	 * @param string $name
+	 */
+	public function get_params($name){
+		return $this->getHandler()->getBody()->getParams($name);
 	}
 }

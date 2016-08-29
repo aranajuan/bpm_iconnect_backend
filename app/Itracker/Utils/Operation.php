@@ -2,7 +2,7 @@
 
 namespace Itracker\Utils;
 
-use \Itracker\Exceptions\ItException;
+use \Itracker\Exceptions\ItFunctionalException;
 
 /**
  * Realiza operaciones entre objetos itracker desde string
@@ -93,7 +93,7 @@ class Operation {
         if ($Op == '=') { //es asignacion
             $asign = $operation->getArg(0);
             if ($this->getArgType($asign) != 'var') {
-                throw new ItException('its/error','',
+                throw new ItFunctionalException('its/error','',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error solo se puede asignar a variables',
                         array('Ec' => $this->operation));
@@ -124,7 +124,7 @@ class Operation {
         switch ($operation->getOpe($offset)) {
             case null:
                 if ($a1set == false) {
-                     throw new ItException('its/error','',
+                     throw new ItFunctionalException('its/error','',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error en argumentos',
                         array('Ec' => $this->operation,
@@ -220,7 +220,7 @@ class Operation {
                 }
                 return implode(',', array_unique(array_diff($a1, $a2)));
             default :
-                 throw new ItException('its/error','',
+                 throw new ItFunctionalException('its/error','',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error operacion desconocida',
                         array('Ec' => $this->operation,
@@ -373,13 +373,13 @@ class Operation {
             try {
                 $obj->set_prop($arr[1], $value);
             } catch (\Exception $e) {
-                throw new ItException('its/error','',
+                throw new ItFunctionalException('its/error','',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al setear variable en objeto ',
                         array($prop, $propR, get_class($obj), $value));
             }
         } else {
-            throw new ItException('its/error','',
+            throw new ItFunctionalException('its/error','',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al setear variable en objeto ',
                         array($prop, $propR, get_class($obj), $value));

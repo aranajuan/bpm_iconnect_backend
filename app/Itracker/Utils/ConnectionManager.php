@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker\Utils;
+use \Itracker\Exceptions\ItErrorException;
 
 class ConnectionManager {
 
@@ -94,7 +95,7 @@ class ConnectionManager {
             $close = true;
         }
         if ($failure && $close) {
-            throw new \ErrorException('connection/closeerror');
+            throw new ItErrorException('connection/closeerror');
         }
     }
 
@@ -114,7 +115,7 @@ class ConnectionManager {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
             return $pdo;
         } catch (\Exception $e) {
-            throw new ErrorException('connection/open', '',
+            throw new ItErrorException('connection/open', '',
                     \KLogger\Psr\Log\LogLevel::CRITICAL,
                     '',array($strCn,
                         $host, $user, $pass, $e->getMessage()));

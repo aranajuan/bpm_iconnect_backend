@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class JoinAction implements ITActionsInterface {
 	public static function go($action) {
@@ -16,14 +16,14 @@ class JoinAction implements ITActionsInterface {
 		if ($action->isWorking ()) {
 			
 			if (! $context->get_User ()->in_team ( $master->get_prop ( 'idequipo' ) )) {
-				throw new ItException ('action/go/invalid','El ticket master no esta en tu equipo');
+				throw new ItFunctionalException ('action/go/invalid','El ticket master no esta en tu equipo');
 			}
 			
 			$utomM = $master->get_prop ( "u_tom" );
 			if ($utomM != null && $utomM != $context->get_User ()->get_prop ( 'usr' )) { // el ticket master esta tomado por otro
 				$arrEJ = makeproparr ( $action->getTKT ()->valid_actions (), 'ejecuta' );
 				if (! in_array ( 'asign', $arrEJ )) {
-					throw new ItException ('action/go/invalid','El ticket master esta tomado y no puedes asignarlo');
+					throw new ItFunctionalException ('action/go/invalid','El ticket master esta tomado y no puedes asignarlo');
 				}
 			}
 		}

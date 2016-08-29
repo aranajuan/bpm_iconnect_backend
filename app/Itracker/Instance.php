@@ -12,7 +12,7 @@ class Instance extends ITObject {
 
 
     function __construct($conn = null) {
-        $this->dbroot = new Utils\DB($this->getContext()->get_Connection(), true);
+        $this->dbroot = new Utils\DB($this->getContext()->getConnection(), true);
     }
     
     function load_DB($name) {

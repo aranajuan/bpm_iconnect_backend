@@ -1,6 +1,6 @@
 <?php
 namespace Itracker\RequestHandlers;
-use \Itracker\Exceptions\ErrorException;
+use \Itracker\Exceptions\ItErrorException;
 
 /**
  * Clase con datos del cuerpo de la solicitud
@@ -60,7 +60,7 @@ class Body{
 	 */
 	public function setMethod($method) {
 		if ( !preg_match ( '/\\s*\\w+\\s*/', $method ) ) {
-			throw new ErrorException ( 'handler/invalid', 'Metodo invalido' );
+			throw new ItErrorException ( 'handler/invalid', 'Metodo invalido' );
 		}
 		$this->method = $method;
 	}
@@ -79,7 +79,7 @@ class Body{
 	 */
 	public function setClass($class) {
 		if ( !preg_match ( '/\\s*\\w+\\s*/', $class ) ) {
-			throw new ErrorException ( 'handler/invalid', 'Clase invalido' );
+			throw new ItErrorException ( 'handler/invalid', 'Clase invalido' );
 		}
 		$this->class = $class;
 	}

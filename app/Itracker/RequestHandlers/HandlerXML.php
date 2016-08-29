@@ -2,7 +2,7 @@
 
 namespace Itracker\RequestHandlers;
 
-use \Itracker\Exceptions\ErrorException;
+use \Itracker\Exceptions\ItErrorException;
 
 class HandlerXML implements HandlerInterface {
 
@@ -13,6 +13,8 @@ class HandlerXML implements HandlerInterface {
 	private $responses;
 
 	public function addResponse($response, $path = null) {
+		$this->responses = array(array ('res' => $response, 'path' => $path));
+		return;
 		if ( $path == null ) {
 			$path = '/';
 		}
@@ -32,7 +34,7 @@ class HandlerXML implements HandlerInterface {
 	}
 
 	public function getResponse() {
-		$doc = new \DOMDocument();
+		$doc = new \DOMDocument('1.0','utf-8');
 		$it = $doc->createElement('itracker');
 		$res = $doc->createElement('response');
 		$res->appendChild(
@@ -83,7 +85,6 @@ class HandlerXML implements HandlerInterface {
 			$domXML->loadXML ( $el->getValue () );
 			return $doc->importNode ( $domXML );
 		}
-
 		return $doc->createElement($el->getTitle(),
 			$this->xmlEscape ( $el->getValue ()) );
 	}
@@ -99,7 +100,7 @@ class HandlerXML implements HandlerInterface {
 			$this->parsed = new \DOMDocument();
 			$this->parsed->loadXML ( $input['txt'] );
 		} catch ( \Exception $e ) {
-			throw new ErrorException ( 'handler/format' );
+			throw new ItErrorException ( 'handler/format' );
 		}
 		$xpath = new \DOMXpath ( $this->parsed );
 
@@ -122,12 +123,12 @@ class HandlerXML implements HandlerInterface {
 		$this->header = new Header (
 			$xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $input['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $input['date']
 		);
-		$params = $xpath->query ( '/itracker/request/params' );
+		$params = $xpath->query ( '/itracker/request/params/*' );
 		$params_array = array ();
 		foreach ( $params as $p ) {
 			$params_array[$p->nodeName] = $p->nodeValue;
 		}
-		$files = $xpath->query ( '/itracker/request/files' );
+		$files = $xpath->query ( '/itracker/request/files/*' );
 		$files_array = array ();
 		foreach ( $files as $p ) {
 			$files_array[$p->nodeName] = $p->nodeValue;

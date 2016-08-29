@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Exceptions\ItDeletedException;
 
 class Tkt extends Tree {
@@ -57,7 +57,7 @@ class Tkt extends Tree {
             $tmpU = $this->dbinstance->get_vector();
             return $this->load_DV($tmpU);
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -297,7 +297,7 @@ class Tkt extends Tree {
      */
     public function setVars($vars) {
         if (!($vars instanceof Utils\Vars)) {
-            throw new ItException('vars/load', 'Parametro invalido setVars');
+            throw new ItFunctionalException('vars/load', 'Parametro invalido setVars');
         }
         $ssql = "variables='" . strToSQL($vars->getXml()->saveXML());
         $this->update_DB($ssql);
@@ -490,7 +490,7 @@ class Tkt extends Tree {
                     return;
                 }
                 $this->master = $t;
-            } catch (ItException $e) {
+            } catch (ItFunctionalException $e) {
                 $this->idmaster = NULL;
                 $this->master = NULL;
                 $this->getContext()->getLogger()->warning("Separado ticket por master con error", array($this->id, $this->idmaster));
@@ -548,7 +548,7 @@ class Tkt extends Tree {
                         $this->ejecute_action("LIBERAR");
                     }
                 }
-            } catch (ItException $e) {
+            } catch (ItFunctionalException $e) {
                 $this->getContext()->getLogger()->warning("Ticket liberado por error en usurio", array($this->id, $this->u_tom, $rta));
                 $this->ejecute_action("LIBERAR");
             }
@@ -557,8 +557,8 @@ class Tkt extends Tree {
         try {
             $u = $this->objsCache->get_object("User", $this->usr);
             $this->usr_o = $u;
-        } catch (ItException $e) {
-            throw new ItException('dbobject/load', 'Ticket con usuario generador invalido');
+        } catch (ItFunctionalException $e) {
+            throw new ItFunctionalException('dbobject/load', 'Ticket con usuario generador invalido');
         }
     }
 
@@ -568,24 +568,24 @@ class Tkt extends Tree {
      */
     public function check_data() {
         if (!$this->can_edit)
-            throw new ItException('dbobject/checkdata', $this->detail_can_edit);
+            throw new ItFunctionalException('dbobject/checkdata', $this->detail_can_edit);
         if (!is_numeric($this->id))
-            throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
+            throw new ItFunctionalException('dbobject/checkdata', 'El id debe ser un numero entero');
         if (trim($this->usr) == "")
-            throw new ItException('dbobject/checkdata', 'El usuario es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El usuario es obligatorio');
         if (!is_numeric($this->idequipo))
-            throw new ItException('dbobject/checkdata', 'El equipo debe ser un numero entero');
+            throw new ItFunctionalException('dbobject/checkdata', 'El equipo debe ser un numero entero');
         if (!is_numeric($this->idmaster)) {
             $this->idmaster = NULL;
         }
         $this->origen = trim($this->origen);
         if ($this->origen == "")
-            throw new ItException('dbobject/checkdata', 'Origen de tkt invalido');
+            throw new ItFunctionalException('dbobject/checkdata', 'Origen de tkt invalido');
 
         if (!is_numeric($this->u_tom) && $this->u_tom != NULL)
-            throw new ItException('dbobject/checkdata', "Usuario invalido, no puede tomar tkt (" . $this->u_tom . ")");
+            throw new ItFunctionalException('dbobject/checkdata', "Usuario invalido, no puede tomar tkt (" . $this->u_tom . ")");
         if (!is_numeric($this->u_asig) && $this->u_asig != NULL)
-            throw new ItException('dbobject/checkdata', "Usuario invalido, no puede asignar tkt (" . $this->u_asig . ")");
+            throw new ItFunctionalException('dbobject/checkdata', "Usuario invalido, no puede asignar tkt (" . $this->u_asig . ")");
     }
 
     /**
@@ -612,7 +612,7 @@ class Tkt extends Tree {
      */
     public function re_open() {
         if ($this->get_prop("minFromClose") > HsToMin($this->get_prop("equipo")->get_prop("t_conformidad"))) {
-            throw new ItException('tkt/update',"Se supero el maximo tiempo de reapertura "
+            throw new ItFunctionalException('tkt/update',"Se supero el maximo tiempo de reapertura "
                     . "(" . $this->get_prop("equipo")->get_prop("t_conformidad") . ") para este equipo. ");
          }
 
@@ -672,7 +672,7 @@ class Tkt extends Tree {
         $actual = $this->get_prop("equipo");
         if ($actual != null) {
             if (!$actual->canDerive($equipo->get_prop("id"))) {
-                throw new ItException('tkt/update','Imposible derivar al area. Sin relacion.');
+                throw new ItFunctionalException('tkt/update','Imposible derivar al area. Sin relacion.');
             }
         }
         $this->load_childs();
@@ -705,7 +705,7 @@ class Tkt extends Tree {
     function set_priority($idP) {
         $idP = intval($idP);
         if (!is_numeric($idP)){
-            throw new ItException('tkt/update','Prioridad invalida');
+            throw new ItFunctionalException('tkt/update','Prioridad invalida');
         }
 
         $ssql = "prioridad=" . intval($idP) ;
@@ -750,7 +750,7 @@ class Tkt extends Tree {
      */
     function asign($tou) {
         if (!$tou->in_team($this->idequipo)){
-            throw new ItException('tkt/update','No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt');   
+            throw new ItFunctionalException('tkt/update','No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt');   
         }
 
         $ssql = "u_tom='" . strToSQL($tou->get_prop("usr")) .
@@ -830,15 +830,15 @@ class Tkt extends Tree {
     function join($master) {
         $childs = $this->get_prop("childs");
         if (trim($master->get_prop("id")) == trim($this->id)) {
-            throw new ItException('tkt/update','No se puede adjuntar al mismo ticket');
+            throw new ItFunctionalException('tkt/update','No se puede adjuntar al mismo ticket');
         }
 
         if ($master->get_prop("FB") != NULL){
-            throw new ItException('tkt/update','No se puede adjuntar a este tkt, ya se encuentra cerrado.');
+            throw new ItFunctionalException('tkt/update','No se puede adjuntar a este tkt, ya se encuentra cerrado.');
         }
 
         if (!$master->is_master()){
-            throw new ItException('tkt/update',"Este ticket esta anexado al tkt:" . 
+            throw new ItFunctionalException('tkt/update',"Este ticket esta anexado al tkt:" . 
                     $master->get_prop("idmaster") . ". Debe anexarlo a este.");
         }
 
@@ -869,7 +869,7 @@ class Tkt extends Tree {
                     $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM)));
                 }
             } elseif ($utomM != $utom) {
-                throw new ItException('tkt/update','El master esta tomado por otro usuario');
+                throw new ItFunctionalException('tkt/update','El master esta tomado por otro usuario');
             }
         }
 
@@ -1055,7 +1055,7 @@ class Tkt extends Tree {
             case 'minfromclose':
                 return DiffBetweenDates($this->get_prop("FB"), "NOW");
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

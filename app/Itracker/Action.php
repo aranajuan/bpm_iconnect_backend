@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase de administracion de acciones
  * Ejecucion, vita html, validaciones
@@ -180,13 +180,13 @@ class Action extends ITObject {
             $this->load_DV($tmpU);
             return $this->estado;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
      * Cargar accion con el nombre especificado
      * @param String $name
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     private function loadDB_name($name) {
         $this->error = FALSE;
@@ -196,7 +196,7 @@ class Action extends ITObject {
             $this->load_DV($tmpU);
             return $this->estado;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -239,7 +239,7 @@ class Action extends ITObject {
 
     /**
      * Carga y devuelve itform
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     private function loadItform() {
         if ($this->itf != NULL) {
@@ -251,7 +251,7 @@ class Action extends ITObject {
                     $this->getContext()->get_User()->get_prop('usr')
             ) {
                 //solo puede actualizar el propio generador
-                throw new ItException('action/invalid', 'Acceso denegado');
+                throw new ItFunctionalException('action/invalid', 'Acceso denegado');
             }
             $this->TH->getUpdateForm();
             return;
@@ -276,97 +276,97 @@ class Action extends ITObject {
     /**
      * Valida accion
      * @param Tkt $TKT
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     public function check_valid() {
         $l = $this->getLogged();
 
         if ($this->habilita_perfiles != "*" && !in_array($l->get_prop("perfil"), explode(",", $this->habilita_perfiles)))
-            throw new ItException('action/invalid', 'Esta accion no esta disponible para tu perfil');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no esta disponible para tu perfil');
 
         if ($this->habilita_equipos != "*" && !in_array($this->TKT->get_prop("idequipo"), explode(",", $this->habilita_equipos)))
-            throw new ItException('action/invalid', 'Esta accion no esta disponible para tu equipo');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no esta disponible para tu equipo');
 
         if ($l->in_team($this->TKT->get_prop("idequipo"))) { //en un equipo del usuario
             if ($this->habilita_equipo == 2)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket de tu equipo');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket de tu equipo');
         }else { // en otro equipo
             if ($this->habilita_equipo == 1)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket de otro equipo' . $this->TKT->get_prop("idequipo"));
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket de otro equipo' . $this->TKT->get_prop("idequipo"));
         }
 
         if ($this->TKT->get_prop("idmaster")) { //no es master
             $utom = $this->TKT->get_prop("master")->get_prop("u_tom");
             if ($this->habilita_master == 1)
-                throw new ItException('action/invalid', 'Esta accion solo se puede utilizar en un ticket master');
+                throw new ItFunctionalException('action/invalid', 'Esta accion solo se puede utilizar en un ticket master');
         }else { // es master
             if ($this->habilita_master == 2)
-                throw new ItException('action/invalid', 'Esta accion solo se puede utilizar en un ticket adjunto a otro');
+                throw new ItFunctionalException('action/invalid', 'Esta accion solo se puede utilizar en un ticket adjunto a otro');
             $utom = $this->TKT->get_prop("u_tom");
         }
 
         if ($utom) { //esta tomado
             if ($this->habilita_tomado == 2)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket tomado');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket tomado');
             if ($l->get_prop("usr") == $utom) { // tomado por el usuario
                 if ($this->habilita_t_propio == 2)
-                    throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un tomado por vos');
+                    throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un tomado por vos');
             }else { // tomado por otro
                 if ($this->habilita_t_propio == 1)
-                    throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un tomado por otro');
+                    throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un tomado por otro');
             }
         } else {
             if ($this->habilita_tomado == 1)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket sin tomar');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket sin tomar');
         }
 
         if ($l->get_prop("usr") == $this->TKT->get_prop("usr")) { //abierto por el usuario
             if ($this->habilita_a_propio == 2)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por vos');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por vos');
         }else { // abierto por otro
             if ($this->habilita_a_propio == 1)
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por otro');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por otro');
             if ($this->habilita_a_propio == 3 &&
                     $l->check_relation('generado_por_equipo_de_usuario', $this->getTKT()) == false) {
-                throw new ItException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por otro equipo');
+                throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por otro equipo');
             }
         }
 
         if ($this->TKT->get_prop("UB") || $this->TKT->get_prop("id") == NULL) { // cerrado - no abierto
             if ($this->habilita_abierto == 1)
-                throw new ItException('action/invalid', 'Esta accion solo se puede aplicar a un ticket abierto');
+                throw new ItFunctionalException('action/invalid', 'Esta accion solo se puede aplicar a un ticket abierto');
         }else { // abierto
             if ($this->habilita_abierto == 2)
-                throw new ItException('action/invalid', 'Esta accion solo se puede aplicar a un ticket no abierto');
+                throw new ItFunctionalException('action/invalid', 'Esta accion solo se puede aplicar a un ticket no abierto');
         }
 
         if (!preg_match_array(explode(',', $this->habilita_estados), $this->getTKT()->get_prop('status')
                 )) {
-            throw new ItException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #1' . $this->getTKT()->get_prop('status'));
+            throw new ItFunctionalException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #1' . $this->getTKT()->get_prop('status'));
         }
         $tvars = $this->getTKT()->getVars();
         if (!preg_match_array(explode(',', $this->habilita_filtroacciones), $tvars->get_prop('actionfilter')
                 )) {
-            throw new ItException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #2');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #2');
         }
         if ($tvars->get_prop('actionfilter-blacklist') != null &&
                 in_array($this->get_prop('nombre'), explode(',', $tvars->get_prop('actionfilter-blacklist')))) {
-            throw new ItException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #3.BL');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #3.BL');
         }
         if ($tvars->get_prop('actionfilter-whitelist') != null &&
                 $tvars->get_prop('actionfilter-whitelist') != '' && !in_array($this->get_prop('nombre'), explode(',', $tvars->get_prop('actionfilter-whitelist')))) {
-            throw new ItException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #3.WL');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no se puede ejecutar en el estado actual del ticket #3.WL');
         }
         if ($this->habilita_equipos_usr != '*' &&
                 count(array_intersect(explode(',', $l->get_prop('idsequipos')), explode(',', $this->habilita_equipos_usr))) == 0) {
-            throw new ItException('action/invalid', 'Esta accion no esta habilitada a tu equipo');
+            throw new ItFunctionalException('action/invalid', 'Esta accion no esta habilitada a tu equipo');
         }
     }
 
     /**
      * Carga ticket para ejecutar accion o consultar
      * @param Tkt $TKT
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     public function loadTKT($TKT) {
         $this->TKT = $TKT;
@@ -442,7 +442,7 @@ class Action extends ITObject {
     /**
      * Carga valores de formulario y valida con itform
      * @param array $values
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     public function loadFormValues($values, $formname = null) {
 
@@ -461,7 +461,7 @@ class Action extends ITObject {
 
     /**
      * Devuelve resultado del script
-     * @throws ItException
+     * @throws ItFunctionalException
      */
     private function ejecuteScript() {
         $this->ITScript = new Utils\ITScript();
@@ -491,7 +491,7 @@ class Action extends ITObject {
 
         $rta = $this->getScriptResponse()->get_prop('result');
         if ($rta == '') {
-            throw new ItException('action/ejecutescript');
+            throw new ItFunctionalException('action/ejecutescript');
         }
         $this->itf = $this->ITScript->getObject('ITFORM');
     }
@@ -523,7 +523,7 @@ class Action extends ITObject {
         if ($this->get_prop("ejecuta")) {
             $cname = '\\Itracker\\Actions\\' . ucfirst($this->get_prop("ejecuta")) . 'Action';
             if (!class_exists($cname)) {
-                throw new ItException('action/notfound', '',
+                throw new ItFunctionalException('action/notfound', '',
                         \KLogger\Psr\Log\LogLevel::CRITICAL,
                         'Clase no encontrada', array($cname));
             }
@@ -667,7 +667,7 @@ class Action extends ITObject {
             case 'descripcion':
                 return $this->descripcion;
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

@@ -3,7 +3,7 @@
 namespace Itracker\Services\Tkt;
 
 use Itracker\ResponseElement;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Listfiltered implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
@@ -12,7 +12,7 @@ class Listfiltered implements \Itracker\Services\ITServiceInterface {
 		$idsteams = explode ( ",", $Context->get_params ( "team" ) );
 		foreach ( $idsteams as $idteam ) {
 			if (! $u->in_team ( $idteam )) {
-				throw new ItException ( 'service/checkdata', "Equipo invalido($idteam). Acceso denegado." );
+				throw new ItFunctionalException ( 'service/checkdata', "Equipo invalido($idteam). Acceso denegado." );
 			}
 			array_push ( $arrayTeam, $idteam );
 		}

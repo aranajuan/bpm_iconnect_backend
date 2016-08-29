@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\ResponseElement;
 
 abstract class ITObject extends BasicObject implements PropInterface, DBObjectInterface {
@@ -38,7 +38,7 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
 					if ($hideError) {
 						$pv = "";
 					} else {
-						throw new ItException ( 'prop/getprop' );
+						throw new ItFunctionalException ( 'prop/getprop' );
 					}
 					return $pv;
 				}
@@ -49,7 +49,7 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
 		}
 	}
 	public function set_prop($property, $value) {
-		throw new ItException ( 'prop/setprop' );
+		throw new ItFunctionalException ( 'prop/setprop' );
 	}
 }
 

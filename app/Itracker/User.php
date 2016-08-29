@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 /*
  * Variables de la vista
@@ -128,7 +128,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
     public function load_DB($usr) {
 
         if ($usr == "") {
-            throw new ItException('dbobject/load');
+            throw new ItFunctionalException('dbobject/load');
         }
         $usr = strtoupper(strToSQL($usr));
 
@@ -139,7 +139,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $userData = $this->dbinstance->get_vector();
         } else {
-            throw new ItException('dbobject/load'); 
+            throw new ItFunctionalException('dbobject/load'); 
         }
         
         $this->usr = $usr;
@@ -177,7 +177,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
             return $this->dbroot->get_vector();
         } else {
-            throw new ItException('dbobject/load');
+            throw new ItFunctionalException('dbobject/load');
         }
     }
 
@@ -278,7 +278,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             $this->dbinstance->query($ssql);
             return;
         }
-        throw new ItException('dbobject\checkdata','No se puede restaurar usuario');
+        throw new ItFunctionalException('dbobject\checkdata','No se puede restaurar usuario');
     }
 
     /**
@@ -578,18 +578,18 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      */
     public function check_data() {
         if ($this->usr == "" || $this->usr == null)
-            throw new ItException('dbobject/checkdata', 'El usuario es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El usuario es obligatorio');
         if (!in_array($this->dominio, $this->getContext()->get_GlobalConfig()->getArray('domains')))
-                throw new ItException('dbobject/checkdata', 'Dominion invalido');
+                throw new ItFunctionalException('dbobject/checkdata', 'Dominion invalido');
 
         if (!is_numeric($this->perfil))
-            throw new ItException('dbobject/checkdata', 'El campo perfil es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El campo perfil es obligatorio');
 
         if (!filter_var(trim($this->mail), FILTER_VALIDATE_EMAIL) && trim($this->mail) != "")
-                throw new ItException('dbobject/checkdata', 'Mail invalido');
+                throw new ItFunctionalException('dbobject/checkdata', 'Mail invalido');
 
         if ($this->dbteams == "" || $this->dbteams == null) {
-            throw new ItException('dbobject/checkdata', 'Seleccione al menos un equipo');
+            throw new ItFunctionalException('dbobject/checkdata', 'Seleccione al menos un equipo');
 
         }
     }
@@ -882,14 +882,14 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
      */
     public function login($passL, $front, $ipuser) {
         if ($this->estado != I_ACTIVE)
-            throw new ItException('dbobject/checkdata', 'Usuario invalido');
+            throw new ItFunctionalException('dbobject/checkdata', 'Usuario invalido');
 
         if ($this->dominio == "BLOQUEADO") {
-            throw new ItException('dbobject/checkdata', 'Acceso deshabilitado para el usuario');
+            throw new ItFunctionalException('dbobject/checkdata', 'Acceso deshabilitado para el usuario');
         }
 
         if ($this->usr == "" || $this->error == true)
-            throw new ItException('dbobject/checkdata', 'Usuario sin cargar');
+            throw new ItFunctionalException('dbobject/checkdata', 'Usuario sin cargar');
 
         $maxsessions = $this->getContext()->get_GlobalConfig()
                 ->getInt('configs/sessionmax');
@@ -902,7 +902,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 
         if ($front->is_trusted()) {
             if ($sessionC >= $maxsessions) {
-                throw new ItException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
+                throw new ItFunctionalException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
             }
             if ($maxsessions == 1) {
                 $this->sessionCloseAll();
@@ -911,26 +911,26 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
         }
 
         if ($passL == "" || $this->error == true)
-            throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos');
+            throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos');
 
 
         switch ($this->dominio) {
             case "ITRACKER":
                 if ($passL != $this->pass) {
-                    throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+                    throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 }
                 break;
             case "CCPI":
                 $ldap = new \ExternalWs\LdapWs();
                 $rta = $ldap->check_user($this->get_prop("usr"), $passL);
                 if ($rta["response"] != "true")
-                   throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+                   throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 break;
             case "TELECOM":
                 $ldap = new \ExternalWs\LdapWs();
                 $rta = $ldap->check_user($this->get_prop("usr"), $passL);
                 if ($rta["response"] != "true")
-                        throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+                        throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
                 break;
             case "SHAREPOINT":
                 $SPF = new Front();
@@ -941,28 +941,28 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
                         . " ";
                 $this->dbroot->loadRS($ssql);
                 if ($this->dbroot->cReg != 1) {
-                    throw new ItException('dbobject/checkdata', 'SP::Usuario o contrase&ntilde;a invalidos.');
+                    throw new ItFunctionalException('dbobject/checkdata', 'SP::Usuario o contrase&ntilde;a invalidos.');
                 }
                 $v = $this->dbroot->get_vector();
                 $f1 = strtotime($v["fecha"]);
                 if ($f1 == false) {
-                    throw new ItException('dbobject/checkdata',  "SP::fecha invalida " . $v["fecha"]);
+                    throw new ItFunctionalException('dbobject/checkdata',  "SP::fecha invalida " . $v["fecha"]);
 
                 }
                 $f2 = strtotime('now');
                 if ($f2 == false) {
-                    throw new ItException('dbobject/checkdata', "SP::fecha invalida");
+                    throw new ItFunctionalException('dbobject/checkdata', "SP::fecha invalida");
 
                 }
                 if (($f2 - $f1) > 60) {
-                    throw new ItException('dbobject/checkdata', "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1));
+                    throw new ItFunctionalException('dbobject/checkdata', "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1));
                 }
                 break;
             default:
-                throw new ItException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+                throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
         }
         if ($sessionC >= $maxsessions) {
-            throw new ItException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
+            throw new ItFunctionalException('dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.');
         }
         if ($maxsessions == 1) {
             $this->sessionCloseAll();
@@ -1148,7 +1148,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             case 'perfilt':
                 $this->load_profile();
                 return $this->perfilAccess["nombre"];
-            case 'accesslist':
+            case 'access':
                 $this->load_profile();
                 return $this->perfilAccess["accesos"];
             case 'instancias':
@@ -1158,7 +1158,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
             case 'puesto':
                 return $this->puesto;
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

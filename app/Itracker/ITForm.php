@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 /**
  * Formularios xml para datos itracker
@@ -75,21 +75,21 @@ class ITForm implements PropInterface {
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
-                throw new ItException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+                throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
             if ($nodeList->length == 0) {
-                throw new ItException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No hay elementos en el form', array($xml));
+                throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No hay elementos en el form', array($xml));
             }
             $this->loadOutput();
             $this->loadXMLFormArray();
-        }catch(ItException $e){
+        }catch(ItFunctionalException $e){
             throw $e;
         }catch (\Exception $e) {
             $this->xml_input = null;
-            throw new ItException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+            throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
         }
-        throw new ItException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+        throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
     }
 
     /**
@@ -137,7 +137,7 @@ class ITForm implements PropInterface {
             if (isset($this->formArray[trim($arr['id'])])) {
                 $this->xml_output = null;
                 $this->formArray = null;
-                throw new ItException('itf/load', '',
+                throw new ItFunctionalException('itf/load', '',
                         \KLogger\Psr\Log\LogLevel::ERROR, 
                         'Id duplicado en itform', array('xml' => $this->xml_input_text,
                     'id' => $arr['id']));
@@ -229,15 +229,15 @@ class ITForm implements PropInterface {
             switch ($element["type"]) {
                 case "date":
                     if (STRdate_format($element["value"], USERDATE_READ_DATE, USERDATE_READ) == -1)
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
                 case "month":
                     if (STRdate_format($element["value"], USERDATE_READ_MONTH, USERDATE_READ) == -1)
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
                 case "datetime":
                     if (STRdate_format($element["value"], USERDATE_READ, USERDATE_READ) == -1)
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
             }
         }
@@ -255,41 +255,41 @@ class ITForm implements PropInterface {
             switch ($valName) {
                 case "numeric":
                     if ($valValue == "true" && !is_numeric($element["value"]) && $notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).");
                     }
                     break;
                 case "required":
                     if ($valValue == "true" && !$notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " es obligatorio.");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es obligatorio.");
                     }
                     break;
                 case "maxlen":
                     if (strlen($element["value"]) > $valValue && $notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres");
                     }
                     break;
                 case "minlen":
                     if (strlen($element["value"]) < $valValue && $notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres");
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres");
                     }
                     break;
                 case "max":
                     if ($element["value"] > $valValue && $notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue);
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue);
                     }
                     break;
                 case "min":
                     if ($element["value"] < $valValue && $notempty) {
-                        throw new ItException('itf/value',"El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue);
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue);
                     }
                     break;
                 case "regex":
                     if ($notempty) {
                         $valid = preg_match($valValue, $element["value"], $newstr);
                         if (!$valid) {
-                            throw new ItException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado.");
+                            throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado.");
                         } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
-                            throw new ItException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?");
+                            throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?");
                         }
                     }
                     break;
@@ -338,7 +338,7 @@ class ITForm implements PropInterface {
         foreach ($arr as $a) {
             $id = trim(str_replace($prefix, '', $a['id']));
             if (is_array($a['value'])) {
-                throw new ItException('itf/value','El formulario contiene informacion invalida en:' . $id);
+                throw new ItFunctionalException('itf/value','El formulario contiene informacion invalida en:' . $id);
             }
             if (isset($this->formArray[$id])) {
                 $this->formArray[$id]['value'] = $a['value'];
@@ -582,7 +582,7 @@ class ITForm implements PropInterface {
         if ($rta) {
             return $rta;
         }
-        throw new ItException('prop/getprop');
+        throw new ItFunctionalException('prop/getprop');
     }
 
     public function getXML() {

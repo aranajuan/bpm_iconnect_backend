@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class TakeAction implements ITActionsInterface {
 	public static function go($action) {
@@ -17,7 +17,7 @@ class TakeAction implements ITActionsInterface {
 		try {
 			$uas = $obCI->get_object ( 'User', $th->get_prop ( 'UA' ), false, true );
 			return new ITActionsShowResponse ( $uas, 'Tomado por ' . $uas->get_prop ( 'nombre' ) );
-		} catch ( ItException $e ) {
+		} catch ( ItFunctionalException $e ) {
 			return new ITActionsShowResponse ( null, 'No se puede determinar usuario. Error ' . $th->get_prop ( 'UA' ) );
 		}
 	}

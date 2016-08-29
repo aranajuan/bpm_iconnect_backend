@@ -3,7 +3,7 @@
 namespace Itracker\Services\Report;
 
 use Itracker\ResponseElement;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Report implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
@@ -16,7 +16,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
 		$idsteams = explode ( ",", $Context->get_params ( "team" ) );
 		foreach ( $idsteams as $idteam ) {
 			if (! $u->in_team ( $idteam, true )) {
-				throw new ItException ( 'service/checkdata', "Equipo invalido($idteam). Acceso denegado." );
+				throw new ItFunctionalException ( 'service/checkdata', "Equipo invalido($idteam). Acceso denegado." );
 			}
 			array_push ( $arrayTeam, $idteam );
 			if (! $ffound && file_exists ( $filepath . '_' . $idteam . '.json' )) {
@@ -30,7 +30,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
 			if (file_exists ( $filepath . '.json' )) {
 				$filepath .= '.json';
 			} else {
-				throw new ItException ( 'service/checkdata',"No hay reporte disponible para el perfil. $rname");
+				throw new ItFunctionalException ( 'service/checkdata',"No hay reporte disponible para el perfil. $rname");
 			}
 		}
 		

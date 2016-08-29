@@ -4,7 +4,7 @@ namespace Itracker\Exceptions;
 /**
  * Excepciones graves
  */
-class ErrorException extends \Exception {
+class ItErrorException extends \Exception {
  /**
      * Codigo de error de var
      * @var String 
@@ -26,6 +26,7 @@ class ErrorException extends \Exception {
      */
     public function __construct($error,$description='',
             $loglevel=null ,$logmsg=null,$logdata=null) {
+	    parent::__construct($error.'-'.$description);
         $this->error = $error;
         $this->description=$description;
     }

@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class ResponseElement{
     
@@ -47,6 +47,10 @@ class ResponseElement{
         
         $this->setTitle($title);
         
+	if($type!=null){
+            $this->setType($type);
+        }
+	
         if($value==null){
             return;
         }
@@ -57,10 +61,6 @@ class ResponseElement{
             }
         }else{
             $this->addValue($value);
-        }
-        
-        if($type!=null){
-            $this->setType($type);
         }
         
     }
@@ -87,7 +87,7 @@ class ResponseElement{
      */
     public function setType($type){
         if($type>3 || $type<1){
-            throw new ItException('responseelement/invalidtype');
+            throw new ItFunctionalException('responseelement/invalidtype');
         }
         
         $this->type=$type;
@@ -108,7 +108,7 @@ class ResponseElement{
     public function getValue() {
         
         if($this->getType() == null){
-            throw new ItException('responseelement/invalidtype');
+            throw new ItFunctionalException('responseelement/invalidtype');
         }
         
         return $this->value;
@@ -126,13 +126,13 @@ class ResponseElement{
                 $this->type=self::$ARRAY;
             }
             if(!is_array($this->value)){
-                throw new ItException('responseelement/invalidtype');
+                throw new ItFunctionalException('responseelement/invalidtype');
             }
             array_push($this->value, $value);
             return;
         }
         if($this->value != null){
-            throw new ItException('responseelement/invalidtype');
+            throw new ItFunctionalException('responseelement/invalidtype');
         }
         $this->value = $value;
         if($this->getType()==null){

@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker\Services\Tkt;
-use \Itracker\Exceptions\ItException;
+use \Itracker\Exceptions\ItFunctionalException;
 use Itracker\ResponseElement;
 
 class Downloadfile implements \Itracker\Services\ITServiceInterface {
@@ -18,18 +18,18 @@ class Downloadfile implements \Itracker\Services\ITServiceInterface {
             $TH = $Context->get_objcache()->get_object("TktH", $fv[0]);
 
             if (!$TH->candownload()) {
-                throw new ItException('th/getfile','Archivo invalido, acceso denegado 2.');
+                throw new ItFunctionalException('th/getfile','Archivo invalido, acceso denegado 2.');
             }
             $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/adjuntos/" . $fname;
         } elseif ($type === "anexo") {
             $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/anexos/" . $fname;
         } else {
-            throw new ItException('th/getfile','Archivo invalido');
+            throw new ItFunctionalException('th/getfile','Archivo invalido');
         }
 
         $im = file_get_contents($filepath);
         if (!$im) {
-            throw new ItException('th/getfile','Error al leer archivo.');
+            throw new ItFunctionalException('th/getfile','Error al leer archivo.');
         }
 
 

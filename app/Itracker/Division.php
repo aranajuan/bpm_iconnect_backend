@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 /**
  * Administra direcciones
@@ -44,7 +44,7 @@ class Division extends ITObject {
             $this->load_DV($tmpU);
             return $this->estado;
         }else {
-            throw new ItException('dbobject/load');
+            throw new ItFunctionalException('dbobject/load');
         }
     }
 
@@ -92,7 +92,7 @@ class Division extends ITObject {
         $this->load_systems();
         // error si no existe
         if(!isset($this->Ppreguntas[$idSistema])){
-            throw new ItException('dbobject/checkdata',
+            throw new ItFunctionalException('dbobject/checkdata',
                     'Tipificacion invalida');
         }
         return $this->Ppreguntas[$idSistema];
@@ -123,11 +123,11 @@ class Division extends ITObject {
      */
     function check_data() {
         if (!is_numeric($this->id))
-            throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
+            throw new ItFunctionalException('dbobject/checkdata', 'El id debe ser un numero entero');
         if ($this->nombre == "")
-            throw new ItException('dbobject/checkdata', 'El campo Nombre es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El campo Nombre es obligatorio');
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'Imposible modificar registro eliminado');
+            throw new ItFunctionalException('dbobject/checkdata', 'Imposible modificar registro eliminado');
     }
 
     /**
@@ -158,7 +158,7 @@ class Division extends ITObject {
      */
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'La direccion ya se encuentra eliminada');
+            throw new ItFunctionalException('dbobject/checkdata', 'La direccion ya se encuentra eliminada');
         $ssql = "update TBL_DIRECCION set estado=1 where id=" . intval($this->id);
         $this->dbinstance->query($ssql);
     }
@@ -181,7 +181,7 @@ class Division extends ITObject {
                 $this->load_systems();
                 return $this->sistemas;
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

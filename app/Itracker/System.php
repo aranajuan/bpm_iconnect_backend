@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para cargar y manejar sistemas
  */
@@ -37,7 +37,7 @@ class System extends ITObject {
             $this->load_DV($tmpU);
             return $this->estado;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -64,12 +64,12 @@ class System extends ITObject {
      */
     function check_data() {
         if (!is_numeric($this->id))
-            throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
+            throw new ItFunctionalException('dbobject/checkdata', 'El id debe ser un numero entero');
         if ($this->nombre == "")
-            throw new ItException('dbobject/checkdata', 'El campo Nombre es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El campo Nombre es obligatorio');
 
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'Imposible modificar registro eliminado');
+            throw new ItFunctionalException('dbobject/checkdata', 'Imposible modificar registro eliminado');
     }
 
     /**
@@ -100,7 +100,7 @@ class System extends ITObject {
      */
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'El sistema ya se encuentra eliminado');
+            throw new ItFunctionalException('dbobject/checkdata', 'El sistema ya se encuentra eliminado');
         $ssql = "update TBL_SISTEMAS set estado=1 where id=" . intval($this->id);
         $this->dbinstance->query($ssql);
     }
@@ -118,7 +118,7 @@ class System extends ITObject {
             case 'nombre':
                 return ucwords($this->nombre);
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class LinkAction implements ITActionsInterface {
 
@@ -13,7 +13,7 @@ class LinkAction implements ITActionsInterface {
             $action->loadObjadjId($idth);
             return new ITActionsGoResponse('ok', '');
         } else {
-        	throw new ItException ('action/go/invalid','Id invalido');
+        	throw new ItFunctionalException ('action/go/invalid','Id invalido');
         }
     }
 

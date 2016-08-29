@@ -30,7 +30,7 @@ abstract class BasicObject {
         if ($conn) {
             $this->conn = $conn;
         } else {
-            $this->conn = $this->getContext()->get_Connection();
+            $this->conn = $this->getContext()->getConnection ();
         }
         $this->dbinstance = new Utils\DB($this->conn, false);
         //prepara la clase de cache para acceso

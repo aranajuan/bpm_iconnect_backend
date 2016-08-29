@@ -1,7 +1,7 @@
 <?php
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Exceptions\ItDeletedException;
 
 /**
@@ -104,7 +104,7 @@ class ObjectCache {
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {
-                throw  new ItException('objectcache/classnotfound','',
+                throw  new ItFunctionalException('objectcache/classnotfound','',
                 		\KLogger\Psr\Log\LogLevel::CRITICAL,
                 		'Clase invalida',array('nombre'=>$class));
             }

@@ -71,7 +71,7 @@ class DB {
                 $this->details = "Error al ejecutar solicitud.";
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                throw new ErrorException('db/query', '',
+                throw new ItErrorException('db/query', '',
                     \KLogger\Psr\Log\LogLevel::CRITICAL,
                     'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
@@ -93,7 +93,7 @@ class DB {
                 $this->details = "Error al ejecutar solicitud."; 
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                 throw new ErrorException('db/query', '',
+                 throw new ItErrorException('db/query', '',
                     \KLogger\Psr\Log\LogLevel::CRITICAL,
                     'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
@@ -123,7 +123,7 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                 throw new ErrorException('db/query', '',
+                 throw new ItErrorException('db/query', '',
                     \KLogger\Psr\Log\LogLevel::CRITICAL,
                     'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
@@ -144,7 +144,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->lstIDmss = NULL;
-                 throw new ErrorException('db/query', '',
+                 throw new ItErrorException('db/query', '',
                     \KLogger\Psr\Log\LogLevel::CRITICAL,
                     'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),

@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Arbol de opciones y movimientos
  */
@@ -68,7 +68,7 @@ abstract class Tree extends ITObject {
                 $tmp = implode(",", $this->path);
                 $this->path = NULL;
                 $this->path_max = 0;
-                throw new ItException('dbobject/checkdata',
+                throw new ItFunctionalException('dbobject/checkdata',
                         'Error en la tipificacion',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         'Arbol invalido ('.$tmp.')');
@@ -102,7 +102,7 @@ abstract class Tree extends ITObject {
                     $ct = "Option";
                     break;
                 default:
-                    throw new ItException('dbobject/checkdata',
+                    throw new ItFunctionalException('dbobject/checkdata',
                         'Error en la tipificacion',
                         \KLogger\Psr\Log\LogLevel::ERROR,
                         "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)");
@@ -368,7 +368,7 @@ abstract class Tree extends ITObject {
         if (isset($this->path_obj[$this->path_max])) {
             return $this->path_obj[$this->path_max];
         }
-        throw new ItException('option/destiny','Error en ultima opcion');;
+        throw new ItFunctionalException('option/destiny','Error en ultima opcion');;
     }
 
 }

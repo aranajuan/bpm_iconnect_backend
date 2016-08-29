@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker\Services\User;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\ResponseElement;
 
 class Lister implements \Itracker\Services\ITServiceInterface {
@@ -14,7 +14,7 @@ class Lister implements \Itracker\Services\ITServiceInterface {
     public static function GO($Context) {
         $idteam =  $Context->get_params('idteam');
         if(!$Context->getUser()->isadm($idteam)){
-           throw new ItException('service/checkdata', 'No puede administrar este equipo');
+           throw new ItFunctionalException('service/checkdata', 'No puede administrar este equipo');
         }
         $team = $Context->get_objcache()->get_object("Team", $idteam);
 

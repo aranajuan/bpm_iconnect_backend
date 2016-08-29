@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para administrar los equipos
  */
@@ -60,7 +60,7 @@ class Team extends ITObject {
             $this->load_DV($tmpU);
             return $this->estado;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -123,22 +123,22 @@ class Team extends ITObject {
      */
     function check_data() {
         if (!is_numeric($this->id))
-            throw new ItException('dbobject/checkdata', 'El id debe ser un numero entero');
+            throw new ItFunctionalException('dbobject/checkdata', 'El id debe ser un numero entero');
         if ($this->nombre == "")
-            throw new ItException('dbobject/checkdata', 'El campo Nombre es obligatorio');
+            throw new ItFunctionalException('dbobject/checkdata', 'El campo Nombre es obligatorio');
 
         if (!is_numeric($this->idlistin))
-            throw new ItException('dbobject/checkdata', 'Debe seleccionar un listin valido');
+            throw new ItFunctionalException('dbobject/checkdata', 'Debe seleccionar un listin valido');
         $this->load_listin();
         if (!is_numeric($this->iddireccion))
-            throw new ItException('dbobject/checkdata', '');
+            throw new ItFunctionalException('dbobject/checkdata', '');
         $this->load_division();
 
         $this->load_teamsDer();
         if (HsToMin($this->t_conformidad) == -1)
-            throw new ItException('dbobject/checkdata', 'Tiempo de conformidad invalido, respete el formato HH:MM');
+            throw new ItFunctionalException('dbobject/checkdata', 'Tiempo de conformidad invalido, respete el formato HH:MM');
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'Imposible modificar registro eliminado');
+            throw new ItFunctionalException('dbobject/checkdata', 'Imposible modificar registro eliminado');
     }
 
     /**
@@ -265,7 +265,7 @@ class Team extends ITObject {
 
     function delete_DB() {
         if ($this->estado == I_DELETED)
-            throw new ItException('dbobject/checkdata', 'El equipo ya se encuentra eliminado');
+            throw new ItFunctionalException('dbobject/checkdata', 'El equipo ya se encuentra eliminado');
         $ssql = "update TBL_EQUIPOS set estado=1 where id=" . intval($this->id);
         $this->dbinstance->query($ssql);
     }
@@ -345,7 +345,7 @@ class Team extends ITObject {
             case 'idsequiposreporta':
                 return $this->idsequiposreporta;
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

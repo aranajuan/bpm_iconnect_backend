@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class AsignAction implements ITActionsInterface {
 	public static function go($action) {
@@ -23,7 +23,7 @@ class AsignAction implements ITActionsInterface {
 		try {
 			$uas = $obCI->get_object ( 'User', $th->get_prop ( "objadj_id" ), false, true );
 			return new ITActionsShowResponse ( $uas, 'Se ha asignado a ' . $uas->get_prop ( 'nombre' ) );
-		} catch ( ItException $e ) {
+		} catch ( ItFunctionalException $e ) {
 			return new ITActionsShowResponse ( null, 'No se puede determinar usuario. Error ' . $th->get_prop ( 'objadj_id' ) );
 		}
 	}

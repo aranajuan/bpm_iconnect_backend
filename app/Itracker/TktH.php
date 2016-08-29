@@ -2,7 +2,7 @@
 
 namespace Itracker;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 use Itracker\ResponseElement;
 
 /**
@@ -72,7 +72,7 @@ class TktH extends ITObject {
             }
             return I_ACTIVE;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -374,11 +374,11 @@ class TktH extends ITObject {
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
             if (fwrite($fileO, base64_decode($f["data"])) == FALSE) {
-                throw new Exceptions\ErrorException('th/savefile');
+                throw new Exceptions\ItItErrorException('th/savefile');
             }
             fclose($fileO);
             if (!file_exists($fname)) {
-                throw new Exceptions\ErrorException('th/savefile');
+                throw new Exceptions\ItItErrorException('th/savefile');
             }
         }
     }
@@ -483,7 +483,7 @@ class TktH extends ITObject {
                     return NULL;
                 return STRdate_format($this->FB, DBDATE_READ, USERDATE_READ);
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

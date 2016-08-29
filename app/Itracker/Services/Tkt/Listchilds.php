@@ -2,7 +2,7 @@
 
 namespace Itracker\Services\Tkt;
 use Itracker\ResponseElement;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Listchilds implements \Itracker\Services\ITServiceInterface {
 
@@ -10,7 +10,7 @@ class Listchilds implements \Itracker\Services\ITServiceInterface {
         $TKT = $Context->get_objcache()->get_object("Tkt", $Context->get_params("idtkt"));
 
         if (!$Context->getUser()->in_team($TKT->get_prop("idequipo"))) {
-        	throw new ItException('service/checkdata','Acceso denegado. El ticket no esta asignado a tu equipo.');
+        	throw new ItFunctionalException('service/checkdata','Acceso denegado. El ticket no esta asignado a tu equipo.');
         }
 
         $ALL_v = $TKT->get_prop("childs");

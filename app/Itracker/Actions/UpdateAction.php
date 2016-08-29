@@ -2,7 +2,7 @@
 
 namespace Itracker\Actions;
 
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class UpdateAction implements ITActionsInterface {
 	public static function go($action) {
@@ -15,21 +15,21 @@ class UpdateAction implements ITActionsInterface {
 			$ActName = explode ( '-', $action->get_prop ( 'nombre' ) );
 			
 			if ($ActName [1] != 'UPDATE' || $ActName [0] != $THA_nameV [0]) {
-				throw new ItException ( 'action/go/invalid', 'Evento invalido', KLogger\Psr\Log\LogLevel::WARNING, '', array (
+				throw new ItFunctionalException ( 'action/go/invalid', 'Evento invalido', KLogger\Psr\Log\LogLevel::WARNING, '', array (
 						'tha_name' => $THA_name,
 						'a_name' => $action->get_prop ( 'nombre' ) 
 				) );
 			}
 			
 			if ($TH->getThUpdate ()) {
-				throw new ItException ( 'action/go/invalid', 'No se puede actualizar (evento actualizado previamente)');
+				throw new ItFunctionalException ( 'action/go/invalid', 'No se puede actualizar (evento actualizado previamente)');
 			} else {
 				$action->loadObjadjId ( $TH->get_prop ( 'id' ) );
 				// MOVER ADJUNTOS
 				return new ITActionsGoResponse ( 'ok', '' );
 			}
 		} else {
-			throw new ItException ( 'action/go/invalid', 'No se puede actualizar (sin evento)');
+			throw new ItFunctionalException ( 'action/go/invalid', 'No se puede actualizar (sin evento)');
 		}
 	}
 	public static function show($th) {

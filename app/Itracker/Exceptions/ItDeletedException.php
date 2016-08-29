@@ -11,7 +11,7 @@ namespace Itracker\Exceptions;
  *
  * @author u548391
  */
-class ItDeletedException extends ItException {
+class ItDeletedException extends ItFunctionalException {
     
 }
 

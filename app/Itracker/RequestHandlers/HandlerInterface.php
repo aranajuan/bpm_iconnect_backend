@@ -11,7 +11,7 @@ interface HandlerInterface {
 	 * Cargar datos input
 	 * 
 	 * @param mixed $input        	
-	 * @throws \Itracker\Exceptions\ErrorException
+	 * @throws \Itracker\Exceptions\ItErrorException
 	 */
 	public function loadEnvironment($input);
 	/**
@@ -39,7 +39,7 @@ interface HandlerInterface {
 	 * @param \Itracker\ResponseElement $response        	
 	 * @param String $path
 	 *        	path donde agregar
-	 * @throws \Itracker\Exceptions\ErrorException
+	 * @throws \Itracker\Exceptions\ItErrorException
 	 */
 	public function addResponse($response, $path = null);
 	
@@ -47,7 +47,7 @@ interface HandlerInterface {
 	 * Obtener respuesta
 	 * 
 	 * @return mixed
-	 * @throws \Itracker\Exceptions\ErrorException
+	 * @throws \Itracker\Exceptions\ItErrorException
 	 */
 	public function getResponse();
 }

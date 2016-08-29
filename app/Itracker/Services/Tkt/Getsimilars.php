@@ -3,7 +3,7 @@
 namespace Itracker\Services\Tkt;
 
 use Itracker\ResponseElement;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Getsimilars implements \Itracker\Services\ITServiceInterface {
 	public static function GO($Context) {
@@ -15,7 +15,7 @@ class Getsimilars implements \Itracker\Services\ITServiceInterface {
 		$topts = $TKT->get_last ();
 		
 		if (! $topts->get_prop ( 'unir' )) {
-			throw new ItException ( 'action/invalid', 'Accion no valida para esta opcion. #2' );
+			throw new ItFunctionalException ( 'action/invalid', 'Accion no valida para esta opcion. #2' );
 		}
 		
 		$ALL_v = $TKT->get_similar ();

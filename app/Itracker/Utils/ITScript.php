@@ -2,7 +2,7 @@
 
 namespace Itracker\Utils;
 
-use \Itracker\Exceptions\ItException;
+use \Itracker\Exceptions\ItFunctionalException;
 
 class ITScript extends Operation {
 
@@ -90,7 +90,7 @@ class ITScript extends Operation {
         array_push($stack, $this->jump);
         $ll = count($this->stack);
         if ($line != $stack[1]) {
-            throw new ItException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
+            throw new ItFunctionalException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
             , 'Error en script, finalizacion de bloques invalida');
         }
         if ($this->jump[0] == $ll) { //salto al mismo nivel
@@ -215,7 +215,7 @@ class ITScript extends Operation {
             return;
         }
 
-        throw new ItException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
+        throw new ItFunctionalException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
                 , 'Error desconocido', array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
             
     }

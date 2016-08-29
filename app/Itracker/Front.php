@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-use Itracker\Exceptions\ItException;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Front extends ITObject {
 
@@ -50,7 +50,7 @@ class Front extends ITObject {
             $this->load_DV($tmpU);
              return $this->estado;
         }
-        throw new ItException('dbobject/load');
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -144,7 +144,7 @@ class Front extends ITObject {
             case 'ip':
                 return trim($this->ip);
             default:
-                throw new ItException('prop/getprop');
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

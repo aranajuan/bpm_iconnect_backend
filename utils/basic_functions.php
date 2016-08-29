@@ -58,21 +58,6 @@ function make_arrayobj($arr) {
     return $arr;
 }
 
-/**
- * Une XML
- * @param \SimpleXMLElement $simplexml_to
- * @param \SimpleXMLElement $simplexml_from
- */
-function append_simplexml(&$simplexml_to, &$simplexml_from) {
-    foreach ($simplexml_from->children() as $simplexml_child) {
-        $simplexml_temp = $simplexml_to->addChild($simplexml_child->getName(), xmlEscape((string) $simplexml_child));
-        foreach ($simplexml_child->attributes() as $attr_key => $attr_value) {
-            $simplexml_temp->addAttribute($attr_key, xmlEscape($attr_value));
-        }
-
-        append_simplexml($simplexml_temp, $simplexml_child);
-    }
-}
 
 /**
  * Busca objeto en array
@@ -190,19 +175,7 @@ function space_delete($str, $charL = null) {
     return $rta;
 }
 
-/**
- * Escapa caracteres especiales XML
- * @param string $string
- * @param boolean $CDATA
- * @return string
- */
-function xmlEscape($string, $CDATA = false) {
-    if ($CDATA) {
-        str_replace("]]>", "&cdatag;", $string);
-        return "<![CDATA[" . $string . "]]>";
-    }
-    return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $string);
-}
+
 
 /**
  * si data es null devuelve default

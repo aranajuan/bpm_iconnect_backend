@@ -89,7 +89,7 @@ class ITForm implements PropInterface {
             $this->xml_input = null;
             throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
         }
-        throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+        
     }
 
     /**
@@ -596,5 +596,9 @@ class ITForm implements PropInterface {
     public function set_prop($property, $value) {
         $this->set_value($property, $value);
     }
+
+	public function getData($props = null) {
+		
+	}
 
 }

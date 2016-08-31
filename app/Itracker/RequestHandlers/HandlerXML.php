@@ -81,9 +81,10 @@ class HandlerXML implements HandlerInterface {
 		}
 
 		if ( $el->getType () == \Itracker\ResponseElement::$XML ) {
-			$domXML = new \DOMDocument();
-			$domXML->loadXML ( $el->getValue () );
-			return $doc->importNode ( $domXML );
+			$node = $doc->importNode ( $el->getValue ()->documentElement,true );
+			if($node){
+				return $node;
+			}
 		}
 		return $doc->createElement($el->getTitle(),
 			$this->xmlEscape ( $el->getValue ()) );

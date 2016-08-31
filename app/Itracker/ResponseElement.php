@@ -49,12 +49,12 @@ class ResponseElement{
         
 	if($type!=null){
             $this->setType($type);
-        }
+	}
 	
         if($value==null){
             return;
         }
-        
+
         if(is_array($value)){
             foreach($value as $v){
                 $this->addValue($v);
@@ -107,7 +107,7 @@ class ResponseElement{
      */
     public function getValue() {
         
-        if($this->getType() == null){
+        if($this->getType() == null && $this->value!=null){
             throw new ItFunctionalException('responseelement/invalidtype');
         }
         

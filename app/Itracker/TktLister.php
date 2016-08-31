@@ -71,7 +71,7 @@ class TktLister extends BasicObject {
 		}
 		$T = $this->objsCache->get_object ( "Tkt", $id );
 		$this->objsCache->clean_object ( "Tkt", $id );
-		if ($this->getContext ()->get_User ()->get_view ( $T ) != null) {
+		if ($this->getContext ()->getUser ()->get_view ( $T ) != null) {
 			return $T;
 		}
 	}

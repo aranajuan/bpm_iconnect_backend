@@ -8,7 +8,7 @@ use Itracker\ResponseElement;
 abstract class ITObject extends BasicObject implements PropInterface, DBObjectInterface {
 	public function getData($props = null) {
 		$cname = explode ( "\\", get_called_class () );
-		$rta = new ResponseElement ( strtoupper ( $cname [count ( $cname ) - 1] ) );
+		$rta = new ResponseElement ( strtolower ( $cname [count ( $cname ) - 1] ) );
 		foreach ( $props as $p ) {
 			$pv = $this->get_Subprop ( $p, true );
 			$rta->addValue ( new ResponseElement ( $p, $pv, ResponseElement::$TEXT ) );

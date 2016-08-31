@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-
+use Itracker\Exceptions\ItErrorException;
 use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Utils\AccessLog;
 
@@ -117,25 +117,14 @@ class Context {
 	 * Maneja errores
 	 */
 	public function executeRequest() {
-		try{
+
 			$this->loadAccessLog();
 			$this->prepare ();
 			$this->getHandler()->addResponse ( $this->executeWS () );
 			$response = $this->getHandler()->getResponse();
 			$this->finishScript();
 			return $response;
-		}catch(ItFunctionalException $e){
-			$this->getHandler()->addResponse ( new ResponseElement ( 'error', $e->getMessage () ) );
-			$response = $this->getHandler()->getResponse();
-			$this->finishScript();
-			return $response;
-		}catch(\Itracker\Exceptions\ItErrorException $e){
-			$this->finishScript(true);
-			$this->accesslog->add('error', $e->getMessage());
-			
-		}catch(\Exception $e){
-			$this->finishScript(true);
-		}
+
 	}
 	
 	/**

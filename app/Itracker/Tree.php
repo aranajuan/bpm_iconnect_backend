@@ -109,7 +109,7 @@ abstract class Tree extends ITObject {
             }
             
             //carga de baja
-            $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1,false,true));
+            $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1),false,true);
             $rta = $this->objsCache->get_status($ct, substr($this->path[$i], 1));
             if ($ct == 'Option') {
                 if (!$o->checkProfile($perfil)) {
@@ -138,7 +138,7 @@ abstract class Tree extends ITObject {
         $this->critico = "";
         foreach ($this->path_obj as $o) {
             if($o instanceof Option && 
-                    $o->get_prop("texto_critico"!= NULL))
+                    $o->get_prop("texto_critico")!= NULL)
                 $this->critico.="," . $critico;
                 $this->critico_v[$i] = $o;
                 $i++;

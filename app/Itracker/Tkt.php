@@ -300,7 +300,7 @@ class Tkt extends Tree {
             throw new ItFunctionalException('vars/load', 'Parametro invalido setVars');
         }
         $ssql = "variables='" . strToSQL($vars->getXml()->saveXML());
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
         $this->vars = $vars;
     }
 
@@ -617,7 +617,7 @@ class Tkt extends Tree {
          }
 
         $ssql = "UB=NULL, FB=NULL";
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
         $this->UB = NULL;
         $this->FB = NULL;
 
@@ -647,7 +647,7 @@ class Tkt extends Tree {
 
         /* Cerrar en tabla tkts */
         $ssql = "UB='" . strToSQL($UB) . "', FB=now()";
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
@@ -680,7 +680,7 @@ class Tkt extends Tree {
         $ssql = "idequipo=" . $equipo->get_prop("id") .
                 ", equipos_tratan='" . $tmpTratan .
                 "', u_tom= NULL , u_asig= NULL, prioridad=NULL";
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         if ($this->is_master()) {
             foreach ($this->get_prop("childs") as $c) {
@@ -709,7 +709,7 @@ class Tkt extends Tree {
         }
 
         $ssql = "prioridad=" . intval($idP) ;
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
         $this->prioridad = $idP;
 
         if ($this->is_master()) {
@@ -728,7 +728,7 @@ class Tkt extends Tree {
 
         $ssql = "u_tom='" . strToSQL($this->getLogged()->get_prop("usr")) .
                 "', u_asig=NULL";
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         $this->u_tom = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $this->getLogged();
@@ -756,7 +756,7 @@ class Tkt extends Tree {
         $ssql = "u_tom='" . strToSQL($tou->get_prop("usr")) .
                 "',u_asig='" . strToSQL($this->getLogged()->get_prop("usr")) . "'";
 
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
         $this->u_tom = $tou->get_prop("usr");
         $this->u_asig = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $tou;
@@ -777,7 +777,7 @@ class Tkt extends Tree {
     function free() {
         $l = $this->getLogged();
         $ssql = "u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr"));
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
         
         $this->u_tom = NULL;
         $this->u_asig = $l->get_prop("usr");
@@ -811,7 +811,7 @@ class Tkt extends Tree {
         }
         $ssql = "idmaster=NULL, u_tom=" . $utom;
 
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         $this->idmaster = NULL;
         $this->master = NULL;
@@ -874,7 +874,7 @@ class Tkt extends Tree {
         }
 
         $ssql = "idmaster=" . intval($master->get_prop("id"));
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
@@ -903,7 +903,7 @@ class Tkt extends Tree {
     function un_join() {
         $ssql = "idmaster=NULL";
         
-        $this->update_DB($ssql);
+        $this->update_sql($ssql);
 
         $this->idmaster = NULL;
         $this->master = NULL;
@@ -971,10 +971,14 @@ class Tkt extends Tree {
         $this->id = $this->dbinstance->get_lastID();
     }
 
-    private function update_DB($ssql) {
+    public function update_sql($ssql) {
         $this->check_data();
         $this->dbinstance->query('update TBL_TICKETS set '.$ssql.
                 'where id=' . intval($this->id));
+    }
+    
+    public function update_DB() {
+	    
     }
 
     function get_prop($property) {

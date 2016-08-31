@@ -50,7 +50,7 @@ abstract class BasicObject {
      * @return User
      */
     protected function getLogged() {
-        return $this->getContext()->get_User();
+        return $this->getContext()->getUser();
     }
 
     /**

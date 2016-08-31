@@ -21,7 +21,7 @@ class OpenAction implements ITActionsInterface {
 		if (! is_numeric ( $destiny->get_prop ( 'id' ) )) {
 			throw new ItFunctionalException ( 'action/go/invalid', 'No hay destino valido id en script', KLogger\Psr\Log\LogLevel::WARNING, '', array (
 					'id' => $lstOption->get_prop ( 'id' ),
-					'usr' => $context->get_User ()->get_prop ( 'usr' ),
+					'usr' => $context->getUser ()->get_prop ( 'usr' ),
 					'data' => $context->get_params ( 'form' ) 
 			) );
 		}

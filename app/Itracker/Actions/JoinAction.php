@@ -15,12 +15,12 @@ class JoinAction implements ITActionsInterface {
 		
 		if ($action->isWorking ()) {
 			
-			if (! $context->get_User ()->in_team ( $master->get_prop ( 'idequipo' ) )) {
+			if (! $context->getUser ()->in_team ( $master->get_prop ( 'idequipo' ) )) {
 				throw new ItFunctionalException ('action/go/invalid','El ticket master no esta en tu equipo');
 			}
 			
 			$utomM = $master->get_prop ( "u_tom" );
-			if ($utomM != null && $utomM != $context->get_User ()->get_prop ( 'usr' )) { // el ticket master esta tomado por otro
+			if ($utomM != null && $utomM != $context->getUser ()->get_prop ( 'usr' )) { // el ticket master esta tomado por otro
 				$arrEJ = makeproparr ( $action->getTKT ()->valid_actions (), 'ejecuta' );
 				if (! in_array ( 'asign', $arrEJ )) {
 					throw new ItFunctionalException ('action/go/invalid','El ticket master esta tomado y no puedes asignarlo');

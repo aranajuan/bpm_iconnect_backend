@@ -248,7 +248,7 @@ class Action extends ITObject {
 
         if ($this->ejecuta == 'update') {
             if ($this->TH->get_prop('UA') !=
-                    $this->getContext()->get_User()->get_prop('usr')
+                    $this->getContext()->getUser()->get_prop('usr')
             ) {
                 //solo puede actualizar el propio generador
                 throw new ItFunctionalException('action/invalid', 'Acceso denegado');
@@ -481,7 +481,7 @@ class Action extends ITObject {
         $master = $this->getTKT()->get_prop('master');
         $this->ITScript->addObject('TKT', $this->getTKT());
         $this->ITScript->addObject('TKTVAR', $this->getTKT()->getVars());
-        $this->ITScript->addObject('USR', $this->getContext()->get_User());
+        $this->ITScript->addObject('USR', $this->getContext()->getUser());
         if ($this->getitform()) {
             $this->ITScript->addObject('ITFORM', $this->getitform());
         }

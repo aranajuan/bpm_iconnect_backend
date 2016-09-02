@@ -299,7 +299,7 @@ class Tkt extends Tree {
         if (!($vars instanceof Utils\Vars)) {
             throw new ItFunctionalException('vars/load', 'Parametro invalido setVars');
         }
-        $ssql = "variables='" . strToSQL($vars->getXml()->saveXML());
+        $ssql = "variables='" . strToSQL($vars->getXml()->saveXML())."'";
         $this->update_sql($ssql);
         $this->vars = $vars;
     }
@@ -463,6 +463,9 @@ class Tkt extends Tree {
             return;
         }
         $this->teamLoaded = true;
+        if($this->idequipo ==0){
+        	return;
+        }
         $t = $this->objsCache->get_object("Team", $this->idequipo, false, true);
         $rta = $this->objsCache->get_status("Team", $this->idequipo);
         if ($rta == I_DELETED) {
@@ -581,11 +584,6 @@ class Tkt extends Tree {
         $this->origen = trim($this->origen);
         if ($this->origen == "")
             throw new ItFunctionalException('dbobject/checkdata', 'Origen de tkt invalido');
-
-        if (!is_numeric($this->u_tom) && $this->u_tom != NULL)
-            throw new ItFunctionalException('dbobject/checkdata', "Usuario invalido, no puede tomar tkt (" . $this->u_tom . ")");
-        if (!is_numeric($this->u_asig) && $this->u_asig != NULL)
-            throw new ItFunctionalException('dbobject/checkdata', "Usuario invalido, no puede asignar tkt (" . $this->u_asig . ")");
     }
 
     /**
@@ -598,7 +596,6 @@ class Tkt extends Tree {
         $this->id = I_NEWID;
         $this->u_tom = NULL;
         $this->u_asig = NULL;
-        $this->usr = $this->getLogged()->get_prop("usr");
         $this->idequipo = $idequipo;
         $this->equipos_tratan = ',' . $idequipo . ',';
         $this->teamLoaded = false;
@@ -776,7 +773,7 @@ class Tkt extends Tree {
      */
     function free() {
         $l = $this->getLogged();
-        $ssql = "u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr"));
+        $ssql = "u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")). "'";
         $this->update_sql($ssql);
         
         $this->u_tom = NULL;
@@ -974,7 +971,7 @@ class Tkt extends Tree {
     public function update_sql($ssql) {
         $this->check_data();
         $this->dbinstance->query('update TBL_TICKETS set '.$ssql.
-                'where id=' . intval($this->id));
+                ' where id=' . intval($this->id));
     }
     
     public function update_DB() {

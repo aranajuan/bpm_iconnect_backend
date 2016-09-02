@@ -1,5 +1,7 @@
 <?php
 namespace Itracker\Utils;
+
+use Itracker\Exceptions\ItErrorException;
 /*
  * Clase ejecucion base de datos
  */

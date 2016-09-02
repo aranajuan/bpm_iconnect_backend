@@ -13,7 +13,10 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
         $TKT= $Context->get_objcache()->get_object("Tkt",$idtkt);
     }else{
         $TKT = new \Itracker\Tkt();
-        $TKT->load_VEC(array("origen" => $Context->get_params("path")));
+        $TKT->load_VEC(array(
+        		'origen' => $Context->get_params("path"),
+        		'usr'=>$Context->getUser()->get_prop("usr")
+        ));
     }
     $A = new \Itracker\Action();
     $A->load_DB($Context->get_params("action"));
@@ -34,7 +37,7 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
     
     $fget = false;
     if($Context->get_params("sendfiles")=="true" && $A->get_prop('formulario')){
-        $files = $Context->get_files();
+        $files = $Context->getHandler()->getBody()->getFiles();
         $A->loadFiles($files);
         $fget = true;
     }
@@ -53,8 +56,9 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
 
     $rta = new ResponseElement('data');
 
-    foreach($actionResult as $k=>$v){
-        $rta->addValue(ResponseElement($k,$v, ResponseElement::$TEXT));
+    foreach($actionResult->toArray() as $k=>$v){
+    	
+        $rta->addValue(new ResponseElement($k,$v, ResponseElement::$TEXT));
     }
     
     return $rta;

@@ -293,7 +293,7 @@ class TktH extends ITObject {
         if ($this->get_prop("itform") != null) {
             $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
-            	$rta->addValue(new ResponseElement('itf',$itfDom,ResponseElement::$XML));
+            	$rta->addValue(new ResponseElement('',$itfDom,ResponseElement::$XML));
             } else {
                 $this->getContext()->getLogger()->notice('itform sin nada visible', array(
                     'idth' => $this->id

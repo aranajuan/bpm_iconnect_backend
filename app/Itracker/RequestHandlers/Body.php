@@ -106,8 +106,11 @@ class Body{
 	 * @param int $id
 	 * @return Array
 	 */
-	public function getFiles($id) {
-		return $this->files[$id];
+	public function getFiles($id=NULL) {
+		if($id){
+			return $this->files[$id];
+		}
+		return $this->files;
 	}
 
 	/**

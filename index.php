@@ -10,7 +10,7 @@ start_measure ( 'fullscript' );
 
 $ContextConf = \Itracker\Utils\GlobalConfig::getInstance ();
 
-\Itracker\Utils\LoggerFactory::getLogger ( $ContextConf->getString ( 'debug/log_level' ) );
+$logger = \Itracker\Utils\LoggerFactory::getLogger ( $ContextConf->getString ( 'debug/log_level' ) );
 
 if ( $ContextConf->getString ( 'database/motor' ) == 'mssql' )
 	header ( 'Content-Type: text/html; charset=iso-8859-1' );
@@ -49,5 +49,7 @@ if ( !isset ( $argv[1] ) ) {
 }
 
 $Context->setHandler ( $handler );
-echo $Context->executeRequest ();
+$rs = $Context->executeRequest ();
+$logger->debug("msj",array('in'=>trim(file_get_contents('php://input')),'out'=>$rs));
+echo $rs;
 exit ();

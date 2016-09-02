@@ -58,7 +58,7 @@ abstract class BasicObject {
      * @return Instance
      */
     protected function getInstance() {
-        return $this->getContext()->get_Instance();
+        return $this->getContext()->getInstance();
     }
     
 }

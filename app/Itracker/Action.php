@@ -3,6 +3,7 @@
 namespace Itracker;
 
 use Itracker\Exceptions\ItFunctionalException;
+use Itracker\Actions\ITActionsGoResponse;
 /**
  * Clase de administracion de acciones
  * Ejecucion, vita html, validaciones
@@ -118,7 +119,8 @@ class Action extends ITObject {
             $t_propio = "habilita_t_propio in (0,1,2)"; // todas, bloquea las acciones el "tomado"
         }
 
-        if ($l->get_prop("usr") == $this->TKT->get_prop("usr"))
+        if ($l->get_prop("usr") == $this->TKT->get_prop("usr") &&
+        		$this->TKT->get_prop('id')!=NULL)
             $a_propio = "habilita_a_propio in (0,1,3)";  //generado por el usuario logueado
         else
             $a_propio = "habilita_a_propio in (0,2,3)"; //generado por otro usuario
@@ -147,7 +149,7 @@ class Action extends ITObject {
             try {
                 $A->check_valid();
                 $ret[$i] = $A;
-            } catch (Itracker\ItException $e) {
+            } catch (ItFunctionalException $e) {
                 
             }
             $i++;
@@ -320,7 +322,8 @@ class Action extends ITObject {
                 throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket sin tomar');
         }
 
-        if ($l->get_prop("usr") == $this->TKT->get_prop("usr")) { //abierto por el usuario
+        if ($l->get_prop("usr") == $this->TKT->get_prop("usr") &&
+        		$this->TKT->get_prop('id')!=NULL) { //abierto por el usuario
             if ($this->habilita_a_propio == 2)
                 throw new ItFunctionalException('action/invalid', 'Esta accion no se puede aplicar a un ticket generado por vos');
         }else { // abierto por otro
@@ -450,11 +453,11 @@ class Action extends ITObject {
             return;
         }
         if ($this->get_prop('ejecuta') == 'update' &&
-                !Context::getContext()->get_files_count()) {
+                !$this->getContext()->getHandler()->getBody()->getFilesCount()) {
             $this->itf->setFileCount(count($this->getTH()->get_files()));
             $this->itf->addFileLinkTh($this->getTH());
         } else {
-            $this->itf->setFileCount(Context::getContext()->get_files_count());
+            $this->itf->setFileCount($this->getContext()->getHandler()->getBody()->getFilesCount());
         }
         $this->itf->load_values($values, $formname);
     }
@@ -531,6 +534,7 @@ class Action extends ITObject {
             $response = $cAction->go($this);
             $this->addTKT_H();
         } else {
+        	$response = new ITActionsGoResponse('ok', '');
             $this->addTKT_H();
         }
         $info = $this->getScriptResponse()->get_prop('info');

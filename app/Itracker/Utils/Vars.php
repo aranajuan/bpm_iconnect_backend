@@ -240,7 +240,7 @@ class Vars implements \Itracker\PropInterface {
 		$dompos = $this->dom;
 		foreach ( $pathV as $p ) {
 			if ( $i == $pos ) {
-				$nnode = $this->dom->createElement ( $p, trim ( xmlEscape ( strip_tags ( $v ) ) ) );
+				$nnode = $this->dom->createElement ( $p, trim ( htmlspecialchars(  strip_tags ( $v ),ENT_XML1  ) ));
 				$dompos->appendChild ( $nnode );
 				return;
 			}

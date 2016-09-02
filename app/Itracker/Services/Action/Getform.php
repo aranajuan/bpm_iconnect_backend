@@ -19,7 +19,7 @@ class Getform implements \Itracker\Services\ITServiceInterface {
 
         $form = $A->get_prop("itf");
 
-        $rta = new ResponseElement('data',
+        $rta = new ResponseElement('',
                 $form->getInputDom(),
                 ResponseElement::$XML);
         

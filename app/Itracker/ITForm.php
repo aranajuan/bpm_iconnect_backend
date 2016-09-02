@@ -310,7 +310,7 @@ class ITForm implements PropInterface {
             if (count($list)) {
                 $field->removeChild($list[0]);
             }
-            $field->appendChild($this->xml_output->createElement('value', xmlEscape($this->formArray[$id]['value'])));
+            $field->appendChild($this->xml_output->createElement('value', htmlspecialchars($this->formArray[$id]['value'],ENT_XML1)));
         }
         if ($this->THfiles) {
             $fileLnk = $this->xml_output->createElement('filelnk');

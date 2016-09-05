@@ -78,9 +78,6 @@ class ITForm implements PropInterface {
                 throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
-            if ($nodeList->length == 0) {
-                throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No hay elementos en el form', array($xml));
-            }
             $this->loadOutput();
             $this->loadXMLFormArray();
         }catch(ItFunctionalException $e){

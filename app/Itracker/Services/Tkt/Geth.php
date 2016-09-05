@@ -16,11 +16,10 @@ class Geth implements \Itracker\Services\ITServiceInterface {
         }
         $TKT = $Context->get_objcache()->get_object("Tkt", $idtkt);
         
-        $response = new \DOMDocument();
-        $responseData = $response->createElement("data");
-		$rta = new ResponseElement('data');
-		$rta->addValue(new ResponseElement('idmaster'),$TKT->get_prop('idmaster'));
-		$rta->addValue(new ResponseElement('largestatus'),$TKT->get_LargeStatus());
+	$rta = new ResponseElement('data');
+	$rta->addValue(new ResponseElement('idmaster',$TKT->get_prop('idmaster')));
+	$rta->addValue(new ResponseElement('largestatus',$TKT->get_LargeStatus()));
+	
         $rta->addValue(
                 $TKT->get_prop('usr_o')->getData(array('usr', 'nombre', 'mail'))
         );

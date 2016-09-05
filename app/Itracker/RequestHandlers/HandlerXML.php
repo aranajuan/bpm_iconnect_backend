@@ -65,7 +65,8 @@ class HandlerXML implements HandlerInterface {
 		}
 		
 		if ($el->getType () == \Itracker\ResponseElement::$FILE) {
-			return $doc->createElement ( $el->getTitle (), $el->getValue () );
+			return $doc->createElement ( $el->getTitle (),
+				base64_encode($el->getValue ()) );
 		}
 		
 		if ($el->getType () == \Itracker\ResponseElement::$XML) {

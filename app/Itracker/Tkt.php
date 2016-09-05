@@ -494,7 +494,8 @@ class Tkt extends Tree {
                 }
                 $this->master = $t;
             } catch (ItFunctionalException $e) {
-                $this->idmaster = NULL;
+
+		    $this->idmaster = NULL;
                 $this->master = NULL;
                 $this->getContext()->getLogger()->warning("Separado ticket por master con error", array($this->id, $this->idmaster));
                 $this->ejecute_action("SEPARAR");

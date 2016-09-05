@@ -64,7 +64,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
 		$Tl->execute ();
 		
 		if ($Tl->getCount () == 0) {
-			return null;
+			throw new ItFunctionalException('service/checkdata','No hay tickes en el periodo');
 		}
 		
 		$RR = new \Itracker\Report\Request ();

@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker\Utils;
+use \Itracker\Exceptions\ItErrorException;
 
 class ConnectionManager {
 
@@ -11,7 +12,6 @@ class ConnectionManager {
     private $dbRootTran;
     private $dbInstanceTran;
     private $serverMotor;
-    private $status;
     public static $ROOT = 1;
     public static $INSTANCE = 2;
 
@@ -43,17 +43,8 @@ class ConnectionManager {
     public function connect_root($motor, $host, $user, $pass, $dbAlias) {
         $this->serverMotor = $motor;
         $this->dbRootAlias = $dbAlias;
-        $lnk = $this->new_link($host, $user, $pass);
+        $this->dbRootlink = $this->new_link($host, $user, $pass);
         $this->dbRootTran = false;
-        if ($lnk) {
-            $this->dbRootlink = $lnk;
-            $this->status = "root_ok";
-            return true;
-        } else {
-            $this->dbRootlink = null;
-            $this->status = "root_error";
-            return false;
-        }
     }
 
     /**
@@ -65,20 +56,9 @@ class ConnectionManager {
      * @return boolean
      */
     public function connect_instance($host, $user, $pass, $dbAlias) {
-        if ($this->status != "root_ok")
-            return false;
         $this->dbInstanceAlias = $dbAlias;
-        $lnk = $this->new_link($host, $user, $pass);
+        $this->dbInstancelink = $this->new_link($host, $user, $pass);
         $this->dbInstanceTran = false;
-        if ($lnk) {
-            $this->dbInstancelink = $lnk;
-            $this->status = "ok";
-            return true;
-        } else {
-            $this->dbInstancelink = null;
-            $this->status = "instance_error";
-            return false;
-        }
     }
 
     /**
@@ -86,7 +66,7 @@ class ConnectionManager {
      * @param boolean $failure
      * @param boolean $exit close on failure
      */
-    public function close_connections($failure = false,$exit=true) {
+    public function close_connections($failure = false, $exit = true) {
         $close = false;
         if ($this->dbInstancelink instanceof \PDO) {
             if ($this->dbInstanceTran) {
@@ -115,10 +95,7 @@ class ConnectionManager {
             $close = true;
         }
         if ($failure && $close) {
-            echo 'Ocurrio un error inesperado, reintente la operacion.';
-            if($exit){
-                exit();
-            }
+            throw new ItErrorException('connection/closeerror');
         }
     }
 
@@ -138,10 +115,10 @@ class ConnectionManager {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
             return $pdo;
         } catch (\Exception $e) {
-            LoggerFactory::getLogger()
-                    ->critical("Imposible conectar a DB", array($strCn,
+            throw new ItErrorException('connection/open', '',
+                    \KLogger\Psr\Log\LogLevel::CRITICAL,
+                    '',array($strCn,
                         $host, $user, $pass, $e->getMessage()));
-            return null;
         }
     }
 
@@ -151,15 +128,15 @@ class ConnectionManager {
      * @return boolean
      */
     public function beginTran($db) {
-        if ($db == ConnectionManager::$INSTANCE && 
-                $this->dbInstancelink && 
-                $this->dbInstanceTran==false) {
-            $this->dbInstanceTran=true;
+        if ($db == ConnectionManager::$INSTANCE &&
+                $this->dbInstancelink &&
+                $this->dbInstanceTran == false) {
+            $this->dbInstanceTran = true;
             return $this->get_link($db)->beginTransaction();
-        } elseif ($db == ConnectionManager::$ROOT&& 
-                $this->dbRootlink && 
-                $this->dbRootTran==false) {
-            $this->dbRootTran=true;
+        } elseif ($db == ConnectionManager::$ROOT &&
+                $this->dbRootlink &&
+                $this->dbRootTran == false) {
+            $this->dbRootTran = true;
             return $this->get_link($db)->beginTransaction();
         }
         return 0;

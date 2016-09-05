@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker;
+use Itracker\Exceptions\ItFunctionalException;
 
 /**
  *  Clase para el filtrado de tickets en reporting
@@ -127,11 +128,9 @@ class TktFilter extends BasicObject {
             if ($this->get_filter(self::$IS_OPEN) == "true") {
                 $SSQL = "TKT.FB is null";
             } else {
-                $this->error = "Filtro de fechas invalido";
-                return null;
+            	throw new ItFunctionalException('tktfilter/invalidparameters','Filtro de fechas invalido');
             }
         }
-
 
         foreach ($this->filterArray as $type => $value) {
             switch ($type) {
@@ -213,14 +212,6 @@ class TktFilter extends BasicObject {
     }
 
     /**
-     * Devuelve error generado
-     * @return string
-     */
-    public function getError() {
-        return $this->error;
-    }
-
-    /**
      * Verifica periodo valido de fechas
      * @return boolean
      */
@@ -246,10 +237,9 @@ class TktFilter extends BasicObject {
             $this->ssql= null;
         }
         if (!$this->validDate()) {
-            $this->error = 'Rango invalido. Maximo: ' .
+        	throw new ItFunctionalException('tktfilter/invalidparameters','Rango invalido. Maximo: ' .
                     $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit') 
-                    . ' dias.';
-            $this->ssql= null;
+                    . ' dias.');
         }
         $SSQL .= $sWHERE.' order by TKT.id';
         $this->ssql= $SSQL;

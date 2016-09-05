@@ -1,6 +1,8 @@
 <?php
 
 namespace Itracker\Services\Tkt;
+use \Itracker\Exceptions\ItFunctionalException;
+use Itracker\ResponseElement;
 
 class Downloadfile implements \Itracker\Services\ITServiceInterface {
 
@@ -14,36 +16,35 @@ class Downloadfile implements \Itracker\Services\ITServiceInterface {
             //validate tkt view
             $fv = explode("_", $reqFile);
             $TH = $Context->get_objcache()->get_object("TktH", $fv[0]);
-            if ($Context->get_objcache()->get_status("TktH", $fv[0]) != "ok") {
-                return $Context->createElement("error", "Archivo invalido, acceso denegado 1.");
-            }
+
             if (!$TH->candownload()) {
-                return $Context->createElement("error", "Archivo invalido, acceso denegado 2.");
+                throw new ItFunctionalException('th/getfile','Archivo invalido, acceso denegado 2.');
             }
-            $filepath = $Context->get_Instance()->get_prop("archivos_externos") . "/adjuntos/" . $fname;
+            $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/adjuntos/" . $fname;
         } elseif ($type === "anexo") {
-            $filepath = $Context->get_Instance()->get_prop("archivos_externos") . "/anexos/" . $fname;
+            $filepath = $Context->getInstance()->get_prop("archivos_externos") . "/anexos/" . $fname;
         } else {
-            return $Context->createElement("error", "Archivo invalido");
+            throw new ItFunctionalException('th/getfile','Archivo invalido');
         }
 
         $im = file_get_contents($filepath);
         if (!$im) {
-            return $Context->createElement("error", "Error al leer archivo.");
+            throw new ItFunctionalException('th/getfile','Error al leer archivo.');
         }
 
-        if (!$im) {
-            return $Context->createElement("error", "Error al leer archivo.2.");
-        }
 
-        $arch = $Context->createElement("file");
-        $arch->appendChild($Context->createElement("name", $fname));
+        $rta = new ResponseElement('file');
+        $rta->addValue(new ResponseElement('name', 
+                $fname, ResponseElement::$TEXT));
         if ($TH) {
-            $arch->appendChild($Context->createElement("idtkt", $TH->get_prop("idtkt")));
+            $rta->addValue(new ResponseElement('idtkt', 
+                $TH->get_prop("idtkt"), ResponseElement::$TEXT));
         }
-        $arch->appendChild($Context->createElementSecure("data", $im));
+        $rta->addValue(new ResponseElement('data',
+                $im, ResponseElement::$FILE));
 
-        return $arch;
+        return $rta;
+        
     }
 
 }

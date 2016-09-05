@@ -1,19 +1,20 @@
 <?php
 
 namespace Itracker\Services\Listin;
+use Itracker\ResponseElement;
 
 class IdselList implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $ALL = new \Itracker\Listin($Context->get_Connection());
+        $ALL = new \Itracker\Listin();
         $ALL_v = $ALL->list_all();
-        $listL = $Context->createElement("list");
+        $rta = new ResponseElement('list');
         if ($ALL_v) {
-            foreach ($ALL_v as $l)
-                $listL->appendChild($l->getXML($Context, array('id', 'nombre')));
-            return $listL;
+            foreach ($ALL_v as $l){
+                $rta->addValue($l->getData(array('id', 'nombre')));
+            }
         }
-        return null;
+        return $rta;
     }
 
 }

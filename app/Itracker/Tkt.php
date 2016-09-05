@@ -2,6 +2,9 @@
 
 namespace Itracker;
 
+use Itracker\Exceptions\ItFunctionalException;
+use Itracker\Exceptions\ItDeletedException;
+
 class Tkt extends Tree {
 
     private $id;    /* id del ticket */
@@ -54,9 +57,7 @@ class Tkt extends Tree {
             $tmpU = $this->dbinstance->get_vector();
             return $this->load_DV($tmpU);
         }
-
-        $this->error = TRUE;
-        return "error";
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -92,10 +93,7 @@ class Tkt extends Tree {
         if ($this->variables != '' && $this->variables != '<?xml version="1.0"?>') {
             $this->vars = new \Itracker\Utils\Vars();
             $this->vars->setRootTag('tkt');
-            if ($this->vars->loadXML($this->variables) == false) {
-                $this->getContext()->getLogger()->error('Variables invalidas en tkt', array('id' => $this->id, 'vars' => $this->variables));
-                return 'Error al cargar tkt.[Vars Error]';
-            }
+            $this->vars->loadXML($this->variables);
         } else {
             $this->vars = new Utils\Vars();
             $this->vars->setRootTag('tkt');
@@ -112,12 +110,11 @@ class Tkt extends Tree {
         $this->idequipo = $tmpU["idequipo"];
         $this->equipos_tratan = trim($tmpU["equipos_tratan"]);
         $this->teamLoaded = false;
-        $rta = $this->load_VEC($tmpU, true);
+        $this->load_VEC($tmpU, true);
         $usr = $this->getLogged();
         $this->load_users();
         $this->view = $usr->get_view($this);
         show_measure("OBJ:TKT:DB:" . $this->id);
-        return $rta;
     }
 
     /**
@@ -129,7 +126,7 @@ class Tkt extends Tree {
     function load_VEC($tmpU, $fromdb = false) {
         $this->usr = $tmpU["usr"];
         $this->origen = $tmpU["origen"];
-        return $this->load_path($this->origen, !$fromdb);
+        $this->load_path($this->origen, !$fromdb);
     }
 
     /**
@@ -258,8 +255,9 @@ class Tkt extends Tree {
         $idteam = null;
         if ($this->dbinstance->noEmpty) {
             while ($TH = $this->dbinstance->get_vector()) {
-                $THO = $this->objsCache->get_object("TktH", $TH[0]);
-                if ($this->objsCache->get_status("TktH", $TH[0]) == "ok") {
+                try {
+                    $THO = $this->objsCache->get_object("TktH", $TH[0]);
+
                     $THO->set_view($this->view);
                     $this->tkt_hOBJ[$i] = $THO;
                     $eje = $THO->get_prop('accion')->get_prop("ejecuta");
@@ -271,6 +269,8 @@ class Tkt extends Tree {
                         $idteam = $THO->get_prop("objadj_id");
                     }
                     $i++;
+                } catch (ItDeletedException $e) {
+                    
                 }
             }
         }
@@ -297,13 +297,11 @@ class Tkt extends Tree {
      */
     public function setVars($vars) {
         if (!($vars instanceof Utils\Vars)) {
-            return 'Parametro invalido setVars #1';
+            throw new ItFunctionalException('vars/load', 'Parametro invalido setVars');
         }
-        $ssql = "update TBL_TICKETS set variables='" . strToSQL($vars->getXml()->saveXML()) . "' where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql))
-            return "Ticket_vars: " . $this->dbinstance->details;
+        $ssql = "variables='" . strToSQL($vars->getXml()->saveXML())."'";
+        $this->update_sql($ssql);
         $this->vars = $vars;
-        return 'ok';
     }
 
     /**
@@ -321,12 +319,12 @@ class Tkt extends Tree {
      * Setea status en var
      * @param String $status
      */
-    public function set_status($status){
-    	$v = $this->getVars();
-    	$v->set_prop('status', $status);
-    	return $this->setVars($v);
+    public function set_status($status) {
+        $v = $this->getVars();
+        $v->set_prop('status', $status);
+        return $this->setVars($v);
     }
-    
+
     /*
      * devuelve el estado del tkt
      * @return  string
@@ -383,14 +381,11 @@ class Tkt extends Tree {
         if ($this->dbinstance->noEmpty) {
             $THID = $this->dbinstance->get_vector();
             $THO = $this->objsCache->get_object("TktH", $THID[0]);
-            if ($this->objsCache->get_status("TktH", $THID[0]) == "ok") {
-                $THO->set_view($this->view);
-                if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("objadj_id"));
-                }
-                return $THO;
+            $THO->set_view($this->view);
+            if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
+                $THO->set_idteam($THO->get_prop("objadj_id"));
             }
-            return NULL;
+            return $THO;
         }
         return NULL;
     }
@@ -427,14 +422,11 @@ class Tkt extends Tree {
         if ($this->dbinstance->noEmpty) {
             $THID = $this->dbinstance->get_vector();
             $THO = $this->objsCache->get_object("TktH", $THID[0]);
-            if ($this->objsCache->get_status("TktH", $THID[0]) == "ok") {
-                $THO->set_view($this->view);
-                if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
-                    $THO->set_idteam($THO->get_prop("objadj_id"));
-                }
-                return $THO;
+            $THO->set_view($this->view);
+            if ($THO->get_prop("accion")->get_prop("ejecuta") === "abrir") {
+                $THO->set_idteam($THO->get_prop("objadj_id"));
             }
-            return NULL;
+            return $THO;
         }
         return NULL;
     }
@@ -471,37 +463,20 @@ class Tkt extends Tree {
             return;
         }
         $this->teamLoaded = true;
-        if (!is_numeric($this->idequipo)) {
+        if($this->idequipo ==0){
+        	return;
+        }
+        $t = $this->objsCache->get_object("Team", $this->idequipo, false, true);
+        $rta = $this->objsCache->get_status("Team", $this->idequipo);
+        if ($rta == I_DELETED) {
             $this->can_edit = 0;
-            if ($this->id != null) {
-                $this->getContext()->getLogger()->error("Ticket sin equipo asignado", array($this->id, $this->idequipo, $this->get_path()));
-            }
-            $this->detail_can_edit = "Equipo sin asignar";
-            $this->idequipo = NULL;
-            $this->equipo = NULL;
+            $this->detail_can_edit = "El equipo asignado ya no existe " . $this->id . " ->" . $this->idequipo;
+            $this->equipo = $t;
             return;
         }
-        $t = $this->objsCache->get_object("Team", $this->idequipo);
-        $rta = $this->objsCache->get_status("Team", $this->idequipo);
-        switch ($rta) {
-            case "eliminado":
-                $this->can_edit = 0;
-                $this->detail_can_edit = "El equipo asignado ya no existe " . $this->id . " ->" . $this->idequipo;
-                $this->getContext()->getLogger()->error("Ticket en equipo eliminado", array($this->id, $this->idequipo));
-                $this->equipo = $t;
-                break;
-            case "error":
-                $this->can_edit = 0;
-                $this->detail_can_edit = "Error al cargar el equipo " . $this->id . "->" . $this->idequipo;
-                $this->getContext()->getLogger()->error("Ticket en equipo con error", array($this->id, $this->idequipo));
-                $this->idequipo = NULL;
-                $this->equipo = NULL;
-                break;
-            default:
-                $this->can_edit = 1;
-                $this->detail_can_edit = "";
-                $this->equipo = $t;
-        }
+        $this->can_edit = 1;
+        $this->detail_can_edit = "";
+        $this->equipo = $t;
     }
 
     /**
@@ -510,20 +485,22 @@ class Tkt extends Tree {
     private function load_master() {
         // si esta cerrado no se puede editar este tkt, si no existe este se independiza
         if ($this->idmaster && $this->master == NULL) {
-            $t = $this->objsCache->get_object("Tkt", $this->idmaster);
-            if ($this->objsCache->get_status("Tkt", $this->idmaster) == "error" && $this->UB == NULL) {
-                $this->idmaster = NULL;
+            try {
+                $t = $this->objsCache->get_object("Tkt", $this->idmaster);
+                if (($t->get_prop("idequipo") != $this->get_prop("idequipo") || $t->get_prop("UB")) && $this->UB == NULL) {
+                    $this->getContext()->getLogger()->warning("Separado ticket por master en otro equipo", array($this->id, $this->idmaster));
+                    $this->ejecute_action("SEPARAR");
+                    return;
+                }
+                $this->master = $t;
+            } catch (ItFunctionalException $e) {
+
+		    $this->idmaster = NULL;
                 $this->master = NULL;
                 $this->getContext()->getLogger()->warning("Separado ticket por master con error", array($this->id, $this->idmaster));
                 $this->ejecute_action("SEPARAR");
                 return;
             }
-            if (($t->get_prop("idequipo") != $this->get_prop("idequipo") || $t->get_prop("UB")) && $this->UB == NULL) {
-                $this->getContext()->getLogger()->warning("Separado ticket por master en otro equipo", array($this->id, $this->idmaster));
-                $this->ejecute_action("SEPARAR");
-                return;
-            }
-            $this->master = $t;
         }
     }
 
@@ -535,24 +512,17 @@ class Tkt extends Tree {
      * @return string
      */
     public function ejecute_action($action, $values = null, $objadj_id = null) {
+        //lanzar error!
         $this->getContext()->getLogger()->info('Ejecutando', array(
             'accion' => $action,
             'values' => print_r($values, true),
             'objID' => $objadj_id
         ));
         $A = $this->objsCache->get_object("Action", $action, true);
-        if ($this->objsCache->get_status("Action", $action) != "ok") {
-            $this->getContext()->getLogger()->error('Error al cargar accion', array(
-                'accion' => $action,
-            ));
-            return "no se puede cargar accion";
-        }
+
         $A->loadTKT($this);
         if ($values) {
-            $valid = $A->loadFormValues($values);
-            if ($valid != 'ok') {
-                return array('result' => $valid);
-            }
+            $A->loadFormValues($values);
         }
         if ($objadj_id) {
             $A->loadObjadjId($objadj_id);
@@ -566,11 +536,8 @@ class Tkt extends Tree {
     private function load_users() {
         // si no coincide usr con equipo se libera (funcion para liberar)
         if ($this->u_tom) {
-
-            $u = $this->objsCache->get_object("User", $this->u_tom);
-            $rta = $this->objsCache->get_status("User", $this->u_tom);
-
-            if ($rta == "ok") { // existe
+            try {
+                $u = $this->objsCache->get_object("User", $this->u_tom);
                 if ($u->in_team($this->get_prop("idequipo"))) { // usuario pertenece al equipo
                     $this->u_tom_o = $u;
                     $u = null;
@@ -585,19 +552,17 @@ class Tkt extends Tree {
                         $this->ejecute_action("LIBERAR");
                     }
                 }
-            } else {
+            } catch (ItFunctionalException $e) {
                 $this->getContext()->getLogger()->warning("Ticket liberado por error en usurio", array($this->id, $this->u_tom, $rta));
                 $this->ejecute_action("LIBERAR");
             }
         }
-        if ($this->usr) {
-            $u = null;
+
+        try {
             $u = $this->objsCache->get_object("User", $this->usr);
-            $stat = $this->objsCache->get_status("User", $this->usr);
-            if ($stat != "ok") {
-                $this->getContext()->getLogger()->warning("Ticket con usuario generador invalido", array($this->id, $this->usr, $stat));
-            }
             $this->usr_o = $u;
+        } catch (ItFunctionalException $e) {
+            throw new ItFunctionalException('dbobject/load', 'Ticket con usuario generador invalido');
         }
     }
 
@@ -607,24 +572,19 @@ class Tkt extends Tree {
      */
     public function check_data() {
         if (!$this->can_edit)
-            return $this->detail_can_edit;
+            throw new ItFunctionalException('dbobject/checkdata', $this->detail_can_edit);
         if (!is_numeric($this->id))
-            return "El id debe ser un numero entero";
+            throw new ItFunctionalException('dbobject/checkdata', 'El id debe ser un numero entero');
         if (trim($this->usr) == "")
-            return "El usuario es obligatorio";
+            throw new ItFunctionalException('dbobject/checkdata', 'El usuario es obligatorio');
         if (!is_numeric($this->idequipo))
-            return "El equipo debe ser un numero entero";
+            throw new ItFunctionalException('dbobject/checkdata', 'El equipo debe ser un numero entero');
         if (!is_numeric($this->idmaster)) {
             $this->idmaster = NULL;
         }
         $this->origen = trim($this->origen);
         if ($this->origen == "")
-            return "Origen de tkt invalido";
-        if (!is_numeric($this->u_tom) && $this->u_tom != NULL)
-            return "Usuario invalido, no puede tomar tkt (" . $this->u_tom . ")";
-        if (!is_numeric($this->u_asig) && $this->u_asig != NULL)
-            return "Usuario invalido, no puede asignar tkt (" . $this->u_asig . ")";
-        return NULL;
+            throw new ItFunctionalException('dbobject/checkdata', 'Origen de tkt invalido');
     }
 
     /**
@@ -633,15 +593,15 @@ class Tkt extends Tree {
      * @return string result
      */
     function open($idequipo) {
+        // can open /is active
         $this->id = I_NEWID;
         $this->u_tom = NULL;
         $this->u_asig = NULL;
-        $this->usr = $this->getLogged()->get_prop("usr");
         $this->idequipo = $idequipo;
         $this->equipos_tratan = ',' . $idequipo . ',';
         $this->teamLoaded = false;
         $this->load_team();
-        return $this->insert_DB();
+        $this->insert_DB();
     }
 
     /**
@@ -650,13 +610,12 @@ class Tkt extends Tree {
      */
     public function re_open() {
         if ($this->get_prop("minFromClose") > HsToMin($this->get_prop("equipo")->get_prop("t_conformidad"))) {
-            return "Se supero el maximo tiempo de reapertura "
-                    . "(" . $this->get_prop("equipo")->get_prop("t_conformidad") . ") para este equipo. ";
-        }
+            throw new ItFunctionalException('tkt/update',"Se supero el maximo tiempo de reapertura "
+                    . "(" . $this->get_prop("equipo")->get_prop("t_conformidad") . ") para este equipo. ");
+         }
 
-        $ssql = "update TBL_TICKETS set UB=NULL, FB=NULL where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql))
-            return "Ticket_reabrir: " . $this->dbinstance->details;
+        $ssql = "UB=NULL, FB=NULL";
+        $this->update_sql($ssql);
         $this->UB = NULL;
         $this->FB = NULL;
 
@@ -673,7 +632,6 @@ class Tkt extends Tree {
                 $c->re_open();
             }
         }
-        return "ok";
     }
 
     /**
@@ -686,10 +644,9 @@ class Tkt extends Tree {
         $this->load_childs();
 
         /* Cerrar en tabla tkts */
-        $ssql = "update TBL_TICKETS set UB='" . strToSQL($UB) . "', FB=now() where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_cerrar: " . $this->dbinstance->details;
-        }
+        $ssql = "UB='" . strToSQL($UB) . "', FB=now()";
+        $this->update_sql($ssql);
+
         $this->UB = $UB;
         $this->FB = date(DBDATE_READ);
 
@@ -699,7 +656,6 @@ class Tkt extends Tree {
                 $c->close();
             }
         }
-        return "ok";
     }
 
     /**
@@ -714,15 +670,15 @@ class Tkt extends Tree {
         $actual = $this->get_prop("equipo");
         if ($actual != null) {
             if (!$actual->canDerive($equipo->get_prop("id"))) {
-                return "Imposible derivar al area. Sin relacion.";
+                throw new ItFunctionalException('tkt/update','Imposible derivar al area. Sin relacion.');
             }
         }
         $this->load_childs();
         $tmpTratan = $this->equipos_tratan . $equipo->get_prop("id") . ',';
-        $ssql = "update TBL_TICKETS set idequipo=" . $equipo->get_prop("id") . ", equipos_tratan='" . $tmpTratan . "', u_tom= NULL , u_asig= NULL, prioridad=NULL where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_derivar: " . $this->dbinstance->details;
-        }
+        $ssql = "idequipo=" . $equipo->get_prop("id") .
+                ", equipos_tratan='" . $tmpTratan .
+                "', u_tom= NULL , u_asig= NULL, prioridad=NULL";
+        $this->update_sql($ssql);
 
         if ($this->is_master()) {
             foreach ($this->get_prop("childs") as $c) {
@@ -737,7 +693,6 @@ class Tkt extends Tree {
         $this->u_tom_o = NULL;
         $this->u_asig_o = NULL;
 
-        return "ok";
     }
 
     /**
@@ -747,13 +702,12 @@ class Tkt extends Tree {
      */
     function set_priority($idP) {
         $idP = intval($idP);
-        if (!is_numeric($idP))
-            return "Prioridad invalida";
-
-        $ssql = "update TBL_TICKETS set prioridad=" . intval($idP) . " where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_priorizar: " . $this->dbinstance->details;
+        if (!is_numeric($idP)){
+            throw new ItFunctionalException('tkt/update','Prioridad invalida');
         }
+
+        $ssql = "prioridad=" . intval($idP) ;
+        $this->update_sql($ssql);
         $this->prioridad = $idP;
 
         if ($this->is_master()) {
@@ -762,7 +716,6 @@ class Tkt extends Tree {
             }
         }
 
-        return "ok";
     }
 
     /**
@@ -771,10 +724,10 @@ class Tkt extends Tree {
      */
     function take() {
 
-        $ssql = "update TBL_TICKETS set u_tom='" . strToSQL($this->getLogged()->get_prop("usr")) . "', u_asig=NULL where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_tomar: " . $this->dbinstance->details;
-        }
+        $ssql = "u_tom='" . strToSQL($this->getLogged()->get_prop("usr")) .
+                "', u_asig=NULL";
+        $this->update_sql($ssql);
+
         $this->u_tom = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $this->getLogged();
         $this->u_asig = NULL;
@@ -786,7 +739,6 @@ class Tkt extends Tree {
             }
         }
 
-        return "ok";
     }
 
     /**
@@ -795,13 +747,14 @@ class Tkt extends Tree {
      * @return string rta
      */
     function asign($tou) {
-        if (!$tou->in_team($this->idequipo))
-            return "No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt";
-
-        $ssql = "update TBL_TICKETS set u_tom='" . strToSQL($tou->get_prop("usr")) . "',u_asig='" . strToSQL($this->getLogged()->get_prop("usr")) . "' where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_asignar: " . $this->dbinstance->details;
+        if (!$tou->in_team($this->idequipo)){
+            throw new ItFunctionalException('tkt/update','No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt');   
         }
+
+        $ssql = "u_tom='" . strToSQL($tou->get_prop("usr")) .
+                "',u_asig='" . strToSQL($this->getLogged()->get_prop("usr")) . "'";
+
+        $this->update_sql($ssql);
         $this->u_tom = $tou->get_prop("usr");
         $this->u_asig = $this->getLogged()->get_prop("usr");
         $this->u_tom_o = $tou;
@@ -813,7 +766,6 @@ class Tkt extends Tree {
             }
         }
 
-        return "ok";
     }
 
     /**
@@ -822,10 +774,9 @@ class Tkt extends Tree {
      */
     function free() {
         $l = $this->getLogged();
-        $ssql = "update TBL_TICKETS set u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")) . "' where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_liberar: " . $this->dbinstance->details;
-        }
+        $ssql = "u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")). "'";
+        $this->update_sql($ssql);
+        
         $this->u_tom = NULL;
         $this->u_asig = $l->get_prop("usr");
         $this->u_tom_o = NULL;
@@ -836,8 +787,6 @@ class Tkt extends Tree {
                 $c->free();
             }
         }
-
-        return "ok";
     }
 
     /**
@@ -847,7 +796,7 @@ class Tkt extends Tree {
     function set_master() {
 
         if ($this->is_master()) {
-            return "ok";
+            return;
         }
 
         $lastMaster = $this->master;
@@ -858,10 +807,9 @@ class Tkt extends Tree {
         } else {
             $utom = "null";
         }
-        $ssql = "update TBL_TICKETS set idmaster=NULL, u_tom=" . $utom . " where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_setmaster: " . $this->dbinstance->details;
-        }
+        $ssql = "idmaster=NULL, u_tom=" . $utom;
+
+        $this->update_sql($ssql);
 
         $this->idmaster = NULL;
         $this->master = NULL;
@@ -869,9 +817,7 @@ class Tkt extends Tree {
         $lastMaster->join($this);
 
         $this->childs = null;
-        //reestablece detalles
 
-        return "ok";
     }
 
     /**
@@ -882,26 +828,26 @@ class Tkt extends Tree {
     function join($master) {
         $childs = $this->get_prop("childs");
         if (trim($master->get_prop("id")) == trim($this->id)) {
-            return "No se puede adjuntar al mismo ticket";
+            throw new ItFunctionalException('tkt/update','No se puede adjuntar al mismo ticket');
         }
 
-        if ($master->get_prop("FB") != NULL)
-            return "No se puede adjuntar a este tkt, ya se encuentra cerrado.";
+        if ($master->get_prop("FB") != NULL){
+            throw new ItFunctionalException('tkt/update','No se puede adjuntar a este tkt, ya se encuentra cerrado.');
+        }
 
-        if (!$master->is_master())
-            return "Este ticket esta anexado al tkt:" . $master->get_prop("idmaster") . ". Debe anexarlo a este.";
+        if (!$master->is_master()){
+            throw new ItFunctionalException('tkt/update',"Este ticket esta anexado al tkt:" . 
+                    $master->get_prop("idmaster") . ". Debe anexarlo a este.");
+        }
 
         /* ADECUACION EQUIPO */
         if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
-            $rta = $this->ejecute_action("DERIVAR", array(
+            $this->ejecute_action("DERIVAR", array(
                 array("id" => "idequipo", "value" => $master->get_prop("idequipo")),
                 array("id" => "comment", "value" => "Derivado para unir a master"),
             ));
-            if ($master->get_prop("idequipo") != $this->get_prop("idequipo")) {
-                return "TKT_derive_join: " . $rta["msj"];
-            }
         }
-        
+
         /* ADECUACION USUARIO TOMADO */
         $utomM = $master->get_prop("u_tom");
         $utom = $this->get_prop("u_tom");
@@ -921,33 +867,31 @@ class Tkt extends Tree {
                     $this->ejecute_action("ASIGNAR", array(array("id" => "idusr", "value" => $utomM)));
                 }
             } elseif ($utomM != $utom) {
-                return "El master esta tomado por otro usuario";
+                throw new ItFunctionalException('tkt/update','El master esta tomado por otro usuario');
             }
         }
 
-        $ssql = "update TBL_TICKETS set idmaster=" . intval($master->get_prop("id")) . " where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_join: " . $this->dbinstance->details;
-        }
+        $ssql = "idmaster=" . intval($master->get_prop("id"));
+        $this->update_sql($ssql);
 
         $this->idmaster = $master->get_prop("id");
         $this->master = $master;
         $this->clear_childs();
 
         /* ADECUACION STATUS */
-        if($this->isWorking() &&
-        		$this->get_status()!=$master->get_status()){
-        	$tv = $this->getEjecutingAction()->getITS()->getObject('TKTVAR');
-        	if($tv instanceof Utils\Vars){
-        		$tv->set_prop('status',$master->get_status());
-        		$this->getEjecutingAction()->getITS()->addObject('TKTVAR', $tv);
-        	}
+        if ($this->isWorking() &&
+                $this->get_status() != $master->get_status()) {
+            $tv = $this->getEjecutingAction()->getITS()->getObject('TKTVAR');
+            if ($tv instanceof Utils\Vars) {
+                $tv->set_prop('status', $master->get_status());
+                $this->getEjecutingAction()->getITS()->addObject('TKTVAR', $tv);
+            }
         }
-        
+
         foreach ($childs as $c) {
             $c->join($master);
         }
-        return "ok";
+
     }
 
     /**
@@ -955,13 +899,12 @@ class Tkt extends Tree {
      * @return string
      */
     function un_join() {
-        $ssql = "update TBL_TICKETS set idmaster=NULL where id=" . intval($this->id);
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_separar: " . $this->dbinstance->details;
-        }
+        $ssql = "idmaster=NULL";
+        
+        $this->update_sql($ssql);
+
         $this->idmaster = NULL;
         $this->master = NULL;
-        return "ok";
     }
 
     /**
@@ -1012,26 +955,28 @@ class Tkt extends Tree {
     }
 
     public function insert_DB() {
-        if (($rta = $this->check_data())) {
-            return $rta;
-        }
+        $this->check_data();
+
         $ssql = "insert into TBL_TICKETS(usr,idequipo,equipos_tratan,idmaster,origen,u_tom,u_asig,FA,UA,FB,UB)" .
                 "values ('" . strToSQL($this->get_prop("usr")) . "'," .
                 $this->get_prop("idequipo") . ",'" . $this->get_prop("equipostratan") . "',NULL,'" . strToSQL($this->get_path()) .
                 "',NULL,NULL,now(),'" . strToSQL($this->get_prop("usr")) . "',NULL,NULL);";
 
 
-        if ($this->dbinstance->query($ssql)) {
-            return "TKT_Open: " . $this->dbinstance->details;
-        } else {
-            $this->UA = $this->usr;
-            $this->id = $this->dbinstance->get_lastID();
-            return "ok";
-        }
+        $this->dbinstance->query($ssql);
+
+        $this->UA = $this->usr;
+        $this->id = $this->dbinstance->get_lastID();
     }
 
+    public function update_sql($ssql) {
+        $this->check_data();
+        $this->dbinstance->query('update TBL_TICKETS set '.$ssql.
+                ' where id=' . intval($this->id));
+    }
+    
     public function update_DB() {
-        return "Funcion en desarrollo.";
+	    
     }
 
     function get_prop($property) {
@@ -1112,7 +1057,7 @@ class Tkt extends Tree {
             case 'minfromclose':
                 return DiffBetweenDates($this->get_prop("FB"), "NOW");
             default:
-                return "Propiedad invalida.";
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

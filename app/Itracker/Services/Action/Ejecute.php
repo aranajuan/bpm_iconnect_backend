@@ -2,6 +2,8 @@
 
 namespace Itracker\Services\Action;
 
+use Itracker\ResponseElement;
+
 class Ejecute implements \Itracker\Services\ITServiceInterface{
      
     public static function GO($Context) {
@@ -9,67 +11,56 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
     
     if ($idtkt) {
         $TKT= $Context->get_objcache()->get_object("Tkt",$idtkt);
-        if($Context->get_objcache()->get_status("Tkt",$idtkt)!="ok"){
-            return $Context->createElement("error", "No se pudo cargar el ticket");
-        }
     }else{
         $TKT = new \Itracker\Tkt();
-        $lV_rta = $TKT->load_VEC(array("origen" => $Context->get_params("path")));
-        if($lV_rta!="ok"){
-           return $Context->createElement("error", "Tipificacion invalida. ".$lV_rta); 
-        }
+        $TKT->load_VEC(array(
+        		'origen' => $Context->get_params("path"),
+        		'usr'=>$Context->getUser()->get_prop("usr")
+        ));
     }
     $A = new \Itracker\Action();
     $A->load_DB($Context->get_params("action"));
     $A->setWorking();
     $TKT->setWorking();
-    $validation = $A->loadTKT($TKT);
-
-    if (!$validation) {
-        return $Context->createElement("error", "No se pudo cargar el ticket");
-    }
+    $A->loadTKT($TKT);
     
     $idth = $Context->get_params("idth");
     if($idth){
         $TH= $Context->get_objcache()->get_object("TktH",$idth);
-        if($Context->get_objcache()->get_status("TktH",$idth)!="ok"){
-            return $Context->createElement("error", "No se pudo cargar el evento $idth");
-        }
         $A->loadTH($TH);
     }
     
-    $validation = $A->check_valid(); //opciones del arbol - equipo destino - etc en apertura
-
-    if ($validation != "ok") {
-        return $Context->createElement("error", "Accion invalida. " . $validation);
-    }
+    $A->check_valid(); //opciones del arbol - equipo destino - etc en apertura
 
     $form = json_decode($Context->get_params("form"),true);
-    $validation = $A->loadFormValues($form,"actionform");
-    if ($validation != "ok") {
-        return $Context->createElement("error", "Error en formulario. " . $validation);
-    }
+    $A->loadFormValues($form,"actionform");
     
     $fget = false;
     if($Context->get_params("sendfiles")=="true" && $A->get_prop('formulario')){
-        $files = $Context->get_files();
+        $files = $Context->getHandler()->getBody()->getFiles();
         $A->loadFiles($files);
         $fget = true;
     }
     
     $Notif = new \Itracker\Notify();
     $actionResult = $A->ejecute();
-    if(!$fget && $actionResult["sendfiles"]=='ok'){
-        $actionResult["sendfiles"]='no requerido';
+
+
+    $Notif->load_actionOBJ($A);
+    try{
+        $Notif->send();
+    }catch(\Exception $e){
+        $Context->getLogger()->error('No se pudo enviar mail', 
+                array('err' => $e->getMessage() ));
     }
-    if($actionResult["result"]=="ok"){
-        $Notif->load_actionOBJ($A);
-        $actionResult["mail"]= $Notif->send();
+
+    $rta = new ResponseElement('data');
+
+    foreach($actionResult->toArray() as $k=>$v){
+    	
+        $rta->addValue(new ResponseElement($k,$v, ResponseElement::$TEXT));
     }
-    $result= $Context->createElement("data");
-    foreach($actionResult as $k=>$v){
-        $result->appendChild($Context->createElement($k, $v));
-    }
-    return $result;
+    
+    return $rta;
     }    
 }

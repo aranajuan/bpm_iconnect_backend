@@ -1,51 +1,55 @@
 <?php
+
 /* Ruta root */
-define('ROOT_DIR', dirname(__FILE__));
+define ( 'ROOT_DIR', dirname ( __FILE__ ) );
 
 /* Autoload para class, algunos includes y configuraciones */
 require_once 'utils/init.php';
 
-start_measure('fullscript');
+start_measure ( 'fullscript' );
+
+$ContextConf = \Itracker\Utils\GlobalConfig::getInstance ();
+
+$logger = \Itracker\Utils\LoggerFactory::getLogger ( $ContextConf->getString ( 'debug/log_level' ) );
+
+if ( $ContextConf->getString ( 'database/motor' ) == 'mssql' )
+	header ( 'Content-Type: text/html; charset=iso-8859-1' );
 
 /* Contexto general */
-$Context = \Itracker\Context::getContext();
-
-$Context->getLogger($Context->get_GlobalConfig()->getString('debug/log_level'));
-
-if ($Context->get_GlobalConfig()->getString('database/motor') == 'mssql')
-    header('Content-Type: text/html; charset=iso-8859-1');
+$Context = \Itracker\Context::getContext ();
 
 /* Routing */
-if(preg_match('/\\/aux\\/.*/' ,$_SERVER["REQUEST_URI"])){
-    /* aux connections */
-    $req = $_GET['service'];
-    $Context->add_accessLog('rq_class', 'xtra');
-    $Context->add_accessLog('rq_method', $req);
-    $Context->add_accessLog('front_ip', $_SERVER['REMOTE_ADDR']);
-    if(preg_match('/[a-zA-Z0-9_]*/',$req )){
-        $filereq = ROOT_DIR.DIRECTORY_SEPARATOR.'xtra'.DIRECTORY_SEPARATOR.$req.'.php'; 
-        if(file_exists($filereq)){
-            include $filereq;
-        }else{
-            $Context->add_accessLog('error','invalid service.#1');
-            echo 'invalid service.#1';
-        }
-    }else{
-        $Context->add_accessLog('error','invalid service.#2');
-        echo 'invalid service.#2';
-    }
-    
-}else{
-    $RQ = trim(file_get_contents('php://input'));
-    $Context->request($RQ, $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_TIME']);
-    $RP = $Context->get_response();
-    $Context->getLogger()->debug('RQ',array('RQ'=>$RQ,'RS'=>$RP));
-    echo $RP;
+if ( preg_match ( '/\\/aux\\/.*/', $_SERVER["REQUEST_URI"] ) ) {
+	/* aux connections */
+	$req = $_GET['service'];
+	$Context->add_accessLog ( 'rq_class', 'xtra' );
+	$Context->add_accessLog ( 'rq_method', $req );
+	$Context->add_accessLog ( 'front_ip', $_SERVER['REMOTE_ADDR'] );
+	if ( preg_match ( '/[a-zA-Z0-9_]*/', $req ) ) {
+		$filereq = ROOT_DIR . DIRECTORY_SEPARATOR . 'xtra' . DIRECTORY_SEPARATOR . $req . '.php';
+		if ( file_exists ( $filereq ) ) {
+			include $filereq;
+		} else {
+			$Context->add_accessLog ( 'error', 'invalid service.#1' );
+			echo 'invalid service.#1';
+		}
+	} else {
+		$Context->add_accessLog ( 'error', 'invalid service.#2' );
+		echo 'invalid service.#2';
+	}
 }
 
-stop_measure('fullscript');
-$Context->finishScript();
+if ( !isset ( $argv[1] ) ) {
+	$handler = new \Itracker\RequestHandlers\HandlerXML();
+	$handler->loadEnvironment ( array (
+	    'txt' => trim(file_get_contents('php://input')),
+	    'ipfront' => $_SERVER['REMOTE_ADDR'],
+	    'date' => $_SERVER['REQUEST_TIME']
+	) );
+}
 
-exit();
-
-?>
+$Context->setHandler ( $handler );
+$rs = $Context->executeRequest ();
+$logger->debug("msj",array('in'=>trim(file_get_contents('php://input')),'out'=>$rs));
+echo $rs;
+exit ();

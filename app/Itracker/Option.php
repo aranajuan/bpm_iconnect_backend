@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para cargar y manejar opciones de arbol
  */
@@ -31,21 +31,18 @@ class Option extends ITObject {
     private $FA; /* fecha creacion */
     private $UB; /* usuario que elimino la opcion */
     private $FB; /* fecha en que elimino la opcion */
-    private $error = FALSE; /* error al cargar de la base */
 
     function load_DB($id) {
-        $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_OPCIONES where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
-            $rta = $this->load_DV($tmpU);
+            $this->load_DV($tmpU);
             if ($this->UB != NULL)
-                return "eliminado";
-            return $rta;
+                return I_DELETED;
+            return I_ACTIVE;
         } else {
-            $this->error = TRUE;
+            throw new ItFunctionalException('dbobject/load');
         }
-        return "error";
     }
 
     function load_VEC($tmpU) {
@@ -59,22 +56,16 @@ class Option extends ITObject {
 
         $this->unir = trim($tmpU['unir']);
         if ($this->destino == '' && ($this->pretext != '' || $this->idpregunta_destino == '')) {
-            $this->getContext()->getLogger()->error('Error en opcion sin destino', array('id' => $this->id));
-            return 'Error en el arbol de derivaciones. #1';
+            throw new ItFunctionalException('option/destiny','',
+            \KLogger\Psr\Log\LogLevel::ERROR,'Error en opcion sin destino',array('id' => $this->id));
         }
 
         if ($this->pretext != '') {
             $this->itform = new ITForm();
-            if ($this->itform->load_xml($this->pretext) != 'ok') {
-                $this->itform = null;
-            }
+            $this->itform->load_xml($this->pretext);
         } else {
             $this->itform = null;
         }
-
-
-
-        return 'ok';
     }
 
     /**
@@ -87,7 +78,7 @@ class Option extends ITObject {
         $this->FA = $tmpU["FA"];
         $this->UB = $tmpU["UB"];
         $this->FB = $tmpU["FB"];
-        return $this->load_VEC($tmpU);
+        $this->load_VEC($tmpU);
     }
 
     /**
@@ -132,7 +123,7 @@ class Option extends ITObject {
                 $days = $min /1440;
                 return $days<= $this->getContext()->get_GlobalConfig()->getInt('configs/optnewdays');      
             default:
-                return "Propiedad invalida.";
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

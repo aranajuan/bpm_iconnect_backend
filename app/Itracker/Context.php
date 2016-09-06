@@ -4,6 +4,7 @@ namespace Itracker;
 use Itracker\Exceptions\ItErrorException;
 use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Utils\AccessLog;
+use \Itracker\Utils\LoggerFactory;
 
 /**
  * Maneja todo el requerimiento del front
@@ -51,6 +52,12 @@ class Context {
 	private $finished;
 	
 	/**
+	 * Configuracion de errores
+	 * @var Utils\Config
+	 */
+	private $errorConfig;
+	
+	/**
 	 * Handler
 	 *
 	 * @var RequestHandlers\HandlerInterface
@@ -60,6 +67,7 @@ class Context {
 	
 	private function __construct() {
 		$this->finished=false;
+		$this->errorConfig=null;
 		$this->accesslog = new AccessLog();
 	}
 	
@@ -74,9 +82,20 @@ class Context {
 		return static::$__instance;
 	}
 	public function getLogger() {
-		return Utils\LoggerFactory::getLogger ();
+		return LoggerFactory::getLogger ();
 	}
 	
+	/**
+	 * Configuracion de errores
+	 * @return Utils\Config
+	 */
+	public function getErrorConfig(){
+		if($this->errorConfig == null){
+			$this->errorConfig = new Utils\Config('errors.xml','errors');
+		}
+		return $this->errorConfig;
+	}
+
 	/**
 	 * Objeto de cache
 	 *
@@ -117,13 +136,25 @@ class Context {
 	 * Maneja errores
 	 */
 	public function executeRequest() {
-
+		try{
+			$this->getHandler()->initialize();
 			$this->loadAccessLog();
 			$this->prepare ();
-			$this->getHandler()->addResponse ( $this->executeWS () );
-			$response = $this->getHandler()->getResponse();
-			$this->finishScript();
-			return $response;
+			$response = $this->executeWS ();
+			$error = false;
+		}catch(\Exception $e){
+			LoggerFactory::getLogger()
+				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
+			$response = null;
+			echo "error";
+			exit();
+			//$response = new ErrorResponseAdapter($e);
+			$error = true;
+		}
+		$this->getHandler()->addResponse ( $response);
+		$responseSTR = $this->getHandler()->getResponse();
+		$this->finishScript($error);
+		return $responseSTR;
 
 	}
 	
@@ -287,7 +318,7 @@ class Context {
 		if ($error) {
 			$this->accesslog->add ( 'exit_error_message', print_r ( error_get_last (), true ) );
 		}
-		\Itracker\Utils\LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
+		LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
 	}
 	
 	/**

@@ -16,7 +16,7 @@ class GlobalConfig extends Config {
 	 */
 	public static function getInstance() {
 		if ( !static::$__instance ) {
-			static::$__instance = new static ( ROOT_DIR . '/config/config.xml' );
+			static::$__instance = new static ('config.xml');
 		}
 		return self::$__instance;
 	}

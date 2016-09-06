@@ -1,5 +1,7 @@
 <?php
 namespace Itracker\Exceptions;
+use Itracker\Context;
+use \KLogger\Psr\Log\LogLevel;
 
 /**
  * Excepciones graves
@@ -14,38 +16,67 @@ class ItErrorException extends \Exception {
     /**
      * Descripcion adicional
      */
-    private $description;
+    private $logMsj;
     
+    /**
+     * Error context
+     * @var array 
+     */
+    private $logData;
+    
+    /**
+     * Nivel de log
+     * @var String
+     */
+    private $logLevel;
     /**
      * 
      * @param String $error
-     * @param String $description
-     * @param \KLKLogger\Psr\Log\LogLevel $loglevel
      * @param String $logmsg
      * @param Array $logdata
      */
-    public function __construct($error,$description='',
-            $loglevel=null ,$logmsg=null,$logdata=null) {
-	    parent::__construct($error.'-'.$description);
+    public function __construct($error,$logmsg=null,$logdata=null,$defaultLogLevel=LogLevel::ERROR) {
         $this->error = $error;
-        $this->description=$description;
+        $this->logMsj=$error.'/'.$logmsg;
+	$this->logData=$logdata;
+	$errorV = explode('/', $error);
+	$errCnf = Context::getContext()->getErrorConfig();
+	$this->logLevel = $errCnf->getString ( $error.'/loglevel' );
+	if($this->logLevel == null){
+		$this->logLevel = $defaultLogLevel;
+	}
+	parent::__construct(
+		$errCnf->getString ( $error.'/description' ),
+		$errCnf->getInt ( $errorV[0].'/code')*100+
+		$errCnf->getInt ( $error.'/code' )
+		);
+	
     }
     
     /**
-     * Error para buscar en vars.
+     * 
      * @return String
      */
-    public function getError() {
-        return $this->error;
+    public function getLogMsj(){
+	    return $this->logMsj;
+    }
+    
+    /**
+     * 
+     * @return array
+     */
+    public function getLogData(){
+	    return $this->logData;
     }
 
     /**
-     * Detalles adicionales del error.
+     * 
      * @return String
      */
-    public function getDescription() {
-        return $this->description;
+    public function getLogLevel(){
+	    return $this->logLevel;
     }
+    
 }
 
-?>
+

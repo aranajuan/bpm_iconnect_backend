@@ -14,6 +14,11 @@ interface HandlerInterface {
 	 * @throws \Itracker\Exceptions\ItErrorException
 	 */
 	public function loadEnvironment($input);
+	
+	/**
+	 * Inicia el ambiente
+	 */
+	public function initialize();
 	/**
 	 * Mostrar solicitud
 	 * 

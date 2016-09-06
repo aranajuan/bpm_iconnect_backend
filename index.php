@@ -2,6 +2,7 @@
 
 /* Ruta root */
 define ( 'ROOT_DIR', dirname ( __FILE__ ) );
+define ( 'CONFIG_DIR', ROOT_DIR.'/config/' );
 
 /* Autoload para class, algunos includes y configuraciones */
 require_once 'utils/init.php';

@@ -120,4 +120,11 @@ interface LoggerInterface
      * @return null
      */
     public function log($level, $message, array $context = array());
+    
+    
+    /**
+     * Loguear msj
+     * @param LogMsjInterface $msj
+     */
+    public function logMsj($msj);
 }

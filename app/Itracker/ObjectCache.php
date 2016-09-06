@@ -100,7 +100,6 @@ class ObjectCache {
                 $cn->load_DB($id);
                 $this->last++;
                 $this->itobjects[$this->last] = $cn;
-                $this->status[$this->last] = $resp;
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {

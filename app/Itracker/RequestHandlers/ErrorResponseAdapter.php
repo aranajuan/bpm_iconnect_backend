@@ -32,9 +32,10 @@ class ErrorResponseAdapter implements ResponseItemInterface {
 		if($this->error instanceof \Itracker\Exceptions\ItErrorException){
 			$msj = $this->error->getMessage();
 		}
-		if($this->error instanceof \Itracker\Exceptions\ItErrorException){
+		if($this->error instanceof \Itracker\Exceptions\ItFunctionalException){
 			$msj.= '||' .$this->error->getDescription();
 		}
+
 		return array(
 		    new ResponseElement('msj',$msj,self::TEXT),
 		    new ResponseElement('code',$this->error->getCode (),self::TEXT)

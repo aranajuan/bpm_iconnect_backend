@@ -63,7 +63,7 @@ class TktH extends ITObject {
     function load_DB($id) {
         $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
-                            where H.id=$id and H.estado = " . I_ACTIVE);
+                            where H.id=".intval($id)." and H.estado = " . I_ACTIVE);
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
@@ -305,7 +305,7 @@ class TktH extends ITObject {
         if ($files_h && count($files_h)) {
             $files = new ResponseElement('files');
             foreach ($files_h as $f) {
-            	$files->addValue(new ResponseElement('file',$f,ResponseElement::FILE));
+            	$files->addValue(new ResponseElement('file',$f,ResponseElement::TEXT));
             }
             $rta->addValue($files);
         }

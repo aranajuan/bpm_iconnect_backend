@@ -56,8 +56,8 @@ class Option extends ITObject {
 
         $this->unir = trim($tmpU['unir']);
         if ($this->destino == '' && ($this->pretext != '' || $this->idpregunta_destino == '')) {
-            throw new ItFunctionalException('option/destiny','',
-            \KLogger\Psr\Log\LogLevel::ERROR,'Error en opcion sin destino',array('id' => $this->id));
+            throw new ItFunctionalException('option/destiny',''
+		    ,'Error en opcion sin destino',array('id' => $this->id));
         }
 
         if ($this->pretext != '') {

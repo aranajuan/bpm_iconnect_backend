@@ -65,9 +65,7 @@ class ObjectCache {
             $this->recall++;
         }
         if($this->status[$ind]!=I_ACTIVE && !$allow_deleted){
-                throw new ItDeletedException('dbobject/deleted','',
-                                \KLogger\Psr\Log\LogLevel::ERROR,
-                                'Objeto eliminado');
+                throw new ItDeletedException('dbobject/deleted','','Eliminado',array('obj'=>$class.'/'.$id));
         }
         return $this->itobjects[$ind];
     }
@@ -104,8 +102,7 @@ class ObjectCache {
                 return $this->last;
             } else {
                 throw  new ItFunctionalException('objectcache/classnotfound','',
-                		\KLogger\Psr\Log\LogLevel::CRITICAL,
-                		'Clase invalida',array('nombre'=>$class));
+			'Clase invalida',array('nombre'=>$class));
             }
     }
 

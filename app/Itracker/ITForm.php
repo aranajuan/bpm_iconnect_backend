@@ -75,7 +75,7 @@ class ITForm implements PropInterface {
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
-                throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+                throw new ItFunctionalException('itf/load', '', 'No se pudo parsear XML', array($xml));
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
             $this->loadOutput();
@@ -84,7 +84,7 @@ class ITForm implements PropInterface {
             throw $e;
         }catch (\Exception $e) {
             $this->xml_input = null;
-            throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+            throw new ItFunctionalException('itf/load', '',  'No se pudo parsear XML', array($xml));
         }
         
     }

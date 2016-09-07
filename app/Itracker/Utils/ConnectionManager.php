@@ -115,9 +115,7 @@ class ConnectionManager {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
             return $pdo;
         } catch (\Exception $e) {
-            throw new ItErrorException('connection/open', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    '',array($strCn,
+            throw new ItErrorException('connection/open','',array($strCn,
                         $host, $user, $pass, $e->getMessage()));
         }
     }

@@ -536,9 +536,7 @@ class Notify extends ITObject {
         $extras = "From: $from\r\nMIME-Version: 1.0\r\nContent-type: text/html; charset=iso-8859-1";
         $rta = mail($to, $subject, $body, $extras);
         if (!$rta) {
-            throw new Exceptions\ItErrorException('smtp/send','',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    'Error smtp');
+            throw new Exceptions\ItErrorException('smtp/send','','Error smtp');
         }
     }
 

@@ -20,7 +20,7 @@ class ItFunctionalException extends ItErrorException {
 	 */
 	private $description;
 	
-	function __construct($error,$description, $logmsg = null, $logdata = null) {
+	function __construct($error,$description=null, $logmsg = null, $logdata = null) {
 		$this->description = $description;
 		if($logdata){
 			$logdata=  array_merge($logdata,

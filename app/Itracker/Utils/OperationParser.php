@@ -191,7 +191,6 @@ class OperationParser {
         }
         
         throw new ItException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al parsear ecuacion',
                         array('Ec' => $this->operationStr,
                         'Err' => 'String no finalizado'
@@ -218,7 +217,6 @@ class OperationParser {
             return $this->getVar($i + 1);
         }
          throw new ItException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al parsear ecuacion',
                         array('Ec' => $this->operationStr,
                         'Err' => 'Variable no finalizada'

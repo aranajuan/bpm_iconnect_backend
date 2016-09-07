@@ -293,7 +293,7 @@ class TktH extends ITObject {
         if ($this->get_prop("itform") != null) {
             $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
-            	$rta->addValue(new ResponseElement('',$itfDom,ResponseElement::$XML));
+            	$rta->addValue(new ResponseElement('',$itfDom,ResponseElement::XML));
             } else {
                 $this->getContext()->getLogger()->notice('itform sin nada visible', array(
                     'idth' => $this->id
@@ -305,7 +305,7 @@ class TktH extends ITObject {
         if ($files_h && count($files_h)) {
             $files = new ResponseElement('files');
             foreach ($files_h as $f) {
-            	$files->addValue(new ResponseElement('file',$f,ResponseElement::$FILE));
+            	$files->addValue(new ResponseElement('file',$f,ResponseElement::FILE));
             }
             $rta->addValue($files);
         }

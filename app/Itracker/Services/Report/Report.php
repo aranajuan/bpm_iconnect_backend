@@ -80,8 +80,8 @@ class Report implements \Itracker\Services\ITServiceInterface {
 		$RPADAPTER->loadExcel ();
 		
 		$rta = new ResponseElement ( 'file' );
-		$rta->addValue ( new ResponseElement ( 'name', 'reporteITRACKER.xlsx', ResponseElement::$TEXT ) );
-		$rta->addValue ( new ResponseElement ( 'data', $RPADAPTER->getFile (), ResponseElement::$FILE ) );
+		$rta->addValue ( new ResponseElement ( 'name', 'reporteITRACKER.xlsx', ResponseElement::TEXT ) );
+		$rta->addValue ( new ResponseElement ( 'data', $RPADAPTER->getFile (), ResponseElement::FILE ) );
 		
 		return $rta;
 	}

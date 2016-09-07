@@ -211,7 +211,7 @@ class Vars implements \Itracker\PropInterface {
 	public function getData($props = null) {
 		$rta = new ResponseElement ( 'VARS' );
 		foreach ( $props as $p ) {
-			$rta->addValue ( new ResponseElement ( $p,  $this->vars[$p], ResponseElement::$TEXT ) );
+			$rta->addValue ( new ResponseElement ( $p,  $this->vars[$p], ResponseElement::TEXT ) );
 		}
 		return $rta;
 	}

@@ -40,7 +40,7 @@ class HandlerXML implements HandlerInterface {
 		$doc = new \DOMDocument ( '1.0', 'utf-8' );
 		$it = $doc->createElement ( 'itracker' );
 		$res = $doc->createElement ( 'response' );
-		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseElement) {
+		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseItemInterface) {
 			$res->appendChild ( $this->generateElement ( $doc, $this->responses [0] ['res'] ) );
 		}
 		$it->appendChild ( $res );
@@ -56,7 +56,7 @@ class HandlerXML implements HandlerInterface {
 	 * @return \DOMElement
 	 */
 	private function generateElement($doc, $el) {
-		if ($el->getType () == \Itracker\ResponseElement::$ARRAY) {
+		if ($el->getType () == \Itracker\ResponseElement::ARRAYL) {
 			$lst = $doc->createElement ( $el->getTitle () );
 			foreach ( $el->getValue () as $e ) {
 				$lst->appendChild ( $this->generateElement ( $doc, $e ) );
@@ -64,12 +64,12 @@ class HandlerXML implements HandlerInterface {
 			return $lst;
 		}
 		
-		if ($el->getType () == \Itracker\ResponseElement::$FILE) {
+		if ($el->getType () == \Itracker\ResponseElement::FILE) {
 			return $doc->createElement ( $el->getTitle (),
 				base64_encode($el->getValue ()) );
 		}
 		
-		if ($el->getType () == \Itracker\ResponseElement::$XML) {
+		if ($el->getType () == \Itracker\ResponseElement::XML) {
 			$node = $doc->importNode ( $el->getValue ()->documentElement, true );
 			
 			if ($el->getTitle () == '') {

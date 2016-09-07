@@ -21,7 +21,7 @@ class Getform implements \Itracker\Services\ITServiceInterface {
 
         $rta = new ResponseElement('',
                 $form->getInputDom(),
-                ResponseElement::$XML);
+                ResponseElement::XML);
         
         return $rta;
     }

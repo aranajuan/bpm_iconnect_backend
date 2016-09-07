@@ -42,7 +42,7 @@ class GetTreeOptions implements \Itracker\Services\ITServiceInterface {
 				$itform = $topts ["object"]->get_prop ( "itform" );
 				$itfdom = $itform->getInputDom ();
 				if ($itfdom) {
-					$rta_tree->addValue ( new ResponseElement ( 'opendata', $itfdom,  ResponseElement::$XML ) );
+					$rta_tree->addValue ( new ResponseElement ( 'opendata', $itfdom,  ResponseElement::XML ) );
 					
 					if ($topts ["object"]->get_prop ( "unir" )) {
 						$rta_tree->addValue ( new ResponseElement ( 'join', 'true' ) );

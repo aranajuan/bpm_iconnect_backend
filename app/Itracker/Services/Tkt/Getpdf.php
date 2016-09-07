@@ -79,7 +79,7 @@ class Getpdf implements \Itracker\Services\ITServiceInterface {
         
         $rta = new ResponseElement('file',array(
         		new ResponseElement('name','Export id ' . $idtkt . '.pdf'),
-        		new ResponseElement('data',$pdfDoc, ResponseElement::$FILE)
+        		new ResponseElement('data',$pdfDoc, ResponseElement::FILE)
         ));
         
         return $rta;

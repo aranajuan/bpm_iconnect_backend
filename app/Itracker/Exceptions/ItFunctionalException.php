@@ -30,4 +30,12 @@ class ItFunctionalException extends ItErrorException {
 		}
 		parent::__construct ( $error, $logmsg, $logdata, LogLevel::NOTICE );
 	}
+	
+	/**
+	 * Descripcion del error
+	 * @return String
+	 */
+	public function getDescription(){
+		return $this->description;
+	}
 }

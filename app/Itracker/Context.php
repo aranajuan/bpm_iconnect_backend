@@ -145,11 +145,8 @@ class Context {
 		}catch(\Exception $e){
 			LoggerFactory::getLogger()
 				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
-			$response = null;
-			echo "error";
-			exit();
-			//$response = new ErrorResponseAdapter($e);
-			$error = true;
+			$response = new RequestHandlers\ErrorResponseAdapter($e);
+			$error = FALSE;
 		}
 		$this->getHandler()->addResponse ( $response);
 		$responseSTR = $this->getHandler()->getResponse();

@@ -11,7 +11,7 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
 		$rta = new ResponseElement ( strtolower ( $cname [count ( $cname ) - 1] ) );
 		foreach ( $props as $p ) {
 			$pv = $this->get_Subprop ( $p, true );
-			$rta->addValue ( new ResponseElement ( $p, $pv, ResponseElement::$TEXT ) );
+			$rta->addValue ( new ResponseElement ( $p, $pv, ResponseElement::TEXT ) );
 		}
 		return $rta;
 	}

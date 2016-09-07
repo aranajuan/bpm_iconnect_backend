@@ -58,7 +58,7 @@ class Ejecute implements \Itracker\Services\ITServiceInterface{
 
     foreach($actionResult->toArray() as $k=>$v){
     	
-        $rta->addValue(new ResponseElement($k,$v, ResponseElement::$TEXT));
+        $rta->addValue(new ResponseElement($k,$v, ResponseElement::TEXT));
     }
     
     return $rta;

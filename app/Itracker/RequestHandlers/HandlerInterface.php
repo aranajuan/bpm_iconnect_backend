@@ -41,7 +41,7 @@ interface HandlerInterface {
 	/**
 	 * Agregar response a la respuesta
 	 * 
-	 * @param \Itracker\ResponseElement $response        	
+	 * @param ResponseItemInterface $response        	
 	 * @param String $path
 	 *        	path donde agregar
 	 * @throws \Itracker\Exceptions\ItErrorException

@@ -163,7 +163,6 @@ class TktH extends ITObject {
             $THmaster = $THmaster->get_prop('objadj');
         }
         $actOr = $THmaster->get_prop('accion');
-
         if ($actOr->get_prop('ejecuta') == 'open') {
             //formulario de apertura
             if ($this->TKT) {

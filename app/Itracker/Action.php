@@ -255,7 +255,7 @@ class Action extends ITObject {
                 //solo puede actualizar el propio generador
                 throw new ItFunctionalException('action/invalid', 'Acceso denegado');
             }
-            $this->TH->getUpdateForm();
+            $this->itf = $this->TH->getUpdateForm();
             return;
         }
 

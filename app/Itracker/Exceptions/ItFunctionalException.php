@@ -20,7 +20,7 @@ class ItFunctionalException extends ItErrorException {
 	 */
 	private $description;
 	
-	function __construct($error,$description=null, $logmsg = null, $logdata = null) {
+	function __construct($error,$description=null, $logmsg = null, $logdata = null,$defaultLogLevel= null) {
 		$this->description = $description;
 		if($logdata){
 			$logdata=  array_merge($logdata,
@@ -28,7 +28,14 @@ class ItFunctionalException extends ItErrorException {
 		}else{
 			$logdata =array('description'=>$this->description);
 		}
-		parent::__construct ( $error, $logmsg, $logdata, LogLevel::NOTICE );
+		if($defaultLogLevel==null){
+			if($logmsg!=null){
+				$defLogLevel = LogLevel::WARNING;
+			}else{
+				$defLogLevel = LogLevel::NOTICE;
+			}
+		}
+		parent::__construct ( $error, $logmsg, $logdata, $defLogLevel );
 	}
 	
 	/**

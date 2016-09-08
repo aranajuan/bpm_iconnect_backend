@@ -3,6 +3,7 @@ namespace Itracker;
 
 use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Exceptions\ItDeletedException;
+use Itracker\Exceptions\ItErrorException;
 
 /**
  * Administra cache de objetos y crea itobjects nuevos
@@ -101,7 +102,7 @@ class ObjectCache {
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {
-                throw  new ItFunctionalException('objectcache/classnotfound','',
+                throw  new ItErrorException('objectcache/classnotfound',
 			'Clase invalida',array('nombre'=>$class));
             }
     }

@@ -1,6 +1,7 @@
 <?php
 namespace KLogger;
 use \Itracker\Context;
+use KLogger\Psr\Log\LogLevel;
 
 class ErrorLogAdapter implements LogMsjInterface{
 	
@@ -19,6 +20,8 @@ class ErrorLogAdapter implements LogMsjInterface{
 	
 	private function loadData(){
 		$this->context=array();
+		$this->level = LogLevel::DEBUG;
+		
 		$this->msj=$this->error->getMessage();
 		try{
 			$this->context = array_merge($this->context, array('input'=>

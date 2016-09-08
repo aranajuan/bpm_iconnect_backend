@@ -496,6 +496,9 @@ class Action extends ITObject {
         if ($rta == '') {
             throw new ItFunctionalException('action/ejecutescript');
         }
+        if ($rta != 'ok'){
+        	throw new ItFunctionalException('action/ejecutescript',$rta);
+        }
         $this->itf = $this->ITScript->getObject('ITFORM');
     }
 

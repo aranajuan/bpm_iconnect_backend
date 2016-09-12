@@ -51,9 +51,7 @@ class Report implements \Itracker\Services\ITServiceInterface {
 			$users = array ();
 			foreach ( $arrayTeam as $id ) {
 				$t = $Context->get_objcache ()->get_object ( "Team", $id );
-				if ($Context->get_objcache ()->get_status ( "Team", $id ) == "ok") {
-					$users = array_merge ( $users, makeproparr ( $t->get_users (), "usr" ) );
-				}
+				$users = array_merge ( $users, makeproparr ( $t->get_users (), "usr" ) );
 			}
 			$Tf->set_filter ( \Itracker\TktFilter::$UA, $users );
 		}

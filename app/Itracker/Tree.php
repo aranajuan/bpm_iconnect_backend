@@ -365,7 +365,8 @@ abstract class Tree extends ITObject {
         if (isset($this->path_obj[$this->path_max])) {
             return $this->path_obj[$this->path_max];
         }
-        throw new ItFunctionalException('option/destiny','Error en ultima opcion');;
+        throw new ItFunctionalException('option/destiny',
+		'Error en ultima opcion');
     }
 
 }

@@ -36,19 +36,28 @@ class ItErrorException extends \Exception {
      * @param Array $logdata
      */
     public function __construct($error,$logmsg=null,$logdata=null,$defaultLogLevel=LogLevel::ERROR) {
+	$errCnf = Context::getContext()->getErrorConfig();
         $this->error = $error;
         $this->logMsj=$error.'/'.$logmsg;
 	$this->logData=$logdata;
 	$errorV = explode('/', $error);
-	$errCnf = Context::getContext()->getErrorConfig();
+	$code = 0;
+	$path = '';
+	$wight = 1;
+	foreach ($errorV as $e){
+		$path .= $e;
+		$code +=$errCnf->getInt ( $path.'/code' )*$wight;
+		$path.='/';
+		$wight*=100;
+	}
+	
 	$this->logLevel = $errCnf->getString ( $error.'/loglevel' );
 	if($this->logLevel == null){
 		$this->logLevel = $defaultLogLevel;
 	}
 	parent::__construct(
 		$errCnf->getString ( $error.'/description' ),
-		$errCnf->getInt ( $errorV[0].'/code')*100+
-		$errCnf->getInt ( $error.'/code' )
+		$code
 		);
 	
     }

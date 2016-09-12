@@ -134,9 +134,9 @@ class ITForm implements PropInterface {
             if (isset($this->formArray[trim($arr['id'])])) {
                 $this->xml_output = null;
                 $this->formArray = null;
-                throw new ItFunctionalException('itf/load', '',
-                        \KLogger\Psr\Log\LogLevel::ERROR, 
-                        'Id duplicado en itform', array('xml' => $this->xml_input_text,
+                throw new ItFunctionalException('itf/load','Error en formulario', 
+                        'Id duplicado en itform',
+			array('xml' => $this->xml_input_text,
                     'id' => $arr['id']));
             }
             $this->formArray[trim($arr['id'])] = $arr;

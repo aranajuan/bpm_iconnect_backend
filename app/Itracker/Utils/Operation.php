@@ -340,7 +340,7 @@ class Operation {
         }
         if ($obj instanceof \Itracker\PropInterface) {
             return $this->normalize(
-                            $obj->get_Subprop($arr[1])
+                            $obj->get_Subprop($arr[1],true)
             );
         } else {
             return 'undefined';

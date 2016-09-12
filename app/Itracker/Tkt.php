@@ -331,7 +331,6 @@ class Tkt extends Tree {
      */
 
     public function get_status() {
-
         if ($this->getVars()->getValue('status')) {
             return $this->vars->getValue('status');
         }

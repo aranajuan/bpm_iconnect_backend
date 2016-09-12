@@ -66,7 +66,7 @@ class ConnectionManager {
      * @param boolean $failure
      * @param boolean $exit close on failure
      */
-    public function close_connections($failure = false, $exit = true) {
+    public function close_connections($failure = false) {
         $close = false;
         if ($this->dbInstancelink instanceof \PDO) {
             if ($this->dbInstanceTran) {
@@ -93,9 +93,6 @@ class ConnectionManager {
             $this->dbRootTran = false;
             $this->dbRootlink = NULL;
             $close = true;
-        }
-        if ($failure && $close) {
-            throw new ItErrorException('connection/closeerror');
         }
     }
 

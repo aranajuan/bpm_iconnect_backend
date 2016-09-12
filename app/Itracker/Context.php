@@ -132,30 +132,6 @@ class Context {
 	}
 	
 	/**
-	 * Ejecuta request y carga handler
-	 * Maneja errores
-	 */
-	public function executeRequest() {
-		try{
-			$this->getHandler()->initialize();
-			$this->loadAccessLog();
-			$this->prepare ();
-			$response = $this->executeWS ();
-			$error = false;
-		}catch(\Exception $e){
-			LoggerFactory::getLogger()
-				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
-			$response = new RequestHandlers\ErrorResponseAdapter($e);
-			$error = FALSE;
-		}
-		$this->getHandler()->addResponse ( $response);
-		$responseSTR = $this->getHandler()->getResponse();
-		$this->finishScript($error);
-		return $responseSTR;
-
-	}
-	
-	/**
 	 * Carga access log
 	 */
 	private function loadAccessLog(){
@@ -294,6 +270,31 @@ class Context {
 		return $C->GO($this);
 	}
 	
+	
+		/**
+	 * Ejecuta request y carga handler
+	 * Maneja errores
+	 */
+	public function executeRequest() {
+		try{
+			$this->getHandler()->initialize();
+			$this->loadAccessLog();
+			$this->prepare ();
+			$response = $this->executeWS ();
+			$error = false;
+		}catch(\Exception $e){
+			LoggerFactory::getLogger()
+				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
+			$response = new RequestHandlers\ErrorResponseAdapter($e);
+			$error = true;
+		}
+		$this->getHandler()->addResponse ( $response);
+		$responseSTR = $this->getHandler()->getResponse();
+		$this->finishScript($error);
+		return $responseSTR;
+
+	}
+	
 	/**
 	 * Finaliza la ejecucion del script
 	 *
@@ -309,12 +310,9 @@ class Context {
 		if ($this->getConnection () instanceof Utils\ConnectionManager) {
 			$this->accesslog->add ( 'sql_elapsed', $this->getConnection ()->getSqlElapsed () );
 			$this->accesslog->add ( 'sql_count', $this->getConnection ()->getSqlCount () );
-			$this->getConnection ()->close_connections ( $error, false );
+			$this->getConnection ()->close_connections ( $error );
 		} 
 		$this->accesslog->add ( 'exit_error', $error );
-		if ($error) {
-			$this->accesslog->add ( 'exit_error_message', print_r ( error_get_last (), true ) );
-		}
 		LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
 	}
 	

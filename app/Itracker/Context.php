@@ -195,14 +195,30 @@ class Context {
 				)){
 					throw new ItErrorException('handler/invalid','Instancia desconocida al front');
 		}
+		
+		if($this->getHandler ()->getBody ()->getClass ()=='user'
+				&& $this->getHandler ()->getBody ()->getMethod ()=='login'){
+			$login = true;
+		}else{
+			$login = false;
+		}
+		
 		try{
 			$this->user = $this->get_objcache ()
 				->get_object ( 'User', 
 				$this->getHandler()->getHeader()->getUser() );
 		}catch(ItFunctionalException $e){
-			throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+			if($login){
+					$this->user = new User();
+			}else{
+				throw new ItErrorException('handler/invalid', 'Usuario invalido.');
+			}
 		}
 		
+		if($login){
+			return;
+		}
+				
 		if (! $this->getUser()->check_instance ( $this->getInstance()->get_prop ( 'nombre' ) )) {
 			throw new ItErrorException('handler/invalid','Instancia invalida');
 		}
@@ -230,10 +246,6 @@ class Context {
 	private function validateRequest() {
 		$class = $this->getHandler()->getBody()->getClass();
 		$method = $this->getHandler()->getBody()->getMethod();
-		if ($class == 'user' && $method == 'login') {
-			return;
-		}
-		
 
 		if (! $this->getFront()->validAction ( 	$class, $method )) {
 					throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(Front) a '.$class.'/'.$method);
@@ -243,7 +255,7 @@ class Context {
 				$this->getHandler()->getHeader()->getHash (),
 				$this->getFront(),
 				$this->getHandler()->getHeader()->getIpuser())) {
-			throw new ItFunctionalException('dbobject/checkdata', 'Usuario no logueado ');
+			throw new ItFunctionalException('handler/invalid', 'Sesion invalida o vencida');
 		}
 		
 		if ($class == 'user' && $method == 'logout') {

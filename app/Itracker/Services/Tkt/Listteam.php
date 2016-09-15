@@ -56,8 +56,14 @@ class Listteam implements \Itracker\Services\ITServiceInterface {
 				$Tf->set_filter ( \Itracker\TktFilter::$IS_OPEN, "true" );
 		}
 		
-		$equipo = $u->get_team_obj ( $arrayTeam [0] );
-		$view = $equipo->get_prop ( "staffhome_vista" );
+		foreach($arrayTeam as $t){
+			$equipo = $u->get_team_obj ( $arrayTeam [0] );
+			$view = $equipo->get_prop ( "staffhome_vista" );
+			if($view != null && $view!=''){
+				break;
+			}
+		}
+		
 		$fields = $equipo->getFieldRequired ( "staffhome_vista" );
 		
 		$Tf->set_filter ( \Itracker\TktFilter::$IDMASTER, array (

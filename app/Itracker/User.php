@@ -1079,7 +1079,12 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 	private function getView($type) {
 		$equipos = $this->get_prop ( "equiposobj" );
 		if ( count ( $equipos ) ) {
-			return array ($equipos[0]->get_prop ( $type ), $equipos[0]->getFieldRequired ( $type ));
+			foreach($equipos as $t){
+				$view = $equipos[0]->get_prop ( $type );
+				if($view!= '' && $view != null){
+					return array ($equipos[0]->get_prop ( $type ), $equipos[0]->getFieldRequired ( $type ));
+				}
+			}
 		} else {
 			return array ('', '');
 		}

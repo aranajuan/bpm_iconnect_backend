@@ -20,8 +20,13 @@ class Listtouch implements \Itracker\Services\ITServiceInterface {
 		$Tf = new \Itracker\TktFilter ();
 		$Tf->set_filter ( \Itracker\TktFilter::$TOUCH_BY_TEAM, $arrayTeam );
 		$Tf->set_filter ( \Itracker\TktFilter::$NOT_IDSTEAMS, $arrayTeam );
-		$equipo = $u->get_team_obj ( $arrayTeam [0] );
-		$view = $equipo->get_prop ( "staffhome_vista" );
+		foreach ( $arrayTeam as $t ) {
+			$equipo = $u->get_team_obj ( $arrayTeam [0] );
+			$view = $equipo->get_prop ( "staffhome_vista" );
+			if ($view != null && $view != '') {
+				break;
+			}
+		}
 		$fields = $equipo->getFieldRequired ( "staffhome_vista" );
 		if ($Context->get_params ( "filter" ) == "derived") {
 			$Tf->set_filter ( \Itracker\TktFilter::$IS_OPEN, "true" );

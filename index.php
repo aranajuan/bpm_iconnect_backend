@@ -23,19 +23,19 @@ $Context = \Itracker\Context::getContext ();
 if ( preg_match ( '/\\/aux\\/.*/', $_SERVER["REQUEST_URI"] ) ) {
 	/* aux connections */
 	$req = $_GET['service'];
-	$Context->add_accessLog ( 'rq_class', 'xtra' );
-	$Context->add_accessLog ( 'rq_method', $req );
-	$Context->add_accessLog ( 'front_ip', $_SERVER['REMOTE_ADDR'] );
+	$Context->getAccessLog()->add( 'rq_class', 'xtra' );
+	$Context->getAccessLog()->add ( 'rq_method', $req );
+	$Context->getAccessLog()->add ( 'front_ip', $_SERVER['REMOTE_ADDR'] );
 	if ( preg_match ( '/[a-zA-Z0-9_]*/', $req ) ) {
 		$filereq = ROOT_DIR . DIRECTORY_SEPARATOR . 'xtra' . DIRECTORY_SEPARATOR . $req . '.php';
 		if ( file_exists ( $filereq ) ) {
 			include $filereq;
 		} else {
-			$Context->add_accessLog ( 'error', 'invalid service.#1' );
+			$Context->getAccessLog()->add ( 'error', 'true' );
 			echo 'invalid service.#1';
 		}
 	} else {
-		$Context->add_accessLog ( 'error', 'invalid service.#2' );
+		$Context->getAccessLog()->add ( 'error', 'true' );
 		echo 'invalid service.#2';
 	}
 }

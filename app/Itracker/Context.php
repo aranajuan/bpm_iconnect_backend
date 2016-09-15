@@ -371,4 +371,11 @@ class Context {
 	public function get_params($name){
 		return $this->getHandler()->getBody()->getParams($name);
 	}
+	
+	/**
+	 * @return AccessLog
+	 */
+	public function getAccessLog(){
+		return $this->accesslog;
+	}
 }

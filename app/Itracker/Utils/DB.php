@@ -73,9 +73,7 @@ class DB {
                 $this->details = "Error al ejecutar solicitud.";
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                throw new ItErrorException('db/query', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    'Error loadrs',array(
+                throw new ItErrorException('db/query', 'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {
@@ -95,9 +93,7 @@ class DB {
                 $this->details = "Error al ejecutar solicitud."; 
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                 throw new ItErrorException('db/query', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    'Error loadrs',array(
+                 throw new ItErrorException('db/query', 'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {
@@ -125,9 +121,7 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                 throw new ItErrorException('db/query', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    'Error loadrs',array(
+                 throw new ItErrorException('db/query', '','Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {
@@ -146,9 +140,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->lstIDmss = NULL;
-                 throw new ItErrorException('db/query', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    'Error loadrs',array(
+                 throw new ItErrorException('db/query', '','Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {

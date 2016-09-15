@@ -255,7 +255,7 @@ class Action extends ITObject {
                 //solo puede actualizar el propio generador
                 throw new ItFunctionalException('action/invalid', 'Acceso denegado');
             }
-            $this->TH->getUpdateForm();
+            $this->itf = $this->TH->getUpdateForm();
             return;
         }
 
@@ -494,7 +494,12 @@ class Action extends ITObject {
 
         $rta = $this->getScriptResponse()->get_prop('result');
         if ($rta == '') {
-            throw new ItFunctionalException('action/ejecutescript');
+            throw new ItFunctionalException('action/ejecutescript','',
+            		'El script no devolvio un resultado valido',
+            		array('script'=>$this->script,'accion'=>$this->nombre));
+        }
+        if ($rta != 'ok'){
+        	throw new ItFunctionalException('action/ejecutescript',$rta);
         }
         $this->itf = $this->ITScript->getObject('ITFORM');
     }

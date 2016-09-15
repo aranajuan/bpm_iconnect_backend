@@ -66,7 +66,7 @@ class ConnectionManager {
      * @param boolean $failure
      * @param boolean $exit close on failure
      */
-    public function close_connections($failure = false, $exit = true) {
+    public function close_connections($failure = false) {
         $close = false;
         if ($this->dbInstancelink instanceof \PDO) {
             if ($this->dbInstanceTran) {
@@ -94,9 +94,6 @@ class ConnectionManager {
             $this->dbRootlink = NULL;
             $close = true;
         }
-        if ($failure && $close) {
-            throw new ItErrorException('connection/closeerror');
-        }
     }
 
     /**
@@ -115,9 +112,7 @@ class ConnectionManager {
             $pdo = new \PDO($strCn, $user, \Encrypter::decrypt($pass));
             return $pdo;
         } catch (\Exception $e) {
-            throw new ItErrorException('connection/open', '',
-                    \KLogger\Psr\Log\LogLevel::CRITICAL,
-                    '',array($strCn,
+            throw new ItErrorException('connection/open','',array($strCn,
                         $host, $user, $pass, $e->getMessage()));
         }
     }

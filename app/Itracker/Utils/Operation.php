@@ -94,7 +94,6 @@ class Operation {
             $asign = $operation->getArg(0);
             if ($this->getArgType($asign) != 'var') {
                 throw new ItFunctionalException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error solo se puede asignar a variables',
                         array('Ec' => $this->operation));
             }
@@ -125,7 +124,6 @@ class Operation {
             case null:
                 if ($a1set == false) {
                      throw new ItFunctionalException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error en argumentos',
                         array('Ec' => $this->operation,
                             'Oper' => $operation->getOpe($offset)));
@@ -221,7 +219,6 @@ class Operation {
                 return implode(',', array_unique(array_diff($a1, $a2)));
             default :
                  throw new ItFunctionalException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error operacion desconocida',
                         array('Ec' => $this->operation,
                             'Oper' => $operation->getOpe($offset)));
@@ -343,7 +340,7 @@ class Operation {
         }
         if ($obj instanceof \Itracker\PropInterface) {
             return $this->normalize(
-                            $obj->get_Subprop($arr[1])
+                            $obj->get_Subprop($arr[1],true)
             );
         } else {
             return 'undefined';
@@ -374,13 +371,11 @@ class Operation {
                 $obj->set_prop($arr[1], $value);
             } catch (\Exception $e) {
                 throw new ItFunctionalException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al setear variable en objeto ',
                         array($prop, $propR, get_class($obj), $value));
             }
         } else {
             throw new ItFunctionalException('its/error','',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         'Error al setear variable en objeto ',
                         array($prop, $propR, get_class($obj), $value));
         }

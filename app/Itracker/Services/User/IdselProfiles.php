@@ -13,8 +13,8 @@ class IdselProfiles implements \Itracker\Services\ITServiceInterface {
                 if ($l["id"] > 1) {
                     $rta->addValue(new ResponseElement('PROFILE',
                         array(
-                            new ResponseElement('id',$l["id"],  ResponseElement::$TEXT),
-                            new ResponseElement('nombre',$l["nombre"],  ResponseElement::$TEXT)
+                            new ResponseElement('id',$l["id"],  ResponseElement::TEXT),
+                            new ResponseElement('nombre',$l["nombre"],  ResponseElement::TEXT)
                             )
                         ));
                 }

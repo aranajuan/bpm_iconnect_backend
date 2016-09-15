@@ -4,6 +4,7 @@ namespace Itracker;
 use Itracker\Exceptions\ItErrorException;
 use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Utils\AccessLog;
+use \Itracker\Utils\LoggerFactory;
 
 /**
  * Maneja todo el requerimiento del front
@@ -51,6 +52,12 @@ class Context {
 	private $finished;
 	
 	/**
+	 * Configuracion de errores
+	 * @var Utils\Config
+	 */
+	private $errorConfig;
+	
+	/**
 	 * Handler
 	 *
 	 * @var RequestHandlers\HandlerInterface
@@ -60,6 +67,7 @@ class Context {
 	
 	private function __construct() {
 		$this->finished=false;
+		$this->errorConfig=null;
 		$this->accesslog = new AccessLog();
 	}
 	
@@ -74,9 +82,20 @@ class Context {
 		return static::$__instance;
 	}
 	public function getLogger() {
-		return Utils\LoggerFactory::getLogger ();
+		return LoggerFactory::getLogger ();
 	}
 	
+	/**
+	 * Configuracion de errores
+	 * @return Utils\Config
+	 */
+	public function getErrorConfig(){
+		if($this->errorConfig == null){
+			$this->errorConfig = new Utils\Config('errors.xml','errors');
+		}
+		return $this->errorConfig;
+	}
+
 	/**
 	 * Objeto de cache
 	 *
@@ -110,21 +129,6 @@ class Context {
 	 */
 	public function getHandler() {
 		return $this->handler;
-	}
-	
-	/**
-	 * Ejecuta request y carga handler
-	 * Maneja errores
-	 */
-	public function executeRequest() {
-
-			$this->loadAccessLog();
-			$this->prepare ();
-			$this->getHandler()->addResponse ( $this->executeWS () );
-			$response = $this->getHandler()->getResponse();
-			$this->finishScript();
-			return $response;
-
 	}
 	
 	/**
@@ -191,14 +195,30 @@ class Context {
 				)){
 					throw new ItErrorException('handler/invalid','Instancia desconocida al front');
 		}
+		
+		if($this->getHandler ()->getBody ()->getClass ()=='user'
+				&& $this->getHandler ()->getBody ()->getMethod ()=='login'){
+			$login = true;
+		}else{
+			$login = false;
+		}
+		
 		try{
 			$this->user = $this->get_objcache ()
 				->get_object ( 'User', 
 				$this->getHandler()->getHeader()->getUser() );
 		}catch(ItFunctionalException $e){
-			throw new ItFunctionalException('dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.');
+			if($login){
+					$this->user = new User();
+			}else{
+				throw new ItErrorException('handler/invalid', 'Usuario invalido.');
+			}
 		}
 		
+		if($login){
+			return;
+		}
+				
 		if (! $this->getUser()->check_instance ( $this->getInstance()->get_prop ( 'nombre' ) )) {
 			throw new ItErrorException('handler/invalid','Instancia invalida');
 		}
@@ -226,10 +246,6 @@ class Context {
 	private function validateRequest() {
 		$class = $this->getHandler()->getBody()->getClass();
 		$method = $this->getHandler()->getBody()->getMethod();
-		if ($class == 'user' && $method == 'login') {
-			return;
-		}
-		
 
 		if (! $this->getFront()->validAction ( 	$class, $method )) {
 					throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(Front) a '.$class.'/'.$method);
@@ -239,7 +255,7 @@ class Context {
 				$this->getHandler()->getHeader()->getHash (),
 				$this->getFront(),
 				$this->getHandler()->getHeader()->getIpuser())) {
-			throw new ItFunctionalException('dbobject/checkdata', 'Usuario no logueado ');
+			throw new ItFunctionalException('handler/invalid', 'Sesion invalida o vencida');
 		}
 		
 		if ($class == 'user' && $method == 'logout') {
@@ -266,6 +282,31 @@ class Context {
 		return $C->GO($this);
 	}
 	
+	
+		/**
+	 * Ejecuta request y carga handler
+	 * Maneja errores
+	 */
+	public function executeRequest() {
+		try{
+			$this->getHandler()->initialize();
+			$this->loadAccessLog();
+			$this->prepare ();
+			$response = $this->executeWS ();
+			$error = false;
+		}catch(\Exception $e){
+			LoggerFactory::getLogger()
+				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
+			$response = new RequestHandlers\ErrorResponseAdapter($e);
+			$error = true;
+		}
+		$this->getHandler()->addResponse ( $response);
+		$responseSTR = $this->getHandler()->getResponse();
+		$this->finishScript($error);
+		return $responseSTR;
+
+	}
+	
 	/**
 	 * Finaliza la ejecucion del script
 	 *
@@ -281,13 +322,10 @@ class Context {
 		if ($this->getConnection () instanceof Utils\ConnectionManager) {
 			$this->accesslog->add ( 'sql_elapsed', $this->getConnection ()->getSqlElapsed () );
 			$this->accesslog->add ( 'sql_count', $this->getConnection ()->getSqlCount () );
-			$this->getConnection ()->close_connections ( $error, false );
+			$this->getConnection ()->close_connections ( $error );
 		} 
 		$this->accesslog->add ( 'exit_error', $error );
-		if ($error) {
-			$this->accesslog->add ( 'exit_error_message', print_r ( error_get_last (), true ) );
-		}
-		\Itracker\Utils\LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
+		LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
 	}
 	
 	/**
@@ -332,5 +370,12 @@ class Context {
 	 */
 	public function get_params($name){
 		return $this->getHandler()->getBody()->getParams($name);
+	}
+	
+	/**
+	 * @return AccessLog
+	 */
+	public function getAccessLog(){
+		return $this->accesslog;
 	}
 }

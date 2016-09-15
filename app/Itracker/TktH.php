@@ -63,7 +63,7 @@ class TktH extends ITObject {
     function load_DB($id) {
         $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
                         left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
-                            where H.id=$id and H.estado = " . I_ACTIVE);
+                            where H.id=".intval($id)." and H.estado = " . I_ACTIVE);
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
@@ -163,7 +163,6 @@ class TktH extends ITObject {
             $THmaster = $THmaster->get_prop('objadj');
         }
         $actOr = $THmaster->get_prop('accion');
-
         if ($actOr->get_prop('ejecuta') == 'open') {
             //formulario de apertura
             if ($this->TKT) {
@@ -293,7 +292,7 @@ class TktH extends ITObject {
         if ($this->get_prop("itform") != null) {
             $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
-            	$rta->addValue(new ResponseElement('',$itfDom,ResponseElement::$XML));
+            	$rta->addValue(new ResponseElement('',$itfDom,ResponseElement::XML));
             } else {
                 $this->getContext()->getLogger()->notice('itform sin nada visible', array(
                     'idth' => $this->id
@@ -305,7 +304,7 @@ class TktH extends ITObject {
         if ($files_h && count($files_h)) {
             $files = new ResponseElement('files');
             foreach ($files_h as $f) {
-            	$files->addValue(new ResponseElement('file',$f,ResponseElement::$FILE));
+            	$files->addValue(new ResponseElement('file',$f,ResponseElement::TEXT));
             }
             $rta->addValue($files);
         }

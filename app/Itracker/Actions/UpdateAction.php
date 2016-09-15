@@ -15,7 +15,7 @@ class UpdateAction implements ITActionsInterface {
 			$ActName = explode ( '-', $action->get_prop ( 'nombre' ) );
 			
 			if ($ActName [1] != 'UPDATE' || $ActName [0] != $THA_nameV [0]) {
-				throw new ItFunctionalException ( 'action/go/invalid', 'Evento invalido', KLogger\Psr\Log\LogLevel::WARNING, '', array (
+				throw new ItFunctionalException ( 'action/go/invalid', 'Evento invalido', 'El evento no puede actualizar al destino', array (
 						'tha_name' => $THA_name,
 						'a_name' => $action->get_prop ( 'nombre' ) 
 				) );

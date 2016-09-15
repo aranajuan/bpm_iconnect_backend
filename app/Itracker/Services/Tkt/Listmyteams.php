@@ -2,6 +2,7 @@
 
 namespace Itracker\Services\Tkt;
 use Itracker\ResponseElement;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Listmyteams implements \Itracker\Services\ITServiceInterface {
 
@@ -27,6 +28,9 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
                 foreach ($usrs as $u) {
                     array_push($uids, $u->get_prop("usr"));
                 }
+            }else{
+            	throw new ItFunctionalException( 'service/checkdata',
+            			"Equipo invalido(".$Context->get_params("teams")."). Acceso denegado." );
             }
         }
         $Tf->set_filter(\Itracker\TktFilter::$UA, $uids);

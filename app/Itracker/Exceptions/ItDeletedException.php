@@ -1,18 +1,13 @@
 <?php
 namespace Itracker\Exceptions;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+use KLogger\Psr\Log\LogLevel;
 
 /**
- * Description of ItException
- *
- * @author u548391
+ * Objeto eliminado
  */
 class ItDeletedException extends ItFunctionalException {
-    
+	function __construct($error,$description=null, $logmsg = null, $logdata = null,$defaultLogLevel= null) {
+		parent::__construct($error,$defaultLogLevel,$logdata,$logdata,LogLevel::NOTICE);
+	}
 }
-
-?>

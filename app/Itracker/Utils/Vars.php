@@ -55,7 +55,9 @@ class Vars implements \Itracker\PropInterface {
 	 */
 	public function loadFile($path) {
 		if ( !is_readable ( $path ) ) {
-			throw new ItErrorException ( 'vars/load', '', \KLogger\Psr\Log\LogLevel::CRITICAL, 'No se pudo cargar archivo de configuraciones' . $path );
+			throw new ItErrorException ( 'vars/load',
+				'No se pudo cargar archivo de configuraciones',
+				array( $path) );
 		}
 
 		$this->dom_init = new \DOMDocument();
@@ -63,10 +65,14 @@ class Vars implements \Itracker\PropInterface {
 		$this->vars = null;
 		try {
 			if ( $this->dom_init->load ( $path ) == false ) {
-				throw new ItErrorException ( 'vars/load', '', \KLogger\Psr\Log\LogLevel::CRITICAL, 'Error al parsear Xml de variables' . $path );
+				throw new ItErrorException ( 'vars/load', 
+					'Error al parsear Xml de variables',
+					array($path) );
 			}
 		} catch ( \Exception $e ) {
-			throw new ItErrorException ( 'vars/load', '', \KLogger\Psr\Log\LogLevel::CRITICAL, 'Error en archivo de vars' . $path, array ('msg' => $e->getMessage ()) );
+			throw new ItErrorException ( 'vars/load',
+				'Error en archivo de vars',
+				array ($path,'msg' => $e->getMessage ()) );
 		}
 
 		$this->xml = $this->dom_init->saveXML ();
@@ -87,7 +93,9 @@ class Vars implements \Itracker\PropInterface {
 		$this->dom = null;
 		$this->vars = null;
 		if ( $this->dom_init->loadXML ( $this->xml ) == false ) {
-			throw new ItErrorException ( 'vars/load', '', \KLogger\Psr\Log\LogLevel::CRITICAL, 'Error al parsear Xml de variables', array ('xml' => $xml) );
+			throw new ItErrorException ( 'vars/load', 
+				'Error al parsear Xml de variables',
+				array ('xml' => $xml) );
 		}
 
 		$this->dom = clone $this->dom_init;
@@ -106,7 +114,9 @@ class Vars implements \Itracker\PropInterface {
 		$this->vars = null;
 		$nodeImp = $this->dom_init->importNode ( $node, true );
 		if ( $nodeImp == false ) {
-			throw new ItErrorException ( 'vars/load', '', \KLogger\Psr\Log\LogLevel::CRITICAL, 'No se puede importar nodo de var', array ($node->textContent) );
+			throw new ItErrorException ( 'vars/load',
+				'No se puede importar nodo de var',
+				array ($node->textContent) );
 		}
 
 		$this->dom_init->createElement ( $nodeImp->nodeName )
@@ -188,7 +198,7 @@ class Vars implements \Itracker\PropInterface {
 		$varName = strtolower ( '/' . $this->rootTag . '/' . $varName );
 		if ( !isset ( $this->vars[$varName] ) ) {
 			if ( $exception ) {
-				throw new \Itracker\Exceptions\ItFunctionalException ( 'vars/unset', $varName );
+				throw new ItErrorException ( 'vars/unset', $varName );
 			} else {
 				return null;
 			}
@@ -211,7 +221,7 @@ class Vars implements \Itracker\PropInterface {
 	public function getData($props = null) {
 		$rta = new ResponseElement ( 'VARS' );
 		foreach ( $props as $p ) {
-			$rta->addValue ( new ResponseElement ( $p,  $this->vars[$p], ResponseElement::$TEXT ) );
+			$rta->addValue ( new ResponseElement ( $p,  $this->vars[$p], ResponseElement::TEXT ) );
 		}
 		return $rta;
 	}

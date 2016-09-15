@@ -15,10 +15,10 @@ class Config {
      * @param String $file  path to config
      * @throws Exception
      */
-    public function __construct($file) {
+    public function __construct($file,$root='itracker') {
         $this->vars = new Vars();
-        $this->vars->setRootTag('itracker');
-        $this->vars->loadFile($file);
+        $this->vars->setRootTag($root);
+        $this->vars->loadFile(CONFIG_DIR.$file);
     }
 
     /**

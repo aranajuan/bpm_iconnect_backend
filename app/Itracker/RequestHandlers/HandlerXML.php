@@ -40,7 +40,7 @@ class HandlerXML implements HandlerInterface {
 		$doc = new \DOMDocument ( '1.0', 'utf-8' );
 		$it = $doc->createElement ( 'itracker' );
 		$res = $doc->createElement ( 'response' );
-		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseElement) {
+		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseItemInterface) {
 			$res->appendChild ( $this->generateElement ( $doc, $this->responses [0] ['res'] ) );
 		}
 		$it->appendChild ( $res );
@@ -56,7 +56,7 @@ class HandlerXML implements HandlerInterface {
 	 * @return \DOMElement
 	 */
 	private function generateElement($doc, $el) {
-		if ($el->getType () == \Itracker\ResponseElement::$ARRAY) {
+		if ($el->getType () == \Itracker\ResponseElement::ARRAYL) {
 			$lst = $doc->createElement ( $el->getTitle () );
 			foreach ( $el->getValue () as $e ) {
 				$lst->appendChild ( $this->generateElement ( $doc, $e ) );
@@ -64,12 +64,12 @@ class HandlerXML implements HandlerInterface {
 			return $lst;
 		}
 		
-		if ($el->getType () == \Itracker\ResponseElement::$FILE) {
+		if ($el->getType () == \Itracker\ResponseElement::FILE) {
 			return $doc->createElement ( $el->getTitle (),
 				base64_encode($el->getValue ()) );
 		}
 		
-		if ($el->getType () == \Itracker\ResponseElement::$XML) {
+		if ($el->getType () == \Itracker\ResponseElement::XML) {
 			$node = $doc->importNode ( $el->getValue ()->documentElement, true );
 			
 			if ($el->getTitle () == '') {
@@ -90,9 +90,13 @@ class HandlerXML implements HandlerInterface {
 	public function loadEnvironment($input) {
 		// parseo
 		$this->input = $input;
+	}
+	
+	
+	public function initialize() {
 		try {
 			$this->parsed = new \DOMDocument ();
-			$this->parsed->loadXML ( $input ['txt'] );
+			$this->parsed->loadXML ( $this->input ['txt'] );
 		} catch ( \Exception $e ) {
 			throw new ItErrorException ( 'handler/format' );
 		}
@@ -114,7 +118,7 @@ class HandlerXML implements HandlerInterface {
 		}
 		
 		// header
-		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $input ['date'] );
+		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $this->input ['date'] );
 		$params = $xpath->query ( '/itracker/request/params/*' );
 		$params_array = array ();
 		foreach ( $params as $p ) {

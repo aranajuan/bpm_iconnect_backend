@@ -14,6 +14,11 @@ interface HandlerInterface {
 	 * @throws \Itracker\Exceptions\ItErrorException
 	 */
 	public function loadEnvironment($input);
+	
+	/**
+	 * Inicia el ambiente
+	 */
+	public function initialize();
 	/**
 	 * Mostrar solicitud
 	 * 
@@ -36,7 +41,7 @@ interface HandlerInterface {
 	/**
 	 * Agregar response a la respuesta
 	 * 
-	 * @param \Itracker\ResponseElement $response        	
+	 * @param ResponseItemInterface $response        	
 	 * @param String $path
 	 *        	path donde agregar
 	 * @throws \Itracker\Exceptions\ItErrorException

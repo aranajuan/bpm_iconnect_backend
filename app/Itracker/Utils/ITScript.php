@@ -90,8 +90,8 @@ class ITScript extends Operation {
         array_push($stack, $this->jump);
         $ll = count($this->stack);
         if ($line != $stack[1]) {
-            throw new ItFunctionalException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
-            , 'Error en script, finalizacion de bloques invalida');
+            throw new ItFunctionalException('its/error',
+		    'Error en script, finalizacion de bloques invalida');
         }
         if ($this->jump[0] == $ll) { //salto al mismo nivel
             $this->jump = null;
@@ -215,8 +215,9 @@ class ITScript extends Operation {
             return;
         }
 
-        throw new ItFunctionalException('its/error', '', \KLogger\Psr\Log\LogLevel::ERROR
-                , 'Error desconocido', array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
+        throw new ItFunctionalException('its/error',
+		'Error desconocido', 
+		array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
             
     }
 

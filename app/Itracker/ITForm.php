@@ -75,7 +75,7 @@ class ITForm implements PropInterface {
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
-                throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+                throw new ItFunctionalException('itf/load', '', 'No se pudo parsear XML', array($xml));
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
             $this->loadOutput();
@@ -84,7 +84,7 @@ class ITForm implements PropInterface {
             throw $e;
         }catch (\Exception $e) {
             $this->xml_input = null;
-            throw new ItFunctionalException('itf/load', '', \KLogger\Psr\Log\LogLevel::ERROR, 'No se pudo parsear XML', array($xml));
+            throw new ItFunctionalException('itf/load', '',  'No se pudo parsear XML', array($xml));
         }
         
     }
@@ -134,9 +134,9 @@ class ITForm implements PropInterface {
             if (isset($this->formArray[trim($arr['id'])])) {
                 $this->xml_output = null;
                 $this->formArray = null;
-                throw new ItFunctionalException('itf/load', '',
-                        \KLogger\Psr\Log\LogLevel::ERROR, 
-                        'Id duplicado en itform', array('xml' => $this->xml_input_text,
+                throw new ItFunctionalException('itf/load','Error en formulario', 
+                        'Id duplicado en itform',
+			array('xml' => $this->xml_input_text,
                     'id' => $arr['id']));
             }
             $this->formArray[trim($arr['id'])] = $arr;

@@ -19,10 +19,8 @@ class OpenAction implements ITActionsInterface {
 		$lstOption = $TKT->get_last();
 		
 		if (! is_numeric ( $destiny->get_prop ( 'id' ) )) {
-			throw new ItFunctionalException ( 'action/go/invalid', 'No hay destino valido id en script', KLogger\Psr\Log\LogLevel::WARNING, '', array (
-					'id' => $lstOption->get_prop ( 'id' ),
-					'usr' => $context->getUser ()->get_prop ( 'usr' ),
-					'data' => $context->get_params ( 'form' ) 
+			throw new ItFunctionalException ( 'action/go/invalid', 'No hay destino valido id en script','Opcion sin destino' ,array (
+					'id' => $lstOption->get_prop ( 'id' )
 			) );
 		}
 		

@@ -12,7 +12,7 @@ class IdselDomains implements \Itracker\Services\ITServiceInterface {
             foreach ($V as $l) {
                 $rta->addValue(new ResponseElement('DOMAIN',
                         array(
-                            new ResponseElement('nombre',$l,  ResponseElement::$TEXT)
+                            new ResponseElement('nombre',$l,  ResponseElement::TEXT)
                             )
                         ));
 

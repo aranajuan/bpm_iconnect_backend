@@ -35,13 +35,13 @@ class Downloadfile implements \Itracker\Services\ITServiceInterface {
 
         $rta = new ResponseElement('file');
         $rta->addValue(new ResponseElement('name', 
-                $fname, ResponseElement::$TEXT));
+                $fname, ResponseElement::TEXT));
         if ($TH) {
             $rta->addValue(new ResponseElement('idtkt', 
-                $TH->get_prop("idtkt"), ResponseElement::$TEXT));
+                $TH->get_prop("idtkt"), ResponseElement::TEXT));
         }
         $rta->addValue(new ResponseElement('data',
-                $im, ResponseElement::$FILE));
+                $im, ResponseElement::FILE));
 
         return $rta;
         

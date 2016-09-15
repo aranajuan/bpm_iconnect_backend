@@ -3,6 +3,7 @@ namespace Itracker;
 
 use Itracker\Exceptions\ItFunctionalException;
 use Itracker\Exceptions\ItDeletedException;
+use Itracker\Exceptions\ItErrorException;
 
 /**
  * Administra cache de objetos y crea itobjects nuevos
@@ -65,9 +66,7 @@ class ObjectCache {
             $this->recall++;
         }
         if($this->status[$ind]!=I_ACTIVE && !$allow_deleted){
-                throw new ItDeletedException('dbobject/deleted','',
-                                \KLogger\Psr\Log\LogLevel::ERROR,
-                                'Objeto eliminado');
+                throw new ItDeletedException('dbobject/deleted','','Eliminado',array('obj'=>$class.'/'.$id));
         }
         return $this->itobjects[$ind];
     }
@@ -100,13 +99,11 @@ class ObjectCache {
                 $cn->load_DB($id);
                 $this->last++;
                 $this->itobjects[$this->last] = $cn;
-                $this->status[$this->last] = $resp;
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {
-                throw  new ItFunctionalException('objectcache/classnotfound','',
-                		\KLogger\Psr\Log\LogLevel::CRITICAL,
-                		'Clase invalida',array('nombre'=>$class));
+                throw  new ItErrorException('objectcache/classnotfound',
+			'Clase invalida',array('nombre'=>$class));
             }
     }
 

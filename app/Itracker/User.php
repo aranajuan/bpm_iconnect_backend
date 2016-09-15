@@ -881,18 +881,19 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 	 * Loguea usuario
 	 * @param string $pass
 	 * @param FRONT $front
+	 * @param INSTANCE $instance
 	 * @param string $ipuser
 	 */
-	public function login($passL, $front, $ipuser) {
+	public function login($passL, $front,$instance, $ipuser) {
 		if ( $this->estado != I_ACTIVE )
-			throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario invalido' );
+			throw new ItFunctionalException ( 'dbobject/checkdata', '','Usuario desactivado' );
 
 		if ( $this->dominio == "BLOQUEADO" ) {
-			throw new ItFunctionalException ( 'dbobject/checkdata', 'Acceso deshabilitado para el usuario' );
+			throw new ItFunctionalException ( 'dbobject/checkdata','' ,'Acceso deshabilitado para el usuario' );
 		}
 
 		if ( $this->usr == "" || $this->error == true )
-			throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario sin cargar' );
+			throw new ItFunctionalException ( 'dbobject/checkdata', '' ,'Usuario inexistente' );
 
 		$maxsessions = $this->getContext ()->get_GlobalConfig ()
 			->getInt ( 'configs/sessionmax' );
@@ -903,68 +904,71 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 			$sessionC = -1;
 		}
 
-		if ( $front->is_trusted () ) {
-			if ( $sessionC >= $maxsessions ) {
-				throw new ItFunctionalException ( 'dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.' );
+		/* validar accesos */
+		if ( !$front->is_trusted () ) {
+			if ( $passL == "" || $this->error == true )
+				throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos' );
+
+
+			switch ( $this->dominio ) {
+				case "ITRACKER":
+					if ( $passL != $this->pass ) {
+						throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
+					}
+					break;
+				case "CCPI":
+					$ldap = new \ExternalWs\LdapWs();
+					$rta = $ldap->check_user ( $this->get_prop ( "usr" ), $passL );
+					if ( $rta["response"] != "true" )
+						throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
+					break;
+				case "TELECOM":
+					$ldap = new \ExternalWs\LdapWs();
+					$rta = $ldap->check_user ( $this->get_prop ( "usr" ), $passL );
+					if ( $rta["response"] != "true" )
+						throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
+					break;
+				case "SHAREPOINT":
+					$SPF = new Front();
+					$SPF->load_DB ( "SHAREPOINT" );
+					$ssql = "select fecha from TBL_SESIONES where "
+						. "usr='" . strToSQL ( $this->get_prop ( "usr" ) ) . "' "
+						. "and front=" . $SPF->get_prop ( "id" ) . " and hash='" . strToSQL ( $passL ) . "'"
+						. " ";
+					$this->dbroot->loadRS ( $ssql );
+					if ( $this->dbroot->cReg != 1 ) {
+						throw new ItFunctionalException ( 'dbobject/checkdata', 'SP::Usuario o contrase&ntilde;a invalidos.' );
+					}
+					$v = $this->dbroot->get_vector ();
+					$f1 = strtotime ( $v["fecha"] );
+					if ( $f1 == false ) {
+						throw new ItFunctionalException ( 'dbobject/checkdata', "SP::fecha invalida " . $v["fecha"] );
+					}
+					$f2 = strtotime ( 'now' );
+					if ( $f2 == false ) {
+						throw new ItFunctionalException ( 'dbobject/checkdata', "SP::fecha invalida" );
+					}
+					if ( ($f2 - $f1) > 60 ) {
+						throw new ItFunctionalException ( 'dbobject/checkdata', "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1) );
+					}
+					break;
+				default:
+					throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
 			}
-			if ( $maxsessions == 1 ) {
-				$this->sessionCloseAll ();
-			}
-			$this->sessionCreate ( $front, $ipuser );
-		}
-
-		if ( $passL == "" || $this->error == true )
-			throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos' );
-
-
-		switch ( $this->dominio ) {
-			case "ITRACKER":
-				if ( $passL != $this->pass ) {
-					throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
-				}
-				break;
-			case "CCPI":
-				$ldap = new \ExternalWs\LdapWs();
-				$rta = $ldap->check_user ( $this->get_prop ( "usr" ), $passL );
-				if ( $rta["response"] != "true" )
-					throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
-				break;
-			case "TELECOM":
-				$ldap = new \ExternalWs\LdapWs();
-				$rta = $ldap->check_user ( $this->get_prop ( "usr" ), $passL );
-				if ( $rta["response"] != "true" )
-					throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
-				break;
-			case "SHAREPOINT":
-				$SPF = new Front();
-				$SPF->load_DB ( "SHAREPOINT" );
-				$ssql = "select fecha from TBL_SESIONES where "
-					. "usr='" . strToSQL ( $this->get_prop ( "usr" ) ) . "' "
-					. "and front=" . $SPF->get_prop ( "id" ) . " and hash='" . strToSQL ( $passL ) . "'"
-					. " ";
-				$this->dbroot->loadRS ( $ssql );
-				if ( $this->dbroot->cReg != 1 ) {
-					throw new ItFunctionalException ( 'dbobject/checkdata', 'SP::Usuario o contrase&ntilde;a invalidos.' );
-				}
-				$v = $this->dbroot->get_vector ();
-				$f1 = strtotime ( $v["fecha"] );
-				if ( $f1 == false ) {
-					throw new ItFunctionalException ( 'dbobject/checkdata', "SP::fecha invalida " . $v["fecha"] );
-				}
-				$f2 = strtotime ( 'now' );
-				if ( $f2 == false ) {
-					throw new ItFunctionalException ( 'dbobject/checkdata', "SP::fecha invalida" );
-				}
-				if ( ($f2 - $f1) > 60 ) {
-					throw new ItFunctionalException ( 'dbobject/checkdata', "SP::Usuario o contrase&ntilde;a invalidos. timeout" . ($f2 - $f1) );
-				}
-				break;
-			default:
-				throw new ItFunctionalException ( 'dbobject/checkdata', 'Usuario o contrase&ntilde;a invalidos.' );
 		}
 		if ( $sessionC >= $maxsessions ) {
 			throw new ItFunctionalException ( 'dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.' );
 		}
+		
+		/* validar front e instancia */
+		if (! $this->check_instance ( $instance->get_prop ( 'nombre' ) )) {
+			throw new ItFunctionalException('dbobject/checkdata','Instancia invalida');
+		}
+		
+		if (! $this->check_front ( $front->get_prop ( 'id' ) )) {
+			throw new ItFunctionalException('dbobject/checkdata','Front invalido');
+		}
+		
 		if ( $maxsessions == 1 ) {
 			$this->sessionCloseAll ();
 		}

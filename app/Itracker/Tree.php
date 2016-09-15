@@ -69,9 +69,7 @@ abstract class Tree extends ITObject {
                 $this->path = NULL;
                 $this->path_max = 0;
                 throw new ItFunctionalException('dbobject/checkdata',
-                        'Error en la tipificacion',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
-                        'Arbol invalido ('.$tmp.')');
+                        'Error en la tipificacion', 'Arbol invalido ('.$tmp.')');
             }
             $rpath[$this->path_max]=$this->path[$i];
             $this->path_max++;
@@ -104,7 +102,6 @@ abstract class Tree extends ITObject {
                 default:
                     throw new ItFunctionalException('dbobject/checkdata',
                         'Error en la tipificacion',
-                        \KLogger\Psr\Log\LogLevel::ERROR,
                         "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)");
             }
             
@@ -368,7 +365,8 @@ abstract class Tree extends ITObject {
         if (isset($this->path_obj[$this->path_max])) {
             return $this->path_obj[$this->path_max];
         }
-        throw new ItFunctionalException('option/destiny','Error en ultima opcion');;
+        throw new ItFunctionalException('option/destiny',
+		'Error en ultima opcion');
     }
 
 }

@@ -4,17 +4,8 @@ namespace Itracker;
 
 use Itracker\Exceptions\ItFunctionalException;
 
-class ResponseElement{
-    
-    /**
-     * Tipos de respuesta
-     * @var type 
-     */
-    public static $XML = 1;
-    public static $TEXT = 2;
-    public static $FILE = 3;
-    public static $ARRAY = 4;
-    
+class ResponseElement implements RequestHandlers\ResponseItemInterface{
+
     /**
      * Titulo
      * @var string 
@@ -123,7 +114,7 @@ class ResponseElement{
         if($value instanceof ResponseElement){
             if($this->value == null){
                 $this->value=array();
-                $this->type=self::$ARRAY;
+                $this->type=self::ARRAYL;
             }
             if(!is_array($this->value)){
                 throw new ItFunctionalException('responseelement/invalidtype');
@@ -136,7 +127,7 @@ class ResponseElement{
         }
         $this->value = $value;
         if($this->getType()==null){
-        	$this->setType(self::$TEXT);
+        	$this->setType(self::TEXT);
         }
     }
 

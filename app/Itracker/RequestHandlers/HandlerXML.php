@@ -15,8 +15,8 @@ class HandlerXML implements HandlerInterface {
 		$this->responses = array (
 				array (
 						'res' => $response,
-						'path' => $path 
-				) 
+						'path' => $path
+				)
 		);
 		return;
 		if ($path == null) {
@@ -24,7 +24,7 @@ class HandlerXML implements HandlerInterface {
 		}
 		array_push ( $this->responses, array (
 				'res' => $response,
-				'path' => $path 
+				'path' => $path
 		) );
 	}
 	public function getBody() {
@@ -47,12 +47,12 @@ class HandlerXML implements HandlerInterface {
 		$doc->appendChild ( $it );
 		return $doc->saveXML ( null, LIBXML_NOEMPTYTAG );
 	}
-	
+
 	/**
 	 * Genera domelement de response
-	 * 
-	 * @param \DOMDocument $doc        	
-	 * @param \Itracker\ResponseElement $el        	
+	 *
+	 * @param \DOMDocument $doc
+	 * @param \Itracker\ResponseElement $el
 	 * @return \DOMElement
 	 */
 	private function generateElement($doc, $el) {
@@ -63,15 +63,15 @@ class HandlerXML implements HandlerInterface {
 			}
 			return $lst;
 		}
-		
+
 		if ($el->getType () == \Itracker\ResponseElement::FILE) {
 			return $doc->createElement ( $el->getTitle (),
 				base64_encode($el->getValue ()) );
 		}
-		
+
 		if ($el->getType () == \Itracker\ResponseElement::XML) {
 			$node = $doc->importNode ( $el->getValue ()->documentElement, true );
-			
+
 			if ($el->getTitle () == '') {
 				return $node;
 			}
@@ -79,9 +79,9 @@ class HandlerXML implements HandlerInterface {
 			$nodeH->appendChild ( $node );
 			return $nodeH;
 		}
-		return $doc->createElement ( $el->getTitle (), htmlspecialchars ( $el->getValue (), ENT_XML1 ) );
+		return $doc->createElement ( $el->getTitle (), htmlspecialchars ( $el->getValue (), ENT_QUOTES | ENT_XML1 ) );
 	}
-	
+
 	/**
 	 *
 	 * @param Array $input
@@ -91,8 +91,8 @@ class HandlerXML implements HandlerInterface {
 		// parseo
 		$this->input = $input;
 	}
-	
-	
+
+
 	public function initialize() {
 		try {
 			$this->parsed = new \DOMDocument ();
@@ -101,22 +101,22 @@ class HandlerXML implements HandlerInterface {
 			throw new ItErrorException ( 'handler/format' );
 		}
 		$xpath = new \DOMXpath ( $this->parsed );
-		
+
 		$hash = $xpath->query ( '/itracker/header/hash' );
 		$pass = $xpath->query ( '/itracker/header/pass' );
-		
+
 		if ($hash->length) {
 			$hash = $hash->item ( 0 )->nodeValue;
 		} else {
 			$hash = null;
 		}
-		
+
 		if ($pass->length) {
 			$pass = $pass->item ( 0 )->nodeValue;
 		} else {
 			$pass = null;
 		}
-		
+
 		// header
 		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $this->input ['date'] );
 		$params = $xpath->query ( '/itracker/request/params/*' );
@@ -129,7 +129,7 @@ class HandlerXML implements HandlerInterface {
 		foreach ( $files as $p ) {
 			$files_array [$p->nodeName] = $p->nodeValue;
 		}
-		
+
 		$this->body = new Body ( $xpath->query ( '/itracker/request/class' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/request/method' )->item ( 0 )->nodeValue, $params_array, $files_array );
 	}
 }

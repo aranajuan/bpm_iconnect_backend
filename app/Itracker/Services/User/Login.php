@@ -21,7 +21,7 @@ class Login implements \Itracker\Services\ITServiceInterface {
 		throw new ItFunctionalException('service/checkdata',$msj);
 	}
         $rta = new ResponseElement('data');
-        $rta->addValue($user->getData(array('hash','perfil','access','nombre',
+        $rta->addValue($user->getData(array('hash','perfilt','access','nombre',
             'puesto','ubicacion','mail','telefono','superuser')));
         return $rta;
     }

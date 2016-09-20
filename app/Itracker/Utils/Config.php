@@ -15,23 +15,10 @@ class Config {
      * @param String $file  path to config
      * @throws Exception
      */
-    public function __construct($file) {
-        if (!is_readable($file)) {
-            LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado (no encontrado)', array('path' => $file));
-            throw new \Exception('No se pudo cargar archivo de configuraciones');
-        }
-
+    public function __construct($file,$root='itracker') {
         $this->vars = new Vars();
-        $this->vars->setRootTag('itracker');
-        if ($this->vars->loadFile($file) == false) {
-            LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado', array('path' => $file, 'msg' => $e->getMessage()));
-            $this->dom = null;
-            $this->xpath = null;
-            throw new \Exception('No se pudo cargar archivo de configuraciones');
-        }
-        
+        $this->vars->setRootTag($root);
+        $this->vars->loadFile(CONFIG_DIR.$file);
     }
 
     /**

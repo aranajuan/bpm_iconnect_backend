@@ -2,6 +2,8 @@
 
 namespace Itracker\Utils;
 
+use \Itracker\Exceptions\ItFunctionalException;
+
 class ITScript extends Operation {
 
     /**
@@ -59,7 +61,7 @@ class ITScript extends Operation {
         $this->stack = array();
         $this->jump = null;
         $this->scriptLen = count($this->scriptArray);
-        return $this->ejecuteLine($line);
+        $this->ejecuteLine($line);
     }
 
     /**
@@ -88,7 +90,8 @@ class ITScript extends Operation {
         array_push($stack, $this->jump);
         $ll = count($this->stack);
         if ($line != $stack[1]) {
-            throw new \Exception('Error en script, finalizacion de bloques invalida');
+            throw new ItFunctionalException('its/error',
+		    'Error en script, finalizacion de bloques invalida');
         }
         if ($this->jump[0] == $ll) { //salto al mismo nivel
             $this->jump = null;
@@ -115,17 +118,18 @@ class ITScript extends Operation {
     private function ejecuteLine($line, $prev = null) {
         $lineStr = trim($this->scriptArray[$line]);
         /** Lineas para DEBUG
-        echo ($line) . "#<b>" . $lineStr . "</b>:: PREV: " . $prev . "(JMP:" . print_r($this->jump, true) . 
-                ")(LL:" . $this->getLineLevel() . ")<br/>".print_r($this->stack,true)."<hr/>";
-                **/
+          echo ($line) . "#<b>" . $lineStr . "</b>:: PREV: " . $prev . "(JMP:" . print_r($this->jump, true) .
+          ")(LL:" . $this->getLineLevel() . ")<br/>".print_r($this->stack,true)."<hr/>";
+         * */
         //verifica fin de codigo
         if ($line >= $this->scriptLen) {
-            return 'ok';
+            return;
         }
 
         //saltar vacios
         if ($lineStr == '') {
-            return $this->ejecuteLine($line + 1, 'empty');
+            $this->ejecuteLine($line + 1, 'empty');
+            return;
         }
 
         //verifica fin de bloque
@@ -133,81 +137,88 @@ class ITScript extends Operation {
         if ($endBlock) {
             if ($lineStr == 'endwhile' && $endBlock[3] == null) {
                 //salto de while
-                return $this->ejecuteLine($endBlock[0], 'endblock -loop');
+                $this->ejecuteLine($endBlock[0], 'endblock -loop');
+                return;
             }
-            return $this->ejecuteLine($line + 1, 'endblock');
+            $this->ejecuteLine($line + 1, 'endblock');
+            return;
         }
 
         //salto level - jump to else
         if ($lineStr == $this->jump[1] && $this->getLineLevel() == $this->jump[0]) {
             $this->jump = null;
-            return $this->ejecuteLine($line + 1, 'jumpend');
+            $this->ejecuteLine($line + 1, 'jumpend');
+            return;
         }
-        
+
         //IF
         preg_match_all('/^if\s+(.+)\s+then$/', $lineStr, $matches);
         if (count($matches[1])) { //es un if
-            array_push($this->stack, array($line, 'endif',$this->getLineLevel()+1));
+            array_push($this->stack, array($line, 'endif', $this->getLineLevel() + 1));
             if ($this->jump == null) {
                 //verificar if
-                if ($this->operate($matches[1][0])) {//error en if
-                    return 'Error al ejecutar operacion linea #1:' . $line;
-                }
+                $this->operate($matches[1][0]);
                 if ($this->getResult()) {
-                    return $this->ejecuteLine($line + 1, 'if ok');
+                     $this->ejecuteLine($line + 1, 'if ok');
+                     return;
                 } else {
                     $this->jump = array($this->getLineLevel(), 'else');
-                    return $this->ejecuteLine($line + 1, 'if no ok');
+                    $this->ejecuteLine($line + 1, 'if no ok');
+                    return;
                 }
             } else {
-                return $this->ejecuteLine($line + 1, 'jumping');
+                $this->ejecuteLine($line + 1, 'jumping');
+                return;
             }
         }
         //else - jump to endif
-        if($this->jump==null && $lineStr == 'else'){
+        if ($this->jump == null && $lineStr == 'else') {
             $stack = $this->StackGet();
-            if ($this->getLineLevel()==$stack[2] && $stack[1] == 'endif') {
+            if ($this->getLineLevel() == $stack[2] && $stack[1] == 'endif') {
                 $this->jump = array($this->getLineLevel(), 'endif');
-                return $this->ejecuteLine($line + 1, 'else and jump');
+                $this->ejecuteLine($line + 1, 'else and jump');
+                return;
             }
         }
-        
+
         //WHILE
         preg_match_all('/^while\s+(.+)/', $lineStr, $matches);
         if (count($matches[1])) { //es un while
-            array_push($this->stack, array($line, 'endwhile',$this->getLineLevel()+1));
+            array_push($this->stack, array($line, 'endwhile', $this->getLineLevel() + 1));
             if ($this->jump == null) {
                 //verificar
-                if ($this->operate($matches[1][0])) {//error en if
-                    return 'Error al ejecutar operacion linea #1:' . $line;
-                }
+                $this->operate($matches[1][0]);
                 if ($this->getResult()) {
-                    return $this->ejecuteLine($line + 1, 'while ok');
+                    $this->ejecuteLine($line + 1, 'while ok');
+                    return;
                 } else {
                     $this->jump = array($this->getLineLevel(), 'endwhile');
-                    return $this->ejecuteLine($line + 1, 'while no ok');
+                    $this->ejecuteLine($line + 1, 'while no ok');
+                    return;
                 }
             } else {
-                return $this->ejecuteLine($line + 1, 'jumping');
+                $this->ejecuteLine($line + 1, 'jumping');
+                return;
             }
         }
 
         //CODE LINE
         if ($this->jump == null) {
             if ($lineStr == 'return') {
-                return 'ok';
+                return;
             }
-            if ($this->operate($lineStr)) {//error en if
-            	LoggerFactory::getLogger()->error('Error en script condicional', array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
-                return 'Error al ejecutar operacion linea #2:' . $line;
-            }
-            return $this->ejecuteLine($line + 1, 'next line');
+            $this->operate($lineStr);
+            $this->ejecuteLine($line + 1, 'next line');
+            return;
         } else {
-            return $this->ejecuteLine($line + 1, 'moving');
+            $this->ejecuteLine($line + 1, 'moving');
+            return;
         }
 
-        LoggerFactory::getLogger()->error('Error en script', array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
-        return 'Script::Error desconocido';
+        throw new ItFunctionalException('its/error',
+		'Error desconocido', 
+		array('script' => $this->script, 'linea' => "$line | $lineStr | $prev"));
+            
     }
 
 }

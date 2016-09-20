@@ -181,6 +181,17 @@ class Logger extends AbstractLogger
     }
 
     /**
+     * Loguear msj
+     * @param LogMsjInterface $msj
+     */
+    public function logMsj($msj){
+	if ($this->logLevels[$this->logLevelThreshold] < $this->logLevels[$msj->getLevel()]) {
+            return;
+        }
+        $message = $this->formatMessage($msj->getLevel(), $msj->getMsj (), $msj->getContext ());        
+        $this->write($message);
+    }
+    /**
      * Logs with an arbitrary level.
      *
      * @param mixed $level

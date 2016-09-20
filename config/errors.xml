@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<errors>
+    <!--Errores fatales/graves -->
+    <vars>
+        <code>1</code>
+        <load>
+            <code>1</code>
+            <description>No se puede cargar vars</description>
+	    <loglevel>error</loglevel>
+        </load>
+        <unset>
+            <code>2</code>
+            <description>Variable no seteada</description>
+        </unset>
+    </vars>
+    <connection>
+        <code>2</code>
+        <closeerror>
+            <code>1</code>
+            <description>Ocurrio un error inesperado, reintente la operacion</description>
+	    <loglevel>critical</loglevel>
+        </closeerror>
+        <open>
+            <code>2</code>
+            <description>Imposible conectar a DB</description>
+	    <loglevel>alert</loglevel>
+        </open>
+    </connection>
+    <db>
+        <code>3</code>
+        <query>
+            <code>1</code>
+            <description>Error al ejecutar sql</description>
+	    <loglevel>alert</loglevel>
+        </query>
+    </db>
+
+    <!--Errores itracker -->
+    <prop>
+        <code>5</code>
+        <getprop>
+            <code>1</code>
+            <description>Propiedad invalida</description>
+        </getprop>
+        <setprop>
+            <code>2</code>
+            <description>No se puede setear la propiedad</description>
+        </setprop>
+    </prop>
+    
+    <its>
+        <code>6</code>
+        <error>
+            <code>1</code>
+            <description>Error de ejecucion</description>
+	    <loglevel>error</loglevel>
+        </error>
+    </its>
+    
+    <dbobject>
+        <code>7</code>
+        <load>
+            <code>1</code>
+            <description>No se pudo cargar objeto</description>
+        </load>
+        <checkdata>
+            <code>2</code>
+            <description>Datos invalidos</description>
+        </checkdata>
+        <deleted>
+            <code>3</code>
+            <description>Elemento eliminado</description>
+        </deleted>
+    </dbobject>
+    
+    <objectcache>
+        <code>8</code>
+        <classnotfound>
+            <code>1</code>
+            <description>Clase inexistente</description>
+	    <loglevel>error</loglevel>
+        </classnotfound>
+    </objectcache>
+    
+    <action>
+        <code>9</code>
+        <invalid>
+            <code>1</code>
+            <description>Accion invalida</description>
+        </invalid>
+        <ejecutescript>
+            <code>2</code>
+            <description>Error en accion</description> 
+	    <loglevel>error</loglevel>
+        </ejecutescript>
+        <notfound>
+            <code>3</code>
+            <description>Error en accion</description>
+	    <loglevel>error</loglevel>
+        </notfound>
+        
+        <go>
+            <code>4</code>
+            <invalid>
+                <code>1</code>
+                <description>Error de validacion</description>
+            </invalid>
+        </go>
+    </action>
+    <itf>
+        <code>10</code>
+        <load>
+            <code>1</code>
+            <description>Error al cargar formulario</description>
+	    <loglevel>error</loglevel>
+        </load>
+        <value>
+            <code>2</code>
+            <description>Error de validacion de campo</description>
+        </value>
+    </itf>
+    <smtp>
+        <code>11</code>
+        <send>
+            <code>1</code>
+            <description></description>
+        </send>
+    </smtp>
+    <option>
+        <code>12</code>
+        <destiny>
+            <code>1</code>
+            <description>Destino invalido</description>
+	    <loglevel>error</loglevel>
+        </destiny>
+    </option>
+    <tkt>
+        <code>13</code>
+        <update>
+            <code>1</code>
+            <description>Error al actualizar tkt</description>
+        </update>
+    </tkt>
+    <th>
+        <code>14</code>
+        <savefile>
+            <code>1</code>
+            <description>Error al guardar archivo</description>
+	    <loglevel>error</loglevel>
+        </savefile>
+        <getfile>
+            <code>2</code>
+            <description>Error al obtener archivo</description>
+	    <loglevel>error</loglevel>
+        </getfile>
+    </th>
+    <responseelement>
+        <code>15</code>
+        <invalidtype>
+            <code>1</code>
+            <descripcion>Tipo invalido</descripcion>
+	    <loglevel>error</loglevel>
+        </invalidtype>
+    </responseelement>
+    <tktfilter>
+        <code>16</code>
+        <invalidparameters>
+            <code>1</code>
+            <description>Parametros invalidos</description>
+        </invalidparameters>
+    </tktfilter>
+    <service>
+        <code>17</code>
+        <checkdata>
+            <code>1</code>
+            <description>Datos invalidos en la solicitud</description>
+        </checkdata>
+    </service>
+    <handler>
+	<code>18</code>
+	<format>
+	    <code>1</code>
+	    <description>Error de formato en la solicitud</description>
+	</format>
+	<invalid>
+	    <code>2</code>
+	    <description>Parametros invalidos en la solicitud</description>
+	</invalid>
+    </handler>
+</errors>

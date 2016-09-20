@@ -1,6 +1,8 @@
 <?php
 
 namespace Itracker\Services\Tkt;
+use Itracker\ResponseElement;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Listmyteams implements \Itracker\Services\ITServiceInterface {
 
@@ -18,7 +20,7 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         }
 
         $ids = explode(",", $Context->get_params("teams"));
-        $teamsall = $Context->get_User()->get_prop("equiposobj");
+        $teamsall = $Context->getUser()->get_prop("equiposobj");
         $uids = array();
         foreach ($teamsall as $t) {
             if (in_array($t->get_prop("id"), $ids)) {
@@ -26,31 +28,30 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
                 foreach ($usrs as $u) {
                     array_push($uids, $u->get_prop("usr"));
                 }
+            }else{
+            	throw new ItFunctionalException( 'service/checkdata',
+            			"Equipo invalido(".$Context->get_params("teams")."). Acceso denegado." );
             }
         }
         $Tf->set_filter(\Itracker\TktFilter::$UA, $uids);
         $Tl = new \Itracker\TktLister();
         $Tl->loadFilter($Tf);
-        if (!$Tl->execute()) {
-            return $Context->createElement("error", "Error al cargar listado. " . $Tf->getError());
-        }
+        $Tl->execute();
 
-        $viewA = $Context->get_User()->getMyView();
+        $viewA = $Context->getUser()->getMyView();
         $view = $viewA[0];
         $fields = $viewA[1];
 
-        $response = $Context->createElement("data");
-        $response->appendChild($Context->createElement("view", $view));
-        $listL = $Context->createElement("list");
-
-        if ($Tl->getCount()) {
-            while ($l=$Tl->getObj()) {
-                $listL->appendChild($l->getXML($Context, $fields));
-            }
-            $response->appendChild($listL);
-            return $response;
-        }
-        return null;
+        $rta = new ResponseElement ( 'data', new ResponseElement ( 'view', $view ) );
+		$rta_list = new ResponseElement ( 'list' );
+		if ($Tl->getCount () == 0) {
+			return null;
+		}
+		while ( $l = $Tl->getObj () ) {
+			$rta_list->addValue($l->getData($fields));
+		}
+		$rta->addValue($rta_list);
+		return $rta;
     }
 
 }

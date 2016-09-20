@@ -44,12 +44,6 @@ class OperationParser {
     private $temp;
 
     /**
-     *
-     * @var boolean
-     */
-    private $error;
-
-    /**
      * @var boolean
      */
     private $strStarted;
@@ -66,7 +60,6 @@ class OperationParser {
         $this->args = array();
         $this->ops = array();
         $this->temp = '';
-        $this->error = false;
         $this->parse();
     }
 
@@ -80,21 +73,11 @@ class OperationParser {
     }
 
     /**
-     * Devuelve si hay error
-     * @return boolean
-     */
-    public function getError() {
-        return $this->error;
-    }
-
-    /**
      * Devuelve operando de la posicion
      * @param int $pos
      * @return string
      */
     public function getArg($pos) {
-        if ($this->error)
-            return null;
         return $this->args[$pos];
     }
 
@@ -112,8 +95,6 @@ class OperationParser {
      * @return string
      */
     public function getOpe($pos) {
-        if ($this->error)
-            return null;
         return $this->ops[$pos];
     }
 
@@ -208,11 +189,13 @@ class OperationParser {
         if ($i < $this->operationStrLen) {
             return $this->getString($i + 1);
         }
-        $this->error = true;
-        LoggerFactory::getLogger()->error('Error al parsear ecuacion', array('Ec' => $this->operationStr,
-            'Err' => 'String no finalizado'
-                )
-        );
+        
+        throw new ItException('its/error','',
+                        'Error al parsear ecuacion',
+                        array('Ec' => $this->operationStr,
+                        'Err' => 'String no finalizado'
+                ));
+ 
         return $i;
     }
 
@@ -233,11 +216,11 @@ class OperationParser {
         if ($i < $this->operationStrLen) {
             return $this->getVar($i + 1);
         }
-        $this->error = true;
-        LoggerFactory::getLogger()->error('Error al parsear ecuacion', array('Ec' => $this->operationStr,
-            'Err' => 'Variable no finalizada'
-                )
-        );
+         throw new ItException('its/error','',
+                        'Error al parsear ecuacion',
+                        array('Ec' => $this->operationStr,
+                        'Err' => 'Variable no finalizada'
+                ));
         return $i;
     }
 

@@ -2,10 +2,12 @@
 
 namespace Itracker;
 
+use Itracker\Exceptions\ItFunctionalException;
+
 /**
  * Formularios xml para datos itracker
  */
-class ITForm implements XMLPropInterface {
+class ITForm implements PropInterface {
 
     /**
      *
@@ -30,12 +32,6 @@ class ITForm implements XMLPropInterface {
      * @var int 
      */
     private $view_level;
-
-    /**
-     * Se puede guardar
-     * @var boolean 
-     */
-    private $okToSave;
 
     /**
      * Array con el formulario
@@ -70,7 +66,6 @@ class ITForm implements XMLPropInterface {
     /**
      * Carga xml y lo parsea
      * @param string $xml
-     * @return boolean  se pudo cargar ok
      */
     public function load_xml($xml) {
         $this->set_view(0);
@@ -80,21 +75,18 @@ class ITForm implements XMLPropInterface {
             $this->xml_input = new \DOMDocument();
             $res = $this->xml_input->loadXML($this->xml_input_text);
             if (!$res) {
-                Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML", array($xml));
-                return false;
+                throw new ItFunctionalException('itf/load', '', 'No se pudo parsear XML', array($xml));
             }
             $nodeList = $this->xml_input->getElementsByTagName("element");
-            if ($nodeList->length == 0) {
-                return false;
-            }
             $this->loadOutput();
-            return $this->loadXMLFormArray();
-        } catch (\Exception $e) {
+            $this->loadXMLFormArray();
+        }catch(ItFunctionalException $e){
+            throw $e;
+        }catch (\Exception $e) {
             $this->xml_input = null;
-            Utils\LoggerFactory::getLogger()->error("No se pudo parsear XML", array($xml));
-            return false;
+            throw new ItFunctionalException('itf/load', '',  'No se pudo parsear XML', array($xml));
         }
-        return false;
+        
     }
 
     /**
@@ -142,22 +134,20 @@ class ITForm implements XMLPropInterface {
             if (isset($this->formArray[trim($arr['id'])])) {
                 $this->xml_output = null;
                 $this->formArray = null;
-                Utils\LoggerFactory::getLogger()->error("Id duplicado en itform", array('xml' => $this->xml_input_text,
-                    'id' => $arr['id'])
-                );
-                return false;
+                throw new ItFunctionalException('itf/load','Error en formulario', 
+                        'Id duplicado en itform',
+			array('xml' => $this->xml_input_text,
+                    'id' => $arr['id']));
             }
             $this->formArray[trim($arr['id'])] = $arr;
             if ($arr['notsave'] != 'true') {
                 $this->elSaveCount++;
             }
         }
-
         $els = $this->xml_output->getElementsByTagName("filelnk");
         if ($els->length) {
             $this->THfiles = $els->item(0)->getElementsByTagName('idth')->item(0)->nodeValue;
         }
-        return true;
     }
 
     /**
@@ -236,21 +226,21 @@ class ITForm implements XMLPropInterface {
             switch ($element["type"]) {
                 case "date":
                     if (STRdate_format($element["value"], USERDATE_READ_DATE, USERDATE_READ) == -1)
-                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
                 case "month":
                     if (STRdate_format($element["value"], USERDATE_READ_MONTH, USERDATE_READ) == -1)
-                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
                 case "datetime":
                     if (STRdate_format($element["value"], USERDATE_READ, USERDATE_READ) == -1)
-                        return "El campo " . $element["label"] . " debe ser una fecha.";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser una fecha.");
                     break;
             }
         }
 
         if ($element["validations"] == null || count($element["validations"]) == 0) {
-            return "ok";
+            return;
         }
 
         if ($element["type"] == "fileupl") {
@@ -262,70 +252,62 @@ class ITForm implements XMLPropInterface {
             switch ($valName) {
                 case "numeric":
                     if ($valValue == "true" && !is_numeric($element["value"]) && $notempty) {
-                        return "El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " debe ser numerico (Punto separador decimal).");
                     }
                     break;
                 case "required":
                     if ($valValue == "true" && !$notempty) {
-                        return "El campo " . $element["label"] . " es obligatorio.";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es obligatorio.");
                     }
                     break;
                 case "maxlen":
                     if (strlen($element["value"]) > $valValue && $notempty) {
-                        return "El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es muy largo. Maximo " . $valValue . " caracteres");
                     }
                     break;
                 case "minlen":
                     if (strlen($element["value"]) < $valValue && $notempty) {
-                        return "El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres";
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es muy corto. Minimo " . $valValue . " caracteres");
                     }
                     break;
                 case "max":
                     if ($element["value"] > $valValue && $notempty) {
-                        return "El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue;
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es mayor al solicitado. Maximo " . $valValue);
                     }
                     break;
                 case "min":
                     if ($element["value"] < $valValue && $notempty) {
-                        return "El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue;
+                        throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " es menor al requerido. Minimo " . $valValue);
                     }
                     break;
                 case "regex":
                     if ($notempty) {
                         $valid = preg_match($valValue, $element["value"], $newstr);
                         if (!$valid) {
-                            return "El campo " . $element["label"] . " no cumple el formato solicitado.";
+                            throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado.");
                         } elseif (is_array($newstr) && $newstr[0] != $element["value"]) {
-                            return "El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?";
+                            throw new ItFunctionalException('itf/value',"El campo " . $element["label"] . " no cumple el formato solicitado. ¿Corresponde " . $newstr[0] . " ?");
                         }
                     }
                     break;
             }
         }
-        return "ok";
     }
 
     /**
      * Carga valores de arr_val a XML de formulario
-     * @return string
      */
     private function loadValtoXML() {
         $this->loadOutput();
-        $this->okToSave = true;
-        $error = "ok";
         $nodelist = $this->xml_output->getElementsByTagName('element');
         foreach ($nodelist as $field) {
             $id = trim($this->getImmediateChildrenByTagName($field, 'id')->nodeValue);
-            $rta = $this->check_values($this->formArray[$id]);
-            if ($rta != "ok") {
-                $this->okToSave = false;
-                $error = $rta;
-            }
+            $this->check_values($this->formArray[$id]);
             $list = $this->getImmediateChildrenByTagName($field, 'value', false);
             if (count($list)) {
                 $field->removeChild($list[0]);
             }
-            $field->appendChild($this->xml_output->createElement('value', xmlEscape($this->formArray[$id]['value'])));
+            $field->appendChild($this->xml_output->createElement('value', htmlspecialchars($this->formArray[$id]['value'],ENT_XML1)));
         }
         if ($this->THfiles) {
             $fileLnk = $this->xml_output->createElement('filelnk');
@@ -334,7 +316,6 @@ class ITForm implements XMLPropInterface {
                     $fileLnk
             );
         }
-        return $error;
     }
 
     /**
@@ -354,7 +335,7 @@ class ITForm implements XMLPropInterface {
         foreach ($arr as $a) {
             $id = trim(str_replace($prefix, '', $a['id']));
             if (is_array($a['value'])) {
-                throw new \Exception('Error de value es array ' . $id);
+                throw new ItFunctionalException('itf/value','El formulario contiene informacion invalida en:' . $id);
             }
             if (isset($this->formArray[$id])) {
                 $this->formArray[$id]['value'] = $a['value'];
@@ -362,7 +343,7 @@ class ITForm implements XMLPropInterface {
                 $this->formArrayExt[$id]['value'] = $a['value'];
             }
         }
-        return $this->loadValtoXML();
+        $this->loadValtoXML();
     }
 
     /**
@@ -425,11 +406,10 @@ class ITForm implements XMLPropInterface {
      * Setea valor a elemento
      * @param string $id
      * @param string $value
-     * @return string resultado
      */
     public function set_value($id, $value) {
         $this->formArray[$id]['value'] = $value;
-        return $this->loadValtoXML();
+        $this->loadValtoXML();
     }
 
     /**
@@ -452,10 +432,6 @@ class ITForm implements XMLPropInterface {
      * @return \DOMDocument
      */
     public function getSaveDom() {
-        if (!$this->okToSave) {
-            throw new \Exception("NO OK");
-            return null;
-        }
         $domElemsToRemove = $this->findFieldsByTag('notsave', 'true');
         foreach ($domElemsToRemove as $domElement) {
             $domElement->parentNode->removeChild($domElement);
@@ -490,7 +466,7 @@ class ITForm implements XMLPropInterface {
         }
         return $arr_ret;
     }
-   
+
     /**
      * Devuelve Dom para que el usuario complete
      * @return \DOMDocument
@@ -603,7 +579,7 @@ class ITForm implements XMLPropInterface {
         if ($rta) {
             return $rta;
         }
-        return "Propiedad invalida.";
+        throw new ItFunctionalException('prop/getprop');
     }
 
     public function getXML() {
@@ -617,5 +593,9 @@ class ITForm implements XMLPropInterface {
     public function set_prop($property, $value) {
         $this->set_value($property, $value);
     }
+
+	public function getData($props = null) {
+		
+	}
 
 }

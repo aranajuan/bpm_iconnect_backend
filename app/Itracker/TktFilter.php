@@ -29,9 +29,9 @@ class TktFilter extends BasicObject {
     private $usedDB;
     private $error;
 
-    
+
     private $ssql;
-    
+
     public function __construct() {
         $this->filterArray = array();
         $this->usedDB["TKT"] = false;
@@ -90,7 +90,7 @@ class TktFilter extends BasicObject {
             $SSQL .="inner join TBL_TICKETS_M as TKT_H on (TKT_H.idtkt=TKT.id) ";
         }
         if ($this->usedDB["ACCIONES"]) {
-            $SSQL .="inner join TBL_ACCIONES as ACCIONES on 
+            $SSQL .="inner join TBL_ACCIONES as ACCIONES on
                 (ACCIONES.id=TKT_H.idaccion) ";
         }
         return $SSQL;
@@ -238,13 +238,13 @@ class TktFilter extends BasicObject {
         }
         if (!$this->validDate()) {
         	throw new ItFunctionalException('tktfilter/invalidparameters','Rango invalido. Maximo: ' .
-                    $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit') 
+                    $this->getContext()->get_GlobalConfig()->getInt('configs/reportlimit')
                     . ' dias.');
         }
         $SSQL .= $sWHERE.' order by TKT.id';
         $this->ssql= $SSQL;
     }
-    
+
     /**
      * Devuelve sql generado
      * @return string|null

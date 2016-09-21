@@ -12,20 +12,14 @@ class HandlerXML implements HandlerInterface {
 	private $header;
 	private $responses;
 	public function addResponse($response, $path = null) {
-		$this->responses = array (
-				array (
-						'res' => $response,
-						'path' => $path
-				)
-		);
-		return;
 		if ($path == null) {
-			$path = '/';
+			$path = 'response';
 		}
-		array_push ( $this->responses, array (
-				'res' => $response,
-				'path' => $path
-		) );
+		if(!isset($this->responses[$path])){
+			$this->responses[$path]=array();
+		}
+
+		array_push ( $this->responses[$path], $response );
 	}
 	public function getBody() {
 		return $this->body;
@@ -39,9 +33,18 @@ class HandlerXML implements HandlerInterface {
 	public function getResponse() {
 		$doc = new \DOMDocument ( '1.0', 'utf-8' );
 		$it = $doc->createElement ( 'itracker' );
+		if(isset($this->responses['header'])){
+			$hd = $doc->createElement ( 'header' );
+			foreach($this->responses['header'] as $he){
+						if($he instanceof ResponseItemInterface){
+							$hd->appendChild ( $this->generateElement ( $doc, $he ) );
+						}
+			}
+			$it->appendChild ( $hd );
+		}
 		$res = $doc->createElement ( 'response' );
-		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseItemInterface) {
-			$res->appendChild ( $this->generateElement ( $doc, $this->responses [0] ['res'] ) );
+		if (isset ( $this->responses['response'] ) && $this->responses['response'][0] instanceof ResponseItemInterface) {
+			$res->appendChild ( $this->generateElement ( $doc, $this->responses['response'][0] ) );
 		}
 		$it->appendChild ( $res );
 		$doc->appendChild ( $it );

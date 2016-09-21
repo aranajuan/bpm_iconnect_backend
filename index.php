@@ -14,7 +14,7 @@ $ContextConf = \Itracker\Utils\GlobalConfig::getInstance ();
 /**
  * Crypter
  */
-if (strpos ( $_SERVER ["HTTP_USER_AGENT"], 'MSIE' ) || strpos ( $_SERVER ["HTTP_USER_AGENT"], 'Chrome' )) {
+if ($_SERVER['REQUEST_METHOD']=='GET' && (strpos ( $_SERVER ["HTTP_USER_AGENT"], 'MSIE' ) || strpos ( $_SERVER ["HTTP_USER_AGENT"], 'Chrome' ))) {
 	if ($_SERVER ['REMOTE_ADDR'] != '::1' && $_SERVER ['REMOTE_ADDR'] != '127.0.0.1' && $_SERVER ['REMOTE_ADDR'] != $ContextConf->getString ( 'serverip' )) {
 		echo 'Acceso denegado';
 		exit ();
@@ -36,7 +36,7 @@ $logger = \Itracker\Utils\LoggerFactory::getLogger ( $ContextConf->getString ( '
 
 if ($ContextConf->getString ( 'database/motor' ) == 'mssql')
 	header ( 'Content-Type: text/html; charset=iso-8859-1' );
-	
+
 	/* Contexto general */
 $Context = \Itracker\Context::getContext ();
 
@@ -66,7 +66,7 @@ if (! isset ( $argv [1] )) {
 	$handler->loadEnvironment ( array (
 			'txt' => trim ( file_get_contents ( 'php://input' ) ),
 			'ipfront' => $_SERVER ['REMOTE_ADDR'],
-			'date' => $_SERVER ['REQUEST_TIME'] 
+			'date' => $_SERVER ['REQUEST_TIME']
 	) );
 }
 
@@ -74,7 +74,7 @@ $Context->setHandler ( $handler );
 $rs = $Context->executeRequest ();
 $logger->debug ( "msj", array (
 		'in' => trim ( file_get_contents ( 'php://input' ) ),
-		'out' => $rs 
+		'out' => $rs
 ) );
 echo $rs;
 exit ();

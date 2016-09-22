@@ -14,7 +14,7 @@ class TktH extends ITObject {
 
     /**
      *
-     * @var Tkt 
+     * @var Tkt
      */
     private $TKT;   /* objeto ticket */
     private $idtkt;
@@ -50,7 +50,7 @@ class TktH extends ITObject {
 
     /**
      *
-     * @var Action 
+     * @var Action
      */
     private $accion; /* objeto accion */
     private $idLink;
@@ -61,8 +61,8 @@ class TktH extends ITObject {
     }
 
     function load_DB($id) {
-        $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H 
-                        left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm) 
+        $this->dbinstance->loadRS("select H.*,D.detalle from TBL_TICKETS_M as H
+                        left join TBL_TICKETS_M_DETALLES as D on (H.id=D.idtktm)
                             where H.id=".intval($id)." and H.estado = " . I_ACTIVE);
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
@@ -226,7 +226,7 @@ class TktH extends ITObject {
                         values (" . intval($this->id) . ",'" . strToSQL($form) . "')";
 
         $this->dbinstance->query($ssql);
-            
+
     }
 
     private function loadObjadj() {
@@ -258,7 +258,7 @@ class TktH extends ITObject {
             return null;
         $rta = new ResponseElement('th');
 		$action = new ResponseElement('action');
-        
+
 		$action->addValue(new ResponseElement('id',$this->get_prop('id')));
 
         $alias = $this->accion->get_prop("alias");
@@ -278,7 +278,7 @@ class TktH extends ITObject {
         $action->addValue(new ResponseElement('value',$value));
         $action->addValue(new ResponseElement('usr',$this->get_prop('ua')));
         $action->addValue(new ResponseElement('date',$this->get_prop('fa')));
-        
+
         if ($this->getThUpdate() != null) {
             $isupdate = "true";
         } else {
@@ -286,9 +286,9 @@ class TktH extends ITObject {
         }
         $action->addValue(new ResponseElement('isupdated',$isupdate));
         $action->addValue(new ResponseElement('ejecuta',$this->accion->get_prop('ejecuta')));
-        
+
         $rta->addValue($action);
-        
+
         if ($this->get_prop("itform") != null) {
             $itfDom = $this->get_prop("itform")->getViewDom();
             if ($itfDom) {
@@ -373,11 +373,11 @@ class TktH extends ITObject {
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
             if (fwrite($fileO, base64_decode($f["data"])) == FALSE) {
-                throw new Exceptions\ItItErrorException('th/savefile');
+                throw new Exceptions\ItErrorException('th/savefile');
             }
             fclose($fileO);
             if (!file_exists($fname)) {
-                throw new Exceptions\ItItErrorException('th/savefile');
+                throw new Exceptions\ItErrorException('th/savefile');
             }
         }
     }
@@ -516,7 +516,7 @@ class TktH extends ITObject {
     }
 
     public function check_data() {
-        
+
     }
 
     public function delete_DB() {
@@ -525,7 +525,7 @@ class TktH extends ITObject {
     }
 
     public function update_DB() {
-        
+
     }
 
 }

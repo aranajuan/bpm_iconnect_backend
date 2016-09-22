@@ -17,7 +17,7 @@ class Header {
 	 */
 	private static $IPREGEX =
 		'/^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$/';
-	
+
 	/**
 	 * Ips validas
 	 * @var array
@@ -29,7 +29,7 @@ class Header {
 	 * @var String
 	 */
 	private static $HASHREGEX  = '/([a-fA-F\\d]{40})/';
-	
+
 	/**
 	 *
 	 * @var String
@@ -73,10 +73,17 @@ class Header {
 	private $pass;
 
 	/**
-	 * Fecha inicio solicitud 
+	 *
+	 * @var Boolean
+	 */
+	private $logout;
+
+
+	/**
+	 * Fecha inicio solicitud
 	 */
 	private $request_time;
-	
+
 	/**
 	 * Constructor
 	 * @param String $front
@@ -87,7 +94,7 @@ class Header {
 	 * @param String $hash
 	 * @param String $pass
 	 */
-	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass, $request_time) {
+	public function __construct($front, $ipfront, $instance, $user, $ipuser, $hash, $pass, $logout, $request_time) {
 		$this->setFront ( $front );
 		$this->setIpfront ( $ipfront );
 		$this->setInstance ( $instance );
@@ -95,6 +102,7 @@ class Header {
 		$this->setIpuser ( $ipuser );
 		$this->setHash ( $hash );
 		$this->setPass ( $pass );
+		$this->setLogout( $logout );
 		$this->setRequestTime($request_time);
 	}
 
@@ -105,11 +113,11 @@ class Header {
 		}
 		$this->request_time = $date;
 	}
-	
+
 	public function getRequestTime(){
 		return $this->request_time;
 	}
-	
+
 	/**
 	 * front
 	 * @return string
@@ -239,10 +247,26 @@ class Header {
 	/**
 	 * pass
 	 * @param string $pass
-	 * @return Header{
 	 */
 	public function setPass($pass) {
 		$this->pass = $pass;
 	}
+
+	/**
+	 * Logout despues de cumplir request
+	 * @return Boolean
+	 */
+	public function getLogout() {
+		return $this->logout;
+	}
+
+	/**
+	 * pass
+	 * @param Boolean $logout
+	 */
+	public function setLogout($logout) {
+		$this->logout = 1 && $logout;
+	}
+
 
 }

@@ -144,7 +144,9 @@ class Context {
 				'usr_ip'=>$handler->getHeader()->getIpuser(),
 				'front_name'=>$handler->getHeader()->getFront(),
 				'rq_class'=>$handler->getBody()->getClass(),
-				'rq_method'=>$handler->getBody()->getMethod()
+				'rq_method'=>$handler->getBody()->getMethod(),
+				'login'=> $handler->getHeader()->getPass() && 1,
+				'logout' => $handler->getHeader()->getLogout()
 				));
 
 
@@ -314,6 +316,17 @@ class Context {
 				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
 			$response = new RequestHandlers\ErrorResponseAdapter($e);
 			$error = true;
+		}
+		try{
+			if(
+				$this->getHandler()->getHeader() instanceof RequestHandlers\Header &&
+				$this->getHandler()->getHeader()->getLogout()){
+					if($this->getUser() instanceof User){
+						$this->getUser()->sessionClose();
+					}
+			}
+		}catch(\Exception $e){
+
 		}
 		$this->getHandler()->addResponse ( $response);
 		$responseSTR = $this->getHandler()->getResponse();

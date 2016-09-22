@@ -107,6 +107,7 @@ class HandlerXML implements HandlerInterface {
 
 		$hash = $xpath->query ( '/itracker/header/hash' );
 		$pass = $xpath->query ( '/itracker/header/pass' );
+		$logout = $xpath->query ( '/itracker/header/logout' );
 
 		if ($hash->length) {
 			$hash = $hash->item ( 0 )->nodeValue;
@@ -120,8 +121,14 @@ class HandlerXML implements HandlerInterface {
 			$pass = null;
 		}
 
+		if ($logout->length) {
+			$logout = $logout->item ( 0 )->nodeValue;
+		} else {
+			$logout = null;
+		}
+
 		// header
-		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $this->input ['date'] );
+		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $logout,$this->input ['date'] );
 		$params = $xpath->query ( '/itracker/request/params/*' );
 		$params_array = array ();
 		foreach ( $params as $p ) {

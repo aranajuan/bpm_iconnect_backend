@@ -367,23 +367,23 @@ class TktH extends ITObject {
         $path = $this->getInstance()->get_prop("archivos_externos");
         $path.="/adjuntos";
         $files = $this->accion->getFiles();
-        foreach ($files as $f) {
-            $fileexp = explode(".", $f["name"]);
+        foreach ($files as $name => $data) {
+            $fileexp = explode(".", $name);
             $count = explode("_", $fileexp[0]);
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
             if($fileO == FALSE){
-              throw new Exceptions\ItErrorException('th/savefile',
-              array('msj'=>'error al generar','path'=>$fname));
+              throw new Exceptions\ItErrorException('th/savefile','error al generar',
+              array('path'=>$fname));
             }
-            if (fwrite($fileO, base64_decode($f["data"])) == FALSE) {
-                throw new Exceptions\ItErrorException('th/savefile',
-                array('msj'=>'error al escribir','path'=>$fname));
+            if (fwrite($fileO, base64_decode($data)) == FALSE) {
+                throw new Exceptions\ItErrorException('th/savefile','error al escribir',
+                array('path'=>$fname));
             }
             fclose($fileO);
             if (!file_exists($fname)) {
-                throw new Exceptions\ItErrorException('th/savefile',
-                array('msj'=>'error al verificar','path'=>$fname));
+                throw new Exceptions\ItErrorException('th/savefile','error al verificar',
+                array('path'=>$fname));
             }
         }
     }

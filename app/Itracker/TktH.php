@@ -372,12 +372,18 @@ class TktH extends ITObject {
             $count = explode("_", $fileexp[0]);
             $fname = $path . "/" . $this->id . "_" . $count[1] . "." . $fileexp[1];
             $fileO = fopen($fname, "w");
+            if($fileO == FALSE){
+              throw new Exceptions\ItErrorException('th/savefile',
+              array('msj'=>'error al generar','path'=>$fname));
+            }
             if (fwrite($fileO, base64_decode($f["data"])) == FALSE) {
-                throw new Exceptions\ItErrorException('th/savefile');
+                throw new Exceptions\ItErrorException('th/savefile',
+                array('msj'=>'error al escribir','path'=>$fname));
             }
             fclose($fileO);
             if (!file_exists($fname)) {
-                throw new Exceptions\ItErrorException('th/savefile');
+                throw new Exceptions\ItErrorException('th/savefile',
+                array('msj'=>'error al verificar','path'=>$fname));
             }
         }
     }

@@ -12,20 +12,14 @@ class HandlerXML implements HandlerInterface {
 	private $header;
 	private $responses;
 	public function addResponse($response, $path = null) {
-		$this->responses = array (
-				array (
-						'res' => $response,
-						'path' => $path
-				)
-		);
-		return;
 		if ($path == null) {
-			$path = '/';
+			$path = 'response';
 		}
-		array_push ( $this->responses, array (
-				'res' => $response,
-				'path' => $path
-		) );
+		if(!isset($this->responses[$path])){
+			$this->responses[$path]=array();
+		}
+
+		array_push ( $this->responses[$path], $response );
 	}
 	public function getBody() {
 		return $this->body;
@@ -39,9 +33,18 @@ class HandlerXML implements HandlerInterface {
 	public function getResponse() {
 		$doc = new \DOMDocument ( '1.0', 'utf-8' );
 		$it = $doc->createElement ( 'itracker' );
+		if(isset($this->responses['header'])){
+			$hd = $doc->createElement ( 'header' );
+			foreach($this->responses['header'] as $he){
+						if($he instanceof ResponseItemInterface){
+							$hd->appendChild ( $this->generateElement ( $doc, $he ) );
+						}
+			}
+			$it->appendChild ( $hd );
+		}
 		$res = $doc->createElement ( 'response' );
-		if (isset ( $this->responses [0] ['res'] ) && $this->responses [0] ['res'] instanceof ResponseItemInterface) {
-			$res->appendChild ( $this->generateElement ( $doc, $this->responses [0] ['res'] ) );
+		if (isset ( $this->responses['response'] ) && $this->responses['response'][0] instanceof ResponseItemInterface) {
+			$res->appendChild ( $this->generateElement ( $doc, $this->responses['response'][0] ) );
 		}
 		$it->appendChild ( $res );
 		$doc->appendChild ( $it );
@@ -104,6 +107,7 @@ class HandlerXML implements HandlerInterface {
 
 		$hash = $xpath->query ( '/itracker/header/hash' );
 		$pass = $xpath->query ( '/itracker/header/pass' );
+		$logout = $xpath->query ( '/itracker/header/logout' );
 
 		if ($hash->length) {
 			$hash = $hash->item ( 0 )->nodeValue;
@@ -117,8 +121,14 @@ class HandlerXML implements HandlerInterface {
 			$pass = null;
 		}
 
+		if ($logout->length) {
+			$logout = $logout->item ( 0 )->nodeValue;
+		} else {
+			$logout = null;
+		}
+
 		// header
-		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $this->input ['date'] );
+		$this->header = new Header ( $xpath->query ( '/itracker/header/front' )->item ( 0 )->nodeValue, $this->input ['ipfront'], $xpath->query ( '/itracker/header/instance' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/usr' )->item ( 0 )->nodeValue, $xpath->query ( '/itracker/header/ip' )->item ( 0 )->nodeValue, $hash, $pass, $logout,$this->input ['date'] );
 		$params = $xpath->query ( '/itracker/request/params/*' );
 		$params_array = array ();
 		foreach ( $params as $p ) {

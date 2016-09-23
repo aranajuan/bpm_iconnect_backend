@@ -7,14 +7,14 @@ use Itracker\Exceptions\ItErrorException;
 /**
  * Variables de XML
  * Se ingresa XML y se extraen u opera con datos de las variables
- * 
+ *
  * @author juan
  */
 class Vars implements \Itracker\PropInterface {
 
 	/**
 	 *  Xml de la base
-	 * @var String 
+	 * @var String
 	 */
 	private $xml;
 
@@ -65,7 +65,7 @@ class Vars implements \Itracker\PropInterface {
 		$this->vars = null;
 		try {
 			if ( $this->dom_init->load ( $path ) == false ) {
-				throw new ItErrorException ( 'vars/load', 
+				throw new ItErrorException ( 'vars/load',
 					'Error al parsear Xml de variables',
 					array($path) );
 			}
@@ -93,7 +93,7 @@ class Vars implements \Itracker\PropInterface {
 		$this->dom = null;
 		$this->vars = null;
 		if ( $this->dom_init->loadXML ( $this->xml ) == false ) {
-			throw new ItErrorException ( 'vars/load', 
+			throw new ItErrorException ( 'vars/load',
 				'Error al parsear Xml de variables',
 				array ('xml' => $xml) );
 		}
@@ -250,7 +250,7 @@ class Vars implements \Itracker\PropInterface {
 		$dompos = $this->dom;
 		foreach ( $pathV as $p ) {
 			if ( $i == $pos ) {
-				$nnode = $this->dom->createElement ( $p, trim ( htmlspecialchars(  strip_tags ( $v ),ENT_XML1  ) ));
+				$nnode = $this->dom->createElement ( $p, trim ( htmlspecialchars(  strip_tags ( $v ), ENT_QUOTES | ENT_XML1  ) ));
 				$dompos->appendChild ( $nnode );
 				return;
 			}

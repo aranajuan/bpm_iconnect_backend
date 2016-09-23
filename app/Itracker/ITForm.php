@@ -29,7 +29,7 @@ class ITForm implements PropInterface {
 
     /**
      *  Nivel de vista para el get_output
-     * @var int 
+     * @var int
      */
     private $view_level;
 
@@ -86,7 +86,7 @@ class ITForm implements PropInterface {
             $this->xml_input = null;
             throw new ItFunctionalException('itf/load', '',  'No se pudo parsear XML', array($xml));
         }
-        
+
     }
 
     /**
@@ -134,7 +134,7 @@ class ITForm implements PropInterface {
             if (isset($this->formArray[trim($arr['id'])])) {
                 $this->xml_output = null;
                 $this->formArray = null;
-                throw new ItFunctionalException('itf/load','Error en formulario', 
+                throw new ItFunctionalException('itf/load','Error en formulario',
                         'Id duplicado en itform',
 			array('xml' => $this->xml_input_text,
                     'id' => $arr['id']));
@@ -307,7 +307,7 @@ class ITForm implements PropInterface {
             if (count($list)) {
                 $field->removeChild($list[0]);
             }
-            $field->appendChild($this->xml_output->createElement('value', htmlspecialchars($this->formArray[$id]['value'],ENT_XML1)));
+            $field->appendChild($this->xml_output->createElement('value', htmlspecialchars($this->formArray[$id]['value'], ENT_QUOTES | ENT_XML1)));
         }
         if ($this->THfiles) {
             $fileLnk = $this->xml_output->createElement('filelnk');
@@ -595,7 +595,7 @@ class ITForm implements PropInterface {
     }
 
 	public function getData($props = null) {
-		
+
 	}
 
 }

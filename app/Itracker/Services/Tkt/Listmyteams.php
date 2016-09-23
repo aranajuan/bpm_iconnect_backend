@@ -20,10 +20,15 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         }
 
         $ids = explode(",", $Context->get_params("teams"));
-        $teamsall = $Context->getUser()->get_prop("equiposobj");
         $uids = array();
-        foreach ($teamsall as $t) {
-            if (in_array($t->get_prop("id"), $ids)) {
+        $view = null;
+        foreach ($ids as $idt) {
+            $t = $Context->getUser()->get_team_obj($idt);
+            if(count($ids) == 1){
+              $view = $t->get_prop ( 'mytkts_vista' );
+              $fields = $t->getFieldRequired ( 'mytkts_vista' );
+            }
+            if ($t) {
                 $usrs = $t->get_users();
                 foreach ($usrs as $u) {
                     array_push($uids, $u->get_prop("usr"));
@@ -38,9 +43,11 @@ class Listmyteams implements \Itracker\Services\ITServiceInterface {
         $Tl->loadFilter($Tf);
         $Tl->execute();
 
-        $viewA = $Context->getUser()->getMyView();
-        $view = $viewA[0];
-        $fields = $viewA[1];
+        if(!$view){
+            $viewA = $Context->getUser()->getMyView();
+            $view = $viewA[0];
+            $fields = $viewA[1];
+        }
 
         $rta = new ResponseElement ( 'data', new ResponseElement ( 'view', $view ) );
 		$rta_list = new ResponseElement ( 'list' );

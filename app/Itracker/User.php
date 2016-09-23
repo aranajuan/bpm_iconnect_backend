@@ -242,7 +242,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 
 	/**
 	 * Actualiza los equipos en dbteams
-	 * @param array $teamList   ids de equipos a guardar (se cruza con los que 
+	 * @param array $teamList   ids de equipos a guardar (se cruza con los que
 	 * tiene y los que administra el usuario)
 	 * @return int  cantidad de equipos
 	 */
@@ -396,7 +396,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 				$this->idsequiposV[$i] = $TID;
 				$i++;
 			} catch ( Exceptions\ItDeletedException $e ) {
-				
+
 			}
 		}
 		if ( $i )
@@ -430,7 +430,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 				$this->idsequiposadmV[$i] = $TID;
 				$i++;
 			} catch ( Exceptions\ItDeletedException $e ) {
-				
+
 			}
 		}
 		if ( $i )
@@ -459,7 +459,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 					$t = $this->objsCache->get_object ( "Team", $tid );
 					array_push ( $final, $t );
 				} catch ( Exceptions\ItDeletedException $e ) {
-					
+
 				}
 			}
 		}
@@ -571,7 +571,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 		$ssql = "delete from TBL_UCONTAC where usr='" . strToSQL ( $this->usr ) . "'";
 		$this->dbroot->query ( $ssql );
 
-		$ssql = "insert into TBL_UCONTAC (usr,mail,tel,nombre,puesto,ubicacion) 
+		$ssql = "insert into TBL_UCONTAC (usr,mail,tel,nombre,puesto,ubicacion)
         values ('" . $this->usr . "', '" . strToSQL ( $this->mail ) . "', '" . strToSQL ( $this->tel ) . "','" . strToSQL ( $this->nombre ) . "','" . strToSQL ( $this->puesto ) . "','" . strToSQL ( $this->ubicacion ) . "' )";
 
 		$this->dbroot->query ( $ssql );
@@ -621,7 +621,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 	public function insert_DB() {
 		$this->check_data ();
 
-		$ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado) 
+		$ssql = "insert into TBL_USUARIOS(usr,idsequipos,idsequiposadm,perfil,estado)
                 values ('" . strToSQL ( $this->usr ) . "','" . strToSQL ( $this->dbteams ) . "',null," . intval ( $this->perfil ) . ",0);";
 
 		$this->dbinstance->query ( $ssql );
@@ -691,7 +691,7 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return array vista,eventos,thumb,download
 	 * @param Tkt $TKT
 	 */
@@ -959,16 +959,16 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 		if ( $sessionC >= $maxsessions ) {
 			throw new ItFunctionalException ( 'dbobject/checkdata', 'Limite de sesiones alcanzado. Cierre una sesion.' );
 		}
-		
+
 		/* validar front e instancia */
 		if (! $this->check_instance ( $instance->get_prop ( 'nombre' ) )) {
 			throw new ItFunctionalException('dbobject/checkdata','Instancia invalida');
 		}
-		
+
 		if (! $this->check_front ( $front->get_prop ( 'id' ) )) {
 			throw new ItFunctionalException('dbobject/checkdata','Front invalido');
 		}
-		
+
 		if ( $maxsessions == 1 ) {
 			$this->sessionCloseAll ();
 		}
@@ -1080,9 +1080,9 @@ class User extends ITObject implements Utils\ScriptFunctionsInterface {
 		$equipos = $this->get_prop ( "equiposobj" );
 		if ( count ( $equipos ) ) {
 			foreach($equipos as $t){
-				$view = $equipos[0]->get_prop ( $type );
+				$view = $t->get_prop ( $type );
 				if($view!= '' && $view != null){
-					return array ($equipos[0]->get_prop ( $type ), $equipos[0]->getFieldRequired ( $type ));
+					return array ($t->get_prop ( $type ), $t->getFieldRequired ( $type ));
 				}
 			}
 		} else {

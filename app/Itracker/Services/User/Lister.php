@@ -7,7 +7,7 @@ use Itracker\ResponseElement;
 class Lister implements \Itracker\Services\ITServiceInterface {
 
     /**
-     * 
+     *
      * @param \Itracker\Context $Context
      * @return type
      */
@@ -22,7 +22,7 @@ class Lister implements \Itracker\Services\ITServiceInterface {
         $rta = new ResponseElement('list');
         if ($USERALL_v) {
             foreach ($USERALL_v as $u)
-                $rta->addValue($l->getData( array('usr', 'dominio', 'equiposname', 'mail', 'telefono', 'nombre', 'perfil', 'perfilT', 'ubicacion', 'puesto', 'fronts', 'idsequipos')));
+                $rta->addValue($u->getData( array('usr', 'dominio', 'equiposname', 'mail', 'telefono', 'nombre', 'perfil', 'perfilT', 'ubicacion', 'puesto', 'fronts', 'idsequipos')));
         }
         return $rta;
     }

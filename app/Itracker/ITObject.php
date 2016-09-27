@@ -15,11 +15,11 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
 		}
 		return $rta;
 	}
-	
+
 	/**
 	 * Busca propiedad, dos niveles
-	 * 
-	 * @param string $p        	
+	 *
+	 * @param string $p
 	 * @param boolean $hideError
 	 *        	ocultarPropnull
 	 * @return string | variant
@@ -29,7 +29,14 @@ abstract class ITObject extends BasicObject implements PropInterface, DBObjectIn
 		$i = 0;
 		$cobj = $this;
 		while ( 1 ) {
-			$rta = $cobj->get_prop ( $pparts [$i] );
+			try{
+				$rta = $cobj->get_prop ( $pparts [$i] );
+			}catch(ItFunctionalException $e){
+				if($e->getError()=='prop/getprop' && $hideError){
+					return '';
+				}
+				throw $e;
+			}
 			if (isset ( $pparts [$i + 1] )) {
 				if ($rta instanceof PropInterface) {
 					$cobj = $rta;

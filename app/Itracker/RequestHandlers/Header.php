@@ -22,7 +22,7 @@ class Header {
 	 * Ips validas
 	 * @var array
 	 */
-	private static $IPVALIDS = array ('::1');
+	private static $IPVALIDS = array ('::1','console');
 
 	/**
 	 * Hash valido
@@ -213,7 +213,7 @@ class Header {
 	 * @return Header{
 	 */
 	public function setIpuser($ipuser) {
-		if ( !preg_match ( self::$IPREGEX, $ipuser )) {
+		if ( !preg_match ( self::$IPREGEX, $ipuser ) && !in_array ( $ipuser, self::$IPVALIDS )) {
 			throw new ItErrorException ( 'handler/invalid', 'Ip usuario invalida ' );
 		}
 		$this->ipuser = $ipuser;

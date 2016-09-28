@@ -66,7 +66,7 @@ class PHP_XLSXWriter extends ExcelAdapter {
                 $this->data[$row][$j] = "";
             }
         }
-        $this->data[$row][$col] =  html_entity_decode($data["value"]);
+        $this->data[$row][$col] = iconv("UTF-8", "UTF-8//IGNORE",html_entity_decode($data["value"]) );
         switch ($data["type"]) {
             case "number":
                 $this->tmpHeader_types[$col] = '0.00';

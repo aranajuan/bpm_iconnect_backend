@@ -120,7 +120,7 @@ class Tkt extends Tree {
     /**
      * Carga ruta
      * @param type $tmpU
-     * @fromdb  boolean cargado desde base de datos  
+     * @fromdb  boolean cargado desde base de datos
      * @return string
      */
     function load_VEC($tmpU, $fromdb = false) {
@@ -245,7 +245,7 @@ class Tkt extends Tree {
             }
             $actionsT = implode(",", $actionsV);
             $ssql = "
-            select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion) 
+            select TH.id from TBL_TICKETS_M as TH inner join TBL_ACCIONES as TA on (TA.id=TH.idaccion)
             where TH.idtkt=" . intval($this->id) . " and TH.UB is null and TA.nombre in (" . $actionsT . ")
                 order by id
             ";
@@ -270,7 +270,7 @@ class Tkt extends Tree {
                     }
                     $i++;
                 } catch (ItDeletedException $e) {
-                    
+
                 }
             }
         }
@@ -570,6 +570,7 @@ class Tkt extends Tree {
      * @return string|null
      */
     public function check_data() {
+        $this->load_team();
         if (!$this->can_edit)
             throw new ItFunctionalException('dbobject/checkdata', $this->detail_can_edit);
         if (!is_numeric($this->id))
@@ -599,7 +600,6 @@ class Tkt extends Tree {
         $this->idequipo = $idequipo;
         $this->equipos_tratan = ',' . $idequipo . ',';
         $this->teamLoaded = false;
-        $this->load_team();
         $this->insert_DB();
     }
 
@@ -658,7 +658,7 @@ class Tkt extends Tree {
     }
 
     /**
-     * 
+     *
      * deriva a otro equipo, si es master tambien deriva a sus hijos
      * libera y limpia prioridad
      * @param Team equipo a derivar
@@ -747,7 +747,7 @@ class Tkt extends Tree {
      */
     function asign($tou) {
         if (!$tou->in_team($this->idequipo)){
-            throw new ItFunctionalException('tkt/update','No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt');   
+            throw new ItFunctionalException('tkt/update','No se puede asignar a este usuario, no pertenece al equipo donde esta el tkt');
         }
 
         $ssql = "u_tom='" . strToSQL($tou->get_prop("usr")) .
@@ -775,7 +775,7 @@ class Tkt extends Tree {
         $l = $this->getLogged();
         $ssql = "u_tom=NULL ,u_asig='" . strToSQL($l->get_prop("usr")). "'";
         $this->update_sql($ssql);
-        
+
         $this->u_tom = NULL;
         $this->u_asig = $l->get_prop("usr");
         $this->u_tom_o = NULL;
@@ -835,7 +835,7 @@ class Tkt extends Tree {
         }
 
         if (!$master->is_master()){
-            throw new ItFunctionalException('tkt/update',"Este ticket esta anexado al tkt:" . 
+            throw new ItFunctionalException('tkt/update',"Este ticket esta anexado al tkt:" .
                     $master->get_prop("idmaster") . ". Debe anexarlo a este.");
         }
 
@@ -899,7 +899,7 @@ class Tkt extends Tree {
      */
     function un_join() {
         $ssql = "idmaster=NULL";
-        
+
         $this->update_sql($ssql);
 
         $this->idmaster = NULL;
@@ -908,7 +908,7 @@ class Tkt extends Tree {
 
     /**
      * Vector de TKTS similares
-     * @return array<Tkt>|null 
+     * @return array<Tkt>|null
      */
     public function get_similar() {
 
@@ -920,7 +920,7 @@ class Tkt extends Tree {
 
         $criticVC = explode(",", $critico);
         $ssql = "
-            select id,origen from TBL_TICKETS where idmaster is null and FB is null 
+            select id,origen from TBL_TICKETS where idmaster is null and FB is null
             and origen like 'D%,S" . intval($this->get_system()->get_prop("id")) . ",%'"; // todos los tkts del sistema abiertos
         $this->dbinstance->loadRS($ssql);
         if (!$this->dbinstance->noEmpty) {
@@ -973,9 +973,9 @@ class Tkt extends Tree {
         $this->dbinstance->query('update TBL_TICKETS set '.$ssql.
                 ' where id=' . intval($this->id));
     }
-    
+
     public function update_DB() {
-	    
+
     }
 
     function get_prop($property) {

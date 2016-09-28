@@ -9,28 +9,28 @@ use \KLogger\Psr\Log\LogLevel;
 class ItErrorException extends \Exception {
  /**
      * Codigo de error de var
-     * @var String 
+     * @var String
      */
     private $error;
-    
+
     /**
      * Descripcion adicional
      */
     private $logMsj;
-    
+
     /**
      * Error context
-     * @var array 
+     * @var array
      */
     private $logData;
-    
+
     /**
      * Nivel de log
      * @var String
      */
     private $logLevel;
     /**
-     * 
+     *
      * @param String $error
      * @param String $logmsg
      * @param Array $logdata
@@ -50,7 +50,7 @@ class ItErrorException extends \Exception {
 		$path.='/';
 		$wight*=100;
 	}
-	
+
 	$this->logLevel = $errCnf->getString ( $error.'/loglevel' );
 	if($this->logLevel == null){
 		$this->logLevel = $defaultLogLevel;
@@ -59,19 +59,25 @@ class ItErrorException extends \Exception {
 		$errCnf->getString ( $error.'/description' ),
 		$code
 		);
-	
+
     }
-    
     /**
-     * 
+    * @return error slash
+    **/
+    public function getError(){
+      return $this->error;
+    }
+
+    /**
+     *
      * @return String
      */
     public function getLogMsj(){
 	    return $this->logMsj;
     }
-    
+
     /**
-     * 
+     *
      * @return array
      */
     public function getLogData(){
@@ -79,13 +85,11 @@ class ItErrorException extends \Exception {
     }
 
     /**
-     * 
+     *
      * @return String
      */
     public function getLogLevel(){
 	    return $this->logLevel;
     }
-    
+
 }
-
-

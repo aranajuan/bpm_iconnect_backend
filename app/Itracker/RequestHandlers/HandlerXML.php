@@ -6,11 +6,13 @@ use \Itracker\Exceptions\ItErrorException;
 use Itracker\ResponseElement;
 
 class HandlerXML implements HandlerInterface {
-	private $input;
+
+	protected $input;
 	private $parsed;
-	private $body;
-	private $header;
-	private $responses;
+	protected $body;
+	protected $header;
+	protected $responses;
+
 	public function addResponse($response, $path = null) {
 		if ($path == null) {
 			$path = 'response';

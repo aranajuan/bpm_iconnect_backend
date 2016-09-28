@@ -16,6 +16,8 @@ start_measure ( 'fullscript' );
 
 $ContextConf = \Itracker\Utils\GlobalConfig::getInstance ();
 
+$ContextConf->loadAlterVars('config_console.xml');
+
 $logger = \Itracker\Utils\LoggerFactory::getLogger ( $ContextConf->getString ( 'debug/log_level' ) );
 
 /* Contexto general */

@@ -25,7 +25,7 @@ class DB {
     private $resultarr; /* array resultado de PDO */
     /**
      * Carga connectionmanager
-     * 
+     *
      */
     function __construct($conn, $root = false) {
         $this->connection = $conn;
@@ -55,7 +55,7 @@ class DB {
         }
         return $this->connection->beginTran($this->RI);
     }
-    
+
     /**
      * Carga recordset
      * @param String $ssql
@@ -90,7 +90,7 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud."; 
+                $this->details = "Error al ejecutar solicitud.";
                 $this->noEmpty = 0;
                 $this->cReg = 0;
                  throw new ItErrorException('db/query', 'Error loadrs',array(
@@ -121,7 +121,7 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                 throw new ItErrorException('db/query', '','Error loadrs',array(
+                 throw new ItErrorException('db/query', 'Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {
@@ -140,7 +140,7 @@ class DB {
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
                 $this->lstIDmss = NULL;
-                 throw new ItErrorException('db/query', '','Error loadrs',array(
+                 throw new ItErrorException('db/query','Error loadrs',array(
                         print_r($this->get_link()->errorInfo(),true),
                         $ssql));
             } else {

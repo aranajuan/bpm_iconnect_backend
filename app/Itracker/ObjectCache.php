@@ -42,7 +42,7 @@ class ObjectCache {
         }
         return $class;
     }
-    
+
     /**
      * Obtiene clase de cache o crea objeto y carga de db
      * @param String $class clase requerida
@@ -96,9 +96,10 @@ class ObjectCache {
     private function load_object($class, $id) {
             $cn = new $class();
             if ($cn) {
-                $cn->load_DB($id);
+                $resp = $cn->load_DB($id);
                 $this->last++;
                 $this->itobjects[$this->last] = $cn;
+                $this->status[$this->last] = $resp;
                 $this->index[$this->last] = array($class, $id);
                 return $this->last;
             } else {
@@ -116,13 +117,13 @@ class ObjectCache {
     public function clean_object($class, $id) {
         $class = $this->getITClass($class);
         $pos =$this->getindex_obj($class, $id);
-        if($pos==0) return 0; 
+        if($pos==0) return 0;
         unset($this->itobjects[$pos]);
         unset($this->status[$pos]);
         unset($this->index[$pos]);
         return $pos;
     }
-    
+
     /**
      * Busca indice en cache
      * @param String $class

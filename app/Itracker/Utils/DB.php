@@ -165,8 +165,14 @@ class DB {
             $arr = array_shift($this->resultarr);
             if ($arr) {
                 foreach ($arr as &$a) {
-                    $a = mb_convert_encoding($a, "UTF-8","ISO-8859-15");
-                    $a = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $a);
+                  $a = trim($a);
+		              $a = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $a);
+ 	                $a =html_entity_decode($a,ENT_COMPAT, 'UTF-8');
+			            if(substr($a,0,1) == '<'){
+                        preg_match_all('/(<.*>).*/gs', $a, $matches);
+				                $a = $matches[1][0];
+		   		              $a =  str_replace("&", "&amp;", $a);
+			            }
                 }
             }
             return $arr;

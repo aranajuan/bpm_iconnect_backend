@@ -51,6 +51,10 @@ class ObjectCache {
      * @return \Itracker\ITObject|null Objecto de la clase solicitada null si falla
      */
     public function get_object($class, $id, $force_update = false, $allow_deleted = false) {
+        if(count($this->itobjects) >
+          Utils\GlobalConfig::getInstance()->getInt('configs/objcache_max') ){
+          $this->fullClean();
+        }
         $this->call++;
         $class = $this->getITClass($class);
         if (!Utils\GlobalConfig::getInstance()->getBoolean('configs/objcache')){
@@ -155,6 +159,18 @@ class ObjectCache {
      */
     public function get_call() {
         return $this->call;
+    }
+
+    /**
+    * Limpia la cache
+    */
+    public function fullClean(){
+        $this->itobjects = array();
+        $this->status = array();
+        $this->index = array();
+        $this->last = 0;
+        $this->recall = 0;
+        $this->call;
     }
 
 }

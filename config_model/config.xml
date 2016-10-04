@@ -5,7 +5,7 @@
     <!-- ip del server -->
     <serverip>::1</serverip>
     <!-- Dominios habilitados -->
-    <domains>TELECOM,CCPI,ITRACKER,SHAREPOINT,BLOQUEADO</domains> 
+    <domains>TELECOM,CCPI,ITRACKER,SHAREPOINT,BLOQUEADO</domains>
 
     <debug>
         <!-- Usuarios para debug separar con , -->
@@ -74,6 +74,8 @@
     <configs>
         <!-- habilitar cache de objetos -->
         <objcache>true</objcache>
+        <!-- Maximos objetos en cache -->
+        <objcache_max>20000</objcache_max>
         <!-- maximo periodo a reportar en dias -->
         <reportlimit>390</reportlimit>
         <!-- usuarios prioritarios o ADM -->

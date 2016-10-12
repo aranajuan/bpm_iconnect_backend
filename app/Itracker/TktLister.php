@@ -75,4 +75,13 @@ class TktLister extends BasicObject {
 			return $T;
 		}
 	}
+	
+	/**
+	 * Devuelve el id de la posicion solicitada
+	 * @param int $order
+	 * @return int
+	 */
+	public function getTktId($order){
+		return $this->resultids [$order];
+	}
 }

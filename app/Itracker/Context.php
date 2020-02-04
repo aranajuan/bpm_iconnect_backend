@@ -1,320 +1,409 @@
 <?php
 
 namespace Itracker;
+use Itracker\Exceptions\ItErrorException;
+use Itracker\Exceptions\ItFunctionalException;
+use Itracker\Utils\AccessLog;
+use \Itracker\Utils\LoggerFactory;
+use Itracker\ResponseElement;
 
 /**
  * Maneja todo el requerimiento del front
  */
-class Context extends Utils\XMLhandler {
+class Context {
 
-    /**
-     * usuario logueado 
-     * @var User
-     */
-    private $user;
+	/**
+	 * log de acceso
+	 * @var AccessLog
+	 */
+	private $accesslog;
 
-    /**
-     * Front conectado
-     * @var Front
-     */
-    private $front;
+	/**
+	 * usuario logueado
+	 *
+	 * @var User
+	 */
+	private $user;
 
-    /**
-     * administrador de conexiones
-     * @var Utils\ConnectionManager
-     */
-    private $connections; // 
+	/**
+	 * Front conectado
+	 *
+	 * @var Front
+	 */
+	private $front;
 
-    /**
-     *
-     * @var Instance
-     */
-    private $instance;
+	/**
+	 * administrador de conexiones
+	 *
+	 * @var Utils\ConnectionManager
+	 */
+	private $connections; //
 
-    /**
-     * Script finalizado
-     * @var boolean
-     */
-    private $finished;
-    private $error;
-    private static $__instance;
+	/**
+	 *
+	 * @var Instance
+	 */
+	private $instance;
 
-    private function __construct() {
-        
-    }
+	/**
+	 * Script finalizado
+	 *
+	 * @var boolean
+	 */
+	private $finished;
 
-    /**
-     * 
-     * @return Context
-     */
-    public static function getContext() {
-        if (!static::$__instance) {
-            static::$__instance = new static();
-            static::$__instance->finished = false;
-        }
-        return static::$__instance;
-    }
+	/**
+	 * Configuracion de errores
+	 * @var Utils\Config
+	 */
+	private $errorConfig;
 
-    /**
-     * Prepara conexiones a db, carga input, valida datos
-     * @param type $text 
-     * @param type $ipOr ip del front
-     * @param type $date
-     * @return boolean
-     */
-    public function request($text, $ipOr, $date) {
-        if (!$this->load_input($text, $ipOr, $date)) {
-            return false;
-        }
-        if (in_array($this->getUser(), $this->get_GlobalConfig()->getArray('debug/user'))) {
-            $this->getLogger()->setLogLevelThreshold(
-                    $this->get_GlobalConfig()->getString('debug/log_debug')
-            );
-        }
+	/**
+	 * Handler
+	 *
+	 * @var RequestHandlers\HandlerInterface
+	 */
+	private $handler;
+	private static $__instance;
 
-        $this->connections = new Utils\ConnectionManager();
-        $config = $this->get_GlobalConfig();
-        if ($this->connections->connect_root(
-                        $config->getString('database/motor'), $config->getString('database/host'), $config->getString('database/user'), $config->getString('database/pass'), $GLOBALS["tables_root"]) == false) {
-            $this->set_error("conection", "no se puede conectar a la base de datos.");
-            return false;
-        }
+	private function __construct() {
+		$this->finished=false;
+		$this->errorConfig=null;
+		$this->accesslog = new AccessLog();
+	}
 
-        if (!$this->load_instance()) {
-            $this->set_error("load_instance", "no se puede cargar la instancia.");
-            return false;
-        }
+	/**
+	 *
+	 * @return Context
+	 */
+	public static function getContext() {
+		if (! static::$__instance) {
+			static::$__instance = new static ();
+		}
+		return static::$__instance;
+	}
+	public function getLogger() {
+		return LoggerFactory::getLogger ();
+	}
 
-        if ($this->connections->connect_instance($this->instance->get_prop("dbhost"), $this->instance->get_prop("dbuser"), $this->instance->get_prop("dbpass"), $this->instance->get_alias()) == false) {
-            $this->set_error("connection", "no se puede conectar a la base de datos de la instancia.");
-            return false;
-        }
+	/**
+	 * Configuracion de errores
+	 * @return Utils\Config
+	 */
+	public function getErrorConfig(){
+		if($this->errorConfig == null){
+			$this->errorConfig = new Utils\Config('errors.xml','errors');
+		}
+		return $this->errorConfig;
+	}
 
-        if (!$this->load_front()) {
-            $this->set_error("front", $this->error);
-            return false;
-        }
+	/**
+	 * Objeto de cache
+	 *
+	 * @return ObjectCache
+	 */
+	public function get_objcache() {
+		return ObjectCache::getInstance ();
+	}
 
-        if (!$this->validate_request()) {
-            $this->set_error("validation", $this->error);
-            return false;
-        }
+	/**
+	 *
+	 * @return \Itracker\Utils\GlobalConfig
+	 */
+	public function get_GlobalConfig() {
+		return \Itracker\Utils\GlobalConfig::getInstance ();
+	}
 
-        if ($this->get_User()->get_prop('superuser') == 1) {
-            set_time_limit(12000);
-            ini_set('memory_limit', '512M');
-        } else {
-            set_time_limit(300);
-        }
+	/**
+	 * Carga Handler
+	 *
+	 * @param RequestHandlers\HandlerInterface $handler
+	 */
+	public function setHandler($handler) {
+		$this->handler = $handler;
+	}
 
-        $this->get_User()->sessionActivity();
+	/**
+	 * Handler
+	 *
+	 * @return \Itracker\RequestHandlers\HandlerInterface
+	 */
+	public function getHandler() {
+		return $this->handler;
+	}
 
-        if (!$this->execute_request()) {
-            $this->set_error("ejecution", $this->error);
-            return false;
-        }
-    }
+	/**
+	 * Carga access log
+	 */
+	private function loadAccessLog(){
+		$handler = $this->getHandler();
+		$this->accesslog->addArray(array(
+				'date_rq' => $handler->getHeader()->getRequestTime(),
+				'usr' => $handler->getHeader()->getUser(),
+				'instance'=>$handler->getHeader()->getInstance(),
+				'usr_ip'=>$handler->getHeader()->getIpuser(),
+				'front_name'=>$handler->getHeader()->getFront(),
+				'rq_class'=>$handler->getBody()->getClass(),
+				'rq_method'=>$handler->getBody()->getMethod(),
+				'login'=> $handler->getHeader()->getPass() && 1,
+				'logout' => $handler->getHeader()->getLogout()
+				));
 
-    /**
-     * Valida objetos y acceso de usuario
-     * @return boolean
-     */
-    private function validate_request() {
-        if (!$this->front->validip($this->getIpFront())) {    // no coincide ip del front con el nombrado
-            $this->error = "Error en el origen de la solicitud - #6.2";
-            return false;
-        }
-        if (!$this->front->is_validInstance($this->instance->get_prop("nombre"))) {
-            $this->error = "Error en el origen de la solicitud - #6.3";
-            return false;
-        }
 
-        if (!$this->load_user()) {
-            return false;
-        }
+	}
 
-        if ($this->get_class() == "user" && $this->get_method() == "login") {
-            return true;
-        }
+	/**
+	 * Carga contexto
+	 * @throws ItErrorException
+	 * @throws ItFunctionalException
+	 */
+	private function prepare() {
 
-         if (!$this->front->validAction($this->get_class(), $this->get_method())) {
-            $this->error = "Acceso denegado a " . $this->get_class() . "/" . $this->get_method()." #1";
-            return false;
-        }
-        
-        if (!$this->user->sessionValidate($this->getHash(), $this->front, $this->getIp())) {
-            $this->error = "Usuario no logeado";
-            return false;
-        }
+		$config = $this->get_GlobalConfig ();
+		if (in_array ( $this->getHandler ()->getHeader ()->getUser (), $config->getArray ( 'debug/user' ) )) {
+			$this->getLogger ()->setLogLevelThreshold ( $config->getString ( 'debug/log_debug' ) );
+		}
 
-        if ($this->get_class() == "user" && $this->get_method() == "logout") {
-            return true;
-        }
+		$this->connections = new Utils\ConnectionManager ();
 
-        if (!$this->user->validAction($this->get_class(), $this->get_method())) {
-            $this->error = "Acceso denegado a " . $this->get_class() . "/" . $this->get_method();
-            return false;
-        }
-        return true;
-    }
+		$this->connections->connect_root (
+				$config->getString ( 'database/motor' ),
+				$config->getString ( 'database/host' ),
+				$config->getString ( 'database/user' ),
+				$config->getString ( 'database/pass' ),
+				$GLOBALS ['tables_root'] );
 
-    /**
-     * Carga objeto usuario
-     * @return boolean
-     */
-    private function load_user() {
-        $U = $this->get_objcache()->get_object("User", $this->getUser());
-        if ($this->get_objcache()->get_status("User", $this->getUser()) != "ok") {
-            $this->error = "Usuario o contrase&ntilde;a invalidos";
-            return false;
-        }
+		$this->instance = $this->get_objcache ()
+				->get_object ( 'Instance',
+				$this->getHandler()->getHeader()->getInstance() );
 
-        if (!$U->check_instance($this->instance->get_prop("nombre"))) {
-            $this->error = "Instancia invalida";
-            return false;
-        }
+		$this->connections->connect_instance (
+				$this->getInstance()->get_prop ( "dbhost" ),
+				$this->getInstance()->get_prop ( "dbuser" ),
+				$this->getInstance()->get_prop ( "dbpass" ),
+				$this->getInstance()->get_alias () );
 
-        if (!$U->check_front($this->front->get_prop("id"))) {
-            $this->error = "Front invalido.";
-            return false;
-        }
+		$this->front = $this->get_objcache ()
+				->get_object ( 'Front',
+				$this->getHandler()->getHeader()->getFront() );
 
-        $this->user = $U;
-        return true;
-    }
+		if(!$this->getFront()->validip(
+				$this->getHandler()->getHeader()->getIpfront()
+				)){
+				throw new ItErrorException('handler/invalid','Front desconocido');
+		}
 
-    /**
-     * Carga objeto instancia
-     * @return boolean
-     */
-    private function load_instance() {
-        $I = $this->get_objcache()->get_object("Instance", $this->getInstance());
-        if ($this->get_objcache()->get_status("Instance", $this->getInstance()) != "ok") {
-            $this->instance = null;
-            return false;
-        }
-        //verificar si existe carpeta
-        $this->instance = $I;
-        return true;
-    }
+		if(!$this->getFront()->is_validInstance(
+				$this->getInstance()->get_prop ( 'nombre' )
+				)){
+					throw new ItErrorException('handler/invalid','Instancia desconocida al front');
+		}
 
-    /**
-     * Carga objeto front
-     * @return boolean
-     */
-    private function load_front() {
-        //validar usuario - front - acceso del usr a funcion
-        $front = $this->get_objcache()->get_object("Front", $this->getFrontName());
-        if ($this->get_objcache()->get_status("Front", $this->getFrontName()) != "ok") {
-            $this->error = "Error en el origen de la solicitud - #6.1";
-            return false;
-        }
-        $this->front = $front;
-        return true;
-    }
+		if($this->getHandler ()->getBody ()->getClass ()=='user'
+				&& $this->getHandler ()->getBody ()->getMethod ()=='login'){
+			$login = true;
+		}else{
+			$login = false;
+		}
 
-    /**
-     * Ejecuta GO agrega a response
-     * @return boolean
-     */
-    private function execute_request() {
-        $ClassName = '\\Itracker\\Services\\ ' . $this->get_class() . '\\ ' . $this->get_method();
-        $ClassName = str_replace('_', ' ', $ClassName);
-        $ClassName = ucwords($ClassName);
-        $ClassName = str_replace(' ', '', $ClassName);
-        if (!class_exists($ClassName)) {
-            $this->getLogger()->critical("No se encuentra archivo de ejecucion", array($ClassName));
-            $this->error = "Error al ejecutar solicitud";
-            return false;
-        }
-        include $file;
-        $ret = $ClassName::GO($this);
-        if ($ret) {
-            $this->append_response($ret);
-        }
-        return true;
-    }
+		try{
+			$this->user = $this->get_objcache ()
+				->get_object ( 'User',
+				$this->getHandler()->getHeader()->getUser() );
+		}catch(ItFunctionalException $e){
+			if($login){
+					$this->user = new User();
+			}else{
+				throw new ItErrorException('handler/invalid', 'Usuario invalido.');
+			}
+		}
 
-    /**
-     * Finaliza la ejecucion del script
-     * @param boolean $error
-     */
-    public function finishScript($error = false) {
-        if ($this->finished==true)
-            return;
-        $this->finished=true;
-        try{
-            $this->add_accessLog('timeelapsed', get_measure('fullscript'));
-            $this->add_accessLog('memoryusage', memory_get_peak_usage(true));
-            if ($this->get_Connection() instanceof Utils\ConnectionManager) {
-                $this->add_accessLog('sql_elapsed', $this->get_Connection()->getSqlElapsed());
-                $this->add_accessLog('sql_count', $this->get_Connection()->getSqlCount());
-                $this->get_Connection()->close_connections($error,false);
-            }else{
-                if($error){
-                    echo 'Ocurrio un error inesperado, reintente la operacion.';
-                }
-            }
-            $this->add_accessLog('exit_error', $error);
-            if($error){
-                $this->add_accessLog('exit_error_message', print_r(error_get_last(),true));
-                $this->getLogger()->error(print_r(array(error_get_last(),$this->get_plainrequest()),true));
-            }
-            //echo $this->get_accesslogJson();
-            \Itracker\Utils\LoggerFactory::getAccessLogger()->write($this->get_accesslogJson() . ',' . PHP_EOL);
-        }catch(\Exception $e){
-            echo '<b>Fatal error:</b> '.$e->getMessage();
-        }
-    }
+		if($login){
+			return;
+		}
 
-    /**
-     * Devuelve usuario que ejecuta
-     * @return User
-     */
-    public function get_User() {
-        return $this->user;
-    }
+		if (! $this->getUser()->check_instance ( $this->getInstance()->get_prop ( 'nombre' ) )) {
+			throw new ItErrorException('handler/invalid','Instancia invalida');
+		}
 
-    /**
-     * Devuelve FRONT que ejecuta
-     * @return Front
-     */
-    public function get_Front() {
-        return $this->front;
-    }
+		if (! $this->getUser()->check_front ( $this->getFront()->get_prop ( 'id' ) )) {
+			throw new ItErrorException('handler/invalid','Front invalido');
+		}
 
-    /**
-     * Devuelve conexiones establecidas
-     * @return Utils\ConnectionManager
-     */
-    public function get_Connection() {
-        return $this->connections;
-    }
+		$this->validateRequest();
 
-    /**
-     * Devuelve instancia solicitada
-     * @return Instance
-     */
-    public function get_Instance() {
-        return $this->instance;
-    }
+		if ($this->getUser ()->get_prop ( 'superuser' ) == 1) {
+			set_time_limit ( 12000 );
+			ini_set ( 'memory_limit', '512M' );
+		} else {
+			set_time_limit ( 300 );
+		}
 
-    /**
-     * Objeto de cache
-     * @return ObjectCache
-     */
-    public function get_objcache() {
-        return ObjectCache::getInstance();
-    }
+		$this->getUser ()->sessionActivity ();
+	}
 
-    /**
-     * 
-     * @return \Itracker\Utils\GlobalConfig
-     */
-    public function get_GlobalConfig() {
-        return \Itracker\Utils\GlobalConfig::getInstance();
-    }
+	/**
+	 * Valida accesos
+	 * @throws ItFunctionalException
+	 */
+	private function validateRequest() {
+		$class = $this->getHandler()->getBody()->getClass();
+		$method = $this->getHandler()->getBody()->getMethod();
 
+		if (! $this->getFront()->validAction ( 	$class, $method )) {
+					throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(Front) a '.$class.'/'.$method);
+		}
+
+		if($this->getHandler()->getHeader()->getPass() != null &&
+				$this->getHandler()->getHeader()->getHash () == null ){
+
+						$this->getUser()->login($this->getHandler()->getHeader()->getPass(),
+							$this->getFront(),
+							$this->getInstance(),
+							$this->getHandler()->getHeader()->getIpuser());
+						$this->getHandler()->addResponse(
+								new ResponseElement('hash',
+									$this->getUser()->get_prop('hash'),
+									ResponseElement::TEXT)
+								,'header');
+
+		}else{
+					if (! $this->getUser()->sessionValidate (
+							$this->getHandler()->getHeader()->getHash (),
+							$this->getFront(),
+							$this->getHandler()->getHeader()->getIpuser())) {
+						throw new ItFunctionalException('handler/invalid', 'Sesion invalida o vencida');
+					}
+
+					if ($class == 'user' && $method == 'logout') {
+						return;
+					}
+		}
+		if (! $this->getUser()->validAction ( $class, $method )) {
+			throw new ItFunctionalException('dbobject/checkdata', 'Acceso denegado(User) a '.$class.'/'.$method);
+		}
+	}
+
+	/**
+	 * Ejecuta servicio
+	 * @return ResponseElement
+	 */
+	private function executeWS() {
+		$ClassName = '\\Itracker\\Services\\ ' .
+			$this->getHandler()->getBody ()->getClass () .
+			'\\ ' . $this->getHandler()->getBody ()->getMethod ();
+		$ClassName = str_replace ( '_', ' ', $ClassName );
+		$ClassName = ucwords ( $ClassName );
+		$ClassName = str_replace ( ' ', '', $ClassName );
+		$C = new $ClassName();
+		return $C->GO($this);
+	}
+
+
+		/**
+	 * Ejecuta request y carga handler
+	 * Maneja errores
+	 */
+	public function executeRequest() {
+		try{
+			$this->getHandler()->initialize();
+			$this->loadAccessLog();
+			$this->prepare ();
+			$response = $this->executeWS ();
+			$error = false;
+		}catch(\Exception $e){
+			LoggerFactory::getLogger()
+				->logMsj(new \KLogger\ErrorLogAdapter ($e ));
+			$response = new RequestHandlers\ErrorResponseAdapter($e);
+			$error = true;
+		}
+		try{
+			if(
+				$this->getHandler()->getHeader() instanceof RequestHandlers\Header &&
+				$this->getHandler()->getHeader()->getLogout()){
+					if($this->getUser() instanceof User){
+						$this->getUser()->sessionClose();
+					}
+			}
+		}catch(\Exception $e){
+
+		}
+		$this->getHandler()->addResponse ( $response);
+		$responseSTR = $this->getHandler()->getResponse();
+		$this->finishScript($error);
+		return $responseSTR;
+
+	}
+
+	/**
+	 * Finaliza la ejecucion del script
+	 *
+	 * @param boolean $error
+	 */
+	public function finishScript($error = false) {
+		if ($this->finished == true)
+			return;
+		$this->finished = true;
+
+		$this->accesslog->add( 'timeelapsed', get_measure ( 'fullscript' ) );
+		$this->accesslog->add ( 'memoryusage', memory_get_peak_usage ( true ) );
+		if ($this->getConnection () instanceof Utils\ConnectionManager) {
+			$this->accesslog->add ( 'sql_elapsed', $this->getConnection ()->getSqlElapsed () );
+			$this->accesslog->add ( 'sql_count', $this->getConnection ()->getSqlCount () );
+			$this->getConnection ()->close_connections ( $error );
+		}
+		$this->accesslog->add ( 'exit_error', $error );
+		LoggerFactory::getAccessLogger ()->write ( $this->accesslog->getJson() . ',' . PHP_EOL );
+	}
+
+	/**
+	 * Devuelve usuario que ejecuta
+	 *
+	 * @return User
+	 */
+	public function getUser() {
+		return $this->user;
+	}
+
+	/**
+	 * Devuelve FRONT que ejecuta
+	 *
+	 * @return Front
+	 */
+	public function getFront() {
+		return $this->front;
+	}
+
+	/**
+	 * Devuelve conexiones establecidas
+	 *
+	 * @return Utils\ConnectionManager
+	 */
+	public function getConnection() {
+		return $this->connections;
+	}
+
+	/**
+	 * Devuelve instancia solicitada
+	 *
+	 * @return Instance
+	 */
+	public function getInstance() {
+		return $this->instance;
+	}
+
+	/**
+	 * Nombre del parametro
+	 * @param string $name
+	 */
+	public function get_params($name){
+		return $this->getHandler()->getBody()->getParams($name);
+	}
+
+	/**
+	 * @return AccessLog
+	 */
+	public function getAccessLog(){
+		return $this->accesslog;
+	}
 }
-
-?>

@@ -1,6 +1,7 @@
 <?php
 
 namespace Itracker;
+use Itracker\Exceptions\ItFunctionalException;
 
 class Front extends ITObject {
 
@@ -47,12 +48,9 @@ class Front extends ITObject {
         if ($this->DBobj->noEmpty && $this->DBobj->cReg == 1) {
             $tmpU = $this->DBobj->get_vector();
             $this->load_DV($tmpU);
-            if ($this->estado == I_DELETED)
-                return "eliminado";
-            return "ok";
+             return $this->estado;
         }
-        $this->error = TRUE;
-        return "error";
+        throw new ItFunctionalException('dbobject/load');
     }
 
     /**
@@ -90,7 +88,7 @@ class Front extends ITObject {
         foreach ($valid as $v) {
             $v = trim($v);
             if (strtolower($GLOBALS["access"][$v][1]) == $class && strtolower($GLOBALS["access"][$v][2]) == $method) {
-                return true;
+                return false;
             }
         }
         return false;
@@ -146,7 +144,7 @@ class Front extends ITObject {
             case 'ip':
                 return trim($this->ip);
             default:
-                return "Propiedad invalida.";
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

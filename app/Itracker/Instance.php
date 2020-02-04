@@ -12,18 +12,17 @@ class Instance extends ITObject {
 
 
     function __construct($conn = null) {
-        $this->dbroot = new Utils\DB($this->getContext()->get_Connection(), true);
+        $this->dbroot = new Utils\DB($this->getContext()->getConnection(), true);
     }
     
     function load_DB($name) {
         $this->dbroot->loadRS("select * from TBL_INSTANCIAS where nombre='" . strToSQL($name) . "'");
         if ($this->dbroot->noEmpty && $this->dbroot->cReg == 1) {
             $tmpU = $this->dbroot->get_vector();
-            return $this->load_DV($tmpU);
+            $this->load_DV($tmpU);
+            return I_ACTIVE;
         }
-        else
-            $this->error = TRUE;
-        return "error";
+        throw new ItException('dbobject/load');
     }
 
     /**
@@ -44,7 +43,6 @@ class Instance extends ITObject {
      */
     private function load_DV($tmpU) {
         $this->load_VEC($tmpU);
-        return "ok";
     }
 
     /**
@@ -97,7 +95,7 @@ class Instance extends ITObject {
                 ->getString('database/pass');
                 return $this->dbpass;
             default:
-                return "Propiedad invalida.";
+                throw new ItException('prop/getprop');
         }
     }
 

@@ -11,27 +11,27 @@ class Config {
     protected $vars;
 
     /**
-     * 
+     *  Variables sobreescritas
+     * @var Vars
+     */
+    protected $vars_alter;
+
+    /**
+     *
      * @param String $file  path to config
      * @throws Exception
      */
-    public function __construct($file) {
-        if (!is_readable($file)) {
-            LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado (no encontrado)', array('path' => $file));
-            throw new \Exception('No se pudo cargar archivo de configuraciones');
-        }
-
+    public function __construct($file,$root='itracker') {
         $this->vars = new Vars();
-        $this->vars->setRootTag('itracker');
-        if ($this->vars->loadFile($file) == false) {
-            LoggerFactory::getLogger()->error(
-                    'Archivo de configuraciones no seteado', array('path' => $file, 'msg' => $e->getMessage()));
-            $this->dom = null;
-            $this->xpath = null;
-            throw new \Exception('No se pudo cargar archivo de configuraciones');
-        }
-        
+        $this->vars->setRootTag($root);
+        $this->vars->loadFile(CONFIG_DIR.$file);
+        $this->vars_alter = null;
+    }
+
+    public function loadAlterVars($file,$root='itracker'){
+        $this->vars_alter = new Vars();
+        $this->vars_alter->setRootTag($root);
+        $this->vars_alter->loadFile(CONFIG_DIR.$file);
     }
 
     /**
@@ -83,6 +83,10 @@ class Config {
      * @throws \DOMException
      */
     private function getNodeValue($path) {
+        if($this->vars_alter){
+          $val = $this->vars_alter->getValue($path);
+          if($val){ return $val; }
+        }
         $val = $this->vars->getValue($path);
         return $val;
     }

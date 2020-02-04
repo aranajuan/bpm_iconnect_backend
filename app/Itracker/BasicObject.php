@@ -30,7 +30,7 @@ abstract class BasicObject {
         if ($conn) {
             $this->conn = $conn;
         } else {
-            $this->conn = $this->getContext()->get_Connection();
+            $this->conn = $this->getContext()->getConnection ();
         }
         $this->dbinstance = new Utils\DB($this->conn, false);
         //prepara la clase de cache para acceso
@@ -50,7 +50,7 @@ abstract class BasicObject {
      * @return User
      */
     protected function getLogged() {
-        return $this->getContext()->get_User();
+        return $this->getContext()->getUser();
     }
 
     /**
@@ -58,7 +58,7 @@ abstract class BasicObject {
      * @return Instance
      */
     protected function getInstance() {
-        return $this->getContext()->get_Instance();
+        return $this->getContext()->getInstance();
     }
     
 }

@@ -21,14 +21,15 @@ class Update implements \Itracker\Services\ITServiceInterface {
 
         foreach ($newadms as $Na) {
             if (!in_array($Na, $admsok)) {
-                $U = $Context->get_objcache()->get_object("USER", $Na);
-                if ($Context->get_objcache()->get_status("USER", $Na) === "ok") {
+                try{
+                    $U = $Context->get_objcache()->get_object("USER", $Na);
                     $U->add_adm($O->get_prop("id"));
+                }catch(\Itracker\Exceptions\ItDeletedException $e){
+                    
                 }
             }
         }
 
-        return $Context->createElement("result", $O->update_DB());
     }
 
 }

@@ -79,7 +79,7 @@ class Field {
         return $this->order;
     }
 
-    private function setMax_cevents($val) {
+    public function setMax_cevents($val) {
         if ($val > $this->max_cevents) {
             $this->max_cevents = $val;
         }

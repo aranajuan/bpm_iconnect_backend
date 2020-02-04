@@ -1,7 +1,7 @@
 <?php
 
 namespace Itracker;
-
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Clase para cargar y manejar preguntas
  */
@@ -15,21 +15,19 @@ class Question extends ITObject {
     private $UB; /* usuario que elimino la opcion */
     private $FB; /* fecha en que elimino la opcion */
     private $opciones; /* objetos opciones dependientes de la pregunta */
-    private $error = FALSE; /* erro al cargar de la base */
 
 
     function load_DB($id) {
-        $this->error = FALSE;
         $this->dbinstance->loadRS("select * from TBL_PREGUNTAS where id=" . intval($id));
         if ($this->dbinstance->noEmpty && $this->dbinstance->cReg == 1) {
             $tmpU = $this->dbinstance->get_vector();
             $this->load_DV($tmpU);
             if ($this->UB != NULL)
-                return "eliminado";
-            return "ok";
-        } else
-            $this->error = TRUE;
-        return "error";
+                return I_DELETED;
+            return I_ACTIVE;
+        } else {
+            throw new ItFunctionalException('dbobject/load');
+        }
     }
 
     /**
@@ -99,7 +97,7 @@ class Question extends ITObject {
                 }
                 return false;
             default:
-                return "Propiedad invalida.";
+                throw new ItFunctionalException('prop/getprop');
         }
     }
 

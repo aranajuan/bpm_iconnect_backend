@@ -1,5 +1,7 @@
 <?php
 namespace Itracker\Utils;
+
+use Itracker\Exceptions\ItErrorException;
 /*
  * Clase ejecucion base de datos
  */
@@ -23,7 +25,7 @@ class DB {
     private $resultarr; /* array resultado de PDO */
     /**
      * Carga connectionmanager
-     * 
+     *
      */
     function __construct($conn, $root = false) {
         $this->connection = $conn;
@@ -53,7 +55,7 @@ class DB {
         }
         return $this->connection->beginTran($this->RI);
     }
-    
+
     /**
      * Carga recordset
      * @param String $ssql
@@ -69,10 +71,11 @@ class DB {
             if (!$this->RS) {
                 $this->error = TRUE;
                 $this->details = "Error al ejecutar solicitud.";
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                return 1;
+                throw new ItErrorException('db/query', 'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 $this->resultarr=$this->RS->fetchAll();
                 $this->cReg =count($this->resultarr);
@@ -80,7 +83,6 @@ class DB {
                     $this->noEmpty = 1;
                 else
                     $this->noEmpty = 0;
-                return 0;
             }
         } elseif ($this->connection->get_motor() == 'mssql') {
             $ssql = str_replace("now()", "getdate()", $ssql);
@@ -88,11 +90,12 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$this->RS) {
                 $this->error = TRUE;
-                $this->details = "Error al ejecutar solicitud."; 
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
+                $this->details = "Error al ejecutar solicitud.";
                 $this->noEmpty = 0;
                 $this->cReg = 0;
-                return 1;
+                 throw new ItErrorException('db/query', 'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 $this->resultarr=$this->RS->fetchAll();
                 $this->cReg =count($this->resultarr);
@@ -100,7 +103,6 @@ class DB {
                     $this->noEmpty = 1;
                 else
                     $this->noEmpty = 0;
-                return 0;
             }
         }
     }
@@ -119,16 +121,15 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->connection->close_connections(true);
-                return 1;
+                 throw new ItErrorException('db/query', 'Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
                 $this->connection->addCounters($this->RI, get_measure('sql'));
                 $lstID = $rs->fetchColumn();
                 $this->lstIDmss = $lstID;
-                return 0;
             }
         }
         elseif ($this->connection->get_motor() == 'mssql') {
@@ -138,10 +139,10 @@ class DB {
             $this->connection->addCounters($this->RI, get_measure('sql'));
             if (!$result) {
                 $this->details = "Error al ejecutar solicitud."; //mssql_get_last_message();
-                $this->logError(print_r($this->get_link()->errorInfo(),true)."-".$ssql);
-                $this->connection->close_connections(true);
                 $this->lstIDmss = NULL;
-                return 1;
+                 throw new ItErrorException('db/query','Error loadrs',array(
+                        print_r($this->get_link()->errorInfo(),true),
+                        $ssql));
             } else {
                 start_measure('sql');
                 $rs = $this->get_link()->query("select @@identity as lastid;");
@@ -164,8 +165,14 @@ class DB {
             $arr = array_shift($this->resultarr);
             if ($arr) {
                 foreach ($arr as &$a) {
-                    $a = mb_convert_encoding($a, "UTF-8","ISO-8859-15");
-                    $a = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $a);
+                  $a = trim($a);
+		              $a = preg_replace('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $a);
+ 	                $a =html_entity_decode($a,ENT_COMPAT, 'UTF-8');
+			            if(substr($a,0,1) == '<'){
+                        preg_match_all('/(<.*>).*/gs', $a, $matches);
+				                $a = $matches[1][0];
+		   		              $a =  str_replace("&", "&amp;", $a);
+			            }
                 }
             }
             return $arr;
@@ -179,16 +186,6 @@ class DB {
     public function get_lastID() {
             return $this->lstIDmss;
     }
-    
-    /**
-     * Log de error SQL
-     * @param String $msj
-     */
-    private function logError($msj){
-        $context = \Itracker\Context::getContext();
-        $context->getLogger()->critical($context->getLogString().__CLASS__."\t".$msj);
-    }
-
 }
 
 ?>

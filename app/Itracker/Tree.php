@@ -2,6 +2,7 @@
 
 namespace Itracker;
 
+use Itracker\Exceptions\ItFunctionalException;
 /**
  * Arbol de opciones y movimientos
  */
@@ -27,13 +28,13 @@ abstract class Tree extends ITObject {
         $this->path_obj = NULL;
         $this->deleted = 0;
         if ($path == "") {
-            return "ok";
+            return;
         }
         if ($crypt) {
             $path = \Encrypter::decrypt($path);
         }
         $this->path = explode(",", $path);
-        return $this->check_valid();
+        $this->check_valid();
     }
 
     /**
@@ -67,14 +68,15 @@ abstract class Tree extends ITObject {
                 $tmp = implode(",", $this->path);
                 $this->path = NULL;
                 $this->path_max = 0;
-                return "Arbol invalido ('$tmp')";
+                throw new ItFunctionalException('dbobject/checkdata',
+                        'Error en la tipificacion', 'Arbol invalido ('.$tmp.')');
             }
             $rpath[$this->path_max]=$this->path[$i];
             $this->path_max++;
         }
         $this->path_max--;
         $this->path=$rpath;
-        return $this->load_objects();
+        $this->load_objects();
     }
 
     /**
@@ -98,28 +100,29 @@ abstract class Tree extends ITObject {
                     $ct = "Option";
                     break;
                 default:
-                    return "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)";
+                    throw new ItFunctionalException('dbobject/checkdata',
+                        'Error en la tipificacion',
+                        "Error al cargar un objeto del arbol - Default(id " . $this->path[$i] . " - pos $i)");
             }
-            $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1));
+            
+            //carga de baja
+            $o = $this->objsCache->get_object($ct, substr($this->path[$i], 1),false,true);
             $rta = $this->objsCache->get_status($ct, substr($this->path[$i], 1));
             if ($ct == 'Option') {
                 if (!$o->checkProfile($perfil)) {
                     $this->canopen = false;
                 }
             }
-            if ($rta != "error") {
-                $this->path_obj[$i] = $o;
-            } else {
-                return "Error al cargar un objeto del arbol (id " . $this->path[$i] . " - pos $i - $rta)";
-            }
-            if ($rta == "eliminado") {
+
+            $this->path_obj[$i] = $o;
+
+            if ($rta == I_DELETED) {
                 $this->canopen = false;
                 $this->deleted = 1;
             }
         }
         $this->load_critic();
         show_measure("OBJ:TREE:load_objects");
-        return "ok";
     }
 
     /**
@@ -131,12 +134,11 @@ abstract class Tree extends ITObject {
         $this->critico_v = NULL;
         $this->critico = "";
         foreach ($this->path_obj as $o) {
-            $critico = $o->get_prop("texto_critico");
-            if ($critico != "Propiedad invalida." && $critico != NULL) {
+            if($o instanceof Option && 
+                    $o->get_prop("texto_critico")!= NULL)
                 $this->critico.="," . $critico;
                 $this->critico_v[$i] = $o;
                 $i++;
-            }
         }
         if ($this->critico == "") {
             $this->critico = NULL;
@@ -206,7 +208,7 @@ abstract class Tree extends ITObject {
                         break;
                     default:
                         $o = $this->path_obj[$i];
-                        $q = $this->objsCache->get_object("Question", $o->get_prop("idpregunta"));
+                        $q = $this->objsCache->get_object("Question", $o->get_prop("idpregunta"),false,true);
                         $rta[$i]["question"] = $q->get_prop("texto");
                         $rta[$i]["ans"] = $o->get_prop("texto");
                         $rta[$i]["path"] = $rta[$i - 1]["path"] . ",O" . $o->get_prop("id");
@@ -295,10 +297,6 @@ abstract class Tree extends ITObject {
                 $q = $oD->get_fst_Q($actualO->get_prop("id"));
                 $rta["title"] = $q->get_prop("texto");
                 $rta["detail"] = $q->get_prop("detalle");
-                if ($q == null) {
-                    $rta["error"] = "No hay ruta definida. Error de Arbol";
-                    return $rta;
-                }
                 $perfil = $this->getLogged()->get_prop('perfil');
                 $opts = $q->get_prop("opcionesobj");
                 $i = 0;
@@ -367,7 +365,8 @@ abstract class Tree extends ITObject {
         if (isset($this->path_obj[$this->path_max])) {
             return $this->path_obj[$this->path_max];
         }
-        return NULL;
+        throw new ItFunctionalException('option/destiny',
+		'Error en ultima opcion');
     }
 
 }

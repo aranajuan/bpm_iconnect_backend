@@ -1,12 +1,13 @@
 <?php
 
 namespace Itracker\Services\User;
+use Itracker\ResponseElement;
 
 class IdselListteams implements \Itracker\Services\ITServiceInterface {
 
     public static function GO($Context) {
-        $teams = $Context->get_User()->get_prop("equiposobj");
-        $listL = $Context->createElement("list");
+        $teams = $Context->getUser()->get_prop("equiposobj");
+        $rta = new ResponseElement('list');
         $filter = json_decode($Context->get_params("sel_params"),true);
         $filter=$filter['filter'];
         if ($teams) {
@@ -17,12 +18,11 @@ class IdselListteams implements \Itracker\Services\ITServiceInterface {
                 if($l->get_prop("staffhome_vista")=="" && $filter=="staffhome_vista"){
                     continue;
                 }
-                $listL->appendChild($l->getXML($Context, array('id', 'nombrefull')));
+                $rta->addValue($l->getData( array('id', 'nombrefull')));
                 
             }
-            return $listL;
         }
-        return null;
+        return $rta;
     }
 
 }
